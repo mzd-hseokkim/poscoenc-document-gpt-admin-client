@@ -69,16 +69,9 @@ const SignIn = () => {
                     />
                   </CInputGroup>
                   <CRow>
-                    <CCol xs={6}>
-                      <CButton color="primary" className="px-4" onClick={handleSubmit}>
-                        로그인
-                      </CButton>
-                    </CCol>
-                    <CCol xs={6} className="text-right">
-                      <CButton color="link" className="px-0">
-                        Forgot password?
-                      </CButton>
-                    </CCol>
+                    <CButton color="primary" className="px-4" onClick={handleSubmit}>
+                      로그인
+                    </CButton>
                   </CRow>
                 </CForm>
               </CCardBody>
