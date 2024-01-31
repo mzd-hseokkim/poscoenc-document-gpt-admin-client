@@ -35,4 +35,4 @@ export const logo = [
     </g>
   </g>
 `,
-]
+];

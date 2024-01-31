@@ -9,4 +9,4 @@ export const sygnet = [
     </g>
   </g>
 `,
-]
+];

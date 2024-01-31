@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import {
   CBadge,
   CButton,
@@ -10,8 +10,8 @@ import {
   CDropdownToggle,
   CForm,
   CFormTextarea,
-} from '@coreui/react-pro'
-import CIcon from '@coreui/icons-react'
+} from '@coreui/react-pro';
+import CIcon from '@coreui/icons-react';
 import {
   cilBookmark,
   cilChevronLeft,
@@ -24,7 +24,7 @@ import {
   cilStar,
   cilTags,
   cilTrash,
-} from '@coreui/icons'
+} from '@coreui/icons';
 
 const Message = () => {
   return (
@@ -99,10 +99,10 @@ const Message = () => {
 
           <hr />
           <div className="message-body">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-            dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
+            dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
+            ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat
+            nulla pariatur.
           </div>
           <hr />
 
@@ -140,7 +140,7 @@ const Message = () => {
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Message
+export default Message;

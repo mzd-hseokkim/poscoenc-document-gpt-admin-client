@@ -1,5 +1,5 @@
-import React from 'react'
-import CIcon from '@coreui/icons-react'
+import React from 'react';
+import CIcon from '@coreui/icons-react';
 import {
   cilBell,
   cilCalculator,
@@ -17,8 +17,8 @@ import {
   cilSpeedometer,
   cilSpreadsheet,
   cilStar,
-} from '@coreui/icons'
-import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react-pro'
+} from '@coreui/icons';
+import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react-pro';
 
 const _nav = [
   {
@@ -437,6 +437,6 @@ const _nav = [
       },
     ],
   },
-]
+];
 
-export default _nav
+export default _nav;

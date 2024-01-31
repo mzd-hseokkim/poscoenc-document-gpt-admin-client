@@ -1,44 +1,36 @@
-import React, { useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   CAvatar,
   CCloseButton,
   CFormSwitch,
+  CListGroup,
+  CListGroupItem,
   CNav,
   CNavItem,
   CNavLink,
-  CTabContent,
-  CTabPane,
-  CListGroup,
-  CListGroupItem,
   CProgress,
   CSidebar,
   CSidebarHeader,
-} from '@coreui/react-pro'
-import CIcon from '@coreui/icons-react'
-import {
-  cibSkype,
-  cilCalendar,
-  cilHome,
-  cilList,
-  cilLocationPin,
-  cilSettings,
-  cilSpeech,
-} from '@coreui/icons'
+  CTabContent,
+  CTabPane,
+} from '@coreui/react-pro';
+import CIcon from '@coreui/icons-react';
+import { cibSkype, cilCalendar, cilHome, cilList, cilLocationPin, cilSettings, cilSpeech } from '@coreui/icons';
 
-import avatar2 from './../assets/images/avatars/2.jpg'
-import avatar3 from './../assets/images/avatars/3.jpg'
-import avatar4 from './../assets/images/avatars/4.jpg'
-import avatar5 from './../assets/images/avatars/5.jpg'
-import avatar6 from './../assets/images/avatars/6.jpg'
-import avatar7 from './../assets/images/avatars/7.jpg'
-import avatar8 from './../assets/images/avatars/8.jpg'
+import avatar2 from './../assets/images/avatars/2.jpg';
+import avatar3 from './../assets/images/avatars/3.jpg';
+import avatar4 from './../assets/images/avatars/4.jpg';
+import avatar5 from './../assets/images/avatars/5.jpg';
+import avatar6 from './../assets/images/avatars/6.jpg';
+import avatar7 from './../assets/images/avatars/7.jpg';
+import avatar8 from './../assets/images/avatars/8.jpg';
 
 const AppAside = () => {
-  const dispatch = useDispatch()
-  const asideShow = useSelector((state) => state.asideShow)
+  const dispatch = useDispatch();
+  const asideShow = useSelector((state) => state.asideShow);
 
-  const [activeKey, setActiveKey] = useState(1)
+  const [activeKey, setActiveKey] = useState(1);
 
   return (
     <CSidebar
@@ -48,7 +40,7 @@ const AppAside = () => {
       placement="end"
       visible={asideShow}
       onVisibleChange={(visible) => {
-        dispatch({ type: 'set', asideShow: visible })
+        dispatch({ type: 'set', asideShow: visible });
       }}
     >
       <CSidebarHeader className="bg-transparent p-0">
@@ -58,8 +50,8 @@ const AppAside = () => {
               href="#"
               active={activeKey === 1}
               onClick={(e) => {
-                e.preventDefault()
-                setActiveKey(1)
+                e.preventDefault();
+                setActiveKey(1);
               }}
             >
               <CIcon icon={cilList} alt="CoreUI Icons List" />
@@ -70,8 +62,8 @@ const AppAside = () => {
               href="#"
               active={activeKey === 2}
               onClick={(e) => {
-                e.preventDefault()
-                setActiveKey(2)
+                e.preventDefault();
+                setActiveKey(2);
               }}
             >
               <CIcon icon={cilSpeech} alt="CoreUI Icons Speech" />
@@ -82,8 +74,8 @@ const AppAside = () => {
               href="#"
               active={activeKey === 3}
               onClick={(e) => {
-                e.preventDefault()
-                setActiveKey(3)
+                e.preventDefault();
+                setActiveKey(3);
               }}
             >
               <CIcon icon={cilSettings} alt="CoreUI Icons Settings" />
@@ -190,8 +182,7 @@ const AppAside = () => {
             </div>
             <div className="text-truncate fw-semibold">Lorem ipsum dolor sit amet</div>
             <small className="text-medium-emphasis">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-              incididunt...
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...
             </small>
           </div>
           <hr />
@@ -205,8 +196,7 @@ const AppAside = () => {
             </div>
             <div className="text-truncate fw-semibold">Lorem ipsum dolor sit amet</div>
             <small className="text-medium-emphasis">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-              incididunt...
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...
             </small>
           </div>
           <hr />
@@ -220,8 +210,7 @@ const AppAside = () => {
             </div>
             <div className="text-truncate fw-semibold">Lorem ipsum dolor sit amet</div>
             <small className="text-medium-emphasis">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-              incididunt...
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...
             </small>
           </div>
           <hr />
@@ -235,8 +224,7 @@ const AppAside = () => {
             </div>
             <div className="text-truncate fw-semibold">Lorem ipsum dolor sit amet</div>
             <small className="text-medium-emphasis">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-              incididunt...
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...
             </small>
           </div>
           <hr />
@@ -250,8 +238,7 @@ const AppAside = () => {
             </div>
             <div className="text-truncate fw-semibold">Lorem ipsum dolor sit amet</div>
             <small className="text-medium-emphasis">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-              incididunt...
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...
             </small>
           </div>
         </CTabPane>
@@ -263,8 +250,8 @@ const AppAside = () => {
             </div>
             <div>
               <small className="text-medium-emphasis">
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-                incididunt ut labore et dolore magna aliqua.
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
+                dolore magna aliqua.
               </small>
             </div>
           </div>
@@ -274,8 +261,8 @@ const AppAside = () => {
             </div>
             <div>
               <small className="text-medium-emphasis">
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-                incididunt ut labore et dolore magna aliqua.
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
+                dolore magna aliqua.
               </small>
             </div>
           </div>
@@ -322,7 +309,7 @@ const AppAside = () => {
         </CTabPane>
       </CTabContent>
     </CSidebar>
-  )
-}
+  );
+};
 
-export default React.memo(AppAside)
+export default React.memo(AppAside);

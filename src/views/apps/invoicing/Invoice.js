@@ -1,9 +1,9 @@
-import React from 'react'
+import React from 'react';
 import {
   CButton,
   CCard,
-  CCardHeader,
   CCardBody,
+  CCardHeader,
   CCol,
   CRow,
   CTable,
@@ -12,28 +12,21 @@ import {
   CTableHead,
   CTableHeaderCell,
   CTableRow,
-} from '@coreui/react-pro'
-import CIcon from '@coreui/icons-react'
-import { cilDollar, cilPrint, cilSave } from '@coreui/icons'
+} from '@coreui/react-pro';
+import CIcon from '@coreui/icons-react';
+import { cilDollar, cilPrint, cilSave } from '@coreui/icons';
 
 const Invoice = () => {
   const print = (e) => {
-    e.preventDefault()
-    window.print()
-  }
+    e.preventDefault();
+    window.print();
+  };
 
   return (
     <CCard>
       <CCardHeader>
         Invoice <strong>#90-98792</strong>
-        <CButton
-          className="me-1 float-end"
-          href=""
-          tag="a"
-          size="sm"
-          color="secondary"
-          onClick={print}
-        >
+        <CButton className="me-1 float-end" href="" tag="a" size="sm" color="secondary" onClick={print}>
           <CIcon icon={cilPrint} /> Print
         </CButton>
         <CButton className="me-1 float-end" href="" tag="a" size="sm" color="info">
@@ -98,9 +91,7 @@ const Invoice = () => {
             <CTableRow>
               <CTableDataCell className="text-center">2</CTableDataCell>
               <CTableDataCell className="text-start">Custom Services</CTableDataCell>
-              <CTableDataCell className="text-start">
-                Installation and Customization (per hour)
-              </CTableDataCell>
+              <CTableDataCell className="text-start">Installation and Customization (per hour)</CTableDataCell>
               <CTableDataCell className="text-center">20</CTableDataCell>
               <CTableDataCell className="text-end">$150,00</CTableDataCell>
               <CTableDataCell className="text-end">$3.000,00</CTableDataCell>
@@ -125,10 +116,10 @@ const Invoice = () => {
         </CTable>
         <CRow>
           <CCol lg={4} sm={5}>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-            dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
+            dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
+            ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat
+            nulla pariatur.
           </CCol>
           <CCol lg={4} sm={5} className="ms-auto">
             <CTable>
@@ -168,7 +159,7 @@ const Invoice = () => {
         </CRow>
       </CCardBody>
     </CCard>
-  )
-}
+  );
+};
 
-export default Invoice
+export default Invoice;

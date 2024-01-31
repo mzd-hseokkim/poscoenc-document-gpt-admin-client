@@ -1,9 +1,9 @@
-import React from 'react'
-import { CBadge } from '@coreui/react-pro'
-import PropTypes from 'prop-types'
+import React from 'react';
+import { CBadge } from '@coreui/react-pro';
+import PropTypes from 'prop-types';
 
 const ProBadge = (props) => {
-  let { children, ...attributes } = { ...props }
+  let { children, ...attributes } = { ...props };
   return (
     <CBadge
       href="https://coreui.io/pro/react/"
@@ -14,11 +14,11 @@ const ProBadge = (props) => {
     >
       {children ? children : 'CoreUI PRO Plugin'}
     </CBadge>
-  )
-}
+  );
+};
 
 ProBadge.propTypes = {
   children: PropTypes.node,
-}
+};
 
-export default React.memo(ProBadge)
+export default React.memo(ProBadge);

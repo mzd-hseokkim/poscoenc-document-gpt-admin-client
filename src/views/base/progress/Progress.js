@@ -1,14 +1,6 @@
-import React from 'react'
-import {
-  CCard,
-  CCardBody,
-  CCardHeader,
-  CCol,
-  CProgress,
-  CProgressBar,
-  CRow,
-} from '@coreui/react-pro'
-import { DocsExample } from 'src/components'
+import React from 'react';
+import { CCard, CCardBody, CCardHeader, CCol, CProgress, CProgressBar, CRow } from '@coreui/react-pro';
+import { DocsExample } from 'src/components';
 
 const Progress = () => {
   return (
@@ -20,8 +12,8 @@ const Progress = () => {
           </CCardHeader>
           <CCardBody>
             <p className="text-medium-emphasis small">
-              Progress components are built with two HTML elements, some CSS to set the width, and a
-              few attributes. We don&#39;tuse{' '}
+              Progress components are built with two HTML elements, some CSS to set the width, and a few attributes. We
+              don&#39;tuse{' '}
               <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/progress">
                 the HTML5 <code>&lt;progress&gt;</code> element
               </a>
@@ -54,8 +46,7 @@ const Progress = () => {
           </CCardHeader>
           <CCardBody>
             <p className="text-medium-emphasis small">
-              Add labels to your progress bars by placing text within the{' '}
-              <code>&lt;CProgressBar&gt;</code>.
+              Add labels to your progress bars by placing text within the <code>&lt;CProgressBar&gt;</code>.
             </p>
             <DocsExample href="components/progress#labels">
               <CProgress className="mb-3">
@@ -72,9 +63,8 @@ const Progress = () => {
           </CCardHeader>
           <CCardBody>
             <p className="text-medium-emphasis small">
-              We only set a <code>height</code> value on the <code>&lt;CProgress&gt;</code>, so if
-              you change that value the inner <code>&lt;CProgressBar&gt;</code> will automatically
-              resize accordingly.
+              We only set a <code>height</code> value on the <code>&lt;CProgress&gt;</code>, so if you change that value
+              the inner <code>&lt;CProgressBar&gt;</code> will automatically resize accordingly.
             </p>
             <DocsExample href="components/progress#height">
               <CProgress height={1} className="mb-3">
@@ -139,8 +129,8 @@ const Progress = () => {
           </CCardHeader>
           <CCardBody>
             <p className="text-medium-emphasis small">
-              Add <code>variant=&#34;striped&#34;</code> to any <code>&lt;CProgressBar&gt;</code> to
-              apply a stripe via CSS gradient over the progress bar&#39;s background color.
+              Add <code>variant=&#34;striped&#34;</code> to any <code>&lt;CProgressBar&gt;</code> to apply a stripe via
+              CSS gradient over the progress bar&#39;s background color.
             </p>
             <DocsExample href="components/progress#striped">
               <CProgress className="mb-3">
@@ -167,8 +157,7 @@ const Progress = () => {
           <CCardBody>
             <p className="text-medium-emphasis small">
               The striped gradient can also be animated. Add <code>animated</code> property to{' '}
-              <code>&lt;CProgressBar&gt;</code> to animate the stripes right to left via CSS3
-              animations.
+              <code>&lt;CProgressBar&gt;</code> to animate the stripes right to left via CSS3 animations.
             </p>
             <DocsExample href="components/progress#animated-stripes">
               <CProgress className="mb-3">
@@ -188,7 +177,7 @@ const Progress = () => {
         </CCard>
       </CCol>
     </CRow>
-  )
-}
+  );
+};
 
-export default Progress
+export default Progress;

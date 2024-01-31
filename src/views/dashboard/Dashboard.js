@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 
 import {
   CAvatar,
@@ -17,10 +17,10 @@ import {
   CTableHead,
   CTableHeaderCell,
   CTableRow,
-} from '@coreui/react-pro'
-import { CChartLine } from '@coreui/react-chartjs'
-import { getStyle, hexToRgba } from '@coreui/utils'
-import CIcon from '@coreui/icons-react'
+} from '@coreui/react-pro';
+import { CChartLine } from '@coreui/react-chartjs';
+import { getStyle, hexToRgba } from '@coreui/utils';
+import CIcon from '@coreui/icons-react';
 import {
   cibCcAmex,
   cibCcApplePay,
@@ -28,34 +28,34 @@ import {
   cibCcPaypal,
   cibCcStripe,
   cibCcVisa,
-  cibGoogle,
   cibFacebook,
+  cibGoogle,
   cibLinkedin,
+  cibTwitter,
   cifBr,
   cifEs,
   cifFr,
   cifIn,
   cifPl,
   cifUs,
-  cibTwitter,
   cilCloudDownload,
   cilPeople,
   cilUser,
   cilUserFemale,
-} from '@coreui/icons'
+} from '@coreui/icons';
 
-import avatar1 from 'src/assets/images/avatars/1.jpg'
-import avatar2 from 'src/assets/images/avatars/2.jpg'
-import avatar3 from 'src/assets/images/avatars/3.jpg'
-import avatar4 from 'src/assets/images/avatars/4.jpg'
-import avatar5 from 'src/assets/images/avatars/5.jpg'
-import avatar6 from 'src/assets/images/avatars/6.jpg'
+import avatar1 from 'src/assets/images/avatars/1.jpg';
+import avatar2 from 'src/assets/images/avatars/2.jpg';
+import avatar3 from 'src/assets/images/avatars/3.jpg';
+import avatar4 from 'src/assets/images/avatars/4.jpg';
+import avatar5 from 'src/assets/images/avatars/5.jpg';
+import avatar6 from 'src/assets/images/avatars/6.jpg';
 
-import WidgetsBrand from '../widgets/WidgetsBrand'
-import WidgetsDropdown from '../widgets/WidgetsDropdown'
+import WidgetsBrand from '../widgets/WidgetsBrand';
+import WidgetsDropdown from '../widgets/WidgetsDropdown';
 
 const Dashboard = () => {
-  const random = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
+  const random = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
 
   const progressExample = [
     { title: 'Visits', value: '29.703 Users', percent: 40, color: 'success' },
@@ -63,7 +63,7 @@ const Dashboard = () => {
     { title: 'Pageviews', value: '78.706 Views', percent: 60, color: 'warning' },
     { title: 'New Users', value: '22.123 Users', percent: 80, color: 'danger' },
     { title: 'Bounce Rate', value: 'Average Rate', percent: 40.15, color: 'primary' },
-  ]
+  ];
 
   const progressGroupExample1 = [
     { title: 'Monday', value1: 34, value2: 78 },
@@ -73,19 +73,19 @@ const Dashboard = () => {
     { title: 'Friday', value1: 22, value2: 73 },
     { title: 'Saturday', value1: 53, value2: 82 },
     { title: 'Sunday', value1: 9, value2: 69 },
-  ]
+  ];
 
   const progressGroupExample2 = [
     { title: 'Male', icon: cilUser, value: 53 },
     { title: 'Female', icon: cilUserFemale, value: 43 },
-  ]
+  ];
 
   const progressGroupExample3 = [
     { title: 'Organic Search', icon: cibGoogle, percent: 56, value: '191,235' },
     { title: 'Facebook', icon: cibFacebook, percent: 15, value: '51,223' },
     { title: 'Twitter', icon: cibTwitter, percent: 11, value: '37,564' },
     { title: 'LinkedIn', icon: cibLinkedin, percent: 8, value: '27,319' },
-  ]
+  ];
 
   const tableExample = [
     {
@@ -176,7 +176,7 @@ const Dashboard = () => {
       payment: { name: 'Amex', icon: cibCcAmex },
       activity: 'Last week',
     },
-  ]
+  ];
 
   return (
     <>
@@ -196,12 +196,7 @@ const Dashboard = () => {
               </CButton>
               <CButtonGroup className="float-end me-3">
                 {['Day', 'Month', 'Year'].map((value) => (
-                  <CButton
-                    color="outline-secondary"
-                    key={value}
-                    className="mx-0"
-                    active={value === 'Month'}
-                  >
+                  <CButton color="outline-secondary" key={value} className="mx-0" active={value === 'Month'}>
                     {value}
                   </CButton>
                 ))}
@@ -301,12 +296,7 @@ const Dashboard = () => {
                 <strong>
                   {item.value} ({item.percent}%)
                 </strong>
-                <CProgress
-                  thin
-                  className="mt-2"
-                  color={`${item.color}-gradient`}
-                  value={item.percent}
-                />
+                <CProgress thin className="mt-2" color={`${item.color}-gradient`} value={item.percent} />
               </CCol>
             ))}
           </CRow>
@@ -390,8 +380,7 @@ const Dashboard = () => {
                         <CIcon className="me-2" icon={item.icon} size="lg" />
                         <span>{item.title}</span>
                         <span className="ms-auto fw-semibold">
-                          {item.value}{' '}
-                          <span className="text-medium-emphasis small">({item.percent}%)</span>
+                          {item.value} <span className="text-medium-emphasis small">({item.percent}%)</span>
                         </span>
                       </div>
                       <div className="progress-group-bars">
@@ -426,8 +415,7 @@ const Dashboard = () => {
                       <CTableDataCell>
                         <div>{item.user.name}</div>
                         <div className="small text-medium-emphasis text-nowrap">
-                          <span>{item.user.new ? 'New' : 'Recurring'}</span> | Registered:{' '}
-                          {item.user.registered}
+                          <span>{item.user.new ? 'New' : 'Recurring'}</span> | Registered: {item.user.registered}
                         </div>
                       </CTableDataCell>
                       <CTableDataCell className="text-center">
@@ -442,11 +430,7 @@ const Dashboard = () => {
                             <small className="text-medium-emphasis">{item.usage.period}</small>
                           </div>
                         </div>
-                        <CProgress
-                          thin
-                          color={`${item.usage.color}-gradient`}
-                          value={item.usage.value}
-                        />
+                        <CProgress thin color={`${item.usage.color}-gradient`} value={item.usage.value} />
                       </CTableDataCell>
                       <CTableDataCell className="text-center">
                         <CIcon size="xl" icon={item.payment.icon} />
@@ -464,7 +448,7 @@ const Dashboard = () => {
         </CCol>
       </CRow>
     </>
-  )
-}
+  );
+};
 
-export default Dashboard
+export default Dashboard;

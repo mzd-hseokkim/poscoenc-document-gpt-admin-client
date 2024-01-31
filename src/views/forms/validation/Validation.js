@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import {
   CButton,
   CCard,
@@ -7,34 +7,29 @@ import {
   CCol,
   CForm,
   CFormCheck,
-  CFormInput,
   CFormFeedback,
+  CFormInput,
   CFormLabel,
   CFormSelect,
   CFormTextarea,
   CInputGroup,
   CInputGroupText,
   CRow,
-} from '@coreui/react-pro'
-import { DocsExample } from 'src/components'
+} from '@coreui/react-pro';
+import { DocsExample } from 'src/components';
 
 const CustomStyles = () => {
-  const [validated, setValidated] = useState(false)
+  const [validated, setValidated] = useState(false);
   const handleSubmit = (event) => {
-    const form = event.currentTarget
+    const form = event.currentTarget;
     if (form.checkValidity() === false) {
-      event.preventDefault()
-      event.stopPropagation()
+      event.preventDefault();
+      event.stopPropagation();
     }
-    setValidated(true)
-  }
+    setValidated(true);
+  };
   return (
-    <CForm
-      className="row g-3 needs-validation"
-      noValidate
-      validated={validated}
-      onSubmit={handleSubmit}
-    >
+    <CForm className="row g-3 needs-validation" noValidate validated={validated} onSubmit={handleSubmit}>
       <CCol md={4}>
         <CFormLabel htmlFor="validationCustom01">Email</CFormLabel>
         <CFormInput type="text" id="validationCustom01" defaultValue="Mark" required />
@@ -78,12 +73,7 @@ const CustomStyles = () => {
         <CFormFeedback invalid>Please provide a valid zip.</CFormFeedback>
       </CCol>
       <CCol xs={12}>
-        <CFormCheck
-          type="checkbox"
-          id="invalidCheck"
-          label="Agree to terms and conditions"
-          required
-        />
+        <CFormCheck type="checkbox" id="invalidCheck" label="Agree to terms and conditions" required />
         <CFormFeedback invalid>You must agree before submitting.</CFormFeedback>
       </CCol>
       <CCol xs={12}>
@@ -92,19 +82,19 @@ const CustomStyles = () => {
         </CButton>
       </CCol>
     </CForm>
-  )
-}
+  );
+};
 
 const BrowserDefaults = () => {
-  const [validated, setValidated] = useState(false)
+  const [validated, setValidated] = useState(false);
   const handleSubmit = (event) => {
-    const form = event.currentTarget
+    const form = event.currentTarget;
     if (form.checkValidity() === false) {
-      event.preventDefault()
-      event.stopPropagation()
+      event.preventDefault();
+      event.stopPropagation();
     }
-    setValidated(true)
-  }
+    setValidated(true);
+  };
   return (
     <CForm className="row g-3 needs-validation" validated={validated} onSubmit={handleSubmit}>
       <CCol md={4}>
@@ -150,12 +140,7 @@ const BrowserDefaults = () => {
         <CFormFeedback invalid>Please provide a valid zip.</CFormFeedback>
       </CCol>
       <CCol xs={12}>
-        <CFormCheck
-          type="checkbox"
-          id="invalidCheck"
-          label="Agree to terms and conditions"
-          required
-        />
+        <CFormCheck type="checkbox" id="invalidCheck" label="Agree to terms and conditions" required />
         <CFormFeedback invalid>You must agree before submitting.</CFormFeedback>
       </CCol>
       <CCol xs={12}>
@@ -164,26 +149,21 @@ const BrowserDefaults = () => {
         </CButton>
       </CCol>
     </CForm>
-  )
-}
+  );
+};
 
 const Tooltips = () => {
-  const [validated, setValidated] = useState(false)
+  const [validated, setValidated] = useState(false);
   const handleSubmit = (event) => {
-    const form = event.currentTarget
+    const form = event.currentTarget;
     if (form.checkValidity() === false) {
-      event.preventDefault()
-      event.stopPropagation()
+      event.preventDefault();
+      event.stopPropagation();
     }
-    setValidated(true)
-  }
+    setValidated(true);
+  };
   return (
-    <CForm
-      className="row g-3 needs-validation"
-      noValidate
-      validated={validated}
-      onSubmit={handleSubmit}
-    >
+    <CForm className="row g-3 needs-validation" noValidate validated={validated} onSubmit={handleSubmit}>
       <CCol md={4} className="position-relative">
         <CFormLabel htmlFor="validationTooltip01">Email</CFormLabel>
         <CFormInput type="text" id="validationTooltip01" defaultValue="Mark" required />
@@ -246,8 +226,8 @@ const Tooltips = () => {
         </CButton>
       </CCol>
     </CForm>
-  )
-}
+  );
+};
 
 const Validation = () => {
   return (
@@ -259,17 +239,15 @@ const Validation = () => {
           </CCardHeader>
           <CCardBody>
             <p className="text-medium-emphasis small">
-              For custom CoreUI form validation messages, you&#39;ll need to add the{' '}
-              <code>noValidate</code> boolean property to your <code>&lt;CForm&gt;</code>. This
-              disables the browser default feedback tooltips, but still provides access to the form
-              validation APIs in JavaScript. Try to submit the form below; our JavaScript will
-              intercept the submit button and relay feedback to you. When attempting to submit,
-              you&#39;ll see the <code>:invalid</code> and <code>:valid</code> styles applied to
-              your form controls.
+              For custom CoreUI form validation messages, you&#39;ll need to add the <code>noValidate</code> boolean
+              property to your <code>&lt;CForm&gt;</code>. This disables the browser default feedback tooltips, but
+              still provides access to the form validation APIs in JavaScript. Try to submit the form below; our
+              JavaScript will intercept the submit button and relay feedback to you. When attempting to submit,
+              you&#39;ll see the <code>:invalid</code> and <code>:valid</code> styles applied to your form controls.
             </p>
             <p className="text-medium-emphasis small">
-              Custom feedback styles apply custom colors, borders, focus styles, and background
-              icons to better communicate feedback.{' '}
+              Custom feedback styles apply custom colors, borders, focus styles, and background icons to better
+              communicate feedback.{' '}
             </p>
             <DocsExample href="forms/validation">{CustomStyles()}</DocsExample>
           </CCardBody>
@@ -282,14 +260,13 @@ const Validation = () => {
           </CCardHeader>
           <CCardBody>
             <p className="text-medium-emphasis small">
-              Not interested in custom validation feedback messages or writing JavaScript to change
-              form behaviors? All good, you can use the browser defaults. Try submitting the form
-              below. Depending on your browser and OS, you&#39;ll see a slightly different style of
-              feedback.
+              Not interested in custom validation feedback messages or writing JavaScript to change form behaviors? All
+              good, you can use the browser defaults. Try submitting the form below. Depending on your browser and OS,
+              you&#39;ll see a slightly different style of feedback.
             </p>
             <p className="text-medium-emphasis small">
-              While these feedback styles cannot be styled with CSS, you can still customize the
-              feedback text through JavaScript.
+              While these feedback styles cannot be styled with CSS, you can still customize the feedback text through
+              JavaScript.
             </p>
             <DocsExample href="forms/validation#browser-defaults">{BrowserDefaults()}</DocsExample>
           </CCardBody>
@@ -302,38 +279,25 @@ const Validation = () => {
           </CCardHeader>
           <CCardBody>
             <p className="text-medium-emphasis small">
-              We recommend using client-side validation, but in case you require server-side
-              validation, you can indicate invalid and valid form fields with <code>invalid</code>{' '}
-              and <code>valid</code> boolean properties.
+              We recommend using client-side validation, but in case you require server-side validation, you can
+              indicate invalid and valid form fields with <code>invalid</code> and <code>valid</code> boolean
+              properties.
             </p>
             <p className="text-medium-emphasis small">
-              For invalid fields, ensure that the invalid feedback/error message is associated with
-              the relevant form field using <code>aria-describedby</code> (noting that this
-              attribute allows more than one <code>id</code> to be referenced, in case the field
-              already points to additional form text).
+              For invalid fields, ensure that the invalid feedback/error message is associated with the relevant form
+              field using <code>aria-describedby</code> (noting that this attribute allows more than one <code>id</code>{' '}
+              to be referenced, in case the field already points to additional form text).
             </p>
             <DocsExample href="forms/validation#server-side">
               <CForm className="row g-3 needs-validation">
                 <CCol md={4}>
                   <CFormLabel htmlFor="validationServer01">Email</CFormLabel>
-                  <CFormInput
-                    type="text"
-                    id="validationServer01"
-                    defaultValue="Mark"
-                    valid
-                    required
-                  />
+                  <CFormInput type="text" id="validationServer01" defaultValue="Mark" valid required />
                   <CFormFeedback valid>Looks good!</CFormFeedback>
                 </CCol>
                 <CCol md={4}>
                   <CFormLabel htmlFor="validationServer02">Email</CFormLabel>
-                  <CFormInput
-                    type="text"
-                    id="validationServer02"
-                    defaultValue="Otto"
-                    valid
-                    required
-                  />
+                  <CFormInput type="text" id="validationServer02" defaultValue="Otto" valid required />
                   <CFormFeedback valid>Looks good!</CFormFeedback>
                 </CCol>
                 <CCol md={4}>
@@ -423,12 +387,7 @@ const Validation = () => {
                   ></CFormTextarea>
                   <CFormFeedback invalid>Please enter a message in the textarea.</CFormFeedback>
                 </div>
-                <CFormCheck
-                  className="mb-3"
-                  id="validationFormCheck1"
-                  label="Check this checkbox"
-                  required
-                />
+                <CFormCheck className="mb-3" id="validationFormCheck1" label="Check this checkbox" required />
                 <CFormFeedback invalid>Example invalid feedback text</CFormFeedback>
 
                 <CFormCheck
@@ -460,12 +419,7 @@ const Validation = () => {
                 </div>
 
                 <div className="mb-3">
-                  <CFormInput
-                    type="file"
-                    id="validationTextarea"
-                    aria-label="file example"
-                    required
-                  />
+                  <CFormInput type="file" id="validationTextarea" aria-label="file example" required />
                   <CFormFeedback invalid>Example invalid form file feedback</CFormFeedback>
                 </div>
 
@@ -486,18 +440,17 @@ const Validation = () => {
           </CCardHeader>
           <CCardBody>
             <p className="text-medium-emphasis small">
-              If your form layout allows it, you can swap the text for the tooltip to display
-              validation feedback in a styled tooltip. Be sure to have a parent with{' '}
-              <code>position: relative</code> on it for tooltip positioning. In the example below,
-              our column classes have this already, but your project may require an alternative
-              setup.
+              If your form layout allows it, you can swap the text for the tooltip to display validation feedback in a
+              styled tooltip. Be sure to have a parent with <code>position: relative</code> on it for tooltip
+              positioning. In the example below, our column classes have this already, but your project may require an
+              alternative setup.
             </p>
             <DocsExample href="forms/validation#tooltips">{Tooltips()}</DocsExample>
           </CCardBody>
         </CCard>
       </CCol>
     </CRow>
-  )
-}
+  );
+};
 
-export default Validation
+export default Validation;

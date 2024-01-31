@@ -1,9 +1,9 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-import { CWidgetStatsD, CRow, CCol } from '@coreui/react-pro'
-import CIcon from '@coreui/icons-react'
-import { cibFacebook, cibLinkedin, cibTwitter, cilCalendar } from '@coreui/icons'
-import { CChart } from '@coreui/react-chartjs'
+import React from 'react';
+import PropTypes from 'prop-types';
+import { CCol, CRow, CWidgetStatsD } from '@coreui/react-pro';
+import CIcon from '@coreui/icons-react';
+import { cibFacebook, cibLinkedin, cibTwitter, cilCalendar } from '@coreui/icons';
+import { CChart } from '@coreui/react-chartjs';
 
 const WidgetsBrand = ({ withCharts }) => {
   const chartOptions = {
@@ -32,7 +32,7 @@ const WidgetsBrand = ({ withCharts }) => {
         display: false,
       },
     },
-  }
+  };
 
   return (
     <CRow>
@@ -178,11 +178,11 @@ const WidgetsBrand = ({ withCharts }) => {
         />
       </CCol>
     </CRow>
-  )
-}
+  );
+};
 
 WidgetsBrand.propTypes = {
   withCharts: PropTypes.bool,
-}
+};
 
-export default WidgetsBrand
+export default WidgetsBrand;

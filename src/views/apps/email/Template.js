@@ -1,39 +1,31 @@
-import React from 'react'
-import { NavLink } from 'react-router-dom'
-import { useSelector, useDispatch } from 'react-redux'
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 
 import {
+  CBadge,
+  CCard,
+  CCardBody,
+  CContainer,
+  CNavItem,
   CSidebar,
   CSidebarBrand,
   CSidebarNav,
   CSidebarToggler,
-  CNavItem,
-  CContainer,
-  CCard,
-  CCardBody,
-  CBadge,
-} from '@coreui/react-pro'
-import CIcon from '@coreui/icons-react'
+} from '@coreui/react-pro';
+import CIcon from '@coreui/icons-react';
 
-import { logoNegative } from 'src/assets/brand/logo-negative'
-import { sygnet } from 'src/assets/brand/sygnet'
+import { logoNegative } from 'src/assets/brand/logo-negative';
+import { sygnet } from 'src/assets/brand/sygnet';
 
-import { AppAside, AppFooter, AppHeader } from '../../../components'
-import {
-  cilBookmark,
-  cilInbox,
-  cilPaperPlane,
-  cilPencil,
-  cilSpeedometer,
-  cilStar,
-  cilTrash,
-} from '@coreui/icons'
+import { AppAside, AppFooter, AppHeader } from '../../../components';
+import { cilBookmark, cilInbox, cilPaperPlane, cilPencil, cilSpeedometer, cilStar, cilTrash } from '@coreui/icons';
 
 // eslint-disable-next-line react/prop-types
 const EmailNav = ({ children }) => {
-  const dispatch = useDispatch()
-  const unfoldable = useSelector((state) => state.sidebarUnfoldable)
-  const sidebarShow = useSelector((state) => state.sidebarShow)
+  const dispatch = useDispatch();
+  const unfoldable = useSelector((state) => state.sidebarUnfoldable);
+  const sidebarShow = useSelector((state) => state.sidebarShow);
 
   return (
     <>
@@ -43,7 +35,7 @@ const EmailNav = ({ children }) => {
         unfoldable={unfoldable}
         visible={sidebarShow}
         onVisibleChange={(visible) => {
-          dispatch({ type: 'set', sidebarShow: visible })
+          dispatch({ type: 'set', sidebarShow: visible });
         }}
       >
         <CSidebarBrand className="d-none d-md-flex" to="/">
@@ -104,7 +96,7 @@ const EmailNav = ({ children }) => {
       </div>
       <AppAside />
     </>
-  )
-}
+  );
+};
 
-export default EmailNav
+export default EmailNav;

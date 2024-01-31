@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import {
   CAvatar,
   CBadge,
@@ -7,26 +7,22 @@ import {
   CDropdownItem,
   CDropdownMenu,
   CDropdownToggle,
-} from '@coreui/react-pro'
-import CIcon from '@coreui/icons-react'
-import { cilEnvelopeOpen } from '@coreui/icons'
+} from '@coreui/react-pro';
+import CIcon from '@coreui/icons-react';
+import { cilEnvelopeOpen } from '@coreui/icons';
 
-import avatar4 from './../../assets/images/avatars/4.jpg'
-import avatar5 from './../../assets/images/avatars/5.jpg'
-import avatar6 from './../../assets/images/avatars/6.jpg'
-import avatar7 from './../../assets/images/avatars/7.jpg'
+import avatar4 from './../../assets/images/avatars/4.jpg';
+import avatar5 from './../../assets/images/avatars/5.jpg';
+import avatar6 from './../../assets/images/avatars/6.jpg';
+import avatar7 from './../../assets/images/avatars/7.jpg';
 
 const AppHeaderDropdownMssg = () => {
-  const itemsCount = 4
+  const itemsCount = 4;
   return (
     <CDropdown variant="nav-item" alignment="end">
       <CDropdownToggle className="c-header-nav-link" caret={false}>
         <CIcon icon={cilEnvelopeOpen} size="lg" className="my-1 mx-2" />
-        <CBadge
-          shape="rounded-pill"
-          color="info-gradient"
-          className="position-absolute top-0 end-0"
-        >
+        <CBadge shape="rounded-pill" color="info-gradient" className="position-absolute top-0 end-0">
           {itemsCount}
         </CBadge>
       </CDropdownToggle>
@@ -47,8 +43,7 @@ const AppHeaderDropdownMssg = () => {
               <span className="fa fa-exclamation text-danger"></span> Important message
             </div>
             <div className="small text-medium-emphasis text-truncate">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-              incididunt...
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...
             </div>
           </div>
         </CDropdownItem>
@@ -63,8 +58,7 @@ const AppHeaderDropdownMssg = () => {
             </div>
             <div className="text-truncate font-weight-bold">Lorem ipsum dolor sit amet</div>
             <div className="small text-medium-emphasis text-truncate">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-              incididunt...
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...
             </div>
           </div>
         </CDropdownItem>
@@ -79,8 +73,7 @@ const AppHeaderDropdownMssg = () => {
             </div>
             <div className="text-truncate font-weight-bold">Lorem ipsum dolor sit amet</div>
             <div className="small text-medium-emphasis text-truncate">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-              incididunt...
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...
             </div>
           </div>
         </CDropdownItem>
@@ -95,8 +88,7 @@ const AppHeaderDropdownMssg = () => {
             </div>
             <div className="text-truncate font-weight-bold">Lorem ipsum dolor sit amet</div>
             <div className="small text-medium-emphasis text-truncate">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-              incididunt...
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt...
             </div>
           </div>
         </CDropdownItem>
@@ -105,7 +97,7 @@ const AppHeaderDropdownMssg = () => {
         </CDropdownItem>
       </CDropdownMenu>
     </CDropdown>
-  )
-}
+  );
+};
 
-export default AppHeaderDropdownMssg
+export default AppHeaderDropdownMssg;

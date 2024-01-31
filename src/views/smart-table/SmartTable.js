@@ -1,10 +1,10 @@
-import React from 'react'
-import { CCard, CCardBody, CCardHeader, CCol, CRow } from '@coreui/react-pro'
-import { DocsExample } from 'src/components'
+import React from 'react';
+import { CCard, CCardBody, CCardHeader, CCol, CRow } from '@coreui/react-pro';
+import { DocsExample } from 'src/components';
 
-import SmartTableBasixExample from './SmartTableBasixExample'
-import SmartTableDownloadableExample from './SmartTableDownloadableExample'
-import SmartTableSelectableExample from './SmartTableSelectableExample'
+import SmartTableBasixExample from './SmartTableBasixExample';
+import SmartTableDownloadableExample from './SmartTableDownloadableExample';
+import SmartTableSelectableExample from './SmartTableSelectableExample';
 
 const SmartTable = () => {
   return (
@@ -42,7 +42,7 @@ const SmartTable = () => {
         </CCard>
       </CCol>
     </CRow>
-  )
-}
+  );
+};
 
-export default SmartTable
+export default SmartTable;

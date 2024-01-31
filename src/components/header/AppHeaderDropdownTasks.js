@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import {
   CBadge,
   CDropdown,
@@ -7,21 +7,17 @@ import {
   CDropdownMenu,
   CDropdownToggle,
   CProgress,
-} from '@coreui/react-pro'
-import CIcon from '@coreui/icons-react'
-import { cilList } from '@coreui/icons'
+} from '@coreui/react-pro';
+import CIcon from '@coreui/icons-react';
+import { cilList } from '@coreui/icons';
 
 const AppHeaderDropdownTasks = () => {
-  const itemsCount = 5
+  const itemsCount = 5;
   return (
     <CDropdown variant="nav-item" alignment="end">
       <CDropdownToggle caret={false}>
         <CIcon icon={cilList} size="lg" className="my-1 mx-2" />
-        <CBadge
-          shape="rounded-pill"
-          color="warning-gradient"
-          className="position-absolute top-0 end-0"
-        >
+        <CBadge shape="rounded-pill" color="warning-gradient" className="position-absolute top-0 end-0">
           {itemsCount}
         </CBadge>
       </CDropdownToggle>
@@ -79,7 +75,7 @@ const AppHeaderDropdownTasks = () => {
         </CDropdownItem>
       </CDropdownMenu>
     </CDropdown>
-  )
-}
+  );
+};
 
-export default AppHeaderDropdownTasks
+export default AppHeaderDropdownTasks;

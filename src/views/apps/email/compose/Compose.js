@@ -1,21 +1,21 @@
-import React from 'react'
+import React from 'react';
 import {
-  CButtonToolbar,
-  CDropdown,
-  CDropdownToggle,
-  CDropdownMenu,
-  CDropdownItem,
   CBadge,
   CButton,
   CButtonGroup,
+  CButtonToolbar,
+  CCol,
+  CDropdown,
+  CDropdownItem,
+  CDropdownMenu,
+  CDropdownToggle,
   CForm,
   CFormInput,
   CFormLabel,
   CFormTextarea,
   CRow,
-  CCol,
-} from '@coreui/react-pro'
-import CIcon from '@coreui/icons-react'
+} from '@coreui/react-pro';
+import CIcon from '@coreui/icons-react';
 import {
   cilAlignCenter,
   cilAlignLeft,
@@ -31,7 +31,7 @@ import {
   cilTags,
   cilTrash,
   cilUnderline,
-} from '@coreui/icons'
+} from '@coreui/icons';
 
 const Compose = () => {
   return (
@@ -149,7 +149,7 @@ const Compose = () => {
         </CCol>
       </CRow>
     </>
-  )
-}
+  );
+};
 
-export default Compose
+export default Compose;

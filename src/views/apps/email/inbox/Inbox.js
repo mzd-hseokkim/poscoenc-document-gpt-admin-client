@@ -1,15 +1,15 @@
-import React from 'react'
+import React from 'react';
 import {
-  CButtonToolbar,
-  CDropdown,
-  CDropdownToggle,
-  CDropdownMenu,
-  CDropdownItem,
   CBadge,
   CButton,
   CButtonGroup,
-} from '@coreui/react-pro'
-import CIcon from '@coreui/icons-react'
+  CButtonToolbar,
+  CDropdown,
+  CDropdownItem,
+  CDropdownMenu,
+  CDropdownToggle,
+} from '@coreui/react-pro';
+import CIcon from '@coreui/icons-react';
 import {
   cilBookmark,
   cilChevronLeft,
@@ -22,7 +22,7 @@ import {
   cilStar,
   cilTags,
   cilTrash,
-} from '@coreui/icons'
+} from '@coreui/icons';
 
 const Inbox = () => {
   return (
@@ -83,10 +83,7 @@ const Inbox = () => {
       </CButtonToolbar>
 
       <div className="messages">
-        <a
-          className="message d-flex mb-3 text-high-emphasis text-decoration-none"
-          href="#/apps/email/message"
-        >
+        <a className="message d-flex mb-3 text-high-emphasis text-decoration-none" href="#/apps/email/message">
           <div className="message-actions me-3">
             <CIcon icon={cilStar} />
           </div>
@@ -101,17 +98,14 @@ const Inbox = () => {
               </div>
             </div>
             <div className="message-body">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-              incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-              exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-              dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
+              dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
+              ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+              fugiat nulla pariatur.
             </div>
           </div>
         </a>
-        <a
-          className="message d-flex mb-3 text-medium-emphasis text-decoration-none"
-          href="#/apps/email/message"
-        >
+        <a className="message d-flex mb-3 text-medium-emphasis text-decoration-none" href="#/apps/email/message">
           <div className="message-actions me-3">
             <CIcon icon={cilStar} />
           </div>
@@ -126,10 +120,10 @@ const Inbox = () => {
               </div>
             </div>
             <div className="message-body">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-              incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-              exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-              dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
+              dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
+              ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+              fugiat nulla pariatur.
             </div>
           </div>
         </a>
@@ -151,17 +145,14 @@ const Inbox = () => {
               </div>
             </div>
             <div className="message-body">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-              incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-              exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-              dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
+              dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
+              ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+              fugiat nulla pariatur.
             </div>
           </div>
         </a>
-        <a
-          className="message d-flex mb-3 text-medium-emphasis text-decoration-none"
-          href="#/apps/email/message"
-        >
+        <a className="message d-flex mb-3 text-medium-emphasis text-decoration-none" href="#/apps/email/message">
           <div className="message-actions me-3">
             <CIcon icon={cilStar} />
           </div>
@@ -176,17 +167,14 @@ const Inbox = () => {
               </div>
             </div>
             <div className="message-body">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-              incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-              exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-              dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
+              dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
+              ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+              fugiat nulla pariatur.
             </div>
           </div>
         </a>
-        <a
-          className="message d-flex mb-3 text-medium-emphasis text-decoration-none"
-          href="#/apps/email/message"
-        >
+        <a className="message d-flex mb-3 text-medium-emphasis text-decoration-none" href="#/apps/email/message">
           <div className="message-actions me-3">
             <CIcon icon={cilStar} />
           </div>
@@ -201,17 +189,14 @@ const Inbox = () => {
               </div>
             </div>
             <div className="message-body">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-              incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-              exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-              dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
+              dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
+              ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+              fugiat nulla pariatur.
             </div>
           </div>
         </a>
-        <a
-          className="message d-flex mb-3 text-medium-emphasis text-decoration-none"
-          href="#/apps/email/message"
-        >
+        <a className="message d-flex mb-3 text-medium-emphasis text-decoration-none" href="#/apps/email/message">
           <div className="message-actions me-3">
             <CIcon icon={cilStar} />
           </div>
@@ -226,16 +211,16 @@ const Inbox = () => {
               </div>
             </div>
             <div className="message-body">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-              incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-              exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-              dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
+              dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
+              ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+              fugiat nulla pariatur.
             </div>
           </div>
         </a>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Inbox
+export default Inbox;

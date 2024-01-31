@@ -1,18 +1,18 @@
-import React from 'react'
-import FullCalendar from '@fullcalendar/react'
-import dayGridPlugin from '@fullcalendar/daygrid'
-import timeGridPlugin from '@fullcalendar/timegrid'
-import interactionPlugin from '@fullcalendar/interaction'
-import { INITIAL_EVENTS, createEventId } from './event-utils'
-import { CCard, CCardBody, CCardHeader } from '@coreui/react-pro'
+import React from 'react';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import { createEventId, INITIAL_EVENTS } from './event-utils';
+import { CCard, CCardBody, CCardHeader } from '@coreui/react-pro';
 
-import { ProBadge } from 'src/components'
+import { ProBadge } from 'src/components';
 
 export default class Calendar extends React.Component {
   state = {
     weekendsVisible: true,
     currentEvents: [],
-  }
+  };
 
   render() {
     return (
@@ -47,20 +47,20 @@ export default class Calendar extends React.Component {
           />
         </CCardBody>
       </CCard>
-    )
+    );
   }
 
   handleWeekendsToggle = () => {
     this.setState({
       weekendsVisible: !this.state.weekendsVisible,
-    })
-  }
+    });
+  };
 
   handleDateSelect = (selectInfo) => {
-    let title = prompt('Please enter a new title for your event')
-    let calendarApi = selectInfo.view.calendar
+    let title = prompt('Please enter a new title for your event');
+    let calendarApi = selectInfo.view.calendar;
 
-    calendarApi.unselect() // clear date selection
+    calendarApi.unselect(); // clear date selection
 
     if (title) {
       calendarApi.addEvent({
@@ -69,22 +69,22 @@ export default class Calendar extends React.Component {
         start: selectInfo.startStr,
         end: selectInfo.endStr,
         allDay: selectInfo.allDay,
-      })
+      });
     }
-  }
+  };
 
   handleEventClick = (clickInfo) => {
     // eslint-disable-next-line no-restricted-globals
     if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'`)) {
-      clickInfo.event.remove()
+      clickInfo.event.remove();
     }
-  }
+  };
 
   handleEvents = (events) => {
     this.setState({
       currentEvents: events,
-    })
-  }
+    });
+  };
 }
 
 const renderEventContent = (eventInfo) => {
@@ -93,5 +93,5 @@ const renderEventContent = (eventInfo) => {
       <b>{eventInfo.timeText}</b>
       <i>{eventInfo.event.title}</i>
     </>
-  )
-}
+  );
+};

@@ -1,9 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import {
+  CButton,
   CCard,
   CCardBody,
   CCardHeader,
   CCollapse,
+  CDropdown,
   CDropdownItem,
   CDropdownMenu,
   CDropdownToggle,
@@ -11,20 +13,18 @@ import {
   CFormInput,
   CImage,
   CNavbar,
-  CNavbarNav,
   CNavbarBrand,
+  CNavbarNav,
   CNavbarText,
   CNavbarToggler,
   CNavLink,
-  CDropdown,
-  CButton,
-} from '@coreui/react-pro'
-import { DocsLink } from 'src/components'
+} from '@coreui/react-pro';
+import { DocsLink } from 'src/components';
 
 const CNavbars = () => {
-  const [visible, setVisible] = useState(false)
-  const [isOpenDropdown, setIsOpenDropdown] = useState(false)
-  const [navbarText, setNavbarText] = useState(false)
+  const [visible, setVisible] = useState(false);
+  const [isOpenDropdown, setIsOpenDropdown] = useState(false);
+  const [navbarText, setNavbarText] = useState(false);
 
   return (
     <>
@@ -76,11 +76,7 @@ const CNavbars = () => {
         <CCardBody>
           <CNavbar color="faded" light>
             <CNavbarBrand>
-              <CImage
-                src="https://placekitten.com/g/30/30"
-                className="d-inline-block align-top"
-                alt="CoreuiVue"
-              />
+              <CImage src="https://placekitten.com/g/30/30" className="d-inline-block align-top" alt="CoreuiVue" />
               CoreUI React
             </CNavbarBrand>
           </CNavbar>
@@ -94,7 +90,7 @@ const CNavbars = () => {
             <CNavbarToggler
               inNavbar
               onClick={() => {
-                setNavbarText(!navbarText)
+                setNavbarText(!navbarText);
               }}
             />
             <CNavbarBrand>NavbarBrand</CNavbarBrand>
@@ -114,7 +110,7 @@ const CNavbars = () => {
             <CNavbarToggler
               inNavbar
               onClick={() => {
-                setIsOpenDropdown(!isOpenDropdown)
+                setIsOpenDropdown(!isOpenDropdown);
               }}
             />
             <CCollapse show={isOpenDropdown} navbar>
@@ -168,7 +164,7 @@ const CNavbars = () => {
         </CCardBody>
       </CCard>
     </>
-  )
-}
+  );
+};
 
-export default CNavbars
+export default CNavbars;

@@ -1,8 +1,8 @@
-import React, { Suspense } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
-import { CSpinner } from '@coreui/react-pro'
+import React, { Suspense } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { CSpinner } from '@coreui/react-pro';
 
-import { Compose, Inbox, Message, Template } from './index'
+import { Compose, Inbox, Message, Template } from './index';
 
 const TheEmailApp = () => {
   return (
@@ -16,7 +16,7 @@ const TheEmailApp = () => {
         </Routes>
       </Suspense>
     </Template>
-  )
-}
+  );
+};
 
-export default React.memo(TheEmailApp)
+export default React.memo(TheEmailApp);

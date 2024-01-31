@@ -1,6 +1,6 @@
-import React from 'react'
-import { CCard, CCardHeader, CCardBody } from '@coreui/react-pro'
-import { DocsLink } from 'src/components'
+import React from 'react';
+import { CCard, CCardBody, CCardHeader } from '@coreui/react-pro';
+import { DocsLink } from 'src/components';
 
 const Typography = () => {
   return (
@@ -12,8 +12,8 @@ const Typography = () => {
         </CCardHeader>
         <CCardBody>
           <p>
-            Documentation and examples for Bootstrap typography, including global settings,
-            headings, body text, lists, and more.
+            Documentation and examples for Bootstrap typography, including global settings, headings, body text, lists,
+            and more.
           </p>
           <table className="table">
             <thead>
@@ -93,8 +93,8 @@ const Typography = () => {
           <p>
             <code className="highlighter-rouge">.h1</code> through
             <code className="highlighter-rouge">.h6</code>
-            classes are also available, for when you want to match the font styling of a heading but
-            cannot use the associated HTML element.
+            classes are also available, for when you want to match the font styling of a heading but cannot use the
+            associated HTML element.
           </p>
           <div className="bd-example">
             <p className="h1">h1. Bootstrap heading</p>
@@ -110,8 +110,8 @@ const Typography = () => {
         <div className="card-header">Display headings</div>
         <div className="card-body">
           <p>
-            Traditional heading elements are designed to work best in the meat of your page content.
-            When you need a heading to stand out, consider using a <strong>display heading</strong>
+            Traditional heading elements are designed to work best in the meat of your page content. When you need a
+            heading to stand out, consider using a <strong>display heading</strong>
             —a larger, slightly more opinionated heading style.
           </p>
           <div className="bd-example bd-example-type">
@@ -146,8 +146,8 @@ const Typography = () => {
         <CCardHeader>Inline text elements</CCardHeader>
         <CCardBody>
           <p>
-            Traditional heading elements are designed to work best in the meat of your page content.
-            When you need a heading to stand out, consider using a <strong>display heading</strong>
+            Traditional heading elements are designed to work best in the meat of your page content. When you need a
+            heading to stand out, consider using a <strong>display heading</strong>
             —a larger, slightly more opinionated heading style.
           </p>
           <div className="bd-example">
@@ -182,10 +182,9 @@ const Typography = () => {
         <CCardHeader>Description list alignment</CCardHeader>
         <CCardBody>
           <p>
-            Align terms and descriptions horizontally by using our grid system’s predefined classes
-            (or semantic mixins). For longer terms, you can optionally add a{' '}
-            <code className="highlighter-rouge">.text-truncate</code> class to truncate the text
-            with an ellipsis.
+            Align terms and descriptions horizontally by using our grid system’s predefined classes (or semantic
+            mixins). For longer terms, you can optionally add a{' '}
+            <code className="highlighter-rouge">.text-truncate</code> class to truncate the text with an ellipsis.
           </p>
           <div className="bd-example">
             <dl className="row">
@@ -194,9 +193,7 @@ const Typography = () => {
 
               <dt className="col-sm-3">Euismod</dt>
               <dd className="col-sm-9">
-                <p>
-                  Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.
-                </p>
+                <p>Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.</p>
                 <p>Donec id elit non mi porta gravida at eget metus.</p>
               </dd>
 
@@ -205,17 +202,15 @@ const Typography = () => {
 
               <dt className="col-sm-3 text-truncate">Truncated term is truncated</dt>
               <dd className="col-sm-9">
-                Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut
-                fermentum massa justo sit amet risus.
+                Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit
+                amet risus.
               </dd>
 
               <dt className="col-sm-3">Nesting</dt>
               <dd className="col-sm-9">
                 <dl className="row">
                   <dt className="col-sm-4">Nested definition list</dt>
-                  <dd className="col-sm-8">
-                    Aenean posuere, tortor sed cursus feugiat, nunc augue blandit nunc.
-                  </dd>
+                  <dd className="col-sm-8">Aenean posuere, tortor sed cursus feugiat, nunc augue blandit nunc.</dd>
                 </dl>
               </dd>
             </dl>
@@ -223,7 +218,7 @@ const Typography = () => {
         </CCardBody>
       </CCard>
     </>
-  )
-}
+  );
+};
 
-export default Typography
+export default Typography;

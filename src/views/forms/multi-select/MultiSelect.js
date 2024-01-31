@@ -1,6 +1,6 @@
-import React from 'react'
-import { CCard, CCardBody, CCardHeader, CCol, CMultiSelect, CRow } from '@coreui/react-pro'
-import { DocsExample } from 'src/components'
+import React from 'react';
+import { CCard, CCardBody, CCardHeader, CCol, CMultiSelect, CRow } from '@coreui/react-pro';
+import { DocsExample } from 'src/components';
 
 const MultiSelect = () => {
   const options = [
@@ -38,7 +38,7 @@ const MultiSelect = () => {
         },
       ],
     },
-  ]
+  ];
 
   return (
     <CRow>
@@ -93,7 +93,7 @@ const MultiSelect = () => {
         </CCard>
       </CCol>
     </CRow>
-  )
-}
+  );
+};
 
-export default MultiSelect
+export default MultiSelect;

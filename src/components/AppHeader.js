@@ -1,51 +1,46 @@
-import React from 'react'
-import { NavLink } from 'react-router-dom'
-import { useSelector, useDispatch } from 'react-redux'
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   CButtonGroup,
-  CFormCheck,
   CContainer,
+  CFormCheck,
   CHeader,
   CHeaderBrand,
   CHeaderDivider,
   CHeaderNav,
   CHeaderToggler,
-  CNavLink,
   CNavItem,
-} from '@coreui/react-pro'
-import CIcon from '@coreui/icons-react'
-import { cilApplicationsSettings, cilMenu, cilMoon, cilSun } from '@coreui/icons'
+  CNavLink,
+} from '@coreui/react-pro';
+import CIcon from '@coreui/icons-react';
+import { cilApplicationsSettings, cilMenu, cilMoon, cilSun } from '@coreui/icons';
 
-import { AppBreadcrumb } from './index'
+import { AppBreadcrumb } from './index';
 
 import {
   AppHeaderDropdown,
   AppHeaderDropdownMssg,
   AppHeaderDropdownNotif,
   AppHeaderDropdownTasks,
-} from './header/index'
+} from './header/index';
 
-import { logo } from 'src/assets/brand/logo'
+import { logo } from 'src/assets/brand/logo';
 
 const AppHeader = () => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
-  const theme = useSelector((state) => state.theme)
+  const theme = useSelector((state) => state.theme);
 
-  theme === 'dark'
-    ? document.body.classList.add('dark-theme')
-    : document.body.classList.remove('dark-theme')
+  theme === 'dark' ? document.body.classList.add('dark-theme') : document.body.classList.remove('dark-theme');
 
-  const sidebarShow = useSelector((state) => state.sidebarShow)
-  const asideShow = useSelector((state) => state.asideShow)
+  const sidebarShow = useSelector((state) => state.sidebarShow);
+  const asideShow = useSelector((state) => state.asideShow);
 
   return (
     <CHeader position="sticky" className="mb-4">
       <CContainer fluid>
-        <CHeaderToggler
-          className="ps-1"
-          onClick={() => dispatch({ type: 'set', sidebarShow: !sidebarShow })}
-        >
+        <CHeaderToggler className="ps-1" onClick={() => dispatch({ type: 'set', sidebarShow: !sidebarShow })}>
           <CIcon icon={cilMenu} size="lg" />
         </CHeaderToggler>
         <CHeaderBrand className="mx-auto d-md-none" to="/">
@@ -96,10 +91,7 @@ const AppHeader = () => {
         <CHeaderNav className="ms-3 me-4">
           <AppHeaderDropdown />
         </CHeaderNav>
-        <CHeaderToggler
-          className="px-md-0 me-md-3"
-          onClick={() => dispatch({ type: 'set', asideShow: !asideShow })}
-        >
+        <CHeaderToggler className="px-md-0 me-md-3" onClick={() => dispatch({ type: 'set', asideShow: !asideShow })}>
           <CIcon icon={cilApplicationsSettings} size="lg" />
         </CHeaderToggler>
       </CContainer>
@@ -108,7 +100,7 @@ const AppHeader = () => {
         <AppBreadcrumb />
       </CContainer>
     </CHeader>
-  )
-}
+  );
+};
 
-export default AppHeader
+export default AppHeader;

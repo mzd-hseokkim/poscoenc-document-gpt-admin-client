@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import {
   CCard,
   CCardBody,
@@ -12,8 +12,8 @@ import {
   CTableHead,
   CTableHeaderCell,
   CTableRow,
-} from '@coreui/react-pro'
-import { DocsExample } from 'src/components'
+} from '@coreui/react-pro';
+import { DocsExample } from 'src/components';
 
 const Tables = () => {
   return (
@@ -25,8 +25,7 @@ const Tables = () => {
           </CCardHeader>
           <CCardBody>
             <p className="text-medium-emphasis small">
-              Using the most basic table CoreUI, here&#39;s how <code>&lt;CTable&gt;</code>-based
-              tables look in CoreUI.
+              Using the most basic table CoreUI, here&#39;s how <code>&lt;CTable&gt;</code>-based tables look in CoreUI.
             </p>
             <DocsExample href="components/table">
               <CTable>
@@ -173,9 +172,7 @@ const Tables = () => {
                 </CTableBody>
               </CTable>
             </DocsExample>
-            <p className="text-medium-emphasis small">
-              These classes can also be added to table variants:
-            </p>
+            <p className="text-medium-emphasis small">These classes can also be added to table variants:</p>
             <DocsExample href="components/table#striped-rows">
               <CTable color="dark" striped>
                 <CTableHead>
@@ -463,10 +460,8 @@ const Tables = () => {
               </CTable>
             </DocsExample>
             <p className="text-medium-emphasis small">
-              <a href="https://coreui.io/docs/4.0/utilities/borders#border-color">
-                Border color utilities
-              </a>{' '}
-              can be added to change colors:
+              <a href="https://coreui.io/docs/4.0/utilities/borders#border-color">Border color utilities</a> can be
+              added to change colors:
             </p>
             <DocsExample href="components/table#bordered-tables">
               <CTable bordered borderColor="primary">
@@ -583,8 +578,8 @@ const Tables = () => {
           </CCardHeader>
           <CCardBody>
             <p className="text-medium-emphasis small">
-              Add <code>small</code> property to make any <code>&lt;CTable&gt;</code> more compact
-              by cutting all cell <code>padding</code> in half.
+              Add <code>small</code> property to make any <code>&lt;CTable&gt;</code> more compact by cutting all cell{' '}
+              <code>padding</code> in half.
             </p>
             <DocsExample href="components/table#small-tables">
               <CTable small>
@@ -627,10 +622,9 @@ const Tables = () => {
           </CCardHeader>
           <CCardBody>
             <p className="text-medium-emphasis small">
-              Table cells of <code>&lt;CTableHead&gt;</code> are always vertical aligned to the
-              bottom. Table cells in <code>&lt;CTableBody&gt;</code> inherit their alignment from{' '}
-              <code>&lt;CTable&gt;</code> and are aligned to the the top by default. Use the align
-              property to re-align where needed.
+              Table cells of <code>&lt;CTableHead&gt;</code> are always vertical aligned to the bottom. Table cells in{' '}
+              <code>&lt;CTableBody&gt;</code> inherit their alignment from <code>&lt;CTable&gt;</code> and are aligned
+              to the the top by default. Use the align property to re-align where needed.
             </p>
             <DocsExample href="components/table#vertical-alignment">
               <CTable align="middle" responsive>
@@ -662,9 +656,8 @@ const Tables = () => {
                       This cell inherits <code>vertical-align: middle;</code> from the table
                     </CTableDataCell>
                     <CTableDataCell>
-                      This here is some placeholder text, intended to take up quite a bit of
-                      vertical space, to demonsCTableRowate how the vertical alignment works in the
-                      preceding cells.
+                      This here is some placeholder text, intended to take up quite a bit of vertical space, to
+                      demonsCTableRowate how the vertical alignment works in the preceding cells.
                     </CTableDataCell>
                   </CTableRow>
                   <CTableRow align="bottom">
@@ -678,9 +671,8 @@ const Tables = () => {
                       This cell inherits <code>vertical-align: bottom;</code> from the table row
                     </CTableDataCell>
                     <CTableDataCell>
-                      This here is some placeholder text, intended to take up quite a bit of
-                      vertical space, to demonsCTableRowate how the vertical alignment works in the
-                      preceding cells.
+                      This here is some placeholder text, intended to take up quite a bit of vertical space, to
+                      demonsCTableRowate how the vertical alignment works in the preceding cells.
                     </CTableDataCell>
                   </CTableRow>
                   <CTableRow>
@@ -692,9 +684,8 @@ const Tables = () => {
                     </CTableDataCell>
                     <CTableDataCell align="top">This cell is aligned to the top.</CTableDataCell>
                     <CTableDataCell>
-                      This here is some placeholder text, intended to take up quite a bit of
-                      vertical space, to demonsCTableRowate how the vertical alignment works in the
-                      preceding cells.
+                      This here is some placeholder text, intended to take up quite a bit of vertical space, to
+                      demonsCTableRowate how the vertical alignment works in the preceding cells.
                     </CTableDataCell>
                   </CTableRow>
                 </CTableBody>
@@ -777,9 +768,8 @@ const Tables = () => {
           </CCardHeader>
           <CCardBody>
             <p className="text-medium-emphasis small">
-              Similar to tables and dark tables, use the modifier prop{' '}
-              <code>color=&#34;light&#34;</code> or <code>color=&#34;dark&#34;</code> to make{' '}
-              <code>&lt;CTableHead&gt;</code>s appear light or dark gray.
+              Similar to tables and dark tables, use the modifier prop <code>color=&#34;light&#34;</code> or{' '}
+              <code>color=&#34;dark&#34;</code> to make <code>&lt;CTableHead&gt;</code>s appear light or dark gray.
             </p>
             <DocsExample href="components/table#table-head">
               <CTable>
@@ -902,9 +892,8 @@ const Tables = () => {
           </CCardHeader>
           <CCardBody>
             <p className="text-medium-emphasis small">
-              A <code>&lt;CTableCaption&gt;</code> functions like a heading for a table. It helps
-              users with screen readers to find a table and understand what it&#39;s about and
-              decide if they want to read it.
+              A <code>&lt;CTableCaption&gt;</code> functions like a heading for a table. It helps users with screen
+              readers to find a table and understand what it&#39;s about and decide if they want to read it.
             </p>
             <DocsExample href="components/table#captions">
               <CTable>
@@ -980,7 +969,7 @@ const Tables = () => {
         </CCard>
       </CCol>
     </CRow>
-  )
-}
+  );
+};
 
-export default Tables
+export default Tables;

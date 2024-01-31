@@ -1,14 +1,14 @@
 /* eslint-disable react/prop-types */
-import React from 'react'
-import { CCard, CCardHeader, CCardBody, CNavLink } from '@coreui/react-pro'
-import { GoogleMap, InfoWindow, Marker, useJsApiLoader } from '@react-google-maps/api'
-import { ProBadge } from 'src/components'
+import React from 'react';
+import { CCard, CCardBody, CCardHeader, CNavLink } from '@coreui/react-pro';
+import { GoogleMap, InfoWindow, Marker, useJsApiLoader } from '@react-google-maps/api';
+import { ProBadge } from 'src/components';
 
 // To use the Google Maps JavaScript API, you must register your app project on the Google API Console and get a Google API key which you can add to your app
-const apiKey = 'AIzaSyASyYRBZmULmrmw_P9kgr7_266OhFNinPA'
+const apiKey = 'AIzaSyASyYRBZmULmrmw_P9kgr7_266OhFNinPA';
 
-const defaultZoom = 11
-const defaultCenter = { lat: 37.431489, lng: -122.163719 }
+const defaultZoom = 11;
+const defaultCenter = { lat: 37.431489, lng: -122.163719 };
 const locations = [
   {
     lat: 37.431489,
@@ -42,24 +42,19 @@ const locations = [
     title: 'Facebook',
     www: 'https://www.facebook.com/',
   },
-]
+];
 
 const MarkerList = () => {
   return locations.map((location, index) => {
-    return <MarkerWithInfoWindow key={index.toString()} location={location} />
-  })
-}
+    return <MarkerWithInfoWindow key={index.toString()} location={location} />;
+  });
+};
 
 const MarkerWithInfoWindow = ({ location }) => {
-  const [isOpen, setIsOpen] = React.useState(false)
+  const [isOpen, setIsOpen] = React.useState(false);
 
   return (
-    <Marker
-      onClick={() => setIsOpen(!isOpen)}
-      position={location}
-      title={location.title}
-      label={location.label}
-    >
+    <Marker onClick={() => setIsOpen(!isOpen)} position={location} title={location.title} label={location.label}>
       {isOpen && (
         <InfoWindow onCloseClick={() => setIsOpen(false)}>
           <CNavLink href={location.www} target="_blank">
@@ -68,14 +63,14 @@ const MarkerWithInfoWindow = ({ location }) => {
         </InfoWindow>
       )}
     </Marker>
-  )
-}
+  );
+};
 
 const GoogleMapsComponent = () => {
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: apiKey,
-  })
+  });
 
   return (
     isLoaded && (
@@ -84,8 +79,8 @@ const GoogleMapsComponent = () => {
         <></>
       </GoogleMap>
     )
-  )
-}
+  );
+};
 
 const GoogleMaps = () => {
   return (
@@ -97,7 +92,7 @@ const GoogleMaps = () => {
         <GoogleMapsComponent />
       </CCardBody>
     </CCard>
-  )
-}
+  );
+};
 
-export default GoogleMaps
+export default GoogleMaps;
