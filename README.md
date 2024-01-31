@@ -4,23 +4,23 @@ CoreUI is meant to be the UX game changer. Pure & transparent code is devoid of 
 
 ## Table of Contents
 
-* [Versions](#versions)
-* [Quick Start](#quick-start)
-* [Installation](#installation)
-* [Basic usage](#basic-usage)
-* [What's included](#whats-included)
-* [Documentation](#documentation)
-* [Versioning](#versioning)
-* [Creators](#creators)
-* [Community](#community)
-* [Copyright and License](#copyright-and-license)
+- [Versions](#versions)
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+- [Basic usage](#basic-usage)
+- [What's included](#whats-included)
+- [Documentation](#documentation)
+- [Versioning](#versioning)
+- [Creators](#creators)
+- [Community](#community)
+- [Copyright and License](#copyright-and-license)
 
 ## Versions
 
-* [CoreUI Pro Bootstrap Admin Template](https://coreui.io/pro/)
-* [CoreUI Pro Angular Admin Template](https://coreui.io/pro/angular)
-* [CoreUI Pro React Admin Template](https://coreui.io/pro/react)
-* [CoreUI Pro Vue Admin Template](https://coreui.io/pro/vue)
+- [CoreUI Pro Bootstrap Admin Template](https://coreui.io/pro/)
+- [CoreUI Pro Angular Admin Template](https://coreui.io/pro/angular)
+- [CoreUI Pro React Admin Template](https://coreui.io/pro/react)
+- [CoreUI Pro Vue Admin Template](https://coreui.io/pro/vue)
 
 ## Quick Start
 
@@ -29,34 +29,34 @@ CoreUI is meant to be the UX game changer. Pure & transparent code is devoid of 
 
 ### Instalation
 
-``` bash
+```bash
 $ npm install
 ```
 
 or
 
-``` bash
+```bash
 $ yarn install
 ```
 
 ### Basic usage
 
-``` bash
+```bash
 # dev server with hot reload at http://localhost:3000
-$ npm start 
+$ npm start
 
 # if you use Node 17+ use this command instead of `npm start`
-$ npm run start:n17 
+$ npm run start:n17
 ```
 
-or 
+or
 
-``` bash
+```bash
 # dev server with hot reload at http://localhost:3000
 $ yarn start
 
 # if you use Node 17+ use this command instead of `yarn start`
-$ yarn start:n17 
+$ yarn start:n17
 ```
 
 Navigate to [http://localhost:3000](http://localhost:3000). The app will automatically reload if you change any of the source files.
@@ -70,7 +70,7 @@ Run `build` to build the project. The build artifacts will be stored in the `bui
 $ npm run build
 
 # if you use Node 17+ use this command instead of `build run build`
-$ npm run build:n17 
+$ npm run build:n17
 ```
 
 or
@@ -80,7 +80,7 @@ or
 $ yarn build
 
 # if you use Node 17+ use this command instead of `yarn build`
-$ yarn build:n17 
+$ yarn build:n17
 ```
 
 ## What's included
@@ -103,7 +103,7 @@ coreui-pro-react-admin-template
 │   ├── ...
 │   ├── index.js
 │   ├── routes.js    # routes config
-│   └── store.js     # template state example 
+│   └── store.js     # template state example
 │
 └── package.json
 ```
@@ -121,12 +121,14 @@ See [the Releases section of our project](https://github.com/coreui/coreui-pro-r
 ## Creators
 
 **Łukasz Holeczek**
-* <https://twitter.com/lukaszholeczek>
-* <https://github.com/mrholek>
-* <https://github.com/coreui>
+
+- <https://twitter.com/lukaszholeczek>
+- <https://github.com/mrholek>
+- <https://github.com/coreui>
 
 **CoreUI team**
-* https://github.com/orgs/coreui/people
+
+- https://github.com/orgs/coreui/people
 
 ## Community
 
@@ -137,7 +139,7 @@ Get updates on CoreUI's development and chat with the project maintainers and co
 
 ## Copyright and License
 
-copyright 2023 creativeLabs Łukasz Holeczek.   
+copyright 2023 creativeLabs Łukasz Holeczek.
 
 You must have a valid license purchased to legally use this product for
 your projects.

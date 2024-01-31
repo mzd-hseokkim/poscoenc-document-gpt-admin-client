@@ -1,23 +1,23 @@
 // If you want to override variables do it here
-@import "variables";
+@import 'variables';
 
 $enable-ltr: true; /* stylelint-disable-line scss/dollar-variable-default */
 $enable-rtl: true; /* stylelint-disable-line scss/dollar-variable-default */
 
 // Import styles
-@import "@coreui/coreui-pro/scss/coreui";
-@import "@coreui/coreui-pro/scss/themes/dark";
+@import '@coreui/coreui-pro/scss/coreui';
+@import '@coreui/coreui-pro/scss/themes/dark';
 
 // Import Chart.js custom tooltips styles
-@import "@coreui/chartjs/scss/coreui-chartjs";
+@import '@coreui/chartjs/scss/coreui-chartjs';
 
-@import "layout";
+@import 'layout';
 
 // Plugins
-@import "calendar";
+@import 'calendar';
 
 // Prism.js
-@import "examples";
+@import 'examples';
 
 // If you want to add custom CSS you can put it here.
-@import "custom";
+@import 'custom';
