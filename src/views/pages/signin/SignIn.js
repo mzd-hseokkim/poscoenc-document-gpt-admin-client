@@ -1,3 +1,5 @@
+// signIn
+
 import React, { useState } from 'react';
 import {
   CButton,
@@ -16,9 +18,12 @@ import { cilLockLocked, cilUser } from '@coreui/icons';
 import SignInService from '../../../services/SignInService';
 import { useNavigate } from 'react-router-dom';
 import useToast from '../../../hooks/useToast';
+import { emailValidationPattern, passwordValidationPattern } from '../../../utils/validationUtils';
 
 const SignIn = () => {
-  const [userData, setUserData] = useState({});
+  const [userData, setUserData] = useState([]);
+  const [errors, setErrors] = useState({});
+
   const navigate = useNavigate();
   const addToast = useToast();
 
@@ -36,9 +41,24 @@ const SignIn = () => {
     }
   };
 
+  const validateField = (name, value) => {
+    if (name === 'email') {
+      return !value || !emailValidationPattern.test(value) ? '유효하지 않은 이메일 주소입니다.' : '';
+    } else if (name === 'password') {
+      if (!value || value.length < 5) {
+        return '비밀번호는 최소 5자 이상이어야 합니다.';
+      }
+      if (!passwordValidationPattern.test(value)) {
+        return '유효하지 않은 비밀번호 형식입니다.';
+      }
+    }
+    return '';
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setUserData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
   };
 
   return (
@@ -48,24 +68,35 @@ const SignIn = () => {
           <CCol md={5}>
             <CCard className="p-4">
               <CCardBody>
-                <CForm>
+                <CForm onSubmit={handleSubmit}>
                   <h1>로그인</h1>
                   <CInputGroup className="mb-3">
                     <CInputGroupText>
                       <CIcon icon={cilUser} />
                     </CInputGroupText>
-                    <CFormInput placeholder="이메일" autoComplete="email" name="email" onChange={handleChange} />
+                    <CFormInput
+                      id="email"
+                      placeholder="이메일"
+                      autoComplete="email"
+                      name="email"
+                      onChange={handleChange}
+                      invalid={!!errors.email}
+                      feedbackInvalid={errors.email}
+                    />
                   </CInputGroup>
                   <CInputGroup className="mb-3">
                     <CInputGroupText>
                       <CIcon icon={cilLockLocked} />
                     </CInputGroupText>
                     <CFormInput
+                      id="password"
                       type="password"
                       placeholder="비밀번호"
                       autoComplete="current-password"
                       name="password"
                       onChange={handleChange}
+                      invalid={!!errors.password}
+                      feedbackInvalid={errors.password}
                     />
                   </CInputGroup>
                   <CRow>
