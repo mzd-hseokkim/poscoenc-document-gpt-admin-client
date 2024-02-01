@@ -1,23 +1,31 @@
 export const getColumnDefinitions = () => [
   {
-    key: 'id',
+    key: 'ID',
     _style: { width: '5%' },
   },
   {
-    key: 'title',
-    _style: { width: '50%' },
+    key: '제목',
+    _style: { width: '43%' },
   },
   {
-    key: 'createdByName',
+    key: '작성자',
     _style: { width: '15%' },
   },
   {
-    key: 'deleted',
+    key: '상태',
     _style: { width: '14%' },
   },
   {
-    key: 'createdAt',
+    key: '작성일',
     _style: { width: '10%' },
+  },
+  {
+    key: '첨부파일',
+    _style: { width: '5%' },
+  },
+  {
+    key: '조회수',
+    _style: { width: '2%' },
   },
   // TODO 일괄 삭제버튼 추가
 ];

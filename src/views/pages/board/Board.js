@@ -5,7 +5,6 @@ import { getScopedColumns } from '../../../components/board/BoardScopedColumns';
 import { getBoardList } from '../../../services/board/BoardService';
 
 const Board = () => {
-  const [content, setContent] = useState([]);
   const columns = getColumnDefinitions();
   const [boardData, setBoardData] = useState([]);
 
@@ -24,46 +23,36 @@ const Board = () => {
     })();
   }, []);
   const getBadge = (deleted) => {
+    //FIXME simplify case logic
     switch (deleted) {
-      case 'false':
+      case false:
         return 'success';
-      case 'true':
+      case true:
         return 'danger';
       default:
         return 'primary';
     }
   };
-  const toggleContent = (index) => {
-    const position = content.indexOf(index);
-    let newContent = content.slice();
-    if (position !== -1) {
-      newContent.splice(position, 1);
-    } else {
-      newContent = [...content, index];
-    }
-    setContent(newContent);
-  };
-
   //FIXME
   if (error) return <div>Error: {error.message}</div>;
 
   return (
     <CContainer>
       <CSmartTable
+        pagination
+        itemsPerPageLabel={'페이지당 글 개수'}
+        itemsPerPageSelect
+        itemsPerPage={5}
         activePage={1}
         clickableRows
         columns={columns}
         items={boardData}
-        itemsPerPageSelect
-        itemsPerPage={5}
-        pagination
-        scopedColumns={getScopedColumns(getBadge, toggleContent, content)}
+        scopedColumns={getScopedColumns(getBadge)}
         selectable
         sorterValue={{ column: 'id', state: 'asc' }}
         tableProps={{
           className: 'add-this-class',
           responsive: true,
-          striped: true,
           hover: true,
         }}
         tableBodyProps={{
