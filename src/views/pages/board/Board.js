@@ -1,14 +1,15 @@
 import { CContainer, CSmartTable } from '@coreui/react-pro';
 import { useState } from 'react';
 import { getColumnDefinitions } from '../../../components/board/BoardColumnDefinitions';
-import { BoardData } from '../../../components/board/BoardData';
+import BoardService from '../../../services/board/BoardService';
 import { getScopedColumns } from '../../../components/board/BoardScopedColumns';
 
-const Board = () => {
-  const [details, setDetails] = useState([]);
+const Board = async () => {
+  const [contents, setContents] = useState([]);
   const columns = getColumnDefinitions();
-  const getBadge = (status) => {
-    switch (status) {
+  const boardData = await BoardService.getBoardList();
+  const getBadge = (deleted) => {
+    switch (deleted) {
       case 'false':
         return 'success';
       case 'true':
@@ -17,15 +18,15 @@ const Board = () => {
         return 'primary';
     }
   };
-  const toggleDetails = (index) => {
-    const position = details.indexOf(index);
-    let newDetails = details.slice();
+  const toggleContents = (index) => {
+    const position = contents.indexOf(index);
+    let newContents = contents.slice();
     if (position !== -1) {
-      newDetails.splice(position, 1);
+      newContents.splice(position, 1);
     } else {
-      newDetails = [...details, index];
+      newContents = [...contents, index];
     }
-    setDetails(newDetails);
+    setContents(newContents);
   };
 
   return (
@@ -37,11 +38,11 @@ const Board = () => {
         columns={columns}
         //소팅은 소팅 상태를 가지고 재검색하도록 구현, 소팅 컴포넌트 안씀.
         footer
-        items={BoardData}
+        items={boardData}
         itemsPerPageSelect
         itemsPerPage={5}
         pagination
-        scopedColumns={getScopedColumns(getBadge, toggleDetails, details)}
+        scopedColumns={getScopedColumns(getBadge, toggleContents, contents)}
         selectable
         sorterValue={{ column: 'id', state: 'asc' }}
         tableFilter

@@ -8,7 +8,7 @@ export const getColumnDefinitions = () => [
     _style: { width: '55%' },
   },
   {
-    key: 'author',
+    key: 'createdBy',
     _style: { width: '15%' },
   },
   {
@@ -20,12 +20,12 @@ export const getColumnDefinitions = () => [
     _style: { width: '9%' },
   },
   {
-    key: 'registered',
+    key: 'createdAt',
     _style: { width: '10%' },
   },
   {
     // TODO 버튼말고 row 클릭시 detail
-    key: 'show_details',
+    key: 'show_contents',
     label: '',
     _style: { width: '1%' },
     filter: false,
