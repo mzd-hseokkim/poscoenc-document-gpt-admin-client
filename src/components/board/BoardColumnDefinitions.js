@@ -19,12 +19,5 @@ export const getColumnDefinitions = () => [
     key: 'createdAt',
     _style: { width: '10%' },
   },
-  {
-    key: 'show_content',
-    label: '',
-    _style: { width: '6%' },
-    filter: false,
-    sorter: false,
-  },
   // TODO 일괄 삭제버튼 추가
 ];

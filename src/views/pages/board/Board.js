@@ -51,11 +51,8 @@ const Board = () => {
     <CContainer>
       <CSmartTable
         activePage={1}
-        cleaner
         clickableRows
         columns={columns}
-        //소팅은 소팅 상태를 가지고 재검색하도록 구현, 소팅 컴포넌트 안씀.
-        // footer
         items={boardData}
         itemsPerPageSelect
         itemsPerPage={5}
@@ -63,9 +60,6 @@ const Board = () => {
         scopedColumns={getScopedColumns(getBadge, toggleContent, content)}
         selectable
         sorterValue={{ column: 'id', state: 'asc' }}
-        tableFilter
-        tableFilterLabel={'검색 :'}
-        tableFilterPlaceholder={'...'}
         tableProps={{
           className: 'add-this-class',
           responsive: true,
