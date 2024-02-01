@@ -9,7 +9,7 @@ const Board = () => {
   const columns = getColumnDefinitions();
   const [boardData, setBoardData] = useState([]);
 
-  //REMIND remove below code
+  //REMIND 구체적인 에러 핸들링 추가
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -43,6 +43,7 @@ const Board = () => {
     }
     setContent(newContent);
   };
+
   //FIXME
   if (error) return <div>Error: {error.message}</div>;
 
