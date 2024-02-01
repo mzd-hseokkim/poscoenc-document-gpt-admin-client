@@ -8,13 +8,13 @@ export const getColumnDefinitions = () => [
     _style: { width: '55%' },
   },
   {
-    key: 'createdBy',
+    key: 'createdByName',
     _style: { width: '15%' },
   },
-  {
-    key: 'role',
-    _style: { width: '5%' },
-  },
+  // {
+  //   key: 'role',
+  //   _style: { width: '5%' },
+  // },
   {
     key: 'deleted',
     _style: { width: '9%' },
@@ -25,7 +25,7 @@ export const getColumnDefinitions = () => [
   },
   {
     // TODO 버튼말고 row 클릭시 detail
-    key: 'show_contents',
+    key: 'show_content',
     label: '',
     _style: { width: '1%' },
     filter: false,

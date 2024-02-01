@@ -5,7 +5,7 @@ const BoardMain = React.lazy(() => import('./views/pages/board/Board'));
 const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/icons', exact: true, name: 'Icons', element: CoreUIIcons },
-  { path: '/board-list', exact: true, name: 'Board', element: BoardMain },
+  { path: '/boards', exact: true, name: 'Board', element: BoardMain },
 ];
 
 export default routes;

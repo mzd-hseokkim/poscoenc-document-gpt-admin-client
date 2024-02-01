@@ -21,7 +21,7 @@ const _nav = [
   {
     component: CNavItem,
     name: '게시판',
-    to: '/board-list',
+    to: '/boards',
     icon: <CIcon icon={cilList} customClassName="nav-icon" />,
   },
   {
@@ -31,7 +31,7 @@ const _nav = [
   {
     component: CNavItem,
     name: '게시판',
-    to: '/board-list',
+    to: '/boards',
     icon: <CIcon icon={cilList} customClassName="nav-icon" />,
   },
   {

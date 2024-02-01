@@ -1,13 +1,13 @@
 import { CBadge, CButton, CCardBody, CCollapse } from '@coreui/react-pro';
 
 const translate = (deleted) => {
-  return deleted === 'false' ? 'Active' : 'Deleted';
+  return deleted === 'false' ? 'OnBoard' : 'Deleted';
 };
-export const getScopedColumns = (getBadge, toggleContents, contents) => ({
+export const getScopedColumns = (getBadge, toggleContent, content) => ({
   title: (item) => (
     <td
       onClick={() => {
-        toggleContents(item.id);
+        toggleContent(item.id);
       }}
     >
       {item.title}
@@ -18,7 +18,7 @@ export const getScopedColumns = (getBadge, toggleContents, contents) => ({
       <CBadge color={getBadge(item.deleted)}>{translate(item.deleted)}</CBadge>
     </td>
   ),
-  show_contents: (item) => (
+  show_content: (item) => (
     <td className="py-2">
       <CButton
         color="primary"
@@ -26,19 +26,17 @@ export const getScopedColumns = (getBadge, toggleContents, contents) => ({
         shape="square"
         size="sm"
         onClick={() => {
-          toggleContents(item.id);
+          toggleContent(item.id);
         }}
       >
-        {contents.includes(item.id) ? 'Hide' : 'Show'}
+        {content.includes(item.id) ? 'Hide' : 'Show'}
       </CButton>
     </td>
   ),
-  contents: (item) => (
-    <CCollapse visible={contents.includes(item.id)}>
+  details: (item) => (
+    <CCollapse visible={content.includes(item.id)}>
       <CCardBody className="p-3">
-        <h4>{item.username}</h4>
         <p className="text-muted">{item.content}</p>
-
         <CButton size="sm" color="info">
           이동예정
         </CButton>
