@@ -10,12 +10,12 @@ import {
   CDropdownToggle,
 } from '@coreui/react-pro';
 import {
+  cilAccountLogout,
   cilBell,
   cilCommentSquare,
   cilCreditCard,
   cilEnvelopeOpen,
   cilFile,
-  cilLockLocked,
   cilSettings,
   cilTask,
   cilUser,
@@ -23,8 +23,21 @@ import {
 import CIcon from '@coreui/icons-react';
 
 import avatar8 from './../../assets/images/avatars/8.jpg';
+import { useNavigate } from 'react-router-dom';
+import { useResetRecoilState } from 'recoil';
+import { jwtTokenState } from '../../states/jwtTokenState';
 
 const AppHeaderDropdown = () => {
+  const resetJwtToken = useResetRecoilState(jwtTokenState);
+  const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    localStorage.removeItem('token');
+    resetJwtToken();
+    console.log();
+    navigate('/sign-in');
+  };
+
   return (
     <CDropdown variant="nav-item" alignment="end">
       <CDropdownToggle placement="bottom-end" className="py-0" caret={false}>
@@ -88,9 +101,9 @@ const AppHeaderDropdown = () => {
           </CBadge>
         </CDropdownItem>
         <CDropdownDivider />
-        <CDropdownItem href="#">
-          <CIcon icon={cilLockLocked} className="me-2" />
-          Lock Account
+        <CDropdownItem onClick={handleSignOut}>
+          <CIcon icon={cilAccountLogout} className="me-2" />
+          로그아웃
         </CDropdownItem>
       </CDropdownMenu>
     </CDropdown>
