@@ -5,7 +5,7 @@ export const getColumnDefinitions = () => [
   },
   {
     key: 'title',
-    _style: { width: '55%' },
+    _style: { width: '50%' },
   },
   {
     key: 'createdByName',
@@ -17,7 +17,7 @@ export const getColumnDefinitions = () => [
   // },
   {
     key: 'deleted',
-    _style: { width: '9%' },
+    _style: { width: '14%' },
   },
   {
     key: 'createdAt',
@@ -27,7 +27,7 @@ export const getColumnDefinitions = () => [
     // TODO 버튼말고 row 클릭시 detail
     key: 'show_content',
     label: '',
-    _style: { width: '1%' },
+    _style: { width: '6%' },
     filter: false,
     sorter: false,
   },

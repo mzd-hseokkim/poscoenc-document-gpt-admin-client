@@ -2,30 +2,26 @@ import { CContainer, CSmartTable } from '@coreui/react-pro';
 import { useEffect, useState } from 'react';
 import { getColumnDefinitions } from '../../../components/board/BoardColumnDefinitions';
 import { getScopedColumns } from '../../../components/board/BoardScopedColumns';
-import BoardService from '../../../services/board/BoardService';
+import { getBoardList } from '../../../services/board/BoardService';
 
 const Board = () => {
   const [content, setContent] = useState([]);
   const columns = getColumnDefinitions();
   const [boardData, setBoardData] = useState([]);
 
-  //REMIND remove below two code
-  const [loading, setLoading] = useState(true); // 로딩 상태 초기화
+  //REMIND remove below code
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchBoardData = async () => {
+    (async () => {
       try {
-        const data = await BoardService.getBoardList(); // 데이터 가져오기
+        const data = await getBoardList();
         console.log(data);
-        setBoardData(data); // 상태 업데이트
-        setLoading(false); // 로딩 상태 업데이트
+        setBoardData(data);
       } catch (err) {
-        setError(err); // 에러 상태 업데이트
-        setLoading(false);
+        setError(err);
       }
-    };
-    fetchBoardData();
+    })();
   }, []);
   const getBadge = (deleted) => {
     switch (deleted) {
@@ -47,10 +43,9 @@ const Board = () => {
     }
     setContent(newContent);
   };
-  //fixme
-  if (loading) return <div>Loading...</div>;
-  //fixme
+  //FIXME
   if (error) return <div>Error: {error.message}</div>;
+
   return (
     <CContainer>
       <CSmartTable
