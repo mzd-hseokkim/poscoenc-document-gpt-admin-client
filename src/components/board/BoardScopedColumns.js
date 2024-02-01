@@ -1,14 +1,21 @@
-import { CAvatar, CBadge, CButton, CCardBody, CCollapse } from '@coreui/react-pro';
+import { CBadge, CButton, CCardBody, CCollapse } from '@coreui/react-pro';
 
+const translate = (deleted) => {
+  return deleted === 'false' ? 'Active' : 'Deleted';
+};
 export const getScopedColumns = (getBadge, toggleDetails, details) => ({
-  avatar: (item) => (
-    <td>
-      <CAvatar src={`/images/avatars/${item.avatar}`} />
+  title: (item) => (
+    <td
+      onClick={() => {
+        toggleDetails(item.id);
+      }}
+    >
+      {item.title}
     </td>
   ),
-  status: (item) => (
+  deleted: (item) => (
     <td>
-      <CBadge color={getBadge(item.status)}>{item.status}</CBadge>
+      <CBadge color={getBadge(item.deleted)}>{translate(item.deleted)}</CBadge>
     </td>
   ),
   show_details: (item) => (
@@ -31,11 +38,12 @@ export const getScopedColumns = (getBadge, toggleDetails, details) => ({
       <CCardBody className="p-3">
         <h4>{item.username}</h4>
         <p className="text-muted">{item.content}</p>
+
         <CButton size="sm" color="info">
-          수정
+          이동예정
         </CButton>
         <CButton size="sm" color="danger" className="ml-1">
-          삭제
+          이동예정
         </CButton>
       </CCardBody>
     </CCollapse>

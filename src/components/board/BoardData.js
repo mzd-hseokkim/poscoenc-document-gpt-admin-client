@@ -7,7 +7,7 @@ export const BoardData = [
     avatar: '1.jpg',
     registered: '2022/01/01',
     role: 'Member',
-    status: '대기중',
+    deleted: 'false',
   },
   {
     id: 2,
@@ -17,7 +17,7 @@ export const BoardData = [
     avatar: '2.jpg',
     registered: '2022/02/07',
     role: 'Staff',
-    status: '삭제됨',
+    deleted: 'false',
   },
   {
     id: 3,
@@ -27,18 +27,17 @@ export const BoardData = [
     avatar: '3.jpg',
     registered: '2022/02/07',
     role: 'Admin',
-    status: '삭제됨',
+    deleted: 'false',
   },
   {
     id: 4,
     author: 'Derick Maximinus',
     title: '제목4',
     content: '내용 4',
-
     avatar: '4.jpg',
     registered: '2022/03/19',
     role: 'Member',
-    status: '진행중',
+    deleted: 'true',
   },
   {
     id: 5,
@@ -49,7 +48,7 @@ export const BoardData = [
     avatar: '5.jpg',
     registered: '2022/01/21',
     role: 'Staff',
-    status: '답변 완료',
+    deleted: 'true',
   },
   {
     id: 6,
@@ -59,6 +58,6 @@ export const BoardData = [
     avatar: '6.jpg',
     registered: '2022/01/01',
     role: 'Member',
-    status: '답변 완료',
+    deleted: 'true',
   },
 ];

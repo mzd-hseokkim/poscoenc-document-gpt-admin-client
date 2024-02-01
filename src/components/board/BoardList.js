@@ -9,13 +9,9 @@ const BoardList = () => {
   const columns = getColumnDefinitions();
   const getBadge = (status) => {
     switch (status) {
-      case '답변 완료':
+      case 'false':
         return 'success';
-      case '대기중':
-        return 'secondary';
-      case '진행중':
-        return 'warning';
-      case '삭제됨':
+      case 'true':
         return 'danger';
       default:
         return 'primary';
@@ -38,8 +34,7 @@ const BoardList = () => {
       cleaner
       clickableRows
       columns={columns}
-      columnFilter
-      columnSorter
+      //소팅은 소팅 상태를 가지고 재검색하도록 구현, 소팅 컴포넌트 안씀.
       footer
       items={BoardData}
       itemsPerPageSelect
@@ -47,9 +42,10 @@ const BoardList = () => {
       pagination
       scopedColumns={getScopedColumns(getBadge, toggleDetails, details)}
       selectable
-      sorterValue={{ column: 'status', state: 'asc' }}
+      sorterValue={{ column: 'id', state: 'asc' }}
       tableFilter
       tableFilterLabel={'검색 :'}
+      tableFilterPlaceholder={'...'}
       tableProps={{
         className: 'add-this-class',
         responsive: true,
