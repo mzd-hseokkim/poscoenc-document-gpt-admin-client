@@ -37,7 +37,7 @@ const _nav = [
   {
     component: CNavItem,
     name: '사용자 관리',
-    to: '/',
+    to: '/user-accounts/management',
     icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
   },
   {
