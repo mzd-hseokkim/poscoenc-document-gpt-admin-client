@@ -26,7 +26,6 @@ const UserManagement = () => {
     memo: '',
     fromLastPullRequest: format(startDate, 'yyyy-MM-dd'),
     toLastPullRequest: format(endDate, 'yyyy-MM-dd'),
-
     findEmptyPullRequest: true,
     deletionOption: '',
   };
