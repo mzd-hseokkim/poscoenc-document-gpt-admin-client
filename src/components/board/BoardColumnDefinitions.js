@@ -21,11 +21,11 @@ export const getColumnDefinitions = () => [
   },
   {
     key: '첨부파일',
-    _style: { width: '5%' },
+    _style: { width: '110px' },
   },
   {
     key: '조회수',
-    _style: { width: '2%' },
+    _style: { width: '90px' },
   },
   // TODO 일괄 삭제버튼 추가
 ];

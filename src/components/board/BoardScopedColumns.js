@@ -14,6 +14,6 @@ export const getScopedColumns = (getBadge) => ({
   ),
   작성일: (item) => <td>{item.createdAt.substring(0, 10)}</td>,
   //REMIND fix icon for attachment
-  첨부파일: (item) => <td>{item.hasAttachement ? 'icon' : 'X'}</td>,
+  첨부파일: (item) => <td>{item.hasFiles ? 'icon' : 'X'}</td>,
   조회수: (item) => <td>{item.viewCount}</td>,
 });

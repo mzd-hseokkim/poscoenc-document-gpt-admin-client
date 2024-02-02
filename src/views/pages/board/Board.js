@@ -3,22 +3,25 @@ import { useEffect, useState } from 'react';
 import { getColumnDefinitions } from '../../../components/board/BoardColumnDefinitions';
 import { getScopedColumns } from '../../../components/board/BoardScopedColumns';
 import { getBoardList } from '../../../services/board/BoardService';
+import { DefaultCSmartTable } from '../../../components/board/DefaultCSmartTable';
 
 const Board = () => {
-  const columns = getColumnDefinitions();
+  const boardColumns = getColumnDefinitions();
   const [boardData, setBoardData] = useState([]);
 
   //REMIND 구체적인 에러 핸들링 추가
   const [error, setError] = useState(null);
-
+  const [dataLoadingFlag, setDataLoadingFlag] = useState(true);
   useEffect(() => {
     (async () => {
       try {
         const data = await getBoardList();
         console.log(data);
         setBoardData(data);
+        setDataLoadingFlag(false);
       } catch (err) {
         setError(err);
+        setDataLoadingFlag(true);
       }
     })();
   }, []);
@@ -45,7 +48,8 @@ const Board = () => {
         itemsPerPage={5}
         activePage={1}
         clickableRows
-        columns={columns}
+        loading={dataLoadingFlag}
+        columns={boardColumns}
         items={boardData}
         scopedColumns={getScopedColumns(getBadge)}
         selectable
@@ -59,6 +63,7 @@ const Board = () => {
           className: 'align-middle',
         }}
       />
+      <DefaultCSmartTable />
     </CContainer>
   );
 };
