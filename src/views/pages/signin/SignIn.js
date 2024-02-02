@@ -36,7 +36,7 @@ const SignIn = () => {
     } catch (error) {
       const status = error.response?.status;
       if (status === 401) {
-        addToast({ color: 'danger', body: '이메일 혹은 비밀번호가 틀렸습니다.' });
+        addToast({ color: 'danger', message: '이메일 혹은 비밀번호가 틀렸습니다.' });
       }
     }
   };
