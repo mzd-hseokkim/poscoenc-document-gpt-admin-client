@@ -15,7 +15,7 @@ import {
 } from '@coreui/react-pro';
 import CIcon from '@coreui/icons-react';
 import { cilLockLocked, cilUser } from '@coreui/icons';
-import SignInService from '../../../services/SignInService';
+import SignInService from '../../../services/signin/SignInService';
 import { useNavigate } from 'react-router-dom';
 import useToast from '../../../hooks/useToast';
 import { emailValidationPattern, passwordValidationPattern } from '../../../utils/validationUtils';
