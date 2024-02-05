@@ -1,19 +1,19 @@
 import { CBadge } from '@coreui/react-pro';
 
 const translate = (deleted) => {
-  return deleted === 'false' ? 'OnBoard' : 'Deleted';
+  return deleted ? 'Deleted' : 'OnBoard';
 };
 export const getScopedColumns = (getBadge) => ({
   ID: (item) => <td>{item.id}</td>,
-  제목: (item) => <td>{item.title}</td>,
-  작성자: (item) => <td>{item.createdByName}</td>,
-  상태: (item) => (
+  title: (item) => <td>{item.title}</td>,
+  createdByName: (item) => <td>{item.createdByName}</td>,
+  deleted: (item) => (
     <td>
       <CBadge color={getBadge(item.deleted)}>{translate(item.deleted)}</CBadge>
     </td>
   ),
-  작성일: (item) => <td>{item.createdAt.substring(0, 10)}</td>,
-  //REMIND fix icon for attachment
-  첨부파일: (item) => <td>{item.hasFiles ? 'icon' : 'X'}</td>,
-  조회수: (item) => <td>{item.viewCount}</td>,
+  createdAt: (item) => <td>{item.createdAt.substring(0, 10)}</td>,
+  //REMIND server 에서 보내는 projection 에 attachment 가 빠져있다...
+  hasAttachment: (item) => <td>{item.hasFiles ? 'icon' : 'X'}</td>,
+  viewCount: (item) => <td>{item.viewCount}</td>,
 });
