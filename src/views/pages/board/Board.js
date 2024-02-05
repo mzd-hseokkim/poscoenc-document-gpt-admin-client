@@ -1,29 +1,36 @@
-import { CContainer, CSmartTable } from '@coreui/react-pro';
-import { useEffect, useState } from 'react';
+import { CButton, CSmartTable } from '@coreui/react-pro';
+import { useState } from 'react';
 import { getColumnDefinitions } from '../../../components/board/BoardColumnDefinitions';
 import { getScopedColumns } from '../../../components/board/BoardScopedColumns';
-import { getBoardList } from '../../../services/board/BoardService';
+import { DefaultCSmartTable } from '../../../components/board/DefaultCSmartTable';
+import { useBoardData } from '../../../hooks/board/useBoardData';
+import { fetchPostsDeletedOption } from '../../../services/board/BoardService';
 
 const Board = () => {
-  const columns = getColumnDefinitions();
-  const [boardData, setBoardData] = useState([]);
+  const boardColumns = getColumnDefinitions();
+  const { boardPosts, loadingFlag, fetchBoardData } = useBoardData();
 
-  //REMIND 구체적인 에러 핸들링 추가
-  const [error, setError] = useState(null);
+  const [selectedRows, setSelectedRows] = useState([]);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const data = await getBoardList();
-        console.log(data);
-        setBoardData(data);
-      } catch (err) {
-        setError(err);
-      }
-    })();
-  }, []);
+  const handleRowSelectedIds = (newSelectedRows) => {
+    setSelectedRows(newSelectedRows);
+  };
+
+  const isDeletedRow = (selectedRows) => {
+    return selectedRows.some((row) => row.deleted === true);
+  };
+
+  const togglePostStatus = async (shouldDelete) => {
+    const isSuccess = await fetchPostsDeletedOption(
+      selectedRows.map((row) => row.id),
+      shouldDelete
+    );
+    if (isSuccess) {
+      await fetchBoardData();
+      handleRowSelectedIds([]);
+    }
+  };
   const getBadge = (deleted) => {
-    //FIXME simplify case logic
     switch (deleted) {
       case false:
         return 'success';
@@ -33,23 +40,44 @@ const Board = () => {
         return 'primary';
     }
   };
-  //FIXME
+
+  //REMIND 구체적인 에러 핸들링 추가
+  const [error, setError] = useState(null);
   if (error) return <div>Error: {error.message}</div>;
 
   return (
-    <CContainer>
+    <>
+      <CButton
+        disabled={selectedRows.length === 0 || isDeletedRow(selectedRows)}
+        onClick={() => togglePostStatus(true)}
+      >
+        {'삭제'}
+      </CButton>
+      <CButton
+        disabled={selectedRows.length === 0 || !isDeletedRow(selectedRows)}
+        onClick={() => togglePostStatus(false)}
+      >
+        {'복구'}
+      </CButton>
       <CSmartTable
+        // Functional Flags
         pagination
-        itemsPerPageLabel={'페이지당 글 개수'}
-        itemsPerPageSelect
+        selectable
+        clickableRows
+        loading={loadingFlag}
+        // Data and Data Handling
+        items={boardPosts}
+        columns={boardColumns}
+        scopedColumns={getScopedColumns(getBadge)}
+        sorterValue={{ column: 'id', state: 'asc' }}
+        selected={selectedRows}
+        onSelectedItemsChange={handleRowSelectedIds}
+        // Pagination Controls
         itemsPerPage={5}
         activePage={1}
-        clickableRows
-        columns={columns}
-        items={boardData}
-        scopedColumns={getScopedColumns(getBadge)}
-        selectable
-        sorterValue={{ column: 'id', state: 'asc' }}
+        itemsPerPageLabel={'페이지당 글 개수'}
+        itemsPerPageSelect
+        // Styling and Class Names
         tableProps={{
           className: 'add-this-class',
           responsive: true,
@@ -59,7 +87,8 @@ const Board = () => {
           className: 'align-middle',
         }}
       />
-    </CContainer>
+      <DefaultCSmartTable />
+    </>
   );
 };
 
