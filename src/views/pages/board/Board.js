@@ -2,7 +2,6 @@ import { CButton, CSmartTable } from '@coreui/react-pro';
 import { useState } from 'react';
 import { getColumnDefinitions } from '../../../components/board/BoardColumnDefinitions';
 import { getScopedColumns } from '../../../components/board/BoardScopedColumns';
-import { DefaultCSmartTable } from '../../../components/board/DefaultCSmartTable';
 import { useBoardData } from '../../../hooks/board/useBoardData';
 import { fetchPostsDeletedOption } from '../../../services/board/BoardService';
 
@@ -87,7 +86,6 @@ const Board = () => {
           className: 'align-middle',
         }}
       />
-      <DefaultCSmartTable />
     </>
   );
 };

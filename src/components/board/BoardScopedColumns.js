@@ -1,4 +1,5 @@
 import { CBadge } from '@coreui/react-pro';
+import { format } from 'date-fns';
 
 const translate = (deleted) => {
   return deleted ? 'Deleted' : 'OnBoard';
@@ -12,7 +13,7 @@ export const getScopedColumns = (getBadge) => ({
       <CBadge color={getBadge(item.deleted)}>{translate(item.deleted)}</CBadge>
     </td>
   ),
-  createdAt: (item) => <td>{item.createdAt.substring(0, 10)}</td>,
+  createdAt: (item) => <td>{format(new Date(item.createdAt), 'yyyy/MM/dd')}</td>,
   hasAttachment: (item) => <td>{item.hasFiles ? 'icon' : 'X'}</td>,
   viewCount: (item) => <td>{item.viewCount}</td>,
 });
