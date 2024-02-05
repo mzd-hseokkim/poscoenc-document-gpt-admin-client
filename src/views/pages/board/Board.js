@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { getColumnDefinitions } from '../../../components/board/BoardColumnDefinitions';
 import { getScopedColumns } from '../../../components/board/BoardScopedColumns';
 import { DefaultCSmartTable } from '../../../components/board/DefaultCSmartTable';
-import { DefaultSmartPagination } from '../../../components/pagination/DefaultSmartPagination';
 import { useBoardData } from '../../../hooks/board/useBoardData';
 import { fetchPostsDeletedOption } from '../../../services/board/BoardService';
 
@@ -11,7 +10,6 @@ const Board = () => {
   const boardColumns = getColumnDefinitions();
   const { boardPosts, loadingFlag, fetchBoardData } = useBoardData();
 
-  //TODO 페이지네이션 const [currentPage, setCurrentPage] = useState(1);
   const [selectedRows, setSelectedRows] = useState([]);
 
   const handleRowSelectedIds = (newSelectedRows) => {
@@ -23,7 +21,6 @@ const Board = () => {
   };
 
   const togglePostStatus = async (shouldDelete) => {
-    //TODO Start here. 삭제 후 재조회 로직 구성중
     const isSuccess = await fetchPostsDeletedOption(
       selectedRows.map((row) => row.id),
       shouldDelete
@@ -32,10 +29,8 @@ const Board = () => {
       await fetchBoardData();
       handleRowSelectedIds([]);
     }
-    console.log('selected rows: ' + selectedRows.map((e) => e.toString()));
   };
   const getBadge = (deleted) => {
-    //FIXME simplify case logic
     switch (deleted) {
       case false:
         return 'success';
@@ -50,10 +45,7 @@ const Board = () => {
   const [error, setError] = useState(null);
   if (error) return <div>Error: {error.message}</div>;
 
-  /*REMIND 일괄선택 시, 어떻게 처리할껀지...?  */
-
   return (
-    //REMIND 컨테이너 빼버리면 컨테이너 디폴트 사이즈가 아니라 페이지 반응형 사이즈가 된다...
     <>
       <CButton
         disabled={selectedRows.length === 0 || isDeletedRow(selectedRows)}
@@ -69,11 +61,7 @@ const Board = () => {
       </CButton>
       <CSmartTable
         // Functional Flags
-        //TODO pagination 직접 만들어서 전달하면 1페이지부터 생성 가능..?
-        pagination={{
-          external: true,
-          pagination: DefaultSmartPagination,
-        }}
+        pagination
         selectable
         clickableRows
         loading={loadingFlag}

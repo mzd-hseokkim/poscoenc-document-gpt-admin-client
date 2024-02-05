@@ -13,7 +13,6 @@ export const getScopedColumns = (getBadge) => ({
     </td>
   ),
   createdAt: (item) => <td>{item.createdAt.substring(0, 10)}</td>,
-  //REMIND server 에서 보내는 projection 에 attachment 가 빠져있다...
   hasAttachment: (item) => <td>{item.hasFiles ? 'icon' : 'X'}</td>,
   viewCount: (item) => <td>{item.viewCount}</td>,
 });
