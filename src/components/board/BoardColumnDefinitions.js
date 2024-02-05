@@ -4,28 +4,34 @@ export const getColumnDefinitions = () => [
     _style: { width: '5%' },
   },
   {
-    key: '제목',
+    key: 'title',
+    label: '제목',
     _style: { width: '43%' },
   },
   {
-    key: '작성자',
+    key: 'createdByName',
+    label: '작성자',
     _style: { width: '15%' },
   },
   {
-    key: '상태',
-    _style: { width: '14%' },
-  },
-  {
-    key: '작성일',
+    key: 'createdAt',
+    label: '작성일',
     _style: { width: '10%' },
   },
   {
-    key: '첨부파일',
-    _style: { width: '5%' },
+    key: 'hasAttachment',
+    label: '첨부파일',
+    _style: { width: '110px' },
   },
   {
-    key: '조회수',
-    _style: { width: '2%' },
+    key: 'viewCount',
+    label: '조회수',
+    _style: { width: '90px' },
+  },
+  {
+    key: 'deleted',
+    label: '상태',
+    _style: { width: '14%' },
   },
   // TODO 일괄 삭제버튼 추가
 ];
