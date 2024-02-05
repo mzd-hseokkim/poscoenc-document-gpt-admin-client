@@ -4,12 +4,14 @@ import { getColumnDefinitions } from '../../../components/board/BoardColumnDefin
 import { getScopedColumns } from '../../../components/board/BoardScopedColumns';
 import { useBoardData } from '../../../hooks/board/useBoardData';
 import { fetchPostsDeletedOption } from '../../../services/board/BoardService';
+import BoardPostDetailsModal from '../../../components/board/BoardPostDetailsModal';
 
 const Board = () => {
   const boardColumns = getColumnDefinitions();
-  const { boardPosts, loadingFlag, fetchBoardData } = useBoardData();
 
   const [selectedRows, setSelectedRows] = useState([]);
+
+  const { boardPosts, loadingFlag, fetchBoardData } = useBoardData();
 
   const handleRowSelectedIds = (newSelectedRows) => {
     setSelectedRows(newSelectedRows);
@@ -29,16 +31,22 @@ const Board = () => {
       handleRowSelectedIds([]);
     }
   };
-  const getBadge = (deleted) => {
-    switch (deleted) {
-      case false:
-        return 'success';
-      case true:
-        return 'danger';
-      default:
-        return 'primary';
-    }
+  // Modal ---------------------------------------------------------------
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [clickedItem, setClickedItem] = useState(null);
+  // 모달을 열고 선택된 아이템 ID를 설정하는 함수
+  const handleOpenModal = (item) => {
+    setClickedItem(item);
+    setIsModalOpen(true);
   };
+
+  // 모달을 닫는 함수
+  const handleCloseModal = () => {
+    setClickedItem(null);
+    setIsModalOpen(false);
+  };
+  const scopedColumns = getScopedColumns(isModalOpen, handleOpenModal, clickedItem, handleCloseModal);
+  // ---------------------------------------------------------------
 
   //REMIND 구체적인 에러 핸들링 추가
   const [error, setError] = useState(null);
@@ -67,7 +75,7 @@ const Board = () => {
         // Data and Data Handling
         items={boardPosts}
         columns={boardColumns}
-        scopedColumns={getScopedColumns(getBadge)}
+        scopedColumns={scopedColumns}
         sorterValue={{ column: 'id', state: 'asc' }}
         selected={selectedRows}
         onSelectedItemsChange={handleRowSelectedIds}
@@ -86,6 +94,9 @@ const Board = () => {
           className: 'align-middle',
         }}
       />
+      {clickedItem && (
+        <BoardPostDetailsModal isModalOpen={isModalOpen} details={clickedItem} handleCloseModal={handleCloseModal} />
+      )}
     </>
   );
 };

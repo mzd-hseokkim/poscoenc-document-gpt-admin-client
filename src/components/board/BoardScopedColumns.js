@@ -1,19 +1,18 @@
-import { CBadge } from '@coreui/react-pro';
 import { format } from 'date-fns';
+import StatusBadge from './BoadStatusBadge';
 
-const translate = (deleted) => {
-  return deleted ? 'Deleted' : 'OnBoard';
-};
-export const getScopedColumns = (getBadge) => ({
-  ID: (item) => <td>{item.id}</td>,
-  title: (item) => <td>{item.title}</td>,
+export const getScopedColumns = (isModalOpen, handleOpenModal) => ({
+  id: (item) => <td>{item.id}</td>,
+  title: (item) => {
+    return <td onClick={() => handleOpenModal(item)}>{item.title}</td>;
+  },
   createdByName: (item) => <td>{item.createdByName}</td>,
   deleted: (item) => (
     <td>
-      <CBadge color={getBadge(item.deleted)}>{translate(item.deleted)}</CBadge>
+      <StatusBadge deleted={item.deleted} />
     </td>
   ),
   createdAt: (item) => <td>{format(new Date(item.createdAt), 'yyyy/MM/dd')}</td>,
-  hasAttachment: (item) => <td>{item.hasFiles ? 'icon' : 'X'}</td>,
+  hasFiles: (item) => <td>{item.hasFiles ? 'icon' : 'X'}</td>,
   viewCount: (item) => <td>{item.viewCount}</td>,
 });

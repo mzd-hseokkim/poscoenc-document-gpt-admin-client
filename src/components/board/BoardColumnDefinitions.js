@@ -1,6 +1,7 @@
 export const getColumnDefinitions = () => [
   {
-    key: 'ID',
+    key: 'id',
+    label: 'ID',
     _style: { width: '5%' },
   },
   {
@@ -19,7 +20,7 @@ export const getColumnDefinitions = () => [
     _style: { width: '10%' },
   },
   {
-    key: 'hasAttachment',
+    key: 'hasFiles',
     label: '첨부파일',
     _style: { width: '110px' },
   },
