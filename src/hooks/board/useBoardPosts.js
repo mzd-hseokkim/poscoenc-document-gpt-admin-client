@@ -1,24 +1,24 @@
 import { useEffect, useState } from 'react';
 import { getBoardList } from '../../services/board/BoardService';
 
-export const useBoardData = () => {
+export const useBoardPosts = () => {
   const [boardPosts, setBoardPosts] = useState([]);
-  const [loadingFlag, setLoadingFlag] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const fetchBoardData = async () => {
+  const fetchBoardPosts = async () => {
     try {
       const data = await getBoardList();
       setBoardPosts(data);
-      setLoadingFlag(false);
+      setIsLoading(false);
     } catch (err) {
       console.error(err);
-      setLoadingFlag(false);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchBoardData();
+    fetchBoardPosts();
   }, []);
 
-  return { boardPosts, loadingFlag, fetchBoardData };
+  return { boardPosts, isLoading, fetchBoardData: fetchBoardPosts };
 };

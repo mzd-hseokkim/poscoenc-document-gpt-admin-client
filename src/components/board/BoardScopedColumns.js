@@ -1,10 +1,11 @@
 import { format } from 'date-fns';
 import StatusBadge from './BoadStatusBadge';
 
-export const getScopedColumns = (isModalOpen, handleOpenModal) => ({
+export const getScopedColumns = (navigateToDetails) => ({
   id: (item) => <td>{item.id}</td>,
   title: (item) => {
-    return <td onClick={() => handleOpenModal(item)}>{item.title}</td>;
+    //remind 아래 제목에 포인터 추가
+    return <td onClick={() => navigateToDetails(item.id)}>{item.title}</td>;
   },
   createdByName: (item) => <td>{item.createdByName}</td>,
   deleted: (item) => (

@@ -1,4 +1,5 @@
 export const getColumnDefinitions = () => [
+  //REMIND style 설정 분리
   {
     key: 'id',
     label: 'ID',
@@ -34,5 +35,4 @@ export const getColumnDefinitions = () => [
     label: '상태',
     _style: { width: '14%' },
   },
-  // TODO 일괄 삭제버튼 추가
 ];

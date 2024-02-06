@@ -12,6 +12,7 @@ const getBadge = (deleted) => {
   }
 };
 const translate = (deleted) => {
+  if (deleted == null) return 'No-Data';
   return deleted ? 'Deleted' : 'OnBoard';
 };
 
