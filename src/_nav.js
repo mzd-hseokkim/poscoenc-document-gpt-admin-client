@@ -60,7 +60,7 @@ const _nav = [
   {
     component: CNavItem,
     name: '메뉴 관리',
-    to: '/icons',
+    to: '/menus/management',
     icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
   },
 ];
