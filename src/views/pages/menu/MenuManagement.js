@@ -15,8 +15,8 @@ import React, { useState } from 'react';
 import { format } from 'date-fns';
 import useToast from '../../../hooks/useToast';
 import MenuService from '../../../services/menu/MenuService';
-import ModalContainer from '../../../components/modal/ModalContainer';
 import useModal from '../../../hooks/useModal';
+import ModalContainer from '../../../components/modal/ModalContainer';
 import MenuDetailForm from '../../../components/menu/MenuDetailForm';
 
 const columns = [
@@ -51,7 +51,7 @@ const MenuManagement = () => {
   const [endDate, setEndDate] = useState(new Date());
   const [menuList, setMenuList] = useState([]);
   const [selectedId, setSelectedId] = useState();
-  const [formMode, setFormMode] = useState('default');
+  const [formMode, setFormMode] = useState('');
 
   const addToast = useToast();
   const modal = useModal();
@@ -139,21 +139,21 @@ const MenuManagement = () => {
           <CCardTitle>메뉴 관리</CCardTitle>
           <CForm onSubmit={handleSubmit}>
             <CRow className="mb-3">
-              <CCol md={4} className="position-relative">
+              <CCol md={4}>
                 <CFormInput id="name" label="이름" onChange={handleChange} />
               </CCol>
-              <CCol md={4} className="position-relative">
+              <CCol md={4}>
                 <CFormInput type="number" id="menuOrder" label="메뉴 순서" onChange={handleChange} />
               </CCol>
-              <CCol md={4} className="position-relative">
+              <CCol md={4}>
                 <CFormInput type="number" id="parentId" label="상위 메뉴 ID" onChange={handleChange} />
               </CCol>
             </CRow>
             <CRow className="mb-3">
-              <CCol md={8} className="position-relative">
+              <CCol md={8}>
                 <CFormInput id="urlPath" label="경로" onChange={handleChange} />
               </CCol>
-              <CCol md={4} className="position-relative">
+              <CCol md={4}>
                 <CFormSelect
                   id="deletionOption"
                   label="삭제된 메뉴 검색"
@@ -168,7 +168,7 @@ const MenuManagement = () => {
               </CCol>
             </CRow>
             <CRow className="mb-3">
-              <CCol md={6} className="position-relative">
+              <CCol md={6}>
                 <CDateRangePicker
                   id="createdAt"
                   label="생성 일시"
@@ -178,7 +178,7 @@ const MenuManagement = () => {
                   onEndDateChange={(newDate) => handleEndDateChange({ id: 'createdAt', newDate })}
                 />
               </CCol>
-              <CCol md={6} className="position-relative">
+              <CCol md={6}>
                 <CDateRangePicker
                   label="수정 일시"
                   startDate={startDate}
@@ -189,18 +189,18 @@ const MenuManagement = () => {
               </CCol>
             </CRow>
             <CRow className="mb-3">
-              <div className="d-grid gap-2 d-md-flex justify-content-md-end">
+              <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
                 <CButton type="submit">검색</CButton>
                 <CButton color="primary" value="Reset" onClick={handleReset}>
                   초기화
                 </CButton>
-              </div>
+              </CCol>
             </CRow>
           </CForm>
           <CRow className="mb-3">
-            <div className="d-grid gap-2 d-md-flex justify-content-md-end">
+            <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
               <CButton onClick={handleCreateClick}>메뉴 추가</CButton>
-            </div>
+            </CCol>
           </CRow>
           <CRow className="mb-3">
             <CSmartTable

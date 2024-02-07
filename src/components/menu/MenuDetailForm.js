@@ -1,13 +1,13 @@
+import React, { useEffect, useState } from 'react';
+import { CButton, CCol, CFormCheck, CFormSelect, CMultiSelect, CRow } from '@coreui/react-pro';
 import MenuService from '../../services/menu/MenuService';
 import menuService from '../../services/menu/MenuService';
-import React, { useEffect, useState } from 'react';
-import InputList from '../input/InputList';
-import { CButton, CFormCheck, CFormSelect, CMultiSelect } from '@coreui/react-pro';
 import RoleService from '../../services/Role/RoleService';
+import InputList from '../input/InputList';
 import formModes from '../../utils/formModes';
 
 const MenuDetailForm = ({ selectedId, initialFormMode }) => {
-  const [formData, setFormData] = useState({ allowChildren: false });
+  const [formData, setFormData] = useState([]);
   const [formMode, setFormMode] = useState(initialFormMode);
   const [roles, setRoles] = useState([]);
   const [parentMenus, setParentMenus] = useState([]);
@@ -39,9 +39,10 @@ const MenuDetailForm = ({ selectedId, initialFormMode }) => {
   };
 
   const getParentMenu = async () => {
+    let excludedId = isCreateMode ? '' : selectedId;
+
     try {
-      const data = await MenuService.getParentMenu(selectedId || '');
-      console.log(data);
+      const data = await MenuService.getParentMenu(excludedId);
       const newParentMenus = data.map((parentMenu) => ({
         value: parentMenu.id,
         label: parentMenu.name,
@@ -53,23 +54,19 @@ const MenuDetailForm = ({ selectedId, initialFormMode }) => {
   };
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-      if (!isCreateMode && selectedId) {
-        await fetchMenuDetail();
-      } else {
-        await getRoles();
-        await getParentMenu();
-      }
-    };
-
-    fetchInitialData();
-  }, [selectedId, isCreateMode]);
+    if (!isCreateMode && selectedId) {
+      fetchMenuDetail();
+    } else {
+      getRoles();
+    }
+    getParentMenu();
+  }, [selectedId]);
 
   const handleChange = ({ target: { id, value } }) => {
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  const menuFields = [
+  const menuBasicFields = [
     { name: 'id', label: '아이디', isDisabled: isUpdateMode, isRendered: !isCreateMode },
     { name: 'name', label: '이름', placeholder: '이름을 입력하세요.' },
     {
@@ -80,7 +77,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode }) => {
     },
   ];
 
-  const dummy = [
+  const menuSettingFields = [
     {
       name: 'urlPath',
       label: 'URL',
@@ -130,23 +127,27 @@ const MenuDetailForm = ({ selectedId, initialFormMode }) => {
   };
 
   const renderRoleSelect = () => (
-    <div className="mb-3">
-      <CMultiSelect
-        options={roles}
-        label="인가된 권한"
-        placeholder="권한을 선택하세요."
-        selectAllLabel="모두 선택"
-        virtualScroller
-        onChange={(values) => handleMultiSelect(values)}
-        disabled={isReadMode}
-      />
-    </div>
+    <CRow className="mb-3">
+      <CCol>
+        <CMultiSelect
+          options={roles}
+          label="인가된 권한"
+          placeholder="권한을 선택하세요."
+          selectAllLabel="모두 선택"
+          virtualScroller
+          onChange={(values) => handleMultiSelect(values)}
+          disabled={isReadMode}
+        />
+      </CCol>
+    </CRow>
   );
 
   const renderParentSelect = () => (
-    <div className="mb-3">
-      <CFormSelect name="parentId" label={'상위 메뉴'} options={parentMenus} onChange={handleChange} />
-    </div>
+    <CRow className="mb-3">
+      <CCol>
+        <CFormSelect name="parentId" label={'상위 메뉴'} options={parentMenus} onChange={handleChange} />
+      </CCol>
+    </CRow>
   );
 
   const handleUpdateClick = () => {
@@ -154,32 +155,34 @@ const MenuDetailForm = ({ selectedId, initialFormMode }) => {
   };
 
   return (
-    <div>
-      <InputList fields={menuFields} formData={formData} handleChange={handleChange} isReadMode={isReadMode} />
-      <div className="mb-3">
-        <CFormCheck
-          label="하위 메뉴 등록"
-          id="allowChildren"
-          onChange={(e) => console.log(e.target.value)}
-        ></CFormCheck>
-      </div>
-      <InputList fields={dummy} formData={formData} handleChange={handleChange} isReadMode={isReadMode} />
+    <>
+      <InputList fields={menuBasicFields} formData={formData} handleChange={handleChange} isReadMode={isReadMode} />
+      <CRow className="mb-3">
+        <CCol>
+          <CFormCheck
+            label="하위 메뉴 등록"
+            id="allowChildren"
+            onChange={(e) => console.log(e.target.value)}
+          ></CFormCheck>
+        </CCol>
+      </CRow>
+      <InputList fields={menuSettingFields} formData={formData} handleChange={handleChange} isReadMode={isReadMode} />
       {renderRoleSelect()}
       {renderParentSelect()}
-      {isReadMode ? (
-        <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-          <CButton color="primary" className="me-md-2" onClick={handleUpdateClick}>
-            수정
-          </CButton>
-        </div>
-      ) : (
-        <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-          <CButton color="primary" className="me-md-2" variant="outline" onClick={handleSubmit}>
-            저장
-          </CButton>
-        </div>
-      )}
-    </div>
+      <CRow>
+        <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
+          {isReadMode ? (
+            <CButton color="primary" className="me-md-2" onClick={handleUpdateClick}>
+              수정
+            </CButton>
+          ) : (
+            <CButton color="primary" onClick={handleSubmit}>
+              저장
+            </CButton>
+          )}
+        </CCol>
+      </CRow>
+    </>
   );
 };
 

@@ -1,4 +1,4 @@
-import { CFormInput } from '@coreui/react-pro';
+import { CCol, CFormInput, CRow } from '@coreui/react-pro';
 
 const InputList = ({ fields, formData, handleChange, isReadMode }) => {
   return fields?.map((field) => {
@@ -7,19 +7,21 @@ const InputList = ({ fields, formData, handleChange, isReadMode }) => {
 
     if (isRendered) {
       return (
-        <div className="mb-3" key={field.name}>
-          <CFormInput
-            id={field.name}
-            name={field.name}
-            label={field.label}
-            type={field.type}
-            placeholder={field.placeholder}
-            onChange={handleChange}
-            disabled={field.isDisabled}
-            readOnly={isReadMode}
-            value={fieldValue || ''}
-          />
-        </div>
+        <CRow className="mb-3" key={field.name}>
+          <CCol>
+            <CFormInput
+              id={field.name}
+              name={field.name}
+              label={field.label}
+              type={field.type}
+              placeholder={field.placeholder}
+              onChange={handleChange}
+              disabled={field.isDisabled}
+              readOnly={isReadMode}
+              value={fieldValue || ''}
+            />
+          </CCol>
+        </CRow>
       );
     } else {
       return null;
