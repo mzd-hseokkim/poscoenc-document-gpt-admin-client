@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CForm, CFormInput, CFormLabel, CFormTextarea, CSpinner } from '@coreui/react-pro';
 import StatusBadge from './BoadStatusBadge';
 import { format } from 'date-fns';
@@ -9,8 +9,9 @@ const BoardPostDetailsForm = ({ selectedId }) => {
   const { postDetails, loadingFlag } = useBoardPostDetails(selectedId);
   const [formData, setFormData] = useState(null);
   //REMIND formData 는 form 모드에 따라서 변경
-  setFormData(postDetails);
-
+  useEffect(() => {
+    setFormData(postDetails);
+  }, [postDetails]);
   if (loadingFlag) return <CSpinner variant="border"></CSpinner>;
   return (
     <CForm>

@@ -11,7 +11,6 @@ export const useBoardPostDetails = (postId) => {
         const postDetails = await getPostDetails(postId);
         setPostDetails(postDetails);
         setLoadingFlag(false);
-        console.log(postDetails);
       } catch (err) {
         console.error(err);
         setLoadingFlag(false);
