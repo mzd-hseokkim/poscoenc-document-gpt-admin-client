@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getBoardList } from '../../services/board/BoardService';
+import { getPostList } from '../../services/board/BoardService';
 
 export const useBoardPosts = () => {
   const [boardPosts, setBoardPosts] = useState([]);
@@ -7,7 +7,7 @@ export const useBoardPosts = () => {
 
   const fetchBoardPosts = async () => {
     try {
-      const data = await getBoardList();
+      const data = await getPostList();
       setBoardPosts(data);
       setIsLoading(false);
     } catch (err) {

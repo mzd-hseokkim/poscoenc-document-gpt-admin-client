@@ -4,7 +4,9 @@ import { getColumnDefinitions } from '../../../utils/board/BoardColumnDefinition
 import { getScopedColumns } from '../../../components/board/BoardScopedColumns';
 import { useBoardPosts } from '../../../hooks/board/useBoardPosts';
 import { fetchPostsDeletedOption } from '../../../services/board/BoardService';
-import { useNavigate } from 'react-router-dom';
+import ModalContainer from '../../../components/modal/ModalContainer';
+import BoardPostDetailsForm from '../../../components/board/BoardPostDetailsForm';
+import UseModal from '../../../hooks/useModal';
 
 const BoardMainPage = () => {
   const tableFields = getColumnDefinitions();
@@ -12,6 +14,8 @@ const BoardMainPage = () => {
   const [selectedRows, setSelectedRows] = useState([]);
 
   const { boardPosts, isLoading, fetchBoardData } = useBoardPosts();
+
+  const modal = UseModal();
 
   const handleSelectedRows = (newSelectedRows) => {
     setSelectedRows(newSelectedRows);
@@ -32,11 +36,11 @@ const BoardMainPage = () => {
     }
   };
   // Modal 사용 --------------------------------------------------------------
-  const navigate = useNavigate();
-  const navigateToDetails = (itemId) => {
-    navigate(`/boards/details/${itemId}`);
+  const [clickedRowId, setClickedRowId] = useState(null);
+  const handleClickedRowId = (newClickedRowId) => {
+    setClickedRowId(newClickedRowId);
   };
-  const scopedColumns = getScopedColumns(navigateToDetails);
+  const scopedColumns = getScopedColumns(handleClickedRowId, modal.openModal);
   // ---------------------------------------------------------------
 
   //REMIND 구체적인 에러 핸들링 추가
@@ -72,18 +76,23 @@ const BoardMainPage = () => {
         columnSorter
         sorterValue={{ column: 'id', state: 'asc' }}
         // 컬럼
-        items={boardPosts} //훅
-        columns={tableFields} // 유틸s 패키지 밑에
+        items={boardPosts}
+        columns={tableFields}
         selectable
-        selected={selectedRows} // 기능 동작 후 체크박스 해제하기위함
-        scopedColumns={scopedColumns} //REMIND clickable row 대신에 제목 칸에 css pointer 적용
-        onSelectedItemsChange={() => handleSelectedRows} //REMIND DOMException 처리
+        selected={selectedRows}
+        //REMIND clickable row 대신에 제목 칸에 css pointer 적용
+        scopedColumns={scopedColumns}
+        //REMIND DOMException 처리
+        onSelectedItemsChange={() => handleSelectedRows}
         // 스타일
         tableProps={{
           responsive: true,
           hover: true,
         }}
       />
+      <ModalContainer visible={modal.isOpen} title="게시글" onClose={modal.closeModal}>
+        <BoardPostDetailsForm selectedId={clickedRowId}></BoardPostDetailsForm>
+      </ModalContainer>
     </CCard>
   );
 };

@@ -1,10 +1,17 @@
-import React from 'react';
-import { CForm, CFormInput, CFormLabel, CFormTextarea } from '@coreui/react-pro';
+import React, { useState } from 'react';
+import { CForm, CFormInput, CFormLabel, CFormTextarea, CSpinner } from '@coreui/react-pro';
 import StatusBadge from './BoadStatusBadge';
 import { format } from 'date-fns';
 import BoardComments from './BoardComments';
+import { useBoardPostDetails } from '../../hooks/board/useBoardPostDetails';
 
-const BoardPostDetailsForm = ({ formData }) => {
+const BoardPostDetailsForm = ({ selectedId }) => {
+  const { postDetails, loadingFlag } = useBoardPostDetails(selectedId);
+  const [formData, setFormData] = useState(null);
+  //REMIND formData 는 form 모드에 따라서 변경
+  setFormData(postDetails);
+
+  if (loadingFlag) return <CSpinner variant="border"></CSpinner>;
   return (
     <CForm>
       <div>
@@ -19,7 +26,7 @@ const BoardPostDetailsForm = ({ formData }) => {
           </div>
           <div className="form-group" style={{ marginRight: '1rem', width: '60px' }}>
             <CFormLabel htmlFor="commentCount">댓글 수</CFormLabel>
-            <CFormInput type="number" id="commentCount" defaultValue={formData?.comments.length} readOnly />
+            <CFormInput type="number" id="commentCount" defaultValue={formData?.comments?.length} readOnly />
           </div>
           <div className="form-group" style={{ marginRight: '1rem', width: '60px' }}>
             <CFormLabel htmlFor="postViews">조회수</CFormLabel>

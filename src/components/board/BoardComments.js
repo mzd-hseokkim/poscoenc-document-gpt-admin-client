@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 const BoardComments = ({ formData, handleSubmitComment }) => {
   return (
     <div className="comments-section">
-      {formData.comments.map((comment, index) => (
+      {formData?.comments?.map((comment, index) => (
         <div key={index} className="comment-item mb-2">
           <CInputGroup className="mb-1">
             <CFormInput value={comment.createdByName} readOnly />

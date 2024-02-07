@@ -1,6 +1,6 @@
 import api from '../../api/Api';
 
-const getBoardList = async () => {
+const getPostList = async () => {
   const response = await api.get('/admin/boards');
   return response.data.content;
 };
@@ -15,4 +15,4 @@ const fetchPostsDeletedOption = async (boardIds, deletedOption) => {
   return response.status === 200;
 };
 
-export { getBoardList, getPostDetails, fetchPostsDeletedOption };
+export { getPostList, getPostDetails, fetchPostsDeletedOption };
