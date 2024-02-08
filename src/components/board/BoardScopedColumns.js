@@ -1,4 +1,5 @@
 import { format } from 'date-fns';
+
 import StatusBadge from './BoadStatusBadge';
 
 export const getScopedColumns = (handleClickedRowId, openModal) => ({

@@ -17,7 +17,6 @@ module.exports = {
     'react/react-in-jsx-scope': 'off',
     'react/prop-types': 'off',
     'react/display-name': 'off',
-    // 'prefer-const': 'error', even modify core ui components
     'no-const-assign': 'error',
     'no-var': 'error',
     'no-new-object': 'error',
@@ -27,8 +26,6 @@ module.exports = {
     'prefer-object-spread': 'error',
     'no-array-constructor': 'error',
     'array-callback-return': 'error',
-    'prefer-destructuring': ['error', { array: true, object: true }],
-    // quotes: ['error', 'single'], conflicts with prettier
     'prefer-template': 'error',
     'template-curly-spacing': ['error', 'never'],
     'no-eval': 'error',
@@ -36,7 +33,6 @@ module.exports = {
     'func-style': ['error', 'expression'],
     'no-loop-func': 'error',
     'prefer-rest-params': 'error',
-    'default-param-last': 'error',
     'no-param-reassign': ['error', { props: true }],
     'prefer-spread': 'error',
     'prefer-arrow-callback': 'error',
@@ -47,7 +43,6 @@ module.exports = {
     'implicit-arrow-linebreak': 'error',
     'no-duplicate-imports': 'error',
     'import/no-mutable-exports': 'error',
-    //'import/prefer-default-export': 'error', for what?
     'import/first': 'error',
     'import/no-webpack-loader-syntax': 'error',
     'no-iterator': 'error',
@@ -59,12 +54,8 @@ module.exports = {
     'one-var': ['error', 'never'],
     'no-multi-assign': 'error',
     'no-plusplus': 'error',
-    'max-len': ['error', { code: 120 }],
-    // 'operator-linebreak': ['error', 'after'], meaningless, fix event looks rights
-    'no-unused-vars': 'error',
     'no-case-declarations': 'error',
     'no-mixed-operators': 'error',
-    // 'spaced-comment': ['error', 'always'], this goes to far
     'newline-per-chained-call': 'error',
     'no-whitespace-before-property': 'error',
     'no-new-wrappers': 'error',
