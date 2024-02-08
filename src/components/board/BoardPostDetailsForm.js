@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
+
 import { CForm, CFormInput, CFormLabel, CFormTextarea, CSpinner } from '@coreui/react-pro';
-import StatusBadge from './BoadStatusBadge';
 import { format } from 'date-fns';
+
+import StatusBadge from './BoadStatusBadge';
 import BoardComments from './BoardComments';
 import { useBoardPostDetails } from '../../hooks/board/useBoardPostDetails';
 
