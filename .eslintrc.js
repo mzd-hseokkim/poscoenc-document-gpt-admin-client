@@ -1,29 +1,91 @@
 module.exports = {
-  // parser: '@typescript-eslint/parser', // Specifies the ESLint parser
   parserOptions: {
-    ecmaVersion: 2020, // Allows for the parsing of modern ECMAScript features
-    sourceType: 'module', // Allows for the use of imports
+    ecmaVersion: 2020,
+    sourceType: 'module',
     ecmaFeatures: {
-      jsx: true, // Allows for the parsing of JSX
+      jsx: true,
     },
   },
   settings: {
     react: {
-      version: 'detect', // Tells eslint-plugin-react to automatically detect the version of React to use
+      version: 'detect',
     },
   },
-  extends: [
-    'react-app',
-    'react-app/jest',
-    'plugin:react/recommended', // Uses the recommended rules from @eslint-plugin-react
-    'plugin:prettier/recommended', // Enables eslint-plugin-prettier and eslint-config-prettier. This will display prettier errors as ESLint errors. Make sure this is always the last configuration in the extends array.
-  ],
+  extends: ['react-app', 'react-app/jest', 'plugin:react/recommended', 'plugin:prettier/recommended'],
   plugins: ['react', 'react-hooks'],
   rules: {
-    // Place to specify ESLint rules. Can be used to overwrite rules specified from the extended configs
-    // e.g. "@typescript-eslint/explicit-function-return-type": "off",
     'react/react-in-jsx-scope': 'off',
     'react/prop-types': 'off',
     'react/display-name': 'off',
+    // 'prefer-const': 'error', even modify core ui components
+    'no-const-assign': 'error',
+    'no-var': 'error',
+    'no-new-object': 'error',
+    'object-shorthand': 'error',
+    'quote-props': ['error', 'as-needed'],
+    'no-prototype-builtins': 'error',
+    'prefer-object-spread': 'error',
+    'no-array-constructor': 'error',
+    'array-callback-return': 'error',
+    'prefer-destructuring': ['error', { array: true, object: true }],
+    // quotes: ['error', 'single'], conflicts with prettier
+    'prefer-template': 'error',
+    'template-curly-spacing': ['error', 'never'],
+    'no-eval': 'error',
+    'no-useless-escape': 'error',
+    'func-style': ['error', 'expression'],
+    'no-loop-func': 'error',
+    'prefer-rest-params': 'error',
+    'default-param-last': 'error',
+    'no-param-reassign': ['error', { props: true }],
+    'prefer-spread': 'error',
+    'prefer-arrow-callback': 'error',
+    'arrow-spacing': ['error', { before: true, after: true }],
+    // 'arrow-parens': ['error', 'as-needed'], conflicts with prettier setting
+    // 'arrow-body-style': ['error', 'as-needed'], doesn't match with us
+    'no-confusing-arrow': 'error',
+    'implicit-arrow-linebreak': 'error',
+    'no-duplicate-imports': 'error',
+    'import/no-mutable-exports': 'error',
+    //'import/prefer-default-export': 'error', for what?
+    'import/first': 'error',
+    'import/no-webpack-loader-syntax': 'error',
+    'no-iterator': 'error',
+    'no-restricted-syntax': 'error',
+    'generator-star-spacing': ['error', { before: true, after: false }],
+    'dot-notation': 'error',
+    'no-restricted-properties': 'error',
+    'no-undef': 'error',
+    'one-var': ['error', 'never'],
+    'no-multi-assign': 'error',
+    'no-plusplus': 'error',
+    'max-len': ['error', { code: 120 }],
+    // 'operator-linebreak': ['error', 'after'], meaningless, fix event looks rights
+    'no-unused-vars': 'error',
+    'no-case-declarations': 'error',
+    'no-mixed-operators': 'error',
+    // 'spaced-comment': ['error', 'always'], this goes to far
+    'newline-per-chained-call': 'error',
+    'no-whitespace-before-property': 'error',
+    'no-new-wrappers': 'error',
+    'import/order': [
+      'error',
+      {
+        groups: ['builtin', 'external', 'internal'],
+        pathGroups: [
+          {
+            pattern: 'react',
+            group: 'external',
+            position: 'before',
+          },
+        ],
+        pathGroupsExcludedImportTypes: ['react'],
+        'newlines-between': 'always',
+        alphabetize: {
+          order: 'asc',
+          caseInsensitive: true,
+        },
+      },
+    ],
   },
 };
