@@ -15,4 +15,6 @@ const fetchPostsDeletedOption = async (boardIds, deletedOption) => {
   return response.status === 200;
 };
 
+//StartFrom 수정 api 추가하면서, form readonly 설정 조절, 코멘트 readonly 설정 조절
+
 export { getPostList, getPostDetails, fetchPostsDeletedOption };
