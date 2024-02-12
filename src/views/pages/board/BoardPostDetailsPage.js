@@ -1,4 +1,4 @@
-import { useBoardPostDetails } from '../../../hooks/board/useBoardPostDetails';
+import useBoardPostDetails from '../../../hooks/board/useBoardPostDetails';
 import { useParams } from 'react-router-dom';
 import BoardPostDetailsForm from '../../../components/board/BoardPostDetailsForm';
 import { CSpinner } from '@coreui/react-pro';

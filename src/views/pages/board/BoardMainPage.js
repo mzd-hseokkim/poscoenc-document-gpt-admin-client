@@ -25,7 +25,7 @@ const BoardMainPage = () => {
   const tableFields = getColumnDefinitions();
 
   const [selectedRows, setSelectedRows] = useState([]);
-  //REMIND post 로 기본값 줌
+  //REMIND remove default posts
   const { boardPosts, isLoading, fetchBoardData } = useBoardPosts();
 
   const handleSelectedRows = (newSelectedRows) => {
@@ -66,7 +66,7 @@ const BoardMainPage = () => {
     title: '',
     content: '',
     createdByName: '',
-    hasFilesOption: '',
+    hasFilesOption: true,
     fromCreatedAt: format(startDate, "yyyy-MM-dd'T'00:00"),
     toCreatedAt: format(endDate, "yyyy-MM-dd'T'23:59"),
     deletionOption: '',
@@ -76,13 +76,14 @@ const BoardMainPage = () => {
     setSearchRequestFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleStartDateChange = (newDate) => {
+  const handleStartDateChange = ({ newDate }) => {
+    console.table(newDate);
     setSearchRequestFormData((prev) => ({
       ...prev,
       fromCreatedAt: format(new Date(newDate), "yyyy-MM-dd'T'00:00"),
     }));
   };
-  const handleEndDateChange = (newDate) => {
+  const handleEndDateChange = ({ newDate }) => {
     setSearchRequestFormData((prev) => ({
       ...prev,
       toCreatedAt: format(new Date(newDate), "yyyy-MM-dd'T'23:59"),
@@ -122,15 +123,31 @@ const BoardMainPage = () => {
               <CForm onSubmit={handleSubmit}>
                 <CRow className="mb-3">
                   <CCol md={4} className="position-relative">
-                    <CFormInput type="text" id="title" label="제목" onChange={handleChange} />
+                    <CFormInput
+                      type="text"
+                      id="title"
+                      label="제목"
+                      onChange={handleChange}
+                      value={searchRequestFormData.title}
+                    />
                   </CCol>
                   <CCol md={4} className="position-relative">
-                    <CFormInput id="createdByName" label="작성자" onChange={handleChange} />
+                    <CFormInput
+                      id="createdByName"
+                      label="작성자"
+                      onChange={handleChange}
+                      value={searchRequestFormData.createdByName}
+                    />
                   </CCol>
                 </CRow>
                 <CRow className="mb-3">
                   <CCol md={12} className="position-relative">
-                    <CFormInput id="content" label="내용" onChange={handleChange} />
+                    <CFormInput
+                      id="content"
+                      label="내용"
+                      onChange={handleChange}
+                      value={searchRequestFormData.content}
+                    />
                   </CCol>
                 </CRow>
                 <CRow className="mb-3">
@@ -146,11 +163,12 @@ const BoardMainPage = () => {
                   </CCol>
                   <CCol md={3} className="position-relative">
                     <CFormSelect
-                      id="findEmptyFiles"
+                      id="hasFilesOption"
                       label="첨부파일 없는 게시물 포함"
-                      name="findEmptyFiles"
+                      name="hasFilesOption"
+                      value={searchRequestFormData.hasFilesOption}
                       options={[
-                        { label: '예', value: true },
+                        { label: '예', value: '' },
                         { label: '아니오', value: false },
                       ]}
                       onChange={handleChange}
@@ -161,6 +179,7 @@ const BoardMainPage = () => {
                       id="deletionOption"
                       label="게시글 상태"
                       name="deletionOption"
+                      value={searchRequestFormData.deletionOption}
                       options={[
                         { label: '모든 게시글', value: '' },
                         { label: '삭제됨', value: 'Yes' },
