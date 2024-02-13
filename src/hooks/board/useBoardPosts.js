@@ -21,5 +21,5 @@ export const useBoardPosts = () => {
     fetchBoardPosts();
   }, []);
 
-  return { boardPosts, isLoading, fetchBoardData: fetchBoardPosts };
+  return { boardPosts, isLoading, fetchBoardPosts };
 };

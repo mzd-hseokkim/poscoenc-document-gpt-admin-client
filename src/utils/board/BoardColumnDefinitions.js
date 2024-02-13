@@ -32,7 +32,7 @@ export const getColumnDefinitions = () => [
   },
   {
     key: 'deleted',
-    label: '상태',
+    label: '삭제여부',
     _style: { width: '14%' },
   },
 ];
