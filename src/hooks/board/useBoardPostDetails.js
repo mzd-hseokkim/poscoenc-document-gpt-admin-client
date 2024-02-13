@@ -19,5 +19,5 @@ export const useBoardPostDetails = (postId) => {
     fetchPostDetails(postId);
   }, [postId]);
 
-  return { postDetails, loadingFlag };
+  return { postDetails, isLoading: loadingFlag };
 };

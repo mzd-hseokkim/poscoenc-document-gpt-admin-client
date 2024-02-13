@@ -5,8 +5,8 @@ import { CSpinner } from '@coreui/react-pro';
 
 const BoardPostDetailsPage = () => {
   const { id } = useParams();
-  const { postDetails, loadingFlag } = useBoardPostDetails(id);
-  if (loadingFlag)
+  const { postDetails, isLoading } = useBoardPostDetails(id);
+  if (isLoading)
     return (
       <div className="m-3">
         <CSpinner variant={'grow'} color={'primary'}></CSpinner>
