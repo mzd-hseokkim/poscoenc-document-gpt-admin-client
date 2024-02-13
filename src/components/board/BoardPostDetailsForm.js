@@ -41,6 +41,7 @@ const BoardPostDetailsForm = ({ selectedId }) => {
       hasFiles: submittedData.get('postFileUpload')?.size > 0 ?? false,
     };
     modifyPostDetails(modifiedData);
+    //StartFrom 수정 버튼에 스피너 추가, 수정 후 재 조회 로직 추가.
     handleFormMode(true);
   };
 

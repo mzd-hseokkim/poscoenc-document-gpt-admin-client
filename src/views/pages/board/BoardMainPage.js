@@ -11,6 +11,7 @@ import {
   CFormSelect,
   CRow,
   CSmartTable,
+  CSpinner,
 } from '@coreui/react-pro';
 import { format } from 'date-fns';
 
@@ -27,27 +28,47 @@ const BoardMainPage = () => {
   const tableFields = getColumnDefinitions();
 
   const [selectedRows, setSelectedRows] = useState([]);
-  //REMIND remove default posts
-  const { boardPosts, isLoading, fetchBoardTableData } = useBoardPosts();
+  //REMIND remove default postSearchResults
+  const { boardPosts, deprecatedIsLoading, fetchBoardTableData } = useBoardPosts();
 
   const handleSelectedRows = (newSelectedRows) => {
+    console.log(newSelectedRows);
     setSelectedRows(newSelectedRows);
   };
-
+  // Delete -------------------------------------------------------------
+  const [deleteIsLoading, setDeleteIsLoading] = useState(false);
+  const [restoreIsLoading, setRestoreIsLoading] = useState(false);
   const isDeletedRow = (selectedRows) => {
     return selectedRows.some((row) => row.deleted === true);
   };
 
   const togglePostStatus = async (shouldDelete) => {
-    const isSuccess = await fetchPostsDeletedOption(
-      selectedRows.map((row) => row.id),
-      shouldDelete
-    );
-    if (isSuccess) {
-      await fetchBoardTableData();
-      handleSelectedRows([]);
+    if (shouldDelete) {
+      setDeleteIsLoading(true);
+    } else {
+      setRestoreIsLoading(true);
+    }
+    try {
+      const isSuccess = await fetchPostsDeletedOption(
+        selectedRows.map((row) => row.id),
+        shouldDelete
+      );
+
+      if (isSuccess) {
+        await fetchBoardTableData();
+        handleSelectedRows([]);
+      }
+    } catch (error) {
+      console.error('Failed to toggle post status:', error);
+    } finally {
+      await handleSearchSubmit();
+      setDeleteIsLoading(false);
+      setRestoreIsLoading(false);
     }
   };
+
+  // Delete -------------------------------------------------------------
+
   // Modal --------------------------------------------------------------
   const modal = UseModal();
   const [clickedRowId, setClickedRowId] = useState(null);
@@ -59,7 +80,9 @@ const BoardMainPage = () => {
 
   // 검색 창 --------------------------------------------------------
   //REMIND post 로 기본값 줌
-  const [posts, setPosts] = useState([]);
+  const [postSearchResults, setPostSearchResults] = useState([]);
+  const [searchIsLoading, setSearchIsLoading] = useState(false);
+
   const [startDate, setStartDate] = useState(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
   const [endDate, setEndDate] = useState(new Date());
   const addToast = useToast();
@@ -79,7 +102,6 @@ const BoardMainPage = () => {
   };
 
   const handleStartDateChange = ({ newDate }) => {
-    console.table(newDate);
     setSearchRequestFormData((prev) => ({
       ...prev,
       fromCreatedAt: format(new Date(newDate), "yyyy-MM-dd'T'00:00"),
@@ -96,15 +118,18 @@ const BoardMainPage = () => {
     setStartDate(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
     setEndDate(new Date());
   };
-  const handleSubmit = async () => {
+  const handleSearchSubmit = async () => {
+    setSearchIsLoading(true);
     try {
       const searchResult = await searchPostList(searchRequestFormData);
-      setPosts(searchResult);
+      setPostSearchResults(searchResult);
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
         addToast({ color: 'danger', body: error.response.data.message });
       }
+    } finally {
+      setSearchIsLoading(false);
     }
   };
 
@@ -121,7 +146,7 @@ const BoardMainPage = () => {
         <CCol xs={12}>
           <CCard className="row g-3 needs-validation">
             <CCardBody>
-              <CForm onSubmit={handleSubmit}>
+              <CForm onSubmit={handleSearchSubmit}>
                 <CRow className="mb-3">
                   <CCol md={4} className="position-relative">
                     <CFormInput
@@ -192,7 +217,20 @@ const BoardMainPage = () => {
                   </CCol>
                 </CRow>
                 <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                  <CButton type="submit">검색</CButton>
+                  <CButton
+                    type="submit"
+                    disabled={searchIsLoading}
+                    aria-label={searchIsLoading ? 'Loading...' : 'Search'}
+                  >
+                    {searchIsLoading ? (
+                      <>
+                        <CSpinner className="me-2" component="span" size="sm" variant="grow" aria-hidden="true" />
+                        로딩중...
+                      </>
+                    ) : (
+                      '검색'
+                    )}
+                  </CButton>
                   <CButton onClick={handleReset} color="secondary" value="Reset">
                     초기화
                   </CButton>
@@ -202,21 +240,35 @@ const BoardMainPage = () => {
           </CCard>
         </CCol>
       </CRow>
-      {posts.length !== 0 && (
+      {postSearchResults.length !== 0 && (
         <CCard className="row g-3 mt-2">
           <CCardBody>
-            <div className="d-grid gap-2 d-md-flex justify-content-md-start">
+            <div className="d-grid gap-2 d-md-flex justify-content-md-end">
               <CButton
                 disabled={selectedRows?.length === 0 || isDeletedRow(selectedRows)}
                 onClick={() => togglePostStatus(true)}
               >
-                {'삭제'}
+                {deleteIsLoading ? (
+                  <>
+                    <CSpinner className="me-2" component="span" size="sm" variant="grow" aria-hidden="true" />
+                    로딩중...
+                  </>
+                ) : (
+                  '삭제'
+                )}
               </CButton>
               <CButton
                 disabled={selectedRows?.length === 0 || !isDeletedRow(selectedRows)}
                 onClick={() => togglePostStatus(false)}
               >
-                {'복구'}
+                {restoreIsLoading ? (
+                  <>
+                    <CSpinner className="me-2" component="span" size="sm" variant="grow" aria-hidden="true" />
+                    로딩중...
+                  </>
+                ) : (
+                  '복구'
+                )}
               </CButton>
             </div>
             <CSmartTable
@@ -228,19 +280,19 @@ const BoardMainPage = () => {
               itemsPerPage={10}
               itemsPerPageLabel={'페이지당 글 개수'}
               // 스피너
-              loading={isLoading}
+              loading={searchIsLoading}
               // 정렬
               // REMIND 커스텀 소터 구현
               sorterValue={{ column: 'id', state: 'asc' }}
               // 컬럼
-              items={posts}
+              items={postSearchResults}
               columns={tableFields}
               selectable
               selected={selectedRows}
               // REMIND clickable row 대신에 제목 칸에 css pointer 적용
               scopedColumns={scopedColumns}
               // REMIND DOMException 처리
-              onSelectedItemsChange={() => handleSelectedRows}
+              onSelectedItemsChange={(selectedItems) => handleSelectedRows(selectedItems)}
               // 스타일
               tableProps={{
                 responsive: true,
