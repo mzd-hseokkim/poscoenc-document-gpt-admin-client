@@ -10,8 +10,17 @@ const MenuDetailForm = ({ selectedId, initialFormMode }) => {
   const [formData, setFormData] = useState([]);
   const [formMode, setFormMode] = useState(initialFormMode);
   const [roles, setRoles] = useState([]);
-  const [parentMenus, setParentMenus] = useState([]);
+  const [parentMenus, setParentMenus] = useState([{ label: '선택하지 않음', value: 0 }]);
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
+
+  useEffect(() => {
+    if (!isCreateMode && selectedId) {
+      fetchMenuDetail();
+    } else {
+      getRoles();
+    }
+    getParentMenu();
+  }, [selectedId]);
 
   const fetchMenuDetail = async () => {
     try {
@@ -47,23 +56,17 @@ const MenuDetailForm = ({ selectedId, initialFormMode }) => {
         value: parentMenu.id,
         label: parentMenu.name,
       }));
-      setParentMenus(newParentMenus);
+      setParentMenus((prevMenus) => [...prevMenus, ...newParentMenus]);
     } catch (error) {
       console.log(error);
     }
   };
 
-  useEffect(() => {
-    if (!isCreateMode && selectedId) {
-      fetchMenuDetail();
-    } else {
-      getRoles();
-    }
-    getParentMenu();
-  }, [selectedId]);
+  const handleChange = (e) => {
+    const { id, type, checked, value } = e.target;
 
-  const handleChange = ({ target: { id, value } }) => {
     setFormData((prev) => ({ ...prev, [id]: value }));
+    console.log(id, type, checked, value);
   };
 
   const menuBasicFields = [
@@ -126,6 +129,10 @@ const MenuDetailForm = ({ selectedId, initialFormMode }) => {
     setFormData((prev) => ({ ...prev, allowedRoles: roleList }));
   };
 
+  const handleUpdateClick = () => {
+    setFormMode('update');
+  };
+
   const renderRoleSelect = () => (
     <CRow className="mb-3">
       <CCol>
@@ -145,14 +152,16 @@ const MenuDetailForm = ({ selectedId, initialFormMode }) => {
   const renderParentSelect = () => (
     <CRow className="mb-3">
       <CCol>
-        <CFormSelect name="parentId" label={'상위 메뉴'} options={parentMenus} onChange={handleChange} />
+        <CFormSelect
+          id="parentId"
+          name="parentId"
+          label={'상위 메뉴'}
+          options={parentMenus}
+          onChange={handleChange}
+        ></CFormSelect>
       </CCol>
     </CRow>
   );
-
-  const handleUpdateClick = () => {
-    setFormMode('update');
-  };
 
   return (
     <>
@@ -160,10 +169,17 @@ const MenuDetailForm = ({ selectedId, initialFormMode }) => {
       <CRow className="mb-3">
         <CCol>
           <CFormCheck
+            name="allowChildren"
+            id="allowChildrens"
             label="하위 메뉴 등록"
-            id="allowChildren"
-            onChange={(e) => console.log(e.target.value)}
+            // value={formData.allowChildren}
+            onChange={(e) => setFormData((prev) => ({ ...prev, allowedRoles: e.target.checked }))}
           ></CFormCheck>
+          <input
+            type={'checkbox'}
+            id={'allowChildren'}
+            onChange={(e) => setFormData((prev) => ({ ...prev, allowedRoles: e.target.checked }))}
+          ></input>
         </CCol>
       </CRow>
       <InputList fields={menuSettingFields} formData={formData} handleChange={handleChange} isReadMode={isReadMode} />
