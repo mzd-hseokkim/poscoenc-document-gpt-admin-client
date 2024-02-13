@@ -1,6 +1,7 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+
+import { cilApplicationsSettings, cilMenu, cilMoon, cilSun } from '@coreui/icons';
+import CIcon from '@coreui/icons-react';
 import {
   CButtonGroup,
   CContainer,
@@ -13,10 +14,9 @@ import {
   CNavItem,
   CNavLink,
 } from '@coreui/react-pro';
-import CIcon from '@coreui/icons-react';
-import { cilApplicationsSettings, cilMenu, cilMoon, cilSun } from '@coreui/icons';
-
-import { AppBreadcrumb } from './index';
+import { useDispatch, useSelector } from 'react-redux';
+import { NavLink } from 'react-router-dom';
+import { logo } from 'src/assets/brand/logo';
 
 import {
   AppHeaderDropdown,
@@ -24,8 +24,7 @@ import {
   AppHeaderDropdownNotif,
   AppHeaderDropdownTasks,
 } from './header/index';
-
-import { logo } from 'src/assets/brand/logo';
+import { AppBreadcrumb } from './index';
 
 const AppHeader = () => {
   const dispatch = useDispatch();

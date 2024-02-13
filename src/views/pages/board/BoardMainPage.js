@@ -1,12 +1,14 @@
-import { CButton, CCard, CSmartTable } from '@coreui/react-pro';
 import { useState } from 'react';
-import { getColumnDefinitions } from '../../../utils/board/BoardColumnDefinitions';
-import { getScopedColumns } from '../../../components/board/BoardScopedColumns';
-import { useBoardPosts } from '../../../hooks/board/useBoardPosts';
-import { fetchPostsDeletedOption } from '../../../services/board/BoardService';
-import ModalContainer from '../../../components/modal/ModalContainer';
+
+import { CButton, CCard, CSmartTable } from '@coreui/react-pro';
+
 import BoardPostDetailsForm from '../../../components/board/BoardPostDetailsForm';
+import { getScopedColumns } from '../../../components/board/BoardScopedColumns';
+import ModalContainer from '../../../components/modal/ModalContainer';
+import { useBoardPosts } from '../../../hooks/board/useBoardPosts';
 import UseModal from '../../../hooks/useModal';
+import { fetchPostsDeletedOption } from '../../../services/board/BoardService';
+import { getColumnDefinitions } from '../../../utils/board/BoardColumnDefinitions';
 
 const BoardMainPage = () => {
   const tableFields = getColumnDefinitions();

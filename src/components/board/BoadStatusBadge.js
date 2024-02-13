@@ -1,5 +1,6 @@
-import { CBadge } from '@coreui/react-pro';
 import React from 'react';
+
+import { CBadge } from '@coreui/react-pro';
 
 const getBadge = (deleted) => {
   switch (deleted) {

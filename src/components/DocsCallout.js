@@ -1,6 +1,7 @@
-import PropTypes from 'prop-types';
 import React from 'react';
+
 import { CCallout, CLink } from '@coreui/react-pro';
+import PropTypes from 'prop-types';
 
 const DocsCallout = (props) => {
   const { children, href, name } = props;

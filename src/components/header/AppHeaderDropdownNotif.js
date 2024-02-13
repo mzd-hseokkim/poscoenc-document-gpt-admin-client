@@ -1,4 +1,7 @@
 import React from 'react';
+
+import { cilBasket, cilBell, cilChartPie, cilSpeedometer, cilUserFollow, cilUserUnfollow } from '@coreui/icons';
+import CIcon from '@coreui/icons-react';
 import {
   CBadge,
   CDropdown,
@@ -8,8 +11,6 @@ import {
   CDropdownToggle,
   CProgress,
 } from '@coreui/react-pro';
-import CIcon from '@coreui/icons-react';
-import { cilBasket, cilBell, cilChartPie, cilSpeedometer, cilUserFollow, cilUserUnfollow } from '@coreui/icons';
 
 const AppHeaderDropdownNotif = () => {
   const itemsCount = 5;

@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { CBadge } from '@coreui/react-pro';
 import PropTypes from 'prop-types';
 

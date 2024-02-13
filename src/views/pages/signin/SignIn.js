@@ -1,6 +1,9 @@
 // signIn
 
 import React, { useState } from 'react';
+
+import { cilLockLocked, cilUser } from '@coreui/icons';
+import CIcon from '@coreui/icons-react';
 import {
   CCard,
   CCardBody,
@@ -13,11 +16,10 @@ import {
   CLoadingButton,
   CRow,
 } from '@coreui/react-pro';
-import CIcon from '@coreui/icons-react';
-import { cilLockLocked, cilUser } from '@coreui/icons';
-import SignInService from '../../../services/signin/SignInService';
 import { useNavigate } from 'react-router-dom';
+
 import useToast from '../../../hooks/useToast';
+import SignInService from '../../../services/signin/SignInService';
 import { emailValidationPattern, passwordValidationPattern } from '../../../utils/validationUtils';
 
 const SignIn = () => {
@@ -32,7 +34,7 @@ const SignIn = () => {
     setIsLoading(true);
     try {
       const response = await SignInService.signIn(userData);
-      const token = response.token;
+      const { token } = response;
       localStorage.setItem('token', token);
       navigate('/');
     } catch (error) {
