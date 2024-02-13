@@ -6,7 +6,7 @@ export const useBoardPosts = () => {
   const [boardPosts, setBoardPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchBoardPosts = async () => {
+  const fetchBoardTableData = async () => {
     try {
       const data = await getPostList();
       setBoardPosts(data);
@@ -18,8 +18,8 @@ export const useBoardPosts = () => {
   };
 
   useEffect(() => {
-    fetchBoardPosts();
+    fetchBoardTableData();
   }, []);
 
-  return { boardPosts, isLoading, fetchBoardPosts };
+  return { boardPosts, isLoading, fetchBoardTableData };
 };

@@ -28,7 +28,7 @@ const BoardMainPage = () => {
 
   const [selectedRows, setSelectedRows] = useState([]);
   //REMIND remove default posts
-  const { boardPosts, isLoading, fetchBoardData } = useBoardPosts();
+  const { boardPosts, isLoading, fetchBoardTableData } = useBoardPosts();
 
   const handleSelectedRows = (newSelectedRows) => {
     setSelectedRows(newSelectedRows);
@@ -44,7 +44,7 @@ const BoardMainPage = () => {
       shouldDelete
     );
     if (isSuccess) {
-      await fetchBoardData();
+      await fetchBoardTableData();
       handleSelectedRows([]);
     }
   };
@@ -74,7 +74,7 @@ const BoardMainPage = () => {
     deletionOption: '',
   };
   const [searchRequestFormData, setSearchRequestFormData] = useState(initialSearchFormData);
-  const handleChange = ({ target: { id, value } }) => {
+  const handleSearchFormChange = ({ target: { id, value } }) => {
     setSearchRequestFormData((prev) => ({ ...prev, [id]: value }));
   };
 
@@ -96,7 +96,6 @@ const BoardMainPage = () => {
     setStartDate(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
     setEndDate(new Date());
   };
-  //TODO 검색 요청 구현 예정
   const handleSubmit = async () => {
     try {
       const searchResult = await searchPostList(searchRequestFormData);
@@ -129,7 +128,7 @@ const BoardMainPage = () => {
                       type="text"
                       id="title"
                       label="제목"
-                      onChange={handleChange}
+                      onChange={handleSearchFormChange}
                       value={searchRequestFormData.title}
                     />
                   </CCol>
@@ -137,7 +136,7 @@ const BoardMainPage = () => {
                     <CFormInput
                       id="createdByName"
                       label="작성자"
-                      onChange={handleChange}
+                      onChange={handleSearchFormChange}
                       value={searchRequestFormData.createdByName}
                     />
                   </CCol>
@@ -147,7 +146,7 @@ const BoardMainPage = () => {
                     <CFormInput
                       id="content"
                       label="내용"
-                      onChange={handleChange}
+                      onChange={handleSearchFormChange}
                       value={searchRequestFormData.content}
                     />
                   </CCol>
@@ -174,7 +173,7 @@ const BoardMainPage = () => {
                         { label: '예', value: true },
                         { label: '아니오', value: false },
                       ]}
-                      onChange={handleChange}
+                      onChange={handleSearchFormChange}
                     />
                   </CCol>
                   <CCol md={3} className="position-relative">
@@ -188,7 +187,7 @@ const BoardMainPage = () => {
                         { label: '삭제됨', value: 'Yes' },
                         { label: '삭제되지 않음', value: 'NO' },
                       ]}
-                      onChange={handleChange}
+                      onChange={handleSearchFormChange}
                     />
                   </CCol>
                 </CRow>
@@ -248,7 +247,7 @@ const BoardMainPage = () => {
                 hover: true,
               }}
             />
-            <ModalContainer visible={modal.isOpen} title="게시글" onClose={modal.closeModal}>
+            <ModalContainer visible={modal.isOpen} title="게시글" onClose={modal.closeModal} size="lg">
               <BoardPostDetailsForm selectedId={clickedRowId}></BoardPostDetailsForm>
             </ModalContainer>
           </CCardBody>
