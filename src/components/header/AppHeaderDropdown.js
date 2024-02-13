@@ -1,14 +1,5 @@
 import React from 'react';
-import {
-  CAvatar,
-  CBadge,
-  CDropdown,
-  CDropdownDivider,
-  CDropdownHeader,
-  CDropdownItem,
-  CDropdownMenu,
-  CDropdownToggle,
-} from '@coreui/react-pro';
+
 import {
   cilAccountLogout,
   cilBell,
@@ -21,10 +12,20 @@ import {
   cilUser,
 } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
-
-import avatar8 from './../../assets/images/avatars/8.jpg';
+import {
+  CAvatar,
+  CBadge,
+  CDropdown,
+  CDropdownDivider,
+  CDropdownHeader,
+  CDropdownItem,
+  CDropdownMenu,
+  CDropdownToggle,
+} from '@coreui/react-pro';
 import { useNavigate } from 'react-router-dom';
 import { useResetRecoilState } from 'recoil';
+
+import avatar8 from './../../assets/images/avatars/8.jpg';
 import { jwtTokenState } from '../../states/jwtTokenState';
 
 const AppHeaderDropdown = () => {

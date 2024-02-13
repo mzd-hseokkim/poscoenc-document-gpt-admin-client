@@ -1,8 +1,10 @@
 import React, { Component, Suspense } from 'react';
+
 import { HashRouter, Route, Routes } from 'react-router-dom';
+
 import './scss/style.scss';
-import SimpleToastContainer from './components/toast/SimpleToastContainer';
 import SetupInterceptors from './api/SetupInterceptors';
+import SimpleToastContainer from './components/toast/SimpleToastContainer';
 import { NavigationProvider } from './context/NavigationContext';
 
 const loading = (

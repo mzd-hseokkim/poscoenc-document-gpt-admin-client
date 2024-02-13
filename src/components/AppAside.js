@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+
+import { cibSkype, cilCalendar, cilHome, cilList, cilLocationPin, cilSettings, cilSpeech } from '@coreui/icons';
+import CIcon from '@coreui/icons-react';
 import {
   CAvatar,
   CCloseButton,
@@ -15,8 +17,7 @@ import {
   CTabContent,
   CTabPane,
 } from '@coreui/react-pro';
-import CIcon from '@coreui/icons-react';
-import { cibSkype, cilCalendar, cilHome, cilList, cilLocationPin, cilSettings, cilSpeech } from '@coreui/icons';
+import { useDispatch, useSelector } from 'react-redux';
 
 import avatar2 from './../assets/images/avatars/2.jpg';
 import avatar3 from './../assets/images/avatars/3.jpg';
