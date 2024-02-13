@@ -8,7 +8,6 @@ const BoardPostDetailsPage = () => {
   const { postDetails, loadingFlag } = useBoardPostDetails(id);
   if (loadingFlag)
     return (
-      // d-flex justify-content-center align-items-center min-vh-100
       <div className="m-3">
         <CSpinner variant="grow" color="primary"></CSpinner>
       </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+
 import { getPostDetails } from '../../services/board/BoardService';
 
 const useBoardPostDetails = (postId) => {

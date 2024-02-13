@@ -1,4 +1,7 @@
 import React from 'react';
+
+import { cilEnvelopeOpen } from '@coreui/icons';
+import CIcon from '@coreui/icons-react';
 import {
   CAvatar,
   CBadge,
@@ -8,8 +11,6 @@ import {
   CDropdownMenu,
   CDropdownToggle,
 } from '@coreui/react-pro';
-import CIcon from '@coreui/icons-react';
-import { cilEnvelopeOpen } from '@coreui/icons';
 
 import avatar4 from './../../assets/images/avatars/4.jpg';
 import avatar5 from './../../assets/images/avatars/5.jpg';
