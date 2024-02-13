@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import {
   CButton,
   CCard,
@@ -10,16 +12,16 @@ import {
   CRow,
   CSmartTable,
 } from '@coreui/react-pro';
-import { useState } from 'react';
-import { getColumnDefinitions } from '../../../utils/board/BoardColumnDefinitions';
-import { getScopedColumns } from '../../../components/board/BoardScopedColumns';
-import { useBoardPosts } from '../../../hooks/board/useBoardPosts';
-import { fetchPostsDeletedOption, searchPostList } from '../../../services/board/BoardService';
-import ModalContainer from '../../../components/modal/ModalContainer';
-import BoardPostDetailsForm from '../../../components/board/BoardPostDetailsForm';
-import UseModal from '../../../hooks/useModal';
 import { format } from 'date-fns';
+
+import BoardPostDetailsForm from '../../../components/board/BoardPostDetailsForm';
+import { getScopedColumns } from '../../../components/board/BoardScopedColumns';
+import ModalContainer from '../../../components/modal/ModalContainer';
+import { useBoardPosts } from '../../../hooks/board/useBoardPosts';
+import UseModal from '../../../hooks/useModal';
 import useToast from '../../../hooks/useToast';
+import { fetchPostsDeletedOption, searchPostList } from '../../../services/board/BoardService';
+import { getColumnDefinitions } from '../../../utils/board/BoardColumnDefinitions';
 
 const BoardMainPage = () => {
   const tableFields = getColumnDefinitions();

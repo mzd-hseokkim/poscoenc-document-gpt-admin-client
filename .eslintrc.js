@@ -37,8 +37,6 @@ module.exports = {
     'prefer-spread': 'error',
     'prefer-arrow-callback': 'error',
     'arrow-spacing': ['error', { before: true, after: true }],
-    // 'arrow-parens': ['error', 'as-needed'], conflicts with prettier setting
-    // 'arrow-body-style': ['error', 'as-needed'], doesn't match with us
     'no-confusing-arrow': 'error',
     'implicit-arrow-linebreak': 'error',
     'no-duplicate-imports': 'error',

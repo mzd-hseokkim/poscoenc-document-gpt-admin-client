@@ -1,7 +1,8 @@
-import useBoardPostDetails from '../../../hooks/board/useBoardPostDetails';
-import { useParams } from 'react-router-dom';
-import BoardPostDetailsForm from '../../../components/board/BoardPostDetailsForm';
 import { CSpinner } from '@coreui/react-pro';
+import { useParams } from 'react-router-dom';
+
+import BoardPostDetailsForm from '../../../components/board/BoardPostDetailsForm';
+import useBoardPostDetails from '../../../hooks/board/useBoardPostDetails';
 
 const BoardPostDetailsPage = () => {
   const { id } = useParams();
