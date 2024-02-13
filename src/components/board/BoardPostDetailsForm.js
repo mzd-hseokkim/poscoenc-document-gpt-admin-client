@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 
 import StatusBadge from './BoadStatusBadge';
 import BoardComments from './BoardComments';
-import { useBoardPostDetails } from '../../hooks/board/useBoardPostDetails';
+import useBoardPostDetails from '../../hooks/board/useBoardPostDetails';
 
 const BoardPostDetailsForm = ({ selectedId }) => {
   const { postDetails, isLoading } = useBoardPostDetails(selectedId);

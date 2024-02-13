@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { getPostDetails } from '../../services/board/BoardService';
 
-export const useBoardPostDetails = (postId) => {
+const useBoardPostDetails = (postId) => {
   const [postDetails, setPostDetails] = useState(null);
   const [loadingFlag, setLoadingFlag] = useState(true);
 
@@ -22,3 +22,5 @@ export const useBoardPostDetails = (postId) => {
 
   return { postDetails, isLoading: loadingFlag };
 };
+
+export default useBoardPostDetails;

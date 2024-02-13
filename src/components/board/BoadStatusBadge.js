@@ -4,8 +4,6 @@ import { CBadge } from '@coreui/react-pro';
 
 const getBadge = (deleted) => {
   switch (deleted) {
-    case false:
-      return 'success';
     case true:
       return 'danger';
     default:
@@ -14,7 +12,7 @@ const getBadge = (deleted) => {
 };
 const translate = (deleted) => {
   if (deleted == null) return 'No-Data';
-  return deleted ? 'Deleted' : 'OnBoard';
+  return deleted ? 'Deleted' : '';
 };
 
 const StatusBadge = ({ deleted }) => {
