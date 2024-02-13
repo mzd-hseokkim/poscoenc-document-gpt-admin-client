@@ -66,7 +66,7 @@ const BoardMainPage = () => {
     title: '',
     content: '',
     createdByName: '',
-    hasFilesOption: true,
+    hasFilesOption: '',
     fromCreatedAt: format(startDate, "yyyy-MM-dd'T'00:00"),
     toCreatedAt: format(endDate, "yyyy-MM-dd'T'23:59"),
     deletionOption: '',
@@ -168,7 +168,8 @@ const BoardMainPage = () => {
                       name="hasFilesOption"
                       value={searchRequestFormData.hasFilesOption}
                       options={[
-                        { label: '예', value: '' },
+                        { label: '모든 게시글', value: '' },
+                        { label: '예', value: true },
                         { label: '아니오', value: false },
                       ]}
                       onChange={handleChange}
