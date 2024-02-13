@@ -1,4 +1,7 @@
 import React from 'react';
+
+import { cilLockLocked, cilUser } from '@coreui/icons';
+import CIcon from '@coreui/icons-react';
 import {
   CButton,
   CCard,
@@ -11,8 +14,6 @@ import {
   CInputGroupText,
   CRow,
 } from '@coreui/react-pro';
-import CIcon from '@coreui/icons-react';
-import { cilLockLocked, cilUser } from '@coreui/icons';
 
 const Register = () => {
   return (

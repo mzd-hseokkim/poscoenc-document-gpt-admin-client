@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import {
   CButton,
   CCard,
@@ -9,8 +11,8 @@ import {
   CFormSelect,
   CRow,
 } from '@coreui/react-pro';
-import { useState } from 'react';
 import { format } from 'date-fns';
+
 import useToast from '../../../hooks/useToast';
 import userService from '../../../services/UserService';
 

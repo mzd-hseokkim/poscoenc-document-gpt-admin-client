@@ -1,4 +1,7 @@
 import React from 'react';
+
+import { cilList } from '@coreui/icons';
+import CIcon from '@coreui/icons-react';
 import {
   CBadge,
   CDropdown,
@@ -8,8 +11,6 @@ import {
   CDropdownToggle,
   CProgress,
 } from '@coreui/react-pro';
-import CIcon from '@coreui/icons-react';
-import { cilList } from '@coreui/icons';
 
 const AppHeaderDropdownTasks = () => {
   const itemsCount = 5;

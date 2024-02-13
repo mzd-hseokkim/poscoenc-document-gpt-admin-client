@@ -10,22 +10,28 @@ const api = axios.create({
 export const setupInterceptors = (navigate) => {
   api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
+    let newConfig = {
+      ...config,
+      headers: {
+        ...config.headers,
+      },
+    };
 
     if (token) {
       const decodedToken = jwtDecode(token);
       const currentTime = Date.now() / 1000;
 
       if (decodedToken.exp >= currentTime) {
-        config.headers.Authorization = `Bearer ${token}`;
+        newConfig.headers.Authorization = `Bearer ${token}`;
       } else {
         localStorage.removeItem('token');
-        config.headers.Authorization = '';
+        newConfig.headers.Authorization = '';
         navigate('/sign-in');
       }
     } else {
-      config.headers.Authorization = '';
+      newConfig.headers.Authorization = '';
     }
-    return config;
+    return newConfig;
   });
 };
 

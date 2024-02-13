@@ -1,6 +1,8 @@
 export const getColumnDefinitions = () => [
+  //REMIND style 설정 분리
   {
-    key: 'ID',
+    key: 'id',
+    label: 'ID',
     _style: { width: '5%' },
   },
   {
@@ -19,7 +21,7 @@ export const getColumnDefinitions = () => [
     _style: { width: '10%' },
   },
   {
-    key: 'hasAttachment',
+    key: 'hasFiles',
     label: '첨부파일',
     _style: { width: '110px' },
   },
@@ -30,8 +32,7 @@ export const getColumnDefinitions = () => [
   },
   {
     key: 'deleted',
-    label: '상태',
+    label: '삭제여부',
     _style: { width: '14%' },
   },
-  // TODO 일괄 삭제버튼 추가
 ];

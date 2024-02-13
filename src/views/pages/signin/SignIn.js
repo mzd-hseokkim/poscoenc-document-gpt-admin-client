@@ -1,8 +1,10 @@
 // signIn
 
 import React, { useState } from 'react';
+
+import { cilLockLocked, cilUser } from '@coreui/icons';
+import CIcon from '@coreui/icons-react';
 import {
-  CButton,
   CCard,
   CCardBody,
   CCol,
@@ -11,26 +13,28 @@ import {
   CFormInput,
   CInputGroup,
   CInputGroupText,
+  CLoadingButton,
   CRow,
 } from '@coreui/react-pro';
-import CIcon from '@coreui/icons-react';
-import { cilLockLocked, cilUser } from '@coreui/icons';
-import SignInService from '../../../services/SignInService';
 import { useNavigate } from 'react-router-dom';
+
 import useToast from '../../../hooks/useToast';
+import SignInService from '../../../services/signin/SignInService';
 import { emailValidationPattern, passwordValidationPattern } from '../../../utils/validationUtils';
 
 const SignIn = () => {
   const [userData, setUserData] = useState([]);
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
   const addToast = useToast();
 
   const handleSubmit = async () => {
+    setIsLoading(true);
     try {
       const response = await SignInService.signIn(userData);
-      const token = response.token;
+      const { token } = response;
       localStorage.setItem('token', token);
       navigate('/');
     } catch (error) {
@@ -38,6 +42,8 @@ const SignIn = () => {
       if (status === 401) {
         addToast({ color: 'danger', message: '이메일 혹은 비밀번호가 틀렸습니다.' });
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -100,9 +106,9 @@ const SignIn = () => {
                     />
                   </CInputGroup>
                   <CRow>
-                    <CButton color="primary" className="px-4" onClick={handleSubmit}>
+                    <CLoadingButton loading={isLoading} color="primary" className="px-4" onClick={handleSubmit}>
                       로그인
-                    </CButton>
+                    </CLoadingButton>
                   </CRow>
                 </CForm>
               </CCardBody>

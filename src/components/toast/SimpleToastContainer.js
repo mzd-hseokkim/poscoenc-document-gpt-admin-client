@@ -1,6 +1,8 @@
 import React from 'react';
-import { useRecoilValue } from 'recoil';
+
 import { CToast, CToastBody, CToastClose, CToaster } from '@coreui/react-pro';
+import { useRecoilValue } from 'recoil';
+
 import { toastState } from '../../states/toastState';
 
 const SimpleToastContainer = () => {
