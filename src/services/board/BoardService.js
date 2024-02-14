@@ -6,6 +6,8 @@ const getPostList = async () => {
 };
 
 const getPostDetails = async (postId) => {
+  //REMIND 조회시랑 새로고침 할 때 조회수 올라가지 않도록 분리
+  await api.patch(`/admin/boards/${postId}/view`);
   const response = await api.get(`/admin/boards/${postId}`);
   return response.data;
 };
@@ -27,14 +29,13 @@ const searchPostList = async (params) => {
   return response?.data.content ?? [];
 };
 
+const modifyPostDetails = async (payload) => {
+  const response = await api.put(`/admin/boards/${payload.id}`, payload);
+  return response.data;
+};
+
 const fetchPostsDeletedOption = async (boardIds, deletedOption) => {
   const response = await api.patch(`/admin/boards/deleted/${deletedOption}`, boardIds);
   return response.status === 200;
-};
-
-const modifyPostDetails = async (payload) => {
-  const response = await api.put(`/admin/boards/${payload.id}`, payload);
-  // REMIND now id, request modified data.
-  return response.data;
 };
 export { getPostList, getPostDetails, searchPostList, modifyPostDetails, fetchPostsDeletedOption };

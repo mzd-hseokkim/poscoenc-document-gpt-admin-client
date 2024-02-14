@@ -1,26 +1,27 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { getPostDetails } from '../../services/board/BoardService';
 
 const useBoardPostDetails = (postId) => {
   const [postDetails, setPostDetails] = useState(null);
-  const [loadingFlag, setLoadingFlag] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchPostDetails = async () => {
-      try {
-        const postDetails = await getPostDetails(postId);
-        setPostDetails(postDetails);
-        setLoadingFlag(false);
-      } catch (err) {
-        console.error(err);
-        setLoadingFlag(false);
-      }
-    };
-    fetchPostDetails(postId);
+  const fetchPostDetails = useCallback(async () => {
+    try {
+      const postDetails = await getPostDetails(postId);
+      setPostDetails(postDetails);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   }, [postId]);
 
-  return { postDetails, isLoading: loadingFlag };
+  useEffect(() => {
+    fetchPostDetails();
+  }, [fetchPostDetails]);
+
+  return { postDetails, isLoading, fetchPostDetails };
 };
 
 export default useBoardPostDetails;

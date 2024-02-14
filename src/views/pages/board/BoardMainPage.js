@@ -11,14 +11,12 @@ import {
   CFormSelect,
   CRow,
   CSmartTable,
-  CSpinner,
 } from '@coreui/react-pro';
 import { format } from 'date-fns';
 
 import BoardPostDetailsForm from '../../../components/board/BoardPostDetailsForm';
 import { getScopedColumns } from '../../../components/board/BoardScopedColumns';
 import ModalContainer from '../../../components/modal/ModalContainer';
-import { useBoardPosts } from '../../../hooks/board/useBoardPosts';
 import UseModal from '../../../hooks/useModal';
 import useToast from '../../../hooks/useToast';
 import { fetchPostsDeletedOption, searchPostList } from '../../../services/board/BoardService';
@@ -29,25 +27,16 @@ const BoardMainPage = () => {
 
   const [selectedRows, setSelectedRows] = useState([]);
   //REMIND remove default postSearchResults
-  const { boardPosts, deprecatedIsLoading, fetchBoardTableData } = useBoardPosts();
 
   const handleSelectedRows = (newSelectedRows) => {
-    console.log(newSelectedRows);
     setSelectedRows(newSelectedRows);
   };
   // Delete -------------------------------------------------------------
-  const [deleteIsLoading, setDeleteIsLoading] = useState(false);
-  const [restoreIsLoading, setRestoreIsLoading] = useState(false);
   const isDeletedRow = (selectedRows) => {
     return selectedRows.some((row) => row.deleted === true);
   };
 
   const togglePostStatus = async (shouldDelete) => {
-    if (shouldDelete) {
-      setDeleteIsLoading(true);
-    } else {
-      setRestoreIsLoading(true);
-    }
     try {
       const isSuccess = await fetchPostsDeletedOption(
         selectedRows.map((row) => row.id),
@@ -55,15 +44,14 @@ const BoardMainPage = () => {
       );
 
       if (isSuccess) {
-        await fetchBoardTableData();
+        await handleSearchSubmit();
         handleSelectedRows([]);
       }
     } catch (error) {
+      //REMIND 에러 toast 추가
       console.error('Failed to toggle post status:', error);
     } finally {
       await handleSearchSubmit();
-      setDeleteIsLoading(false);
-      setRestoreIsLoading(false);
     }
   };
 
@@ -217,21 +205,8 @@ const BoardMainPage = () => {
                   </CCol>
                 </CRow>
                 <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                  <CButton
-                    type="submit"
-                    disabled={searchIsLoading}
-                    aria-label={searchIsLoading ? 'Loading...' : 'Search'}
-                  >
-                    {searchIsLoading ? (
-                      <>
-                        <CSpinner className="me-2" component="span" size="sm" variant="grow" aria-hidden="true" />
-                        로딩중...
-                      </>
-                    ) : (
-                      '검색'
-                    )}
-                  </CButton>
-                  <CButton onClick={handleReset} color="secondary" value="Reset">
+                  <CButton type="submit">{'검색'}</CButton>
+                  <CButton onClick={handleReset} color="primary" value="Reset">
                     초기화
                   </CButton>
                 </div>
@@ -240,71 +215,60 @@ const BoardMainPage = () => {
           </CCard>
         </CCol>
       </CRow>
-      {postSearchResults.length !== 0 && (
-        <CCard className="row g-3 mt-2">
-          <CCardBody>
-            <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-              <CButton
-                disabled={selectedRows?.length === 0 || isDeletedRow(selectedRows)}
-                onClick={() => togglePostStatus(true)}
-              >
-                {deleteIsLoading ? (
-                  <>
-                    <CSpinner className="me-2" component="span" size="sm" variant="grow" aria-hidden="true" />
-                    로딩중...
-                  </>
-                ) : (
-                  '삭제'
-                )}
-              </CButton>
-              <CButton
-                disabled={selectedRows?.length === 0 || !isDeletedRow(selectedRows)}
-                onClick={() => togglePostStatus(false)}
-              >
-                {restoreIsLoading ? (
-                  <>
-                    <CSpinner className="me-2" component="span" size="sm" variant="grow" aria-hidden="true" />
-                    로딩중...
-                  </>
-                ) : (
-                  '복구'
-                )}
-              </CButton>
-            </div>
-            <CSmartTable
-              // 페이징
-              // REMIND 페이지네이션 컴포넌트 구현
-              pagination
-              activePage={1}
-              itemsPerPageSelect
-              itemsPerPage={10}
-              itemsPerPageLabel={'페이지당 글 개수'}
-              // 스피너
-              loading={searchIsLoading}
-              // 정렬
-              // REMIND 커스텀 소터 구현
-              sorterValue={{ column: 'id', state: 'asc' }}
-              // 컬럼
-              items={postSearchResults}
-              columns={tableFields}
-              selectable
-              selected={selectedRows}
-              // REMIND clickable row 대신에 제목 칸에 css pointer 적용
-              scopedColumns={scopedColumns}
-              // REMIND DOMException 처리
-              onSelectedItemsChange={(selectedItems) => handleSelectedRows(selectedItems)}
-              // 스타일
-              tableProps={{
-                responsive: true,
-                hover: true,
+      <CCard className="row g-3 mt-2">
+        <CCardBody>
+          <div className="d-grid gap-2 d-md-flex justify-content-md-end">
+            <CButton
+              disabled={selectedRows?.length === 0 || isDeletedRow(selectedRows)}
+              onClick={() => {
+                togglePostStatus(true);
               }}
-            />
-            <ModalContainer visible={modal.isOpen} title="게시글" onClose={modal.closeModal} size="lg">
-              <BoardPostDetailsForm selectedId={clickedRowId}></BoardPostDetailsForm>
-            </ModalContainer>
-          </CCardBody>
-        </CCard>
-      )}
+            >
+              {'삭제'}
+            </CButton>
+            <CButton
+              disabled={selectedRows?.length === 0 || !isDeletedRow(selectedRows)}
+              onClick={() => {
+                togglePostStatus(false);
+              }}
+            >
+              {'복구'}
+            </CButton>
+          </div>
+          <CSmartTable
+            // 페이징
+            // REMIND 페이지네이션 컴포넌트 구현
+            pagination
+            activePage={1}
+            itemsPerPageSelect
+            itemsPerPage={10}
+            itemsPerPageLabel={'페이지당 글 개수'}
+            // 스피너
+            loading={searchIsLoading}
+            // 정렬
+            // REMIND 커스텀 소터 구현
+            sorterValue={{ column: 'id', state: 'asc' }}
+            // 컬럼
+            items={postSearchResults}
+            columns={tableFields}
+            selectable
+            selected={selectedRows}
+            // REMIND clickable row 대신에 제목 칸에 css pointer 적용
+            scopedColumns={scopedColumns}
+            // REMIND DOMException 처리
+            onSelectedItemsChange={(selectedItems) => handleSelectedRows(selectedItems)}
+            noItemsLabel="검색 결과를 찾지 못했습니다."
+            // 스타일
+            tableProps={{
+              responsive: true,
+              hover: true,
+            }}
+          />
+          <ModalContainer visible={modal.isOpen} title="게시글" onClose={modal.closeModal} size="lg">
+            <BoardPostDetailsForm clickedRowId={clickedRowId}></BoardPostDetailsForm>
+          </ModalContainer>
+        </CCardBody>
+      </CCard>
     </>
   );
 };

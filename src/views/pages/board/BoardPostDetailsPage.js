@@ -6,16 +6,17 @@ import useBoardPostDetails from '../../../hooks/board/useBoardPostDetails';
 
 const BoardPostDetailsPage = () => {
   const { id } = useParams();
-  const { postDetails, isLoading } = useBoardPostDetails(id);
-  if (isLoading)
+  const boardPostDetails = useBoardPostDetails(id);
+  if (boardPostDetails.isLoading)
     return (
       <div className="m-3">
+        {/*REMIND CElementCover 사용해서 spinner 사용*/}
         <CSpinner variant="grow" color="primary"></CSpinner>
       </div>
     );
   return (
     <>
-      <BoardPostDetailsForm formData={postDetails} />
+      <BoardPostDetailsForm formData={boardPostDetails.postDetails} />
     </>
   );
 };

@@ -10,9 +10,9 @@ export const useBoardPosts = () => {
     try {
       const data = await getPostList();
       setBoardPosts(data);
-      setIsLoading(false);
     } catch (err) {
       console.error(err);
+    } finally {
       setIsLoading(false);
     }
   };

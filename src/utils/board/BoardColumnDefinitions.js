@@ -8,7 +8,7 @@ export const getColumnDefinitions = () => [
   {
     key: 'title',
     label: '제목',
-    _style: { width: '43%' },
+    _style: { width: '53%' },
   },
   {
     key: 'createdByName',
@@ -21,18 +21,13 @@ export const getColumnDefinitions = () => [
     _style: { width: '10%' },
   },
   {
-    key: 'hasFiles',
-    label: '첨부파일',
-    _style: { width: '110px' },
-  },
-  {
     key: 'viewCount',
     label: '조회수',
-    _style: { width: '90px' },
+    _style: { width: '100px' },
   },
   {
     key: 'deleted',
     label: '삭제여부',
-    _style: { width: '14%' },
+    _style: { width: '100px' },
   },
 ];

@@ -5,4 +5,4 @@ const signIn = async (payload) => {
   return response.data;
 };
 
-export default signIn;
+export default { signIn };

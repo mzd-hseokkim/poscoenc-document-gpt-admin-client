@@ -5,6 +5,7 @@ import {
   CForm,
   CFormInput,
   CFormLabel,
+  CFormText,
   CFormTextarea,
   CListGroup,
   CListGroupItem,
@@ -13,19 +14,18 @@ import {
 import { format } from 'date-fns';
 
 import StatusBadge from './BoadStatusBadge';
-import BoardComments from './BoardComments';
+import BoardCommentsForm from './BoardCommentsForm';
 import useBoardPostDetails from '../../hooks/board/useBoardPostDetails';
 import { modifyPostDetails } from '../../services/board/BoardService';
 
-const BoardPostDetailsForm = ({ selectedId }) => {
-  const { postDetails, isLoading } = useBoardPostDetails(selectedId);
+const BoardPostDetailsForm = ({ clickedRowId }) => {
+  const boardPostDetails = useBoardPostDetails(clickedRowId);
   const [isViewMode, setIsViewMode] = useState(true);
 
   const [formData, setFormData] = useState(null);
-  //REMIND formData 는 form 모드에 따라서 변경
   useEffect(() => {
-    setFormData(postDetails);
-  }, [postDetails]);
+    setFormData(boardPostDetails.postDetails);
+  }, [boardPostDetails.postDetails]);
   const handleFormMode = (isViewMode) => {
     setIsViewMode(isViewMode);
   };
@@ -33,19 +33,18 @@ const BoardPostDetailsForm = ({ selectedId }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const submittedData = new FormData(e.target);
-    console.table(e);
     const modifiedData = {
-      id: selectedId,
+      id: clickedRowId,
       title: submittedData.get('postTitle'),
       content: submittedData.get('postContents'),
       hasFiles: submittedData.get('postFileUpload')?.size > 0 ?? false,
     };
     modifyPostDetails(modifiedData);
-    //StartFrom 수정 버튼에 스피너 추가, 수정 후 재 조회 로직 추가.
+    boardPostDetails.fetchPostDetails();
     handleFormMode(true);
   };
 
-  if (isLoading) return <CSpinner variant="border"></CSpinner>;
+  if (boardPostDetails.isLoading) return <CSpinner variant="border"></CSpinner>;
   return (
     <>
       <CForm onSubmit={handleSubmit}>
@@ -53,68 +52,44 @@ const BoardPostDetailsForm = ({ selectedId }) => {
           <div className="top-info" style={{ display: 'flex', marginBottom: '1rem' }}>
             <div className="form-group" style={{ marginRight: '.5rem', width: '60px' }}>
               <CFormLabel htmlFor="postId">ID</CFormLabel>
-              <CFormInput
-                type="number"
-                id="postId"
-                name="postId"
-                defaultValue={formData?.id}
-                readOnly
-                disabled={!isViewMode}
-              />
+              <CFormText id="postId" name="postId" readOnly disabled={!isViewMode}>
+                {formData?.id}
+              </CFormText>
             </div>
             <div className="form-group" style={{ marginRight: '1rem', width: '90px' }}>
               <CFormLabel htmlFor="postCreatedByName">작성자</CFormLabel>
-              <CFormInput
-                type="text"
-                id="postCreatedByName"
-                defaultValue={formData?.createdByName}
-                readOnly
-                disabled={!isViewMode}
-              />
+              <CFormText id="postCreatedByName" readOnly disabled={!isViewMode}>
+                {formData?.createdByName}
+              </CFormText>
             </div>
             <div className="form-group" style={{ marginRight: '1rem', width: '60px' }}>
               <CFormLabel htmlFor="commentCount">댓글 수</CFormLabel>
-              <CFormInput
-                type="number"
-                id="commentCount"
-                defaultValue={formData?.comments?.length}
-                readOnly
-                disabled={!isViewMode}
-              />
+              <CFormText type="number" id="commentCount" readOnly disabled={!isViewMode}>
+                {formData?.comments?.length}
+              </CFormText>
             </div>
             <div className="form-group" style={{ marginRight: '1rem', width: '60px' }}>
               <CFormLabel htmlFor="postViews">조회수</CFormLabel>
-              <CFormInput
-                type="number"
-                id="postViews"
-                defaultValue={formData?.viewCount}
-                readOnly
-                disabled={!isViewMode}
-              />
+              <CFormText type="number" id="postViews" readOnly disabled={!isViewMode}>
+                {formData?.viewCount}
+              </CFormText>
             </div>
-
+          </div>
+          <div className="middle-info" style={{ display: 'flex', marginBottom: '1rem' }}>
             <div className="form-group" style={{ marginRight: '1rem' }}>
               <CFormLabel htmlFor="postDate">작성일시</CFormLabel>
-              <CFormInput
-                type="text"
-                id="postDate"
-                defaultValue={formData?.createdAt ? format(new Date(formData?.createdAt), 'yyyy/MM/dd HH:mm:ss') : ''}
-                readOnly
-                disabled={!isViewMode}
-              />
+              <CFormText id="postDate">
+                {formData?.createdAt ? format(new Date(formData?.createdAt), 'yyyy/MM/dd HH:mm:ss') : ''}
+              </CFormText>
             </div>
             <div className="form-group" style={{ marginRight: '1rem' }}>
               <CFormLabel htmlFor="modifiedDate">수정일시</CFormLabel>
-              <CFormInput
-                type="text"
-                id="modifiedDate"
-                defaultValue={formData?.modifiedAt ? format(new Date(formData?.modifiedAt), 'yyyy/MM/dd HH:mm:ss') : ''}
-                readOnly
-                disabled={!isViewMode}
-              />
+              <CFormText id="modifiedDate">
+                {formData?.modifiedAt ? format(new Date(formData?.modifiedAt), 'yyyy/MM/dd HH:mm:ss') : ''}
+              </CFormText>
             </div>
             <div className="form-group">
-              <CFormLabel htmlFor="postStatus">상태</CFormLabel>
+              <CFormLabel htmlFor="postStatus">삭제 여부</CFormLabel>
               <div>
                 <StatusBadge id="postStatus" deleted={formData?.deleted} />
               </div>
@@ -136,7 +111,7 @@ const BoardPostDetailsForm = ({ selectedId }) => {
               className="mb-3"
               id="postContents"
               name="postContents"
-              rows={10}
+              rows={5}
               placeholder="내용을 작성 해 주세요."
               defaultValue={formData?.content}
               readOnly={isViewMode}
@@ -149,7 +124,7 @@ const BoardPostDetailsForm = ({ selectedId }) => {
                 <>
                   <CFormLabel htmlFor="postFiles">첨부파일</CFormLabel>
                   <CListGroup id="postFiles" name="postFiles" className="mb-3">
-                    <CListGroupItem>첨부파일 1</CListGroupItem>
+                    <CListGroupItem>첨부파일 1 ( 미구현 )</CListGroupItem>
                   </CListGroup>
                 </>
               )}
@@ -169,7 +144,7 @@ const BoardPostDetailsForm = ({ selectedId }) => {
             </>
           )}
         </div>
-        {/*REMIND 댓글 제출 이벤트핸들러 구현*/}
+        {/*REMIND 작성자만 수정 가능하도록 변경*/}
         {isViewMode && (
           <div className="row justify-content-end">
             <div className="col-auto mb-3">
@@ -183,7 +158,6 @@ const BoardPostDetailsForm = ({ selectedId }) => {
             </div>
           </div>
         )}
-        {isViewMode && <BoardComments formData={formData} isViewMode={isViewMode} />}
         {!isViewMode && (
           <div className="d-grid gap-2 d-md-flex justify-content-md-end">
             <CButton type="submit" className="mt-2 me-0">
@@ -201,6 +175,8 @@ const BoardPostDetailsForm = ({ selectedId }) => {
           </div>
         )}
       </CForm>
+      {/*REMIND 댓글 제출 이벤트핸들러 구현*/}
+      {isViewMode && <BoardCommentsForm postId={clickedRowId} isViewMode={isViewMode} />}
     </>
   );
 };
