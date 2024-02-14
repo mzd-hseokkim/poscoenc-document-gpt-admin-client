@@ -218,7 +218,8 @@ const MenuManagement = () => {
               activePage={1}
               itemsPerPageSelect
               itemsPerPage={10}
-              itemsPerPageLabel={'페이지당 메뉴 개수'}
+              itemsPerPageLabel="페이지당 메뉴 개수"
+              noItemsLabel="검색 결과가 없습니다."
               loading={isLoading}
               sorterValue={{ column: 'id', state: 'asc' }}
               items={menuList}
