@@ -1,3 +1,5 @@
+import React, { useEffect, useState } from 'react';
+
 import {
   CButton,
   CCard,
@@ -11,51 +13,24 @@ import {
   CRow,
   CSmartTable,
 } from '@coreui/react-pro';
-import React, { useState } from 'react';
 import { format } from 'date-fns';
+
+import StatusBadge from '../../../components/board/BoadStatusBadge';
+import MenuDetailForm from '../../../components/menu/MenuDetailForm';
+import ModalContainer from '../../../components/modal/ModalContainer';
+import useModal from '../../../hooks/useModal';
 import useToast from '../../../hooks/useToast';
 import MenuService from '../../../services/menu/MenuService';
-import useModal from '../../../hooks/useModal';
-import ModalContainer from '../../../components/modal/ModalContainer';
-import MenuDetailForm from '../../../components/menu/MenuDetailForm';
-
-const columns = [
-  {
-    key: 'id',
-    label: '아이디',
-  },
-  {
-    key: 'name',
-    label: '이름',
-  },
-  {
-    key: 'icon',
-    label: '아이콘',
-  },
-  {
-    key: 'urlPath',
-    label: 'URL',
-  },
-  {
-    key: 'parentId',
-    label: '상위 메뉴 아이디',
-  },
-  {
-    key: 'menuOrder',
-    label: '메뉴 순서',
-  },
-];
+import { menuColumnUtils } from '../../../utils/menu/menuColumnUtils';
 
 const MenuManagement = () => {
   const [startDate, setStartDate] = useState(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
   const [endDate, setEndDate] = useState(new Date());
   const [menuList, setMenuList] = useState([]);
+  const [checkedItems, setCheckedItems] = useState([]);
   const [selectedId, setSelectedId] = useState();
   const [formMode, setFormMode] = useState('');
-
-  const addToast = useToast();
-  const modal = useModal();
-
+  const [isLoading, setIsLoading] = useState(false);
   const initialFormData = {
     name: '',
     urlPath: '',
@@ -69,10 +44,21 @@ const MenuManagement = () => {
   };
   const [formData, setFormData] = useState(initialFormData);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const addToast = useToast();
+  const modal = useModal();
 
+  useEffect(() => {
+    setIsLoading(false);
+  }, []);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    getMenuList();
+  };
+
+  const getMenuList = async () => {
     try {
+      setIsLoading(true);
       const data = await MenuService.getMenuList(formData);
       setMenuList(data.content);
     } catch (error) {
@@ -80,6 +66,8 @@ const MenuManagement = () => {
       if (status === 400) {
         addToast({ color: 'danger', body: error.response.data.message });
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -132,6 +120,26 @@ const MenuManagement = () => {
     modal.openModal();
   };
 
+  const handleDeleteRestoreClick = async (shouldDelete) => {
+    const ids = checkedItems.map((item) => item.id);
+    if (checkedItems.length === 1) {
+      try {
+        await MenuService.deleteSingleMenu(ids, shouldDelete);
+        getMenuList();
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      try {
+        await MenuService.deleteMultipleMenu(ids, shouldDelete);
+        getMenuList();
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    setCheckedItems([]);
+  };
+
   return (
     <>
       <CCard className="row g-3">
@@ -171,7 +179,7 @@ const MenuManagement = () => {
               <CCol md={6}>
                 <CDateRangePicker
                   id="createdAt"
-                  label="생성 일시"
+                  label="생성일"
                   startDate={startDate}
                   endDate={endDate}
                   onStartDateChange={(newDate) => handleStartDateChange({ id: 'createdAt', newDate })}
@@ -180,7 +188,7 @@ const MenuManagement = () => {
               </CCol>
               <CCol md={6}>
                 <CDateRangePicker
-                  label="수정 일시"
+                  label="수정일"
                   startDate={startDate}
                   endDate={endDate}
                   onStartDateChange={(newDate) => handleStartDateChange({ id: 'modifiedAt', newDate })}
@@ -200,41 +208,52 @@ const MenuManagement = () => {
           <CRow className="mb-3">
             <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
               <CButton onClick={handleCreateClick}>메뉴 추가</CButton>
+              <CButton onClick={() => handleDeleteRestoreClick(true)}>삭제</CButton>
+              <CButton onClick={() => handleDeleteRestoreClick(false)}>복구</CButton>
             </CCol>
           </CRow>
           <CRow className="mb-3">
             <CSmartTable
-              activePage={2}
-              clickableRows
-              columns={columns}
-              columnSorter={false}
-              items={menuList}
-              itemsPerPageSelect
-              itemsPerPage={5}
               pagination
-              onFilteredItemsChange={(items) => {
-                console.log(items);
+              activePage={1}
+              itemsPerPageSelect
+              itemsPerPage={10}
+              itemsPerPageLabel={'페이지당 메뉴 개수'}
+              loading={isLoading}
+              sorterValue={{ column: 'id', state: 'asc' }}
+              items={menuList}
+              columns={menuColumnUtils}
+              selectable
+              scopedColumns={{
+                name: (item) => (
+                  <td
+                    onClick={() => {
+                      handleRowClick(item.id);
+                    }}
+                  >
+                    {item.name}
+                  </td>
+                ),
+                deleted: (item) => (
+                  <td>
+                    <StatusBadge deleted={item.deleted} />
+                  </td>
+                ),
               }}
               onSelectedItemsChange={(items) => {
-                console.log(items);
+                setCheckedItems(items);
               }}
-              selectable
-              sorterValue={{ column: 'id', state: 'asc' }}
               tableProps={{
                 responsive: true,
-                striped: true,
                 hover: true,
               }}
-              tableBodyProps={{
-                className: 'align-middle',
-              }}
-              onRowClick={(row) => handleRowClick(row.id)}
+              selected={checkedItems}
             />
           </CRow>
         </CCardBody>
       </CCard>
       <ModalContainer visible={modal.isOpen} title="메뉴 정보" onClose={modal.closeModal}>
-        <MenuDetailForm selectedId={selectedId} initialFormMode={formMode} />
+        <MenuDetailForm selectedId={selectedId} initialFormMode={formMode} closeModal={modal.closeModal} />
       </ModalContainer>
     </>
   );
