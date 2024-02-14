@@ -254,7 +254,12 @@ const MenuManagement = () => {
         </CCardBody>
       </CCard>
       <ModalContainer visible={modal.isOpen} title="메뉴 정보" onClose={modal.closeModal}>
-        <MenuDetailForm selectedId={selectedId} initialFormMode={formMode} closeModal={modal.closeModal} />
+        <MenuDetailForm
+          selectedId={selectedId}
+          initialFormMode={formMode}
+          closeModal={modal.closeModal}
+          fetchMenuList={getMenuList}
+        />
       </ModalContainer>
     </>
   );

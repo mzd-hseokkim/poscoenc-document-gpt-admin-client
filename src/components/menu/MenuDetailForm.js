@@ -9,7 +9,7 @@ import { getAuditFields } from '../../utils/common/auditFieldUtils';
 import formModes from '../../utils/formModes';
 import InputList from '../input/InputList';
 
-const MenuDetailForm = ({ selectedId, initialFormMode, closeModal }) => {
+const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList }) => {
   const [formData, setFormData] = useState({ allowChildren: false });
   const [formMode, setFormMode] = useState(initialFormMode);
   const [roles, setRoles] = useState([]);
@@ -116,6 +116,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal }) => {
     try {
       await MenuService.createMenu(formData);
       closeModal();
+      fetchMenuList();
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -131,6 +132,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal }) => {
     try {
       await MenuService.updateMenu(formData);
       closeModal();
+      fetchMenuList();
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -166,6 +168,17 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal }) => {
 
   const handleUpdateClick = () => {
     setFormMode('update');
+  };
+
+  const handleDeleteRestoreClick = async (id) => {
+    const shouldDelete = !formData.deleted;
+    try {
+      await MenuService.deleteSingleMenu(id, shouldDelete);
+    } catch (error) {
+      console.log(error);
+    }
+    closeModal();
+    fetchMenuList();
   };
 
   const renderRoleSelect = () => (
@@ -232,9 +245,19 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal }) => {
           <CRow>
             <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
               {isReadMode ? (
-                <CButton onClick={handleUpdateClick}>수정</CButton>
+                <>
+                  <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>
+                    {formData.deleted ? '복구' : '삭제'}
+                  </CButton>
+                  <CButton onClick={handleUpdateClick}>수정</CButton>
+                </>
               ) : (
-                <CButton onClick={handleSubmit}>저장</CButton>
+                <>
+                  <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>
+                    {formData.deleted ? '복구' : '삭제'}
+                  </CButton>
+                  <CButton onClick={handleSubmit}>저장</CButton>
+                </>
               )}
             </CCol>
           </CRow>
