@@ -19,8 +19,17 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const menuBasicFields = [
-    { name: 'id', label: '아이디', isDisabled: isUpdateMode, isRendered: !isCreateMode },
-    { name: 'name', label: '이름', placeholder: '이름을 입력하세요.' },
+    {
+      name: 'id',
+      label: '아이디',
+      isDisabled: isUpdateMode,
+      isRendered: !isCreateMode,
+    },
+    {
+      name: 'name',
+      label: '이름',
+      placeholder: '이름을 입력하세요.',
+    },
     {
       name: 'icon',
       label: '아이콘',
@@ -145,7 +154,6 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal }) => {
     } else {
       setFormData((prev) => ({ ...prev, [id]: value }));
     }
-    console.table(formData);
   };
 
   const handleSubmit = () => {
