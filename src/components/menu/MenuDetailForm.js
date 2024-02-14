@@ -5,6 +5,7 @@ import { CButton, CCol, CFormCheck, CFormSelect, CMultiSelect, CRow, CSpinner } 
 import useToast from '../../hooks/useToast';
 import MenuService from '../../services/menu/MenuService';
 import RoleService from '../../services/Role/RoleService';
+import { getAuditFields } from '../../utils/common/auditFieldUtils';
 import formModes from '../../utils/formModes';
 import InputList from '../input/InputList';
 
@@ -47,13 +48,6 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal }) => {
       type: 'number',
       placeholder: '메뉴 순서를 숫자로 입력하세요',
     },
-  ];
-
-  const auditFields = [
-    { name: 'createdByName', label: '생성자', isRendered: !isCreateMode, isDisabled: isUpdateMode },
-    { name: 'createdAt', label: '생성일자', type: 'date', isRendered: !isCreateMode, isDisabled: isUpdateMode },
-    { name: 'modifiedByName', label: '수정자', isRendered: !isCreateMode, isDisabled: isUpdateMode },
-    { name: 'modifiedAt', label: '수정일자', type: 'date', isRendered: !isCreateMode, isDisabled: isUpdateMode },
   ];
 
   useEffect(() => {
@@ -221,7 +215,12 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal }) => {
           />
           {renderRoleSelect()}
           {renderParentSelect()}
-          <InputList fields={auditFields} formData={formData} handleChange={handleChange} isReadMode={isReadMode} />
+          <InputList
+            fields={getAuditFields(formMode)}
+            formData={formData}
+            handleChange={handleChange}
+            isReadMode={isReadMode}
+          />
           <CRow>
             <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
               {isReadMode ? (
