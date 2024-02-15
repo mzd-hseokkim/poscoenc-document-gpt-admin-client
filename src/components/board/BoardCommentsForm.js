@@ -11,7 +11,7 @@ import { userIdSelector } from '../../states/jwtTokenState';
 
 const BoardCommentsForm = ({ postId }) => {
   const [commentText, setCommentText] = useState('');
-  const boardPostComments = usePostComments(postId);
+  const { postComments, isLoading, fetchPostComments } = usePostComments(postId);
   const submitComment = useSubmitComment();
   //REMIND add loading state
   const { deleteComment, deleteIsLoading } = useDeleteComment();
@@ -25,14 +25,12 @@ const BoardCommentsForm = ({ postId }) => {
     e.preventDefault();
     await submitComment.submitComment(postId, commentText);
     setCommentText('');
-    await boardPostComments.fetchPostComments();
+    await fetchPostComments();
   };
 
   const toggleCommentStatus = async (commentId, shouldDelete) => {
-    const isSuccess = await deleteComment(commentId, shouldDelete);
-    if (isSuccess) {
-      await boardPostComments.fetchPostComments();
-    }
+    await deleteComment(commentId, shouldDelete);
+    await fetchPostComments();
   };
   // create, delete --------------------------------------------------------------
 
@@ -41,15 +39,16 @@ const BoardCommentsForm = ({ postId }) => {
 
   useEffect(() => {
     endOfCommentsRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [boardPostComments.postComments]);
+  }, [postComments]);
+
   // scroll ------------------------------------------------------------
 
   return (
     <CForm onSubmit={handleCommentSubmit} className="comments-section">
       <CFormLabel htmlFor="postComments">댓글</CFormLabel>
 
-      <div style={{ height: '180px', overflowY: 'auto' }} ref={endOfCommentsRef}>
-        {boardPostComments.postComments?.map((comment, index) => (
+      <div style={{ height: '180px', overflowY: 'auto' }}>
+        {postComments?.map((comment, index) => (
           <div key={index} className={`comment-item mb-2 ${comment.deleted ? 'deleted' : ''}`}>
             <CInputGroup className="mb-1">
               <CFormText readOnly>{`작성자 : ${comment.createdByName}`}</CFormText>
@@ -75,6 +74,7 @@ const BoardCommentsForm = ({ postId }) => {
             >
               {comment.content}
             </CFormText>
+            <div ref={endOfCommentsRef} />
           </div>
         ))}
       </div>

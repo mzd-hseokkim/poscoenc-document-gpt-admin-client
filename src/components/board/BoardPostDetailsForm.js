@@ -15,20 +15,22 @@ import { format } from 'date-fns';
 
 import StatusBadge from './BoadStatusBadge';
 import BoardCommentsForm from './BoardCommentsForm';
-import useBoardPostDetails from '../../hooks/board/useBoardPostDetails';
+import useGetBoardPostDetails from '../../hooks/board/useGetBoardPostDetails';
 import useToast from '../../hooks/useToast';
 import { putModifiedPostDetailsApi } from '../../services/board/BoardService';
 
 const BoardPostDetailsForm = ({ clickedRowId }) => {
-  const boardPostDetails = useBoardPostDetails(clickedRowId);
+  const { postDetails, getDetailIsLoading, fetchPostDetails } = useGetBoardPostDetails(clickedRowId);
   const [isViewMode, setIsViewMode] = useState(true);
 
   const addToast = useToast();
 
   const [formData, setFormData] = useState(null);
+
   useEffect(() => {
-    setFormData(boardPostDetails.postDetails);
-  }, [boardPostDetails.postDetails]);
+    setFormData(postDetails);
+  }, [postDetails]);
+
   const handleFormMode = (isViewMode) => {
     setIsViewMode(isViewMode);
   };
@@ -48,11 +50,11 @@ const BoardPostDetailsForm = ({ clickedRowId }) => {
       console.log('touched');
       addToast({ color: 'danger', message: error.message });
     }
-    await boardPostDetails.fetchPostDetails();
-    handleFormMode(true);
+    await fetchPostDetails();
+    await handleFormMode(true);
   };
 
-  if (boardPostDetails.isLoading) return <CSpinner variant="border"></CSpinner>;
+  if (getDetailIsLoading) return <CSpinner variant="border"></CSpinner>;
   return (
     <>
       <CForm onSubmit={handleSubmit}>

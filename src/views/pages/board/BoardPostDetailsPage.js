@@ -2,11 +2,11 @@ import { CSpinner } from '@coreui/react-pro';
 import { useParams } from 'react-router-dom';
 
 import BoardPostDetailsForm from '../../../components/board/BoardPostDetailsForm';
-import useBoardPostDetails from '../../../hooks/board/useBoardPostDetails';
+import useGetBoardPostDetails from '../../../hooks/board/useGetBoardPostDetails';
 
 const BoardPostDetailsPage = () => {
   const { id } = useParams();
-  const boardPostDetails = useBoardPostDetails(id);
+  const boardPostDetails = useGetBoardPostDetails(id);
   if (boardPostDetails.isLoading)
     return (
       <div className="m-3">

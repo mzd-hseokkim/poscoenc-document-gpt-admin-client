@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { getPostComments } from '../../../services/board/BoardCommentService';
 import useToast from '../../useToast';
@@ -9,7 +9,7 @@ export const usePostComments = (postId) => {
 
   const addToast = useToast();
 
-  const fetchPostComments = useCallback(async () => {
+  const fetchPostComments = async () => {
     try {
       const comments = await getPostComments(postId);
       setPostComments(comments);
@@ -18,11 +18,11 @@ export const usePostComments = (postId) => {
     } finally {
       setIsLoading(false);
     }
-  }, [addToast, postId]);
+  };
 
   useEffect(() => {
     fetchPostComments();
-  }, [fetchPostComments]);
+  }, []);
 
   return { postComments, isLoading, fetchPostComments };
 };

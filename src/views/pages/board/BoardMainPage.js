@@ -17,16 +17,16 @@ import { format } from 'date-fns';
 import BoardPostDetailsForm from '../../../components/board/BoardPostDetailsForm';
 import { getScopedColumns } from '../../../components/board/BoardScopedColumns';
 import ModalContainer from '../../../components/modal/ModalContainer';
+import useSearchBoardPosts from '../../../hooks/board/useSearchBoardPosts';
 import UseModal from '../../../hooks/useModal';
 import useToast from '../../../hooks/useToast';
-import { getSearchedPostListApi, patchPostsDeletedOptionApi } from '../../../services/board/BoardService';
+import { patchPostsDeletedOptionApi } from '../../../services/board/BoardService';
 import { getColumnDefinitions } from '../../../utils/board/BoardColumnDefinitions';
 
 const BoardMainPage = () => {
   const tableFields = getColumnDefinitions();
 
   const [selectedRows, setSelectedRows] = useState([]);
-  //REMIND remove default postSearchResults
 
   const handleSelectedRows = (newSelectedRows) => {
     setSelectedRows(newSelectedRows);
@@ -67,8 +67,8 @@ const BoardMainPage = () => {
 
   // 검색 창 --------------------------------------------------------
   //REMIND post 로 기본값 줌
-  const [postSearchResults, setPostSearchResults] = useState([]);
-  const [searchIsLoading, setSearchIsLoading] = useState(false);
+
+  const { postSearchResults, searchResultIsLoading, searchBoardPosts } = useSearchBoardPosts();
 
   const [startDate, setStartDate] = useState(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
   const [endDate, setEndDate] = useState(new Date());
@@ -83,42 +83,31 @@ const BoardMainPage = () => {
     toCreatedAt: format(endDate, "yyyy-MM-dd'T'23:59"),
     deletionOption: '',
   };
-  const [searchRequestFormData, setSearchRequestFormData] = useState(initialSearchFormData);
+  const [searchFormData, setSearchFormData] = useState(initialSearchFormData);
   const handleSearchFormChange = ({ target: { id, value } }) => {
-    setSearchRequestFormData((prev) => ({ ...prev, [id]: value }));
+    setSearchFormData((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleStartDateChange = ({ newDate }) => {
-    setSearchRequestFormData((prev) => ({
+    setSearchFormData((prev) => ({
       ...prev,
       fromCreatedAt: format(new Date(newDate), "yyyy-MM-dd'T'00:00"),
     }));
   };
   const handleEndDateChange = ({ newDate }) => {
-    setSearchRequestFormData((prev) => ({
+    setSearchFormData((prev) => ({
       ...prev,
       toCreatedAt: format(new Date(newDate), "yyyy-MM-dd'T'23:59"),
     }));
   };
   const handleReset = () => {
-    setSearchRequestFormData(initialSearchFormData);
+    setSearchFormData(initialSearchFormData);
     setStartDate(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
     setEndDate(new Date());
   };
-  const handleSearchSubmit = async () => {
-    setSearchIsLoading(true);
-    try {
-      const searchResult = await getSearchedPostListApi(searchRequestFormData);
-      setPostSearchResults(searchResult);
-    } catch (error) {
-      addToast({ color: 'danger', message: error.message });
-      const status = error.response?.status;
-      if (status === 400) {
-        addToast({ color: 'danger', body: error.response.data.message });
-      }
-    } finally {
-      setSearchIsLoading(false);
-    }
+  const handleSearchSubmit = async (e) => {
+    e.preventDefault();
+    await searchBoardPosts(searchFormData);
   };
 
   // 검색 창 --------------------------------------------------------
@@ -142,7 +131,7 @@ const BoardMainPage = () => {
                       id="title"
                       label="제목"
                       onChange={handleSearchFormChange}
-                      value={searchRequestFormData.title}
+                      value={searchFormData.title}
                     />
                   </CCol>
                   <CCol md={4} className="position-relative">
@@ -150,7 +139,7 @@ const BoardMainPage = () => {
                       id="createdByName"
                       label="작성자"
                       onChange={handleSearchFormChange}
-                      value={searchRequestFormData.createdByName}
+                      value={searchFormData.createdByName}
                     />
                   </CCol>
                 </CRow>
@@ -160,7 +149,7 @@ const BoardMainPage = () => {
                       id="content"
                       label="내용"
                       onChange={handleSearchFormChange}
-                      value={searchRequestFormData.content}
+                      value={searchFormData.content}
                     />
                   </CCol>
                 </CRow>
@@ -179,7 +168,7 @@ const BoardMainPage = () => {
                       id="hasFilesOption"
                       label="첨부파일 없는 게시물 포함"
                       name="hasFilesOption"
-                      value={searchRequestFormData.hasFilesOption}
+                      value={searchFormData.hasFilesOption}
                       options={[
                         { label: '모든 게시글', value: '' },
                         { label: '예', value: true },
@@ -193,7 +182,7 @@ const BoardMainPage = () => {
                       id="deletionOption"
                       label="게시글 상태"
                       name="deletionOption"
-                      value={searchRequestFormData.deletionOption}
+                      value={searchFormData.deletionOption}
                       options={[
                         { label: '모든 게시글', value: '' },
                         { label: '삭제됨', value: 'Yes' },
@@ -243,7 +232,7 @@ const BoardMainPage = () => {
             itemsPerPage={10}
             itemsPerPageLabel={'페이지당 글 개수'}
             // 스피너
-            loading={searchIsLoading}
+            loading={searchResultIsLoading}
             // 정렬
             // REMIND 커스텀 소터 구현
             sorterValue={{ column: 'id', state: 'asc' }}

@@ -1,8 +1,6 @@
 import api from '../../api/Api';
 
 const getPostDetailsApi = async (postId) => {
-  //REMIND 조회시랑 새로고침 할 때 조회수 올라가지 않도록 분리
-  await api.patch(`/admin/boards/${postId}/view`);
   const response = await api.get(`/admin/boards/${postId}`);
   return response.data;
 };
