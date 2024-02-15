@@ -1,18 +1,13 @@
 import api from '../../api/Api';
 
-const getPostList = async () => {
-  const response = await api.get('/admin/boards');
-  return response.data.content;
-};
-
-const getPostDetails = async (postId) => {
+const getPostDetailsApi = async (postId) => {
   //REMIND 조회시랑 새로고침 할 때 조회수 올라가지 않도록 분리
   await api.patch(`/admin/boards/${postId}/view`);
   const response = await api.get(`/admin/boards/${postId}`);
   return response.data;
 };
 
-const searchPostList = async (params) => {
+const getSearchedPostListApi = async (params) => {
   const response = await api.get('/admin/boards', {
     params: {
       title: params.title,
@@ -29,13 +24,13 @@ const searchPostList = async (params) => {
   return response?.data.content ?? [];
 };
 
-const modifyPostDetails = async (payload) => {
+const putModifiedPostDetailsApi = async (payload) => {
   const response = await api.put(`/admin/boards/${payload.id}`, payload);
   return response.data;
 };
 
-const fetchPostsDeletedOption = async (boardIds, deletedOption) => {
+const patchPostsDeletedOptionApi = async (boardIds, deletedOption) => {
   const response = await api.patch(`/admin/boards/deleted/${deletedOption}`, boardIds);
   return response.status === 200;
 };
-export { getPostList, getPostDetails, searchPostList, modifyPostDetails, fetchPostsDeletedOption };
+export { getPostDetailsApi, getSearchedPostListApi, putModifiedPostDetailsApi, patchPostsDeletedOptionApi };

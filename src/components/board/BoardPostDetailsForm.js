@@ -16,11 +16,14 @@ import { format } from 'date-fns';
 import StatusBadge from './BoadStatusBadge';
 import BoardCommentsForm from './BoardCommentsForm';
 import useBoardPostDetails from '../../hooks/board/useBoardPostDetails';
-import { modifyPostDetails } from '../../services/board/BoardService';
+import useToast from '../../hooks/useToast';
+import { putModifiedPostDetailsApi } from '../../services/board/BoardService';
 
 const BoardPostDetailsForm = ({ clickedRowId }) => {
   const boardPostDetails = useBoardPostDetails(clickedRowId);
   const [isViewMode, setIsViewMode] = useState(true);
+
+  const addToast = useToast();
 
   const [formData, setFormData] = useState(null);
   useEffect(() => {
@@ -30,7 +33,7 @@ const BoardPostDetailsForm = ({ clickedRowId }) => {
     setIsViewMode(isViewMode);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const submittedData = new FormData(e.target);
     const modifiedData = {
@@ -39,9 +42,13 @@ const BoardPostDetailsForm = ({ clickedRowId }) => {
       content: submittedData.get('postContents'),
       hasFiles: submittedData.get('postFileUpload')?.size > 0 ?? false,
     };
-    console.table(modifiedData);
-    modifyPostDetails(modifiedData);
-    boardPostDetails.fetchPostDetails();
+    try {
+      await putModifiedPostDetailsApi(modifiedData);
+    } catch (error) {
+      console.log('touched');
+      addToast({ color: 'danger', message: error.message });
+    }
+    await boardPostDetails.fetchPostDetails();
     handleFormMode(true);
   };
 

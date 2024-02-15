@@ -19,7 +19,7 @@ import { getScopedColumns } from '../../../components/board/BoardScopedColumns';
 import ModalContainer from '../../../components/modal/ModalContainer';
 import UseModal from '../../../hooks/useModal';
 import useToast from '../../../hooks/useToast';
-import { fetchPostsDeletedOption, searchPostList } from '../../../services/board/BoardService';
+import { getSearchedPostListApi, patchPostsDeletedOptionApi } from '../../../services/board/BoardService';
 import { getColumnDefinitions } from '../../../utils/board/BoardColumnDefinitions';
 
 const BoardMainPage = () => {
@@ -38,7 +38,7 @@ const BoardMainPage = () => {
 
   const togglePostStatus = async (shouldDelete) => {
     try {
-      const isSuccess = await fetchPostsDeletedOption(
+      const isSuccess = await patchPostsDeletedOptionApi(
         selectedRows.map((row) => row.id),
         shouldDelete
       );
@@ -48,8 +48,7 @@ const BoardMainPage = () => {
         handleSelectedRows([]);
       }
     } catch (error) {
-      //REMIND 에러 toast 추가
-      console.error('Failed to toggle post status:', error);
+      addToast({ color: 'danger', message: error.message });
     } finally {
       await handleSearchSubmit();
     }
@@ -109,9 +108,10 @@ const BoardMainPage = () => {
   const handleSearchSubmit = async () => {
     setSearchIsLoading(true);
     try {
-      const searchResult = await searchPostList(searchRequestFormData);
+      const searchResult = await getSearchedPostListApi(searchRequestFormData);
       setPostSearchResults(searchResult);
     } catch (error) {
+      addToast({ color: 'danger', message: error.message });
       const status = error.response?.status;
       if (status === 400) {
         addToast({ color: 'danger', body: error.response.data.message });
