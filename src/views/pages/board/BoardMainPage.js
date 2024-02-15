@@ -257,7 +257,7 @@ const BoardMainPage = () => {
             scopedColumns={scopedColumns}
             // REMIND DOMException 처리
             onSelectedItemsChange={(selectedItems) => handleSelectedRows(selectedItems)}
-            noItemsLabel="검색 결과를 찾지 못했습니다."
+            noItemsLabel="검색 결과가 없습니다."
             // 스타일
             tableProps={{
               responsive: true,
