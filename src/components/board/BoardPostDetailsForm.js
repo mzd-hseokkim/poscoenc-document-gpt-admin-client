@@ -1,16 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import {
-  CButton,
-  CForm,
-  CFormInput,
-  CFormLabel,
-  CFormText,
-  CFormTextarea,
-  CListGroup,
-  CListGroupItem,
-  CSpinner,
-} from '@coreui/react-pro';
+import { CButton, CForm, CFormInput, CFormLabel, CFormText, CFormTextarea, CSpinner } from '@coreui/react-pro';
 import { format } from 'date-fns';
 import { useRecoilValue } from 'recoil';
 
@@ -130,32 +120,6 @@ const BoardPostDetailsForm = ({ clickedRowId }) => {
               readOnly={isViewMode}
             ></CFormTextarea>
           </div>
-          {/*REMIND File 개수 3개 제한*/}
-          {isViewMode && (
-            <div>
-              {formData?.hasFiles && (
-                <>
-                  <CFormLabel htmlFor="postFiles">첨부파일</CFormLabel>
-                  <CListGroup id="postFiles" name="postFiles" className="mb-3">
-                    <CListGroupItem>첨부파일 1 ( 미구현 )</CListGroupItem>
-                  </CListGroup>
-                </>
-              )}
-              {/* List attached files here */}
-            </div>
-          )}
-          {!isViewMode && (
-            <>
-              <CFormInput
-                disabled={isViewMode}
-                type="file"
-                id="postFileUpload"
-                name="postFileUpload"
-                label="파일 업로드 ( 최대 3개 )"
-                multiple
-              />
-            </>
-          )}
         </div>
         {/*REMIND 작성자만 수정 가능하도록 변경*/}
         {isViewMode && (
