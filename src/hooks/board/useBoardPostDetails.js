@@ -1,21 +1,24 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { getPostDetails } from '../../services/board/BoardService';
+import useToast from '../useToast';
 
 const useBoardPostDetails = (postId) => {
   const [postDetails, setPostDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const addToast = useToast();
+
   const fetchPostDetails = useCallback(async () => {
     try {
       const postDetails = await getPostDetails(postId);
       setPostDetails(postDetails);
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      addToast({ color: 'danger', message: error.message });
     } finally {
       setIsLoading(false);
     }
-  }, [postId]);
+  }, [addToast, postId]);
 
   useEffect(() => {
     fetchPostDetails();

@@ -1,17 +1,18 @@
 import { useState } from 'react';
 
 import { postCommentApi } from '../../../services/board/BoardCommentService';
+import useToast from '../../useToast';
 
 const useSubmitComment = () => {
   const [isLoading, setIsLoading] = useState(false);
-  // REMIND hook 의 에러 핸들링 추가
+  const addToast = useToast();
 
   const submitComment = async (postId, content) => {
     setIsLoading(true);
     try {
       return await postCommentApi(postId, content);
     } catch (error) {
-      console.log(error);
+      addToast({ color: 'danger', message: error.message });
     } finally {
       setIsLoading(false);
     }

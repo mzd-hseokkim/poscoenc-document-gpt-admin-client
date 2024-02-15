@@ -18,7 +18,7 @@ export const usePostComments = (postId) => {
     } finally {
       setIsLoading(false);
     }
-  }, [postId]);
+  }, [addToast, postId]);
 
   useEffect(() => {
     fetchPostComments();
