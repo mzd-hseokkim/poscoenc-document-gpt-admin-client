@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { writeCommentApi } from '../../../services/board/BoardCommentService';
+import { postCommentApi } from '../../../services/board/BoardCommentService';
 
 const useSubmitComment = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -9,7 +9,7 @@ const useSubmitComment = () => {
   const submitComment = async (postId, content) => {
     setIsLoading(true);
     try {
-      return await writeCommentApi(postId, content);
+      return await postCommentApi(postId, content);
     } catch (error) {
       console.log(error);
     } finally {

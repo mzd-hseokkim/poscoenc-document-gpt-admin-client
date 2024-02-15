@@ -4,14 +4,14 @@ import { CButton, CForm, CFormLabel, CFormText, CFormTextarea, CInputGroup, CInp
 import { format } from 'date-fns';
 import { useRecoilValue } from 'recoil';
 
-import { useBoardPostComments } from '../../hooks/board/comment/useBoardPostComments';
 import useDeleteComment from '../../hooks/board/comment/useDeleteComment';
+import { usePostComments } from '../../hooks/board/comment/usePostComments';
 import useSubmitComment from '../../hooks/board/comment/useSubmitComment';
 import { userIdSelector } from '../../states/jwtTokenState';
 
 const BoardCommentsForm = ({ postId }) => {
   const [commentText, setCommentText] = useState('');
-  const boardPostComments = useBoardPostComments(postId);
+  const boardPostComments = usePostComments(postId);
   const submitComment = useSubmitComment();
   //REMIND add loading state
   const { deleteComment, deleteIsLoading } = useDeleteComment();

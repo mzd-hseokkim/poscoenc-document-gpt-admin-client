@@ -170,7 +170,6 @@ const BoardMainPage = () => {
                       label="작성일"
                       startDate={startDate}
                       endDate={endDate}
-                      //TODO 메뉴 보고 수정사항 반영하기
                       onStartDateChange={(newDate) => handleStartDateChange({ id: 'createdAt', newDate })}
                       onEndDateChange={(newDate) => handleEndDateChange({ id: 'createdAt', newDate })}
                     />

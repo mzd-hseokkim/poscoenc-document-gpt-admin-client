@@ -39,6 +39,7 @@ const BoardPostDetailsForm = ({ clickedRowId }) => {
       content: submittedData.get('postContents'),
       hasFiles: submittedData.get('postFileUpload')?.size > 0 ?? false,
     };
+    console.table(modifiedData);
     modifyPostDetails(modifiedData);
     boardPostDetails.fetchPostDetails();
     handleFormMode(true);

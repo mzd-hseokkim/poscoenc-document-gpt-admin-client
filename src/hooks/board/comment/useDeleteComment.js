@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { deleteCommentApi } from '../../../services/board/BoardCommentService';
+import { patchDeleteCommentApi } from '../../../services/board/BoardCommentService';
 
 const useDeleteComment = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -8,7 +8,7 @@ const useDeleteComment = () => {
   const deleteComment = async (postId, deletionOption) => {
     setIsLoading(true);
     try {
-      return await deleteCommentApi(postId, deletionOption);
+      return await patchDeleteCommentApi(postId, deletionOption);
     } catch (e) {
       console.log(e);
     } finally {
