@@ -5,7 +5,7 @@ import { toastState } from '../states/toastState';
 const useToast = () => {
   const setToasts = useSetRecoilState(toastState);
 
-  return ({ message, color }) => {
+  return ({ message, color = 'danger' }) => {
     setToasts({ message, color, key: Date.now() });
   };
 };
