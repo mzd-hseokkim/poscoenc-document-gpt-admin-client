@@ -52,6 +52,7 @@ const BoardCommentsForm = ({ postId }) => {
           <div key={index} className={`comment-item mb-2 ${comment.deleted ? 'deleted' : ''}`}>
             <CInputGroup className="mb-1">
               <CFormText readOnly>{`작성자 : ${comment.createdByName}`}</CFormText>
+              {/*REMIND comment 와 post 에 createdBy Id 도 반환할수있도록 변경요청*/}
               {comment.createdByName === currentUserId && (
                 <div className="ms-auto">
                   <CButton size="sm" onClick={() => toggleCommentStatus(comment.id, !comment.deleted)}>

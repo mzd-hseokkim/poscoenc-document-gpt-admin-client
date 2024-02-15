@@ -19,7 +19,7 @@ export const userIdSelector = selector({
       try {
         const decoded = decodeJwt(token);
         //REMIND 테스트용으로 name 넣어둠. 추후 id 로 변경
-        return decoded.name; // 토큰에 따라 'sub' 또는 다른 필드일 수 있음
+        return decoded.name;
       } catch (error) {
         console.error('JWT 디코딩 중 오류 발생', error);
         return undefined;

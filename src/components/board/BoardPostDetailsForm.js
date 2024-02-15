@@ -12,17 +12,20 @@ import {
   CSpinner,
 } from '@coreui/react-pro';
 import { format } from 'date-fns';
+import { useRecoilValue } from 'recoil';
 
 import StatusBadge from './BoadStatusBadge';
 import BoardCommentsForm from './BoardCommentsForm';
 import useGetBoardPostDetails from '../../hooks/board/useGetBoardPostDetails';
 import useToast from '../../hooks/useToast';
 import { putModifiedPostDetailsApi } from '../../services/board/BoardService';
+import { userIdSelector } from '../../states/jwtTokenState';
 
 const BoardPostDetailsForm = ({ clickedRowId }) => {
   const { postDetails, getDetailIsLoading, fetchPostDetails } = useGetBoardPostDetails(clickedRowId);
   const [isViewMode, setIsViewMode] = useState(true);
 
+  const currentUserId = useRecoilValue(userIdSelector);
   const addToast = useToast();
 
   const [formData, setFormData] = useState(null);
@@ -157,15 +160,18 @@ const BoardPostDetailsForm = ({ clickedRowId }) => {
         {/*REMIND 작성자만 수정 가능하도록 변경*/}
         {isViewMode && (
           <div className="row justify-content-end">
-            <div className="col-auto mb-3">
-              <CButton
-                onClick={() => {
-                  handleFormMode(false);
-                }}
-              >
-                수정
-              </CButton>
-            </div>
+            {/*REMIND comment 와 post 에 createdBy Id 도 반환할수있도록 변경요청*/}
+            {formData?.createdByName === currentUserId && (
+              <div className="col-auto mb-3">
+                <CButton
+                  onClick={() => {
+                    handleFormMode(false);
+                  }}
+                >
+                  수정
+                </CButton>
+              </div>
+            )}
           </div>
         )}
         {!isViewMode && (
