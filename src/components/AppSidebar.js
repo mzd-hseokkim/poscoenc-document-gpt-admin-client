@@ -9,12 +9,13 @@ import { sygnet } from 'src/assets/brand/sygnet';
 
 import { AppSidebarNav } from './AppSidebarNav';
 import 'simplebar/dist/simplebar.min.css';
-import navigation from '../_nav';
+import useSideBarItems from '../hooks/useSideBarItems';
 
 const AppSidebar = () => {
   const dispatch = useDispatch();
   const unfoldable = useSelector((state) => state.sidebarUnfoldable);
   const sidebarShow = useSelector((state) => state.sidebarShow);
+  const navItems = useSideBarItems();
 
   return (
     <CSidebar
@@ -31,7 +32,7 @@ const AppSidebar = () => {
       </CSidebarBrand>
       <CSidebarNav>
         <SimpleBar>
-          <AppSidebarNav items={navigation} />
+          <AppSidebarNav items={navItems} />
         </SimpleBar>
       </CSidebarNav>
       <CSidebarToggler
