@@ -4,44 +4,71 @@ import { CButton, CForm, CFormLabel, CFormText, CFormTextarea, CInputGroup, CInp
 import { format } from 'date-fns';
 import { useRecoilValue } from 'recoil';
 
-import useDeleteComment from '../../hooks/board/comment/useDeleteComment';
-import { usePostComments } from '../../hooks/board/comment/usePostComments';
-import useSubmitComment from '../../hooks/board/comment/useSubmitComment';
+import useToast from '../../hooks/useToast';
+import BoardCommentService from '../../services/board/BoardCommentService';
 import { userIdSelector } from '../../states/jwtTokenState';
 
 const BoardCommentsForm = ({ postId }) => {
   const [commentText, setCommentText] = useState('');
-  const { postComments, isLoading, fetchPostComments } = usePostComments(postId);
-  const submitComment = useSubmitComment();
-  //REMIND add loading state
-  const { deleteComment, deleteIsLoading } = useDeleteComment();
-  const currentUserId = useRecoilValue(userIdSelector);
+  const [postComments, setPostComments] = useState([]);
+  //REMIND imple loading spinner
+  const [getIsLoading, setGetIsLoading] = useState(true);
+  const [postCommentIsLoading, setPostCommentIsLoading] = useState(false);
+  const [deleteIsLoading, setDeleteIsLoading] = useState(false);
 
-  // create, delete  -------------------------------------------------------------
+  const addToast = useToast();
+  const currentUserId = useRecoilValue(userIdSelector);
+  const endOfCommentsRef = useRef(null);
+
+  const fetchPostComments = async () => {
+    setGetIsLoading(true);
+    try {
+      const comments = await BoardCommentService.getPostComments(postId);
+      setPostComments(comments);
+    } catch (error) {
+      addToast({ color: 'danger', message: error.message });
+    } finally {
+      setGetIsLoading(false);
+    }
+  };
+
   const handleCommentChange = (event) => {
     setCommentText(event.target.value);
   };
+
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    await submitComment.submitComment(postId, commentText);
-    setCommentText('');
-    await fetchPostComments();
+    setPostCommentIsLoading(true);
+    try {
+      await BoardCommentService.postComment(postId, commentText);
+      setCommentText('');
+      await fetchPostComments();
+    } catch (error) {
+      addToast({ color: 'danger', message: error.message });
+    } finally {
+      setPostCommentIsLoading(false);
+    }
   };
 
   const toggleCommentStatus = async (commentId, shouldDelete) => {
-    await deleteComment(commentId, shouldDelete);
-    await fetchPostComments();
+    setDeleteIsLoading(true);
+    try {
+      await BoardCommentService.patchDeletionOptionComment(commentId, shouldDelete);
+      await fetchPostComments();
+    } catch (error) {
+      addToast({ color: 'danger', message: error.message });
+    } finally {
+      setDeleteIsLoading(false);
+    }
   };
-  // create, delete --------------------------------------------------------------
 
-  // scroll ------------------------------------------------------------
-  const endOfCommentsRef = useRef(null);
+  useEffect(() => {
+    fetchPostComments();
+  }, [postId]);
 
   useEffect(() => {
     endOfCommentsRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [postComments]);
-
-  // scroll ------------------------------------------------------------
 
   return (
     <CForm onSubmit={handleCommentSubmit} className="comments-section">

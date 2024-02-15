@@ -6,23 +6,33 @@ import { useRecoilValue } from 'recoil';
 
 import StatusBadge from './BoadStatusBadge';
 import BoardCommentsForm from './BoardCommentsForm';
-import useGetBoardPostDetails from '../../hooks/board/useGetBoardPostDetails';
 import useToast from '../../hooks/useToast';
-import { putModifiedPostDetailsApi } from '../../services/board/BoardService';
+import BoardService from '../../services/board/BoardService';
 import { userIdSelector } from '../../states/jwtTokenState';
 
-const BoardPostDetailsForm = ({ clickedRowId }) => {
-  const { postDetails, getDetailIsLoading, fetchPostDetails } = useGetBoardPostDetails(clickedRowId);
+const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
+  const [postDetails, setPostDetails] = useState(null);
+  const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
   const [isViewMode, setIsViewMode] = useState(true);
 
-  const currentUserId = useRecoilValue(userIdSelector);
   const addToast = useToast();
+  const currentUserId = useRecoilValue(userIdSelector);
 
-  const [formData, setFormData] = useState(null);
+  const fetchPostDetails = async () => {
+    setGetDetailIsLoading(true);
+    try {
+      const details = await BoardService.getPostDetails(clickedRowId);
+      setPostDetails(details);
+    } catch (error) {
+      addToast({ color: 'danger', message: error.message });
+    } finally {
+      setGetDetailIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setFormData(postDetails);
-  }, [postDetails]);
+    fetchPostDetails();
+  }, [clickedRowId]);
 
   const handleFormMode = (isViewMode) => {
     setIsViewMode(isViewMode);
@@ -38,16 +48,17 @@ const BoardPostDetailsForm = ({ clickedRowId }) => {
       hasFiles: submittedData.get('postFileUpload')?.size > 0 ?? false,
     };
     try {
-      await putModifiedPostDetailsApi(modifiedData);
+      await BoardService.putModifiedPostDetails(modifiedData);
     } catch (error) {
-      console.log('touched');
       addToast({ color: 'danger', message: error.message });
     }
     await fetchPostDetails();
     await handleFormMode(true);
+    await refreshPosts();
   };
 
-  if (getDetailIsLoading) return <CSpinner variant="border"></CSpinner>;
+  if (getDetailIsLoading) return <CSpinner variant="border" />;
+
   return (
     <>
       <CForm onSubmit={handleSubmit}>
@@ -56,25 +67,25 @@ const BoardPostDetailsForm = ({ clickedRowId }) => {
             <div className="form-group" style={{ marginRight: '.5rem', width: '60px' }}>
               <CFormLabel htmlFor="postId">ID</CFormLabel>
               <CFormText id="postId" name="postId" readOnly disabled={!isViewMode}>
-                {formData?.id}
+                {postDetails?.id}
               </CFormText>
             </div>
             <div className="form-group" style={{ marginRight: '1rem', width: '90px' }}>
               <CFormLabel htmlFor="postCreatedByName">작성자</CFormLabel>
               <CFormText id="postCreatedByName" readOnly disabled={!isViewMode}>
-                {formData?.createdByName}
+                {postDetails?.createdByName}
               </CFormText>
             </div>
             <div className="form-group" style={{ marginRight: '1rem', width: '60px' }}>
               <CFormLabel htmlFor="commentCount">댓글 수</CFormLabel>
               <CFormText type="number" id="commentCount" readOnly disabled={!isViewMode}>
-                {formData?.comments?.length}
+                {postDetails?.comments?.length}
               </CFormText>
             </div>
             <div className="form-group" style={{ marginRight: '1rem', width: '60px' }}>
               <CFormLabel htmlFor="postViews">조회수</CFormLabel>
               <CFormText type="number" id="postViews" readOnly disabled={!isViewMode}>
-                {formData?.viewCount}
+                {postDetails?.viewCount}
               </CFormText>
             </div>
           </div>
@@ -82,19 +93,19 @@ const BoardPostDetailsForm = ({ clickedRowId }) => {
             <div className="form-group" style={{ marginRight: '1rem' }}>
               <CFormLabel htmlFor="postDate">작성일시</CFormLabel>
               <CFormText id="postDate">
-                {formData?.createdAt ? format(new Date(formData?.createdAt), 'yyyy/MM/dd HH:mm:ss') : ''}
+                {postDetails?.createdAt ? format(new Date(postDetails?.createdAt), 'yyyy/MM/dd HH:mm:ss') : ''}
               </CFormText>
             </div>
             <div className="form-group" style={{ marginRight: '1rem' }}>
               <CFormLabel htmlFor="modifiedDate">수정일시</CFormLabel>
               <CFormText id="modifiedDate">
-                {formData?.modifiedAt ? format(new Date(formData?.modifiedAt), 'yyyy/MM/dd HH:mm:ss') : ''}
+                {postDetails?.modifiedAt ? format(new Date(postDetails?.modifiedAt), 'yyyy/MM/dd HH:mm:ss') : ''}
               </CFormText>
             </div>
             <div className="form-group">
               <CFormLabel htmlFor="postStatus">삭제 여부</CFormLabel>
               <div>
-                <StatusBadge id="postStatus" deleted={formData?.deleted} />
+                <StatusBadge id="postStatus" deleted={postDetails?.deleted} />
               </div>
             </div>
           </div>
@@ -104,7 +115,7 @@ const BoardPostDetailsForm = ({ clickedRowId }) => {
               type="text"
               id="postTitle"
               name="postTitle"
-              defaultValue={formData?.title}
+              defaultValue={postDetails?.title}
               readOnly={isViewMode}
             ></CFormInput>
           </div>
@@ -116,7 +127,7 @@ const BoardPostDetailsForm = ({ clickedRowId }) => {
               name="postContents"
               rows={5}
               placeholder="내용을 작성 해 주세요."
-              defaultValue={formData?.content}
+              defaultValue={postDetails?.content}
               readOnly={isViewMode}
             ></CFormTextarea>
           </div>
@@ -125,7 +136,7 @@ const BoardPostDetailsForm = ({ clickedRowId }) => {
         {isViewMode && (
           <div className="row justify-content-end">
             {/*REMIND comment 와 post 에 createdBy Id 도 반환할수있도록 변경요청*/}
-            {formData?.createdByName === currentUserId && (
+            {postDetails?.createdByName === currentUserId && (
               <div className="col-auto mb-3">
                 <CButton
                   onClick={() => {
@@ -161,4 +172,4 @@ const BoardPostDetailsForm = ({ clickedRowId }) => {
   );
 };
 
-export default BoardPostDetailsForm;
+export default BoardPostDetailForm;

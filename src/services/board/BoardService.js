@@ -1,11 +1,11 @@
 import api from '../../api/Api';
 
-const getPostDetailsApi = async (postId) => {
+const getPostDetails = async (postId) => {
   const response = await api.get(`/admin/boards/${postId}`);
   return response.data;
 };
 
-const getSearchedPostListApi = async (params) => {
+const getSearchedPostList = async (params) => {
   const response = await api.get('/admin/boards', {
     params: {
       title: params.title,
@@ -22,13 +22,21 @@ const getSearchedPostListApi = async (params) => {
   return response?.data.content ?? [];
 };
 
-const putModifiedPostDetailsApi = async (payload) => {
+const putModifiedPostDetails = async (payload) => {
   const response = await api.put(`/admin/boards/${payload.id}`, payload);
   return response.data;
 };
 
-const patchPostsDeletedOptionApi = async (boardIds, deletedOption) => {
+const patchPostsDeletedOption = async (boardIds, deletedOption) => {
   const response = await api.patch(`/admin/boards/deleted/${deletedOption}`, boardIds);
   return response.status === 200;
 };
-export { getPostDetailsApi, getSearchedPostListApi, putModifiedPostDetailsApi, patchPostsDeletedOptionApi };
+
+const BoardService = {
+  getPostDetails,
+  getSearchedPostList,
+  putModifiedPostDetails,
+  patchPostsDeletedOption,
+};
+
+export default BoardService;

@@ -14,31 +14,92 @@ import {
 } from '@coreui/react-pro';
 import { format } from 'date-fns';
 
-import BoardPostDetailsForm from '../../../components/board/BoardPostDetailsForm';
-import { getScopedColumns } from '../../../components/board/BoardScopedColumns';
+import BoardPostDetailForm from '../../../components/board/BoardPostDetailForm';
+import { getScopedColumns } from '../../../components/board/BoardScopedColumn';
 import ModalContainer from '../../../components/modal/ModalContainer';
-import useSearchBoardPosts from '../../../hooks/board/useSearchBoardPosts';
-import UseModal from '../../../hooks/useModal';
+import useModal from '../../../hooks/useModal';
 import useToast from '../../../hooks/useToast';
-import { patchPostsDeletedOptionApi } from '../../../services/board/BoardService';
-import { getColumnDefinitions } from '../../../utils/board/BoardColumnDefinitions';
+import BoardService from '../../../services/board/BoardService';
+import { postColumnConfig } from '../../../utils/board/postColumnConfig';
 
-const BoardMainPage = () => {
-  const tableFields = getColumnDefinitions();
-
+const BoardManagementPage = () => {
+  // 2. useState
   const [selectedRows, setSelectedRows] = useState([]);
-
-  const handleSelectedRows = (newSelectedRows) => {
-    setSelectedRows(newSelectedRows);
+  const [clickedRowId, setClickedRowId] = useState(null);
+  const [postSearchResults, setPostSearchResults] = useState([]);
+  const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
+  const [startDate, setStartDate] = useState(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
+  const [endDate, setEndDate] = useState(new Date());
+  const initialSearchFormData = {
+    title: '',
+    content: '',
+    createdByName: '',
+    hasFilesOption: '',
+    fromCreatedAt: format(startDate, "yyyy-MM-dd'T'00:00"),
+    toCreatedAt: format(endDate, "yyyy-MM-dd'T'23:59"),
+    deletionOption: '',
   };
-  // Delete -------------------------------------------------------------
+  const [searchFormData, setSearchFormData] = useState(initialSearchFormData);
+  const [error, setError] = useState(null);
+
+  // 3. hooks
+  const tableFields = postColumnConfig;
+  const modal = useModal();
+  const addToast = useToast();
+  const handleClickedRowId = (newClickedRowId) => {
+    setClickedRowId(newClickedRowId);
+  };
+  const scopedColumns = getScopedColumns(handleClickedRowId, modal.openModal);
+
+  // 4. 컴포넌트가 사용할 함수
   const isDeletedRow = (selectedRows) => {
     return selectedRows.some((row) => row.deleted === true);
   };
 
+  // 5. 이벤트 핸들러 함수
+  const handleSelectedRows = (newSelectedRows) => {
+    setSelectedRows(newSelectedRows);
+  };
+
+  const handleSearchFormChange = ({ target: { id, value } }) => {
+    setSearchFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleStartDateChange = ({ newDate }) => {
+    setSearchFormData((prev) => ({
+      ...prev,
+      fromCreatedAt: format(new Date(newDate), "yyyy-MM-dd'T'00:00"),
+    }));
+  };
+
+  const handleEndDateChange = ({ newDate }) => {
+    setSearchFormData((prev) => ({
+      ...prev,
+      toCreatedAt: format(new Date(newDate), "yyyy-MM-dd'T'23:59"),
+    }));
+  };
+
+  const handleReset = () => {
+    setSearchFormData(initialSearchFormData);
+    setStartDate(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
+    setEndDate(new Date());
+  };
+
+  const handleSearchSubmit = async () => {
+    setSearchResultIsLoading(true);
+    try {
+      const searchResult = await BoardService.getSearchedPostList(searchFormData);
+      setPostSearchResults(searchResult);
+    } catch (error) {
+      addToast({ color: 'danger', message: error.message });
+    } finally {
+      setSearchResultIsLoading(false);
+    }
+  };
+
   const togglePostStatus = async (shouldDelete) => {
     try {
-      const isSuccess = await patchPostsDeletedOptionApi(
+      const isSuccess = await BoardService.patchPostsDeletedOption(
         selectedRows.map((row) => row.id),
         shouldDelete
       );
@@ -54,67 +115,10 @@ const BoardMainPage = () => {
     }
   };
 
-  // Delete -------------------------------------------------------------
+  // 6. 렌더링을 돕는 작은 컴포넌트 정의
+  // 이 예시에서는 별도의 작은 컴포넌트가 정의되지 않았습니다.
 
-  // Modal --------------------------------------------------------------
-  const modal = UseModal();
-  const [clickedRowId, setClickedRowId] = useState(null);
-  const handleClickedRowId = (newClickedRowId) => {
-    setClickedRowId(newClickedRowId);
-  };
-  const scopedColumns = getScopedColumns(handleClickedRowId, modal.openModal);
-  // ---------------------------------------------------------------
-
-  // 검색 창 --------------------------------------------------------
-  //REMIND post 로 기본값 줌
-
-  const { postSearchResults, searchResultIsLoading, searchBoardPosts } = useSearchBoardPosts();
-
-  const [startDate, setStartDate] = useState(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
-  const [endDate, setEndDate] = useState(new Date());
-  const addToast = useToast();
-
-  const initialSearchFormData = {
-    title: '',
-    content: '',
-    createdByName: '',
-    hasFilesOption: '',
-    fromCreatedAt: format(startDate, "yyyy-MM-dd'T'00:00"),
-    toCreatedAt: format(endDate, "yyyy-MM-dd'T'23:59"),
-    deletionOption: '',
-  };
-  const [searchFormData, setSearchFormData] = useState(initialSearchFormData);
-  const handleSearchFormChange = ({ target: { id, value } }) => {
-    setSearchFormData((prev) => ({ ...prev, [id]: value }));
-  };
-
-  const handleStartDateChange = ({ newDate }) => {
-    setSearchFormData((prev) => ({
-      ...prev,
-      fromCreatedAt: format(new Date(newDate), "yyyy-MM-dd'T'00:00"),
-    }));
-  };
-  const handleEndDateChange = ({ newDate }) => {
-    setSearchFormData((prev) => ({
-      ...prev,
-      toCreatedAt: format(new Date(newDate), "yyyy-MM-dd'T'23:59"),
-    }));
-  };
-  const handleReset = () => {
-    setSearchFormData(initialSearchFormData);
-    setStartDate(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
-    setEndDate(new Date());
-  };
-  const handleSearchSubmit = async (e) => {
-    e.preventDefault();
-    await searchBoardPosts(searchFormData);
-  };
-
-  // 검색 창 --------------------------------------------------------
-
-  //REMIND 구체적인 에러 핸들링 추가
-  const [error, setError] = useState(null);
-
+  // 7. 메인 렌더링 로직(return 문)
   if (error) return <div>Error: {error.message}</div>;
 
   return (
@@ -224,36 +228,30 @@ const BoardMainPage = () => {
             </CButton>
           </div>
           <CSmartTable
-            // 페이징
             // REMIND 페이지네이션 컴포넌트 구현
             pagination
             activePage={1}
             itemsPerPageSelect
             itemsPerPage={10}
             itemsPerPageLabel={'페이지당 글 개수'}
-            // 스피너
             loading={searchResultIsLoading}
-            // 정렬
             // REMIND 커스텀 소터 구현
             sorterValue={{ column: 'id', state: 'asc' }}
-            // 컬럼
             items={postSearchResults}
             columns={tableFields}
             selectable
             selected={selectedRows}
-            // REMIND clickable row 대신에 제목 칸에 css pointer 적용
             scopedColumns={scopedColumns}
             // REMIND DOMException 처리
             onSelectedItemsChange={(selectedItems) => handleSelectedRows(selectedItems)}
             noItemsLabel="검색 결과가 없습니다."
-            // 스타일
             tableProps={{
               responsive: true,
               hover: true,
             }}
           />
           <ModalContainer visible={modal.isOpen} title="게시글" onClose={modal.closeModal} size="lg">
-            <BoardPostDetailsForm clickedRowId={clickedRowId}></BoardPostDetailsForm>
+            <BoardPostDetailForm clickedRowId={clickedRowId} refreshPosts={handleSearchSubmit}></BoardPostDetailForm>
           </ModalContainer>
         </CCardBody>
       </CCard>
@@ -261,4 +259,4 @@ const BoardMainPage = () => {
   );
 };
 
-export default BoardMainPage;
+export default BoardManagementPage;

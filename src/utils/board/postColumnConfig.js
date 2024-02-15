@@ -1,4 +1,4 @@
-export const getColumnDefinitions = () => [
+export const postColumnConfig = [
   //REMIND style 설정 분리
   {
     key: 'id',

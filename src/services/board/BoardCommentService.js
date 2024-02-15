@@ -9,7 +9,7 @@ const getPostComments = async (postId) => {
   });
   return response.data.content;
 };
-const postCommentApi = async (postId, content) => {
+const postComment = async (postId, content) => {
   const response = await api.post('/admin/board-comments', {
     //REMIND postId 로 변경 요청
     boardId: postId,
@@ -18,8 +18,9 @@ const postCommentApi = async (postId, content) => {
   return response.data;
 };
 
-const patchDeleteCommentApi = async (commentId, deletionOption) => {
+const patchDeletionOptionComment = async (commentId, deletionOption) => {
   const response = await api.patch(`/admin/board-comments/deleted/${deletionOption}`, [commentId]);
   return response.data;
 };
-export { getPostComments, postCommentApi, patchDeleteCommentApi };
+const BoardCommentService = { getPostComments, postComment, patchDeletionOptionComment };
+export default BoardCommentService;
