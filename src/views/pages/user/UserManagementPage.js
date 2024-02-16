@@ -6,14 +6,12 @@ import {
   CCardBody,
   CCardTitle,
   CCol,
-  CDateRangePicker,
   CForm,
   CFormInput,
   CFormSelect,
   CRow,
   CSmartTable,
 } from '@coreui/react-pro';
-import { format } from 'date-fns';
 
 import StatusBadge from '../../../components/board/BoadStatusBadge';
 import ModalContainer from '../../../components/modal/ModalContainer';
@@ -24,8 +22,6 @@ import UserService from '../../../services/UserService';
 import { userColumnConfig } from '../../../utils/user/userColumnConfig';
 
 const UserManagementPage = () => {
-  const [startDate, setStartDate] = useState(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
-  const [endDate, setEndDate] = useState(new Date());
   const [userList, setUserList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [checkedItems, setCheckedItems] = useState([]);
@@ -37,8 +33,6 @@ const UserManagementPage = () => {
     email: '',
     team: '',
     memo: '',
-    fromCreatedAt: format(startDate, "yyyy-MM-dd'T'00:00"),
-    toCreatedAt: format(endDate, "yyyy-MM-dd'T'23:59"),
     deletionOption: '',
   };
   const [formData, setFormData] = useState(initialFormData);
@@ -70,24 +64,8 @@ const UserManagementPage = () => {
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleStartDateChange = (newDate) => {
-    setFormData((prev) => ({
-      ...prev,
-      fromCreatedAt: format(new Date(newDate), "yyyy-MM-dd'T'00:00"),
-    }));
-  };
-
-  const handleEndDateChange = (newDate) => {
-    setFormData((prev) => ({
-      ...prev,
-      toCreatedAt: format(new Date(newDate), "yyyy-MM-dd'T'23:59"),
-    }));
-  };
-
   const handleReset = () => {
     setFormData(initialFormData);
-    setStartDate(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
-    setEndDate(new Date());
   };
 
   const handleRowClick = (id) => {
@@ -141,16 +119,6 @@ const UserManagementPage = () => {
             <CRow className="mb-3">
               <CCol md={4}>
                 <CFormInput id="memo" label="메모" value={formData.memo} onChange={handleChange} />
-              </CCol>
-              <CCol md={5}>
-                <CDateRangePicker
-                  id="createdAt"
-                  label="생성일"
-                  startDate={startDate}
-                  endDate={endDate}
-                  onStartDateChange={(newDate) => handleStartDateChange(newDate)}
-                  onEndDateChange={(newDate) => handleEndDateChange(newDate)}
-                />
               </CCol>
               <CCol md={3}>
                 <CFormSelect
