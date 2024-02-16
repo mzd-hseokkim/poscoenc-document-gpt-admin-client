@@ -1,5 +1,6 @@
 import { CCol, CFormInput, CRow } from '@coreui/react-pro';
-import { format } from 'date-fns';
+
+import { formatToYMD } from '../../utils/common/dateUtils';
 
 const getFieldValue = (field, formData) => {
   if (field.value !== undefined) {
@@ -7,7 +8,7 @@ const getFieldValue = (field, formData) => {
   }
 
   if (formData[field.name] && field.type === 'date') {
-    return format(new Date(formData[field.name]), 'yyyy/MM/dd');
+    return formatToYMD(formData[field.name]);
   }
 
   return formData[field.name];

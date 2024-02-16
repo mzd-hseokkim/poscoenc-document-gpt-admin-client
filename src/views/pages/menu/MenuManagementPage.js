@@ -13,7 +13,6 @@ import {
   CRow,
   CSmartTable,
 } from '@coreui/react-pro';
-import { format } from 'date-fns';
 
 import StatusBadge from '../../../components/board/BoadStatusBadge';
 import MenuDetailForm from '../../../components/menu/MenuDetailForm';
@@ -21,29 +20,34 @@ import ModalContainer from '../../../components/modal/ModalContainer';
 import useModal from '../../../hooks/useModal';
 import useToast from '../../../hooks/useToast';
 import MenuService from '../../../services/menu/MenuService';
+import {
+  formatToIsoEndDate,
+  formatToIsoStartDate,
+  getCurrentDate,
+  getOneYearAgoDate,
+} from '../../../utils/common/dateUtils';
 import { iconMapper } from '../../../utils/common/iconMapper';
 import { menuColumnConfig } from '../../../utils/menu/menuColumnConfig';
 
 const MenuManagementPage = () => {
-  const [startDate, setStartDate] = useState(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
-  const [endDate, setEndDate] = useState(new Date());
   const [menuList, setMenuList] = useState([]);
   const [checkedItems, setCheckedItems] = useState([]);
   const [selectedId, setSelectedId] = useState();
   const [formMode, setFormMode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const initialFormData = {
+  const createInitialFormData = () => ({
     name: '',
     urlPath: '',
     menuOrder: '',
     parentId: '',
-    fromCreatedAt: format(startDate, "yyyy-MM-dd'T'00:00"),
-    toCreatedAt: format(endDate, "yyyy-MM-dd'T'23:59"),
-    fromModifiedAt: format(startDate, "yyyy-MM-dd'T'00:00"),
-    toModifiedAt: format(endDate, "yyyy-MM-dd'T'23:59"),
+    fromCreatedAt: getOneYearAgoDate(),
+    toCreatedAt: getCurrentDate(),
+    fromModifiedAt: getOneYearAgoDate(),
+    toModifiedAt: getCurrentDate(),
     deletionOption: 'ALL',
-  };
-  const [formData, setFormData] = useState(initialFormData);
+  });
+
+  const [formData, setFormData] = useState(createInitialFormData);
 
   const addToast = useToast();
   const modal = useModal();
@@ -76,38 +80,21 @@ const MenuManagementPage = () => {
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleStartDateChange = ({ id, newDate }) => {
-    if (id === 'createdAt') {
-      setFormData((prev) => ({
-        ...prev,
-        fromCreatedAt: format(new Date(newDate), "yyyy-MM-dd'T'00:00"),
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        fromModifiedAt: format(new Date(newDate), "yyyy-MM-dd'T'00:00"),
-      }));
-    }
-  };
+  const handleDateChange = ({ id, newDate, isStartDate = true }) => {
+    const fieldMap = {
+      createdAt: isStartDate ? 'fromCreatedAt' : 'toCreatedAt',
+      modifiedAt: isStartDate ? 'fromModifiedAt' : 'toModifiedAt',
+    };
 
-  const handleEndDateChange = ({ id, newDate }) => {
-    if (id === 'createdAt') {
-      setFormData((prev) => ({
-        ...prev,
-        toCreatedAt: format(new Date(newDate), "yyyy-MM-dd'T'23:59"),
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        toModifiedAt: format(new Date(newDate), "yyyy-MM-dd'T'23:59"),
-      }));
+    const fieldToUpdate = fieldMap[id];
+    if (fieldToUpdate) {
+      const formattedDate = isStartDate ? formatToIsoStartDate(newDate) : formatToIsoEndDate(newDate);
+      setFormData((prev) => ({ ...prev, [fieldToUpdate]: formattedDate }));
     }
   };
 
   const handleReset = () => {
-    setFormData(initialFormData);
-    setStartDate(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
-    setEndDate(new Date());
+    setFormData(createInitialFormData);
   };
 
   const handleRowClick = (id) => {
@@ -196,19 +183,20 @@ const MenuManagementPage = () => {
                 <CDateRangePicker
                   id="createdAt"
                   label="생성일"
-                  startDate={startDate}
-                  endDate={endDate}
-                  onStartDateChange={(newDate) => handleStartDateChange({ id: 'createdAt', newDate })}
-                  onEndDateChange={(newDate) => handleEndDateChange({ id: 'createdAt', newDate })}
+                  startDate={formData.fromCreatedAt}
+                  endDate={formData.toCreatedAt}
+                  onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
+                  onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
                 />
               </CCol>
               <CCol md={6}>
                 <CDateRangePicker
+                  id="modifiedAt"
                   label="수정일"
-                  startDate={startDate}
-                  endDate={endDate}
-                  onStartDateChange={(newDate) => handleStartDateChange({ id: 'modifiedAt', newDate })}
-                  onEndDateChange={(newDate) => handleEndDateChange({ id: 'modifiedAt', newDate })}
+                  startDate={formData.fromModifiedAt}
+                  endDate={formData.toModifiedAt}
+                  onStartDateChange={(newDate) => handleDateChange({ id: 'modifiedAt', newDate })}
+                  onEndDateChange={(newDate) => handleDateChange({ id: 'modifiedAt', newDate, isStartDate: false })}
                 />
               </CCol>
             </CRow>

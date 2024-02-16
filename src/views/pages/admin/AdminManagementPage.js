@@ -13,7 +13,6 @@ import {
   CRow,
   CSmartTable,
 } from '@coreui/react-pro';
-import { format } from 'date-fns';
 
 import AdminDetailForm from '../../../components/admin/AdminDetailForm';
 import StatusBadge from '../../../components/board/BoadStatusBadge';
@@ -22,30 +21,34 @@ import useModal from '../../../hooks/useModal';
 import useToast from '../../../hooks/useToast';
 import AdminService from '../../../services/admin/AdminService';
 import { adminColumnConfig } from '../../../utils/admin/adminColumnConfig';
+import {
+  formatToIsoEndDate,
+  formatToIsoStartDate,
+  formatToYMD,
+  getCurrentDate,
+  getOneYearAgoDate,
+} from '../../../utils/common/dateUtils';
 
 const AdminManagementPage = () => {
-  const [startDate, setStartDate] = useState(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
-  const [endDate, setEndDate] = useState(new Date());
   const [AdminList, setAdminList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [checkedItems, setCheckedItems] = useState([]);
   const [selectedId, setSelectedId] = useState();
   const [formMode, setFormMode] = useState('');
 
-  const initialFormData = {
-    email: '',
+  const createInitialFormData = () => ({
     name: '',
-    role: '',
-    fromLoggedInAt: format(startDate, "yyyy-MM-dd'T'00:00"),
-    toLoggedInAt: format(endDate, "yyyy-MM-dd'T'23:59"),
-    fromCreatedAt: format(startDate, "yyyy-MM-dd'T'00:00"),
-    toCreatedAt: format(endDate, "yyyy-MM-dd'T'23:59"),
-    fromModifiedAt: format(startDate, "yyyy-MM-dd'T'00:00"),
-    toModifiedAt: format(endDate, "yyyy-MM-dd'T'23:59"),
-    findEmptyLogin: false,
+    urlPath: '',
+    menuOrder: '',
+    parentId: '',
+    fromCreatedAt: getOneYearAgoDate(),
+    toCreatedAt: getCurrentDate(),
+    fromModifiedAt: getOneYearAgoDate(),
+    toModifiedAt: getCurrentDate(),
     deletionOption: 'ALL',
-  };
-  const [formData, setFormData] = useState(initialFormData);
+  });
+
+  const [formData, setFormData] = useState(createInitialFormData);
 
   const addToast = useToast();
   const modal = useModal();
@@ -74,42 +77,22 @@ const AdminManagementPage = () => {
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleStartDateChange = ({ id, newDate }) => {
+  const handleDateChange = ({ id, newDate, isStartDate = true }) => {
     const fieldMap = {
-      createdAt: 'fromCreatedAt',
-      modifiedAt: 'fromModifiedAt',
-      lastLoggedInAt: 'fromLoggedInAt',
+      createdAt: isStartDate ? 'fromCreatedAt' : 'toCreatedAt',
+      modifiedAt: isStartDate ? 'fromModifiedAt' : 'toModifiedAt',
+      lastLoggedInAt: isStartDate ? 'fromLoggedInAt' : 'toLoggedInAt',
     };
 
     const fieldToUpdate = fieldMap[id];
     if (fieldToUpdate) {
-      setFormData((prev) => ({
-        ...prev,
-        [fieldToUpdate]: format(new Date(newDate), "yyyy-MM-dd'T'00:00"),
-      }));
-    }
-  };
-
-  const handleEndDateChange = ({ id, newDate }) => {
-    const fieldMap = {
-      createdAt: 'toCreatedAt',
-      modifiedAt: 'toModifiedAt',
-      lastLoggedInAt: 'toLoggedInAt',
-    };
-
-    const fieldToUpdate = fieldMap[id];
-    if (fieldToUpdate) {
-      setFormData((prev) => ({
-        ...prev,
-        [fieldToUpdate]: format(new Date(newDate), "yyyy-MM-dd'T'23:59"),
-      }));
+      const formattedDate = isStartDate ? formatToIsoStartDate(newDate) : formatToIsoEndDate(newDate);
+      setFormData((prev) => ({ ...prev, [fieldToUpdate]: formattedDate }));
     }
   };
 
   const handleReset = () => {
-    setFormData(initialFormData);
-    setStartDate(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
-    setEndDate(new Date());
+    setFormData(createInitialFormData);
   };
 
   const handleRowClick = (id) => {
@@ -165,30 +148,30 @@ const AdminManagementPage = () => {
                 <CDateRangePicker
                   id="createdAt"
                   label="생성일"
-                  startDate={startDate}
-                  endDate={endDate}
-                  onStartDateChange={(newDate) => handleStartDateChange({ id: 'createdAt', newDate })}
-                  onEndDateChange={(newDate) => handleEndDateChange({ id: 'createdAt', newDate })}
+                  startDate={formData.fromCreatedAt}
+                  endDate={formData.toCreatedAt}
+                  onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
+                  onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
                 />
               </CCol>
               <CCol md={4}>
                 <CDateRangePicker
                   id="modifiedAt"
                   label="수정일"
-                  startDate={startDate}
-                  endDate={endDate}
-                  onStartDateChange={(newDate) => handleStartDateChange({ id: 'modifiedAt', newDate })}
-                  onEndDateChange={(newDate) => handleEndDateChange({ id: 'modifiedAt', newDate })}
+                  startDate={formData.fromModifiedAt}
+                  endDate={formData.toModifiedAt}
+                  onStartDateChange={(newDate) => handleDateChange({ id: 'modifiedAt', newDate })}
+                  onEndDateChange={(newDate) => handleDateChange({ id: 'modifiedAt', newDate, isStartDate: false })}
                 />
               </CCol>
               <CCol md={4}>
                 <CDateRangePicker
                   id="lastLoggedInAt"
                   label="최근 로그인"
-                  startDate={startDate}
-                  endDate={endDate}
-                  onStartDateChange={(newDate) => handleStartDateChange({ id: 'lastLoggedInAt', newDate })}
-                  onEndDateChange={(newDate) => handleEndDateChange({ id: 'lastLoggedInAt', newDate })}
+                  startDate={formData.fromLoggedInAt}
+                  endDate={formData.toLoggedInAt}
+                  onStartDateChange={(newDate) => handleDateChange({ id: 'lastLoggedInAt', newDate })}
+                  onEndDateChange={(newDate) => handleDateChange({ id: 'lastLoggedInAt', newDate, isStartDate: false })}
                 />
               </CCol>
             </CRow>
@@ -259,9 +242,7 @@ const AdminManagementPage = () => {
                     {item.email}
                   </td>
                 ),
-                lastLoggedInAt: (item) => (
-                  <td>{item.lastLoggedInAt && format(new Date(item.lastLoggedInAt), 'yyyy/MM/dd')}</td>
-                ),
+                lastLoggedInAt: (item) => <td>{formatToYMD(item.lastLoggedInAt)}</td>,
                 deleted: (item) => (
                   <td>
                     <StatusBadge deleted={item.deleted} />
