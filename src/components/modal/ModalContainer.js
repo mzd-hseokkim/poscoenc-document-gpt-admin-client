@@ -1,8 +1,8 @@
 import { CButton, CModal, CModalBody, CModalFooter, CModalHeader, CModalTitle } from '@coreui/react-pro';
 
-const ModalContainer = ({ children, visible, title, onClose }) => {
+const ModalContainer = ({ children, visible, title, onClose, size }) => {
   return (
-    <CModal alignment="center" visible={visible} onClose={onClose} portal={false}>
+    <CModal size={size} alignment="center" visible={visible} onClose={onClose} portal={false}>
       <CModalHeader>
         <CModalTitle>{title}</CModalTitle>
       </CModalHeader>
