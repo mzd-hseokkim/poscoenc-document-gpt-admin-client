@@ -1,24 +1,23 @@
 import React, { useEffect, useState } from 'react';
 
-import { CButton, CCol, CFormCheck, CFormSelect, CMultiSelect, CRow, CSpinner } from '@coreui/react-pro';
+import { CButton, CCol, CMultiSelect, CRow, CSpinner } from '@coreui/react-pro';
 
 import useToast from '../../hooks/useToast';
-import MenuService from '../../services/menu/MenuService';
+import AdminService from '../../services/admin/AdminService';
 import RoleService from '../../services/Role/RoleService';
 import { getAuditFields } from '../../utils/common/auditFieldUtils';
 import formModes from '../../utils/formModes';
 import InputList from '../input/InputList';
 
-const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList }) => {
-  const [formData, setFormData] = useState({ allowChildren: false });
+const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminList }) => {
+  const [formData, setFormData] = useState([]);
   const [formMode, setFormMode] = useState(initialFormMode);
   const [roles, setRoles] = useState([]);
-  const [parentMenus, setParentMenus] = useState(['상위 메뉴를 선택하세요.', { label: '선택하지 않음', value: '0' }]);
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
   const addToast = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
-  const menuBasicFields = [
+  const adminFields = [
     {
       name: 'id',
       label: '아이디',
@@ -26,36 +25,36 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
       isRendered: !isCreateMode,
     },
     {
+      name: 'email',
+      label: '이메일',
+      placeholder: '이메일을 입력하세요.',
+    },
+    {
       name: 'name',
       label: '이름',
       placeholder: '이름을 입력하세요.',
     },
     {
-      name: 'icon',
-      label: '아이콘',
-      placeholder: 'e.g. cilUser',
-      text: 'Must be 8-20 characters long.',
+      name: 'password',
+      label: '비밀번호',
+      type: 'password',
+      placeholder: '비밀번호를 입력하세요.',
+      isRendered: isCreateMode,
     },
   ];
-
-  const menuSettingFields = [
+  const logInFields = [
     {
-      name: 'urlPath',
-      label: 'URL',
-      value: formData.allowChildren ? '' : formData.urlPath,
-      placeholder: formData.allowChildren ? '메뉴 주소를 입력할 수 없습니다.' : '메뉴 주소를 입력하세요.',
-      isDisabled: formData.allowChildren,
+      name: 'lastLoggedInAt',
+      label: '최근 로그인',
+      type: 'date',
+      isDisabled: isUpdateMode,
+      isRendered: !isCreateMode,
     },
     {
-      name: 'parentId',
-      label: '상위 메뉴',
-      isRendered: isReadMode,
-    },
-    {
-      name: 'menuOrder',
-      label: '메뉴 순서',
+      name: 'failedCnt',
+      label: '로그인 실패 횟수',
       type: 'number',
-      placeholder: '메뉴 순서를 숫자로 입력하세요',
+      isRendered: !isCreateMode,
     },
   ];
 
@@ -66,18 +65,17 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
     } else {
       getRoles();
     }
-    getParentMenu();
   }, [selectedId]);
 
   const fetchMenuDetail = async () => {
     try {
       setIsLoading(true);
-      const data = await MenuService.getMenuDetail(selectedId);
+      const data = await AdminService.getAdmin(selectedId);
       setFormData(data);
-      const allowedRoles = data.allowedRoles.map((role) => role.id);
+      const allowedRoles = data.roles;
       await getRoles(allowedRoles);
     } catch (error) {
-      addToast({ color: 'danger', message: error.message });
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -87,9 +85,9 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
     try {
       const rolesData = await RoleService.getRoleList();
       const newRoles = rolesData.map((role) => ({
-        value: role.id,
+        value: role.role,
         text: role.role,
-        selected: allowedRoles?.length > 0 ? allowedRoles.includes(role.id) : false,
+        selected: allowedRoles?.length > 0 ? allowedRoles.includes(role.role) : false,
       }));
       setRoles(newRoles);
     } catch (error) {
@@ -97,26 +95,11 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
     }
   };
 
-  const getParentMenu = async () => {
-    let excludedId = isCreateMode ? '' : selectedId;
-
+  const createAdmin = async () => {
     try {
-      const data = await MenuService.getParentMenus(excludedId);
-      const newParentMenus = data.map((parentMenu) => ({
-        value: parentMenu.id,
-        label: parentMenu.name,
-      }));
-      setParentMenus((prevMenus) => [...prevMenus, ...newParentMenus]);
-    } catch (error) {
-      addToast({ color: 'danger', message: error });
-    }
-  };
-
-  const postMenu = async () => {
-    try {
-      await MenuService.postMenu(formData);
+      await AdminService.postAdmin(formData);
       closeModal();
-      fetchMenuList();
+      fetchAdminList();
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -128,11 +111,11 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
     }
   };
 
-  const patchMenu = async () => {
+  const updateAdmin = async () => {
     try {
-      await MenuService.patchMenu(formData);
+      await AdminService.putAdmin(selectedId, formData);
       closeModal();
-      fetchMenuList();
+      fetchAdminList();
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -146,7 +129,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
 
   const handleMultiSelect = (list) => {
     const roleList = list.map((item) => item.value);
-    setFormData((prev) => ({ ...prev, allowedRoles: roleList }));
+    setFormData((prev) => ({ ...prev, roles: roleList }));
   };
 
   const handleChange = (e) => {
@@ -160,9 +143,9 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
 
   const handleSubmit = () => {
     if (isCreateMode) {
-      postMenu();
+      createAdmin();
     } else if (isUpdateMode) {
-      patchMenu();
+      updateAdmin();
     }
   };
 
@@ -173,12 +156,12 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
   const handleDeleteRestoreClick = async (id) => {
     const shouldDelete = !formData.deleted;
     try {
-      await MenuService.deleteMenu(id, shouldDelete);
+      await AdminService.deleteAdmin(id, shouldDelete);
     } catch (error) {
       console.log(error);
     }
     closeModal();
-    fetchMenuList();
+    fetchAdminList();
   };
 
   const renderRoleSelect = () => (
@@ -197,45 +180,14 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
     </CRow>
   );
 
-  const renderParentSelect = () => (
-    <CRow className="mb-3">
-      <CCol>
-        <CFormSelect
-          id="parentId"
-          name="parentId"
-          label="상위 메뉴"
-          options={parentMenus}
-          onChange={handleChange}
-        ></CFormSelect>
-      </CCol>
-    </CRow>
-  );
-
   return (
     <>
       {isLoading && <CSpinner />}
       {!isLoading && (
         <>
-          <InputList fields={menuBasicFields} formData={formData} handleChange={handleChange} isReadMode={isReadMode} />
-          <CRow className="mb-3">
-            <CCol>
-              <CFormCheck
-                name="allowChildren"
-                id="allowChildren"
-                label="하위 메뉴 등록 가능 여부"
-                checked={formData.allowChildren}
-                onChange={handleChange}
-              />
-            </CCol>
-          </CRow>
-          <InputList
-            fields={menuSettingFields}
-            formData={formData}
-            handleChange={handleChange}
-            isReadMode={isReadMode}
-          />
+          <InputList fields={adminFields} formData={formData} handleChange={handleChange} isReadMode={isReadMode} />
           {renderRoleSelect()}
-          {renderParentSelect()}
+          <InputList fields={logInFields} formData={formData} handleChange={handleChange} isReadMode={isReadMode} />
           <InputList
             fields={getAuditFields(formMode)}
             formData={formData}
@@ -264,4 +216,4 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
   );
 };
 
-export default MenuDetailForm;
+export default AdminDetailForm;

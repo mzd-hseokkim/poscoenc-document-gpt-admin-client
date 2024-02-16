@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import {
   CButton,
@@ -15,31 +15,34 @@ import {
 } from '@coreui/react-pro';
 import { format } from 'date-fns';
 
+import AdminDetailForm from '../../../components/admin/AdminDetailForm';
 import StatusBadge from '../../../components/board/BoadStatusBadge';
-import MenuDetailForm from '../../../components/menu/MenuDetailForm';
 import ModalContainer from '../../../components/modal/ModalContainer';
 import useModal from '../../../hooks/useModal';
 import useToast from '../../../hooks/useToast';
-import MenuService from '../../../services/menu/MenuService';
-import { menuColumnUtils } from '../../../utils/menu/menuColumnUtils';
+import AdminService from '../../../services/admin/AdminService';
+import { adminColumnConfig } from '../../../utils/admin/adminColumnConfig';
 
-const MenuManagement = () => {
+const AdminManagementPage = () => {
   const [startDate, setStartDate] = useState(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
   const [endDate, setEndDate] = useState(new Date());
-  const [menuList, setMenuList] = useState([]);
+  const [AdminList, setAdminList] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [checkedItems, setCheckedItems] = useState([]);
   const [selectedId, setSelectedId] = useState();
   const [formMode, setFormMode] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+
   const initialFormData = {
+    email: '',
     name: '',
-    urlPath: '',
-    menuOrder: '',
-    parentId: '',
+    role: '',
+    fromLoggedInAt: format(startDate, "yyyy-MM-dd'T'00:00"),
+    toLoggedInAt: format(endDate, "yyyy-MM-dd'T'23:59"),
     fromCreatedAt: format(startDate, "yyyy-MM-dd'T'00:00"),
     toCreatedAt: format(endDate, "yyyy-MM-dd'T'23:59"),
     fromModifiedAt: format(startDate, "yyyy-MM-dd'T'00:00"),
     toModifiedAt: format(endDate, "yyyy-MM-dd'T'23:59"),
+    findEmptyLogin: false,
     deletionOption: 'ALL',
   };
   const [formData, setFormData] = useState(initialFormData);
@@ -47,20 +50,11 @@ const MenuManagement = () => {
   const addToast = useToast();
   const modal = useModal();
 
-  useEffect(() => {
-    setIsLoading(false);
-  }, []);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    getMenuList();
-  };
-
-  const getMenuList = async () => {
+  const fetchAdminList = async () => {
     try {
       setIsLoading(true);
-      const data = await MenuService.getMenuList(formData);
-      setMenuList(data.content);
+      const data = await AdminService.getAdmins(formData);
+      setAdminList(data.content);
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -71,34 +65,43 @@ const MenuManagement = () => {
     }
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    fetchAdminList();
+  };
+
   const handleChange = ({ target: { id, value } }) => {
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleStartDateChange = ({ id, newDate }) => {
-    if (id === 'createdAt') {
+    const fieldMap = {
+      createdAt: 'fromCreatedAt',
+      modifiedAt: 'fromModifiedAt',
+      lastLoggedInAt: 'fromLoggedInAt',
+    };
+
+    const fieldToUpdate = fieldMap[id];
+    if (fieldToUpdate) {
       setFormData((prev) => ({
         ...prev,
-        fromCreatedAt: format(new Date(newDate), "yyyy-MM-dd'T'00:00"),
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        fromModifiedAt: format(new Date(newDate), "yyyy-MM-dd'T'00:00"),
+        [fieldToUpdate]: format(new Date(newDate), "yyyy-MM-dd'T'00:00"),
       }));
     }
   };
 
   const handleEndDateChange = ({ id, newDate }) => {
-    if (id === 'createdAt') {
+    const fieldMap = {
+      createdAt: 'toCreatedAt',
+      modifiedAt: 'toModifiedAt',
+      lastLoggedInAt: 'toLoggedInAt',
+    };
+
+    const fieldToUpdate = fieldMap[id];
+    if (fieldToUpdate) {
       setFormData((prev) => ({
         ...prev,
-        toCreatedAt: format(new Date(newDate), "yyyy-MM-dd'T'23:59"),
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        toModifiedAt: format(new Date(newDate), "yyyy-MM-dd'T'23:59"),
+        [fieldToUpdate]: format(new Date(newDate), "yyyy-MM-dd'T'23:59"),
       }));
     }
   };
@@ -124,17 +127,17 @@ const MenuManagement = () => {
     const ids = checkedItems.map((item) => item.id);
     if (checkedItems.length === 1) {
       try {
-        await MenuService.deleteSingleMenu(ids, shouldDelete);
-        getMenuList();
+        await AdminService.deleteAdmin(ids, shouldDelete);
+        fetchAdminList();
       } catch (error) {
-        console.log(error);
+        addToast({ color: 'danger', message: error.message });
       }
     } else {
       try {
-        await MenuService.deleteMultipleMenu(ids, shouldDelete);
-        getMenuList();
+        await AdminService.deleteAdmins(ids, shouldDelete);
+        fetchAdminList();
       } catch (error) {
-        console.log(error);
+        addToast({ color: 'danger', message: error.message });
       }
     }
     setCheckedItems([]);
@@ -144,39 +147,21 @@ const MenuManagement = () => {
     <>
       <CCard className="row g-3">
         <CCardBody>
-          <CCardTitle>메뉴 관리</CCardTitle>
+          <CCardTitle>관리자 관리</CCardTitle>
           <CForm onSubmit={handleSubmit}>
             <CRow className="mb-3">
               <CCol md={4}>
-                <CFormInput id="name" label="이름" onChange={handleChange} />
+                <CFormInput id="email" label="이메일" value={formData.email} onChange={handleChange} />
               </CCol>
               <CCol md={4}>
-                <CFormInput type="number" id="menuOrder" label="메뉴 순서" onChange={handleChange} />
+                <CFormInput id="name" label="이름" value={formData.name} onChange={handleChange} />
               </CCol>
               <CCol md={4}>
-                <CFormInput type="number" id="parentId" label="상위 메뉴 ID" onChange={handleChange} />
+                <CFormInput id="role" label="권한" value={formData.role} onChange={handleChange} />
               </CCol>
             </CRow>
             <CRow className="mb-3">
-              <CCol md={8}>
-                <CFormInput id="urlPath" label="경로" onChange={handleChange} />
-              </CCol>
               <CCol md={4}>
-                <CFormSelect
-                  id="deletionOption"
-                  label="삭제된 메뉴 검색"
-                  name="deletionOption"
-                  options={[
-                    { label: '선택하지 않음', value: '' },
-                    { label: '예', value: 'YES' },
-                    { label: '아니오', value: 'NO' },
-                  ]}
-                  onChange={handleChange}
-                />
-              </CCol>
-            </CRow>
-            <CRow className="mb-3">
-              <CCol md={6}>
                 <CDateRangePicker
                   id="createdAt"
                   label="생성일"
@@ -186,8 +171,9 @@ const MenuManagement = () => {
                   onEndDateChange={(newDate) => handleEndDateChange({ id: 'createdAt', newDate })}
                 />
               </CCol>
-              <CCol md={6}>
+              <CCol md={4}>
                 <CDateRangePicker
+                  id="modifiedAt"
                   label="수정일"
                   startDate={startDate}
                   endDate={endDate}
@@ -195,19 +181,56 @@ const MenuManagement = () => {
                   onEndDateChange={(newDate) => handleEndDateChange({ id: 'modifiedAt', newDate })}
                 />
               </CCol>
+              <CCol md={4}>
+                <CDateRangePicker
+                  id="lastLoggedInAt"
+                  label="최근 로그인"
+                  startDate={startDate}
+                  endDate={endDate}
+                  onStartDateChange={(newDate) => handleStartDateChange({ id: 'lastLoggedInAt', newDate })}
+                  onEndDateChange={(newDate) => handleEndDateChange({ id: 'lastLoggedInAt', newDate })}
+                />
+              </CCol>
+            </CRow>
+            <CRow className="mb-3">
+              <CCol md={3}>
+                <CFormSelect
+                  id="deletionOption"
+                  label="관리자 상태"
+                  name="deletionOption"
+                  options={[
+                    { label: '모든 관리자', value: '' },
+                    { label: '삭제됨', value: 'Yes' },
+                    { label: '삭제되지 않음', value: 'NO' },
+                  ]}
+                  value={formData.deletionOption}
+                  onChange={handleChange}
+                />
+              </CCol>
+              <CCol md={3}>
+                <CFormSelect
+                  id="findEmptyLogin"
+                  label="미로그인 관리자 검색"
+                  name="deletionOption"
+                  options={[
+                    { label: '아니오', value: false },
+                    { label: '예', value: true },
+                  ]}
+                  value={formData.findEmptyLogin}
+                  onChange={handleChange}
+                />
+              </CCol>
             </CRow>
             <CRow className="mb-3">
               <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
                 <CButton type="submit">검색</CButton>
-                <CButton color="primary" value="Reset" onClick={handleReset}>
-                  초기화
-                </CButton>
+                <CButton onClick={handleReset}>초기화</CButton>
               </CCol>
             </CRow>
           </CForm>
           <CRow className="mb-3">
             <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-              <CButton onClick={handleCreateClick}>메뉴 추가</CButton>
+              <CButton onClick={handleCreateClick}>관리자 추가</CButton>
               <CButton onClick={() => handleDeleteRestoreClick(true)}>삭제</CButton>
               <CButton onClick={() => handleDeleteRestoreClick(false)}>복구</CButton>
             </CCol>
@@ -218,22 +241,26 @@ const MenuManagement = () => {
               activePage={1}
               itemsPerPageSelect
               itemsPerPage={10}
-              itemsPerPageLabel="페이지당 메뉴 개수"
+              itemsPerPageLabel="페이지당 관리자 개수"
               noItemsLabel="검색 결과가 없습니다."
               loading={isLoading}
               sorterValue={{ column: 'id', state: 'asc' }}
-              items={menuList}
-              columns={menuColumnUtils}
+              items={AdminList}
+              columns={adminColumnConfig}
               selectable
               scopedColumns={{
-                name: (item) => (
+                email: (item) => (
                   <td
+                    style={{ cursor: 'pointer' }}
                     onClick={() => {
                       handleRowClick(item.id);
                     }}
                   >
-                    {item.name}
+                    {item.email}
                   </td>
+                ),
+                lastLoggedInAt: (item) => (
+                  <td>{item.lastLoggedInAt && format(new Date(item.lastLoggedInAt), 'yyyy/MM/dd')}</td>
                 ),
                 deleted: (item) => (
                   <td>
@@ -253,16 +280,16 @@ const MenuManagement = () => {
           </CRow>
         </CCardBody>
       </CCard>
-      <ModalContainer visible={modal.isOpen} title="메뉴 정보" onClose={modal.closeModal}>
-        <MenuDetailForm
+      <ModalContainer visible={modal.isOpen} title="관리자 정보" onClose={modal.closeModal}>
+        <AdminDetailForm
           selectedId={selectedId}
           initialFormMode={formMode}
           closeModal={modal.closeModal}
-          fetchMenuList={getMenuList}
+          fetchAdminList={fetchAdminList}
         />
       </ModalContainer>
     </>
   );
 };
 
-export default MenuManagement;
+export default AdminManagementPage;
