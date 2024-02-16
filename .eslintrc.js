@@ -37,8 +37,6 @@ module.exports = {
     'prefer-spread': 'error',
     'prefer-arrow-callback': 'error',
     'arrow-spacing': ['error', { before: true, after: true }],
-    'no-confusing-arrow': 'error',
-    'implicit-arrow-linebreak': 'error',
     'no-duplicate-imports': 'error',
     'import/no-mutable-exports': 'error',
     'import/first': 'error',
