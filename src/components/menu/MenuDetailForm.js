@@ -72,7 +72,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
   const fetchMenuDetail = async () => {
     try {
       setIsLoading(true);
-      const data = await MenuService.getSingleMenu(selectedId);
+      const data = await MenuService.getMenuDetail(selectedId);
       setFormData(data);
       const allowedRoles = data.allowedRoles.map((role) => role.id);
       await getRoles(allowedRoles);
@@ -101,7 +101,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
     let excludedId = isCreateMode ? '' : selectedId;
 
     try {
-      const data = await MenuService.getParentMenu(excludedId);
+      const data = await MenuService.getParentMenus(excludedId);
       const newParentMenus = data.map((parentMenu) => ({
         value: parentMenu.id,
         label: parentMenu.name,
@@ -114,7 +114,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
 
   const postMenu = async () => {
     try {
-      await MenuService.createMenu(formData);
+      await MenuService.postMenu(formData);
       closeModal();
       fetchMenuList();
     } catch (error) {
@@ -130,7 +130,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
 
   const patchMenu = async () => {
     try {
-      await MenuService.updateMenu(formData);
+      await MenuService.patchMenu(formData);
       closeModal();
       fetchMenuList();
     } catch (error) {
@@ -173,7 +173,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
   const handleDeleteRestoreClick = async (id) => {
     const shouldDelete = !formData.deleted;
     try {
-      await MenuService.deleteSingleMenu(id, shouldDelete);
+      await MenuService.deleteMenu(id, shouldDelete);
     } catch (error) {
       console.log(error);
     }
@@ -244,20 +244,17 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
           />
           <CRow>
             <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-              {isReadMode ? (
+              {!isCreateMode && (
                 <>
                   <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>
                     {formData.deleted ? '복구' : '삭제'}
                   </CButton>
-                  <CButton onClick={handleUpdateClick}>수정</CButton>
                 </>
+              )}
+              {isUpdateMode || isCreateMode ? (
+                <CButton onClick={handleSubmit}>저장</CButton>
               ) : (
-                <>
-                  <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>
-                    {formData.deleted ? '복구' : '삭제'}
-                  </CButton>
-                  <CButton onClick={handleSubmit}>저장</CButton>
-                </>
+                <CButton onClick={handleUpdateClick}>수정</CButton>
               )}
             </CCol>
           </CRow>

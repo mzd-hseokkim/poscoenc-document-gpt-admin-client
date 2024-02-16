@@ -1,4 +1,4 @@
-export const menuColumnUtils = [
+export const menuColumnConfig = [
   {
     key: 'id',
     label: '아이디',
