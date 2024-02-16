@@ -57,7 +57,7 @@ const useSideBarItems = () => {
 
   const getMenuList = async () => {
     try {
-      const data = await MenuService.getAuthorizedMenu();
+      const data = await MenuService.getAuthorizedMenus();
       const transformedMenuItems = transformDataToMenuItems(data);
       setMenuItems([...fixedMenu, ...transformedMenuItems]);
     } catch (error) {

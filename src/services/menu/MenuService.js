@@ -1,6 +1,6 @@
 import api from '../../api/Api';
 
-const getMenuList = async (params) => {
+const getMenus = async (params) => {
   const response = await api.get('/admin/menus', {
     params: {
       name: params.name,
@@ -17,47 +17,42 @@ const getMenuList = async (params) => {
   return response.data;
 };
 
-const getAuthorizedMenu = async () => {
+const getAuthorizedMenus = async () => {
   const response = await api.get('/admin/menus/authorized');
   return response.data;
 };
 
-const getParentMenu = async (id) => {
+const getParentMenus = async (id) => {
   const response = await api.get(`/admin/menus/parents?excludedId=${id}`);
   return response.data;
 };
 
-const getSingleMenu = async (id) => {
+const getMenuDetail = async (id) => {
   const response = await api.get(`/admin/menus/${id}`);
   return response.data;
 };
 
-const getFavoriteMenu = async () => {
+const getFavoriteMenus = async () => {
   const response = await api.get('/admin/menus/favorite');
   return response.data;
 };
 
-const getUrlPermissions = async (payload) => {
+const postUri = async (payload) => {
   const response = await api.post('/admin/menu-auth/authorized-menu', payload);
   return response.data;
 };
 
-const getButtonPermission = async (payload) => {
-  const response = await api.post('/admin/menu-auth/authorized-button', payload);
-  return response.data;
-};
-
-const createMenu = async (payload) => {
+const postMenu = async (payload) => {
   const response = await api.post('/admin/menus', payload);
   return response.data;
 };
 
-const createFavoriteMenu = async (payload) => {
+const postFavoriteMenu = async (payload) => {
   const response = await api.post('/admin/menus/favorite', payload);
   return response.data;
 };
 
-const updateMenu = async (payload) => {
+const patchMenu = async (payload) => {
   const response = await api.patch('/admin/menus', payload);
   return response.data;
 };
@@ -67,28 +62,29 @@ const deleteFavoriteMenu = async (id) => {
   return response.data;
 };
 
-const deleteSingleMenu = async (id, deleted) => {
+const deleteMenu = async (id, deleted) => {
   const response = await api.patch(`/admin/menus/${id}/deleted?deleted=${deleted}`);
   return response.data;
 };
 
-const deleteMultipleMenu = async (ids, deleted) => {
+const deleteMenus = async (ids, deleted) => {
   const response = await api.patch(`/admin/menus/deleted/${deleted}`, ids);
   return response.data;
 };
 
-export default {
-  getMenuList,
-  getAuthorizedMenu,
-  getParentMenu,
-  getSingleMenu,
-  getFavoriteMenu,
-  getUrlPermissions,
-  getButtonPermission,
-  createMenu,
-  createFavoriteMenu,
-  updateMenu,
+const MenuService = {
+  getMenus,
+  getAuthorizedMenus,
+  getParentMenus,
+  getMenuDetail,
+  getFavoriteMenus,
+  postUri,
+  postMenu,
+  postFavoriteMenu,
+  patchMenu,
   deleteFavoriteMenu,
-  deleteSingleMenu,
-  deleteMultipleMenu,
+  deleteMenu,
+  deleteMenus,
 };
+
+export default MenuService;

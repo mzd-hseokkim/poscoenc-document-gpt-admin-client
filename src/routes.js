@@ -3,7 +3,7 @@ import React from 'react';
 const BoardMainPage = React.lazy(() => import('./views/pages/board/BoardMainPage'));
 const BoardPostDetailsPage = React.lazy(() => import('./views/pages/board/BoardPostDetailsPage'));
 const UserManagement = React.lazy(() => import('./views/pages/user/UserManagementPage'));
-const MenuManagement = React.lazy(() => import('./views/pages/menu/MenuManagement'));
+const MenuManagement = React.lazy(() => import('./views/pages/menu/MenuManagementPage'));
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },

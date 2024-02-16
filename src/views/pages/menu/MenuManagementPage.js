@@ -21,9 +21,10 @@ import ModalContainer from '../../../components/modal/ModalContainer';
 import useModal from '../../../hooks/useModal';
 import useToast from '../../../hooks/useToast';
 import MenuService from '../../../services/menu/MenuService';
-import { menuColumnUtils } from '../../../utils/menu/menuColumnUtils';
+import { iconMapper } from '../../../utils/common/iconMapper';
+import { menuColumnConfig } from '../../../utils/menu/menuColumnConfig';
 
-const MenuManagement = () => {
+const MenuManagementPage = () => {
   const [startDate, setStartDate] = useState(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
   const [endDate, setEndDate] = useState(new Date());
   const [menuList, setMenuList] = useState([]);
@@ -59,7 +60,7 @@ const MenuManagement = () => {
   const getMenuList = async () => {
     try {
       setIsLoading(true);
-      const data = await MenuService.getMenuList(formData);
+      const data = await MenuService.getMenus(formData);
       setMenuList(data.content);
     } catch (error) {
       const status = error.response?.status;
@@ -124,14 +125,14 @@ const MenuManagement = () => {
     const ids = checkedItems.map((item) => item.id);
     if (checkedItems.length === 1) {
       try {
-        await MenuService.deleteSingleMenu(ids, shouldDelete);
+        await MenuService.deleteMenu(ids, shouldDelete);
         getMenuList();
       } catch (error) {
         console.log(error);
       }
     } else {
       try {
-        await MenuService.deleteMultipleMenu(ids, shouldDelete);
+        await MenuService.deleteMenus(ids, shouldDelete);
         getMenuList();
       } catch (error) {
         console.log(error);
@@ -148,18 +149,32 @@ const MenuManagement = () => {
           <CForm onSubmit={handleSubmit}>
             <CRow className="mb-3">
               <CCol md={4}>
-                <CFormInput id="name" label="이름" onChange={handleChange} />
+                <CFormInput id="name" label="이름" value={formData.name} onChange={handleChange} />
               </CCol>
               <CCol md={4}>
-                <CFormInput type="number" id="menuOrder" label="메뉴 순서" onChange={handleChange} />
+                <CFormInput
+                  type="number"
+                  id="menuOrder"
+                  label="메뉴 순서"
+                  min={0}
+                  value={formData.menuOrder}
+                  onChange={handleChange}
+                />
               </CCol>
               <CCol md={4}>
-                <CFormInput type="number" id="parentId" label="상위 메뉴 ID" onChange={handleChange} />
+                <CFormInput
+                  type="number"
+                  id="parentId"
+                  label="상위 메뉴 ID"
+                  min={0}
+                  value={formData.parentId}
+                  onChange={handleChange}
+                />
               </CCol>
             </CRow>
             <CRow className="mb-3">
               <CCol md={8}>
-                <CFormInput id="urlPath" label="경로" onChange={handleChange} />
+                <CFormInput id="urlPath" label="경로" value={formData.urlPath} onChange={handleChange} />
               </CCol>
               <CCol md={4}>
                 <CFormSelect
@@ -171,6 +186,7 @@ const MenuManagement = () => {
                     { label: '예', value: 'YES' },
                     { label: '아니오', value: 'NO' },
                   ]}
+                  value={formData.deletionOption}
                   onChange={handleChange}
                 />
               </CCol>
@@ -223,11 +239,12 @@ const MenuManagement = () => {
               loading={isLoading}
               sorterValue={{ column: 'id', state: 'asc' }}
               items={menuList}
-              columns={menuColumnUtils}
+              columns={menuColumnConfig}
               selectable
               scopedColumns={{
                 name: (item) => (
                   <td
+                    style={{ cursor: 'pointer' }}
                     onClick={() => {
                       handleRowClick(item.id);
                     }}
@@ -235,6 +252,7 @@ const MenuManagement = () => {
                     {item.name}
                   </td>
                 ),
+                icon: (item) => <td>{iconMapper({ iconName: item.icon })}</td>,
                 deleted: (item) => (
                   <td>
                     <StatusBadge deleted={item.deleted} />
@@ -265,4 +283,4 @@ const MenuManagement = () => {
   );
 };
 
-export default MenuManagement;
+export default MenuManagementPage;
