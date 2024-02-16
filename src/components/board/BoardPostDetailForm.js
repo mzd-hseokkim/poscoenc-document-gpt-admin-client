@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from 'react';
 
-import { CButton, CForm, CFormInput, CFormLabel, CFormText, CFormTextarea, CSpinner } from '@coreui/react-pro';
+import {
+  CButton,
+  CCol,
+  CForm,
+  CFormInput,
+  CFormLabel,
+  CFormText,
+  CFormTextarea,
+  CRow,
+  CSpinner,
+} from '@coreui/react-pro';
 import { format } from 'date-fns';
 import { useRecoilValue } from 'recoil';
 
@@ -62,54 +72,56 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
   return (
     <>
       <CForm onSubmit={handleSubmit}>
-        <div>
-          <div className="top-info" style={{ display: 'flex', marginBottom: '1rem' }}>
-            <div className="form-group" style={{ marginRight: '.5rem', width: '60px' }}>
-              <CFormLabel htmlFor="postId">ID</CFormLabel>
-              <CFormText id="postId" name="postId" readOnly disabled={!isViewMode}>
-                {postDetails?.id}
-              </CFormText>
-            </div>
-            <div className="form-group" style={{ marginRight: '1rem', width: '90px' }}>
-              <CFormLabel htmlFor="postCreatedByName">작성자</CFormLabel>
-              <CFormText id="postCreatedByName" readOnly disabled={!isViewMode}>
-                {postDetails?.createdByName}
-              </CFormText>
-            </div>
-            <div className="form-group" style={{ marginRight: '1rem', width: '60px' }}>
-              <CFormLabel htmlFor="commentCount">댓글 수</CFormLabel>
-              <CFormText type="number" id="commentCount" readOnly disabled={!isViewMode}>
-                {postDetails?.comments?.length}
-              </CFormText>
-            </div>
-            <div className="form-group" style={{ marginRight: '1rem', width: '60px' }}>
-              <CFormLabel htmlFor="postViews">조회수</CFormLabel>
-              <CFormText type="number" id="postViews" readOnly disabled={!isViewMode}>
-                {postDetails?.viewCount}
-              </CFormText>
-            </div>
-          </div>
-          <div className="middle-info" style={{ display: 'flex', marginBottom: '1rem' }}>
-            <div className="form-group" style={{ marginRight: '1rem' }}>
-              <CFormLabel htmlFor="postDate">작성일시</CFormLabel>
-              <CFormText id="postDate">
-                {postDetails?.createdAt ? format(new Date(postDetails?.createdAt), 'yyyy/MM/dd HH:mm:ss') : ''}
-              </CFormText>
-            </div>
-            <div className="form-group" style={{ marginRight: '1rem' }}>
-              <CFormLabel htmlFor="modifiedDate">수정일시</CFormLabel>
-              <CFormText id="modifiedDate">
-                {postDetails?.modifiedAt ? format(new Date(postDetails?.modifiedAt), 'yyyy/MM/dd HH:mm:ss') : ''}
-              </CFormText>
-            </div>
-            <div className="form-group">
-              <CFormLabel htmlFor="postStatus">삭제 여부</CFormLabel>
-              <div>
-                <StatusBadge id="postStatus" deleted={postDetails?.deleted} />
-              </div>
-            </div>
-          </div>
-          <div>
+        {/*REMIND 테이블로 재구성*/}
+        <CRow className="top-info" style={{ display: 'flex', marginBottom: '1rem' }}>
+          <CCol className="form-group" style={{ marginRight: '.5rem', width: '60px' }}>
+            <CFormLabel htmlFor="postId">ID</CFormLabel>
+            <CFormText id="postId" name="postId" readOnly disabled={!isViewMode}>
+              {postDetails?.id}
+            </CFormText>
+          </CCol>
+          <CCol className="form-group" style={{ marginRight: '1rem', width: '90px' }}>
+            <CFormLabel htmlFor="postCreatedByName">작성자</CFormLabel>
+            <CFormText id="postCreatedByName" readOnly disabled={!isViewMode}>
+              {postDetails?.createdByName}
+            </CFormText>
+          </CCol>
+          <CCol className="form-group" style={{ marginRight: '1rem', width: '60px' }}>
+            <CFormLabel htmlFor="commentCount">댓글 수</CFormLabel>
+            <CFormText type="number" id="commentCount" readOnly disabled={!isViewMode}>
+              {postDetails?.comments?.length}
+            </CFormText>
+          </CCol>
+          <CCol className="form-group" style={{ marginRight: '1rem', width: '60px' }}>
+            <CFormLabel htmlFor="postViews">조회수</CFormLabel>
+            <CFormText type="number" id="postViews" readOnly disabled={!isViewMode}>
+              {postDetails?.viewCount}
+            </CFormText>
+          </CCol>
+        </CRow>
+        <CRow className="middle-info" style={{ display: 'flex', marginBottom: '1rem' }}>
+          <CCol className="form-group" style={{ marginRight: '1rem' }}>
+            <CFormLabel htmlFor="postDate">작성일시</CFormLabel>
+            <CFormText id="postDate">
+              {postDetails?.createdAt ? format(new Date(postDetails?.createdAt), 'yyyy/MM/dd HH:mm:ss') : ''}
+            </CFormText>
+          </CCol>
+          <CCol className="form-group" style={{ marginRight: '1rem' }}>
+            <CFormLabel htmlFor="modifiedDate">수정일시</CFormLabel>
+            <CFormText id="modifiedDate">
+              {postDetails?.modifiedAt ? format(new Date(postDetails?.modifiedAt), 'yyyy/MM/dd HH:mm:ss') : ''}
+            </CFormText>
+          </CCol>
+          <CCol className="form-group">
+            <CFormLabel htmlFor="postStatus">삭제 여부</CFormLabel>
+            <CFormText>
+              <StatusBadge id="postStatus" deleted={postDetails?.deleted} />
+            </CFormText>
+          </CCol>
+        </CRow>
+        {/*REMIND 테이블로 재구성*/}
+        <CRow className="mt-3">
+          <CCol>
             <CFormLabel htmlFor="postTitle">제목</CFormLabel>
             <CFormInput
               type="text"
@@ -118,8 +130,10 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
               defaultValue={postDetails?.title}
               readOnly={isViewMode}
             ></CFormInput>
-          </div>
-          <div>
+          </CCol>
+        </CRow>
+        <CRow className="mt-3">
+          <CCol>
             <CFormLabel htmlFor="postContents">내용</CFormLabel>
             <CFormTextarea
               className="mb-3"
@@ -130,14 +144,13 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
               defaultValue={postDetails?.content}
               readOnly={isViewMode}
             ></CFormTextarea>
-          </div>
-        </div>
-        {/*REMIND 작성자만 수정 가능하도록 변경*/}
+          </CCol>
+        </CRow>
         {isViewMode && (
-          <div className="row justify-content-end">
+          <CRow className="row justify-content-end">
             {/*REMIND comment 와 post 에 createdBy Id 도 반환할수있도록 변경요청*/}
             {postDetails?.createdByName === currentUserId && (
-              <div className="col-auto mb-3">
+              <CCol className="col-auto mb-3">
                 <CButton
                   onClick={() => {
                     handleFormMode(false);
@@ -145,28 +158,26 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
                 >
                   수정
                 </CButton>
-              </div>
+              </CCol>
             )}
-          </div>
+          </CRow>
         )}
         {!isViewMode && (
-          <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-            <CButton type="submit" className="mt-2 me-0">
-              저장
-            </CButton>
-            <CButton
-              type="reset"
-              className="mt-2 me-0"
-              onClick={() => {
-                handleFormMode(true);
-              }}
-            >
-              취소
-            </CButton>
-          </div>
+          <CRow className="justify-content-end">
+            <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
+              <CButton type="submit">저장</CButton>
+              <CButton
+                type="reset"
+                onClick={() => {
+                  handleFormMode(true);
+                }}
+              >
+                취소
+              </CButton>
+            </CCol>
+          </CRow>
         )}
       </CForm>
-      {/*REMIND 댓글 제출 이벤트핸들러 구현*/}
       {isViewMode && <BoardCommentsForm postId={clickedRowId} isViewMode={isViewMode} />}
     </>
   );
