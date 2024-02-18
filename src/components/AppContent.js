@@ -6,10 +6,25 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 // routes config
 import routes from '../routes';
 
+const spinnerDivStyle = {
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  height: '100vh',
+  position: 'relative',
+  transform: 'translateY(-20%)',
+};
+
+const spinnerStyle = { width: '4rem', height: '4rem', '--cui-spinner-border-width': '10px' };
+const LoadingFallback = () => (
+  <div style={spinnerDivStyle}>
+    <CSpinner color="primary" variant="border" style={spinnerStyle} />
+  </div>
+);
 const AppContent = () => {
   return (
     <CContainer lg>
-      <Suspense fallback={<CSpinner color="primary" />}>
+      <Suspense fallback={<LoadingFallback />}>
         <Routes>
           {routes.map((route, idx) => {
             return (

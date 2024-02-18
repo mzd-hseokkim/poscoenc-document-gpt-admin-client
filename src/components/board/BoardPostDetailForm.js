@@ -1,6 +1,17 @@
 import React, { useEffect, useState } from 'react';
 
-import { CButton, CForm, CFormInput, CFormLabel, CFormText, CFormTextarea, CSpinner } from '@coreui/react-pro';
+import {
+  CButton,
+  CCard,
+  CCardBody,
+  CCol,
+  CForm,
+  CFormInput,
+  CFormLabel,
+  CFormTextarea,
+  CRow,
+  CSmartTable,
+} from '@coreui/react-pro';
 import { format } from 'date-fns';
 import { useRecoilValue } from 'recoil';
 
@@ -9,6 +20,7 @@ import BoardCommentsForm from './BoardCommentsForm';
 import useToast from '../../hooks/useToast';
 import BoardService from '../../services/board/BoardService';
 import { userIdSelector } from '../../states/jwtTokenState';
+import FormLoadingCover from '../cover/FormLoadingCover';
 
 const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
   const [postDetails, setPostDetails] = useState(null);
@@ -17,6 +29,64 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
 
   const addToast = useToast();
   const currentUserId = useRecoilValue(userIdSelector);
+  const topInfoColumns = [
+    { key: 'id', label: 'ID', _style: { width: '20%' } },
+    { key: 'createdByName', label: '작성자', _style: { width: '30%' } },
+    { key: 'commentCount', label: '댓글수', _style: { width: '25%' } },
+    { key: 'viewCount', label: '조회수', _style: { width: '25%' } },
+  ];
+
+  const topInfoData = [
+    {
+      id: postDetails?.id,
+      createdByName: postDetails?.createdByName,
+      commentCount: postDetails?.comments ? postDetails.comments.length : 0, // 댓글 배열이 있다면 그 길이를, 없다면 0을 사용
+      viewCount: postDetails?.viewCount,
+    },
+  ];
+
+  const middleInfoColumns = [
+    {
+      key: 'createdAt',
+      label: '작성일시',
+      _style: { width: '30%' },
+    },
+    {
+      key: 'modifiedAt',
+      label: '수정일시',
+      _style: { width: '30%' },
+    },
+    {
+      key: 'deleted',
+      label: '삭제 여부',
+      _style: { width: '40%' },
+    },
+  ];
+  const middleInfoData = [
+    {
+      createdAt: postDetails?.createdAt,
+      modifiedAt: postDetails?.modifiedAt,
+      deleted: postDetails?.deleted,
+    },
+  ];
+
+  const middleInfoScopedColumns = {
+    createdAt: (item) => <td>{item.createdAt ? format(new Date(item.createdAt), 'yyyy/MM/dd HH:mm:ss') : ''}</td>,
+    modifiedAt: (item) => <td>{item.modifiedAt ? format(new Date(item.modifiedAt), 'yyyy/MM/dd HH:mm:ss') : ''}</td>,
+    deleted: (item) => (
+      <td>
+        <StatusBadge deleted={item.deleted} />
+      </td>
+    ),
+  };
+
+  const infoTableHeaderProps = {
+    color: 'light',
+  };
+
+  const infoTableProps = {
+    bordered: true,
+  };
 
   const fetchPostDetails = async () => {
     setGetDetailIsLoading(true);
@@ -57,116 +127,92 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
     await refreshPosts();
   };
 
-  if (getDetailIsLoading) return <CSpinner variant="border" />;
+  const renderPostTitleInput = () => (
+    <CRow className="mt-3">
+      <CCol>
+        <CFormLabel htmlFor="postTitle">제목</CFormLabel>
+        <CFormInput
+          type="text"
+          id="postTitle"
+          name="postTitle"
+          defaultValue={postDetails?.title}
+          readOnly={isViewMode}
+        />
+      </CCol>
+    </CRow>
+  );
+
+  const renderPostContentTextarea = () => (
+    <CRow className="mt-3">
+      <CCol>
+        <CFormLabel htmlFor="postContents">내용</CFormLabel>
+        <CFormTextarea
+          id="postContents"
+          name="postContents"
+          rows="5"
+          placeholder="내용을 작성 해 주세요."
+          defaultValue={postDetails?.content}
+          readOnly={isViewMode}
+        />
+      </CCol>
+    </CRow>
+  );
+
+  const renderFormActions = () => (
+    <>
+      {isViewMode && (
+        <CRow className="row justify-content-end">
+          {postDetails?.createdByName === currentUserId && (
+            <CCol className="col-auto mb-3">
+              <CButton onClick={() => handleFormMode(false)}>수정</CButton>
+            </CCol>
+          )}
+        </CRow>
+      )}
+      {!isViewMode && (
+        <CRow className="justify-content-end">
+          <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
+            <CButton type="submit">저장</CButton>
+            <CButton type="reset" onClick={() => handleFormMode(true)}>
+              취소
+            </CButton>
+          </CCol>
+        </CRow>
+      )}
+    </>
+  );
 
   return (
     <>
       <CForm onSubmit={handleSubmit}>
-        <div>
-          <div className="top-info" style={{ display: 'flex', marginBottom: '1rem' }}>
-            <div className="form-group" style={{ marginRight: '.5rem', width: '60px' }}>
-              <CFormLabel htmlFor="postId">ID</CFormLabel>
-              <CFormText id="postId" name="postId" readOnly disabled={!isViewMode}>
-                {postDetails?.id}
-              </CFormText>
-            </div>
-            <div className="form-group" style={{ marginRight: '1rem', width: '90px' }}>
-              <CFormLabel htmlFor="postCreatedByName">작성자</CFormLabel>
-              <CFormText id="postCreatedByName" readOnly disabled={!isViewMode}>
-                {postDetails?.createdByName}
-              </CFormText>
-            </div>
-            <div className="form-group" style={{ marginRight: '1rem', width: '60px' }}>
-              <CFormLabel htmlFor="commentCount">댓글 수</CFormLabel>
-              <CFormText type="number" id="commentCount" readOnly disabled={!isViewMode}>
-                {postDetails?.comments?.length}
-              </CFormText>
-            </div>
-            <div className="form-group" style={{ marginRight: '1rem', width: '60px' }}>
-              <CFormLabel htmlFor="postViews">조회수</CFormLabel>
-              <CFormText type="number" id="postViews" readOnly disabled={!isViewMode}>
-                {postDetails?.viewCount}
-              </CFormText>
-            </div>
-          </div>
-          <div className="middle-info" style={{ display: 'flex', marginBottom: '1rem' }}>
-            <div className="form-group" style={{ marginRight: '1rem' }}>
-              <CFormLabel htmlFor="postDate">작성일시</CFormLabel>
-              <CFormText id="postDate">
-                {postDetails?.createdAt ? format(new Date(postDetails?.createdAt), 'yyyy/MM/dd HH:mm:ss') : ''}
-              </CFormText>
-            </div>
-            <div className="form-group" style={{ marginRight: '1rem' }}>
-              <CFormLabel htmlFor="modifiedDate">수정일시</CFormLabel>
-              <CFormText id="modifiedDate">
-                {postDetails?.modifiedAt ? format(new Date(postDetails?.modifiedAt), 'yyyy/MM/dd HH:mm:ss') : ''}
-              </CFormText>
-            </div>
-            <div className="form-group">
-              <CFormLabel htmlFor="postStatus">삭제 여부</CFormLabel>
-              <div>
-                <StatusBadge id="postStatus" deleted={postDetails?.deleted} />
-              </div>
-            </div>
-          </div>
-          <div>
-            <CFormLabel htmlFor="postTitle">제목</CFormLabel>
-            <CFormInput
-              type="text"
-              id="postTitle"
-              name="postTitle"
-              defaultValue={postDetails?.title}
-              readOnly={isViewMode}
-            ></CFormInput>
-          </div>
-          <div>
-            <CFormLabel htmlFor="postContents">내용</CFormLabel>
-            <CFormTextarea
-              className="mb-3"
-              id="postContents"
-              name="postContents"
-              rows={5}
-              placeholder="내용을 작성 해 주세요."
-              defaultValue={postDetails?.content}
-              readOnly={isViewMode}
-            ></CFormTextarea>
-          </div>
-        </div>
-        {/*REMIND 작성자만 수정 가능하도록 변경*/}
-        {isViewMode && (
-          <div className="row justify-content-end">
-            {/*REMIND comment 와 post 에 createdBy Id 도 반환할수있도록 변경요청*/}
-            {postDetails?.createdByName === currentUserId && (
-              <div className="col-auto mb-3">
-                <CButton
-                  onClick={() => {
-                    handleFormMode(false);
-                  }}
-                >
-                  수정
-                </CButton>
-              </div>
-            )}
-          </div>
-        )}
-        {!isViewMode && (
-          <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-            <CButton type="submit" className="mt-2 me-0">
-              저장
-            </CButton>
-            <CButton
-              type="reset"
-              className="mt-2 me-0"
-              onClick={() => {
-                handleFormMode(true);
-              }}
-            >
-              취소
-            </CButton>
-          </div>
-        )}
+        <CCard className="mb-3">
+          <CCardBody>
+            <CSmartTable
+              columns={topInfoColumns}
+              items={topInfoData}
+              tableHeadProps={infoTableHeaderProps}
+              tableProps={infoTableProps}
+            />
+            <CSmartTable
+              tableHeadProps={infoTableHeaderProps}
+              tableProps={infoTableProps}
+              columns={middleInfoColumns}
+              items={middleInfoData}
+              scopedColumns={middleInfoScopedColumns}
+            />
+          </CCardBody>
+        </CCard>
+        <CCard>
+          <CCard>
+            <CCardBody>
+              {renderPostTitleInput()}
+              {renderPostContentTextarea()}
+            </CCardBody>
+          </CCard>
+          {renderFormActions()}
+          <FormLoadingCover isLoading={getDetailIsLoading} />
+        </CCard>
       </CForm>
-      {/*REMIND 댓글 제출 이벤트핸들러 구현*/}
       {isViewMode && <BoardCommentsForm postId={clickedRowId} isViewMode={isViewMode} />}
     </>
   );

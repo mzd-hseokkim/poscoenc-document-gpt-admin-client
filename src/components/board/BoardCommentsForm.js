@@ -1,7 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { CButton, CForm, CFormLabel, CFormText, CFormTextarea, CInputGroup, CInputGroupText } from '@coreui/react-pro';
-import { format } from 'date-fns';
+import {
+  CButton,
+  CCard,
+  CCardBody,
+  CCardHeader,
+  CCol,
+  CForm,
+  CFormCheck,
+  CFormTextarea,
+  CInputGroup,
+  CRow,
+} from '@coreui/react-pro';
 import { useRecoilValue } from 'recoil';
 
 import useToast from '../../hooks/useToast';
@@ -11,6 +21,8 @@ import { userIdSelector } from '../../states/jwtTokenState';
 const BoardCommentsForm = ({ postId }) => {
   const [commentText, setCommentText] = useState('');
   const [postComments, setPostComments] = useState([]);
+  const [showDeletedComments, setShowDeletedComments] = useState(true);
+
   //REMIND imple loading spinner
   const [getIsLoading, setGetIsLoading] = useState(true);
   const [postCommentIsLoading, setPostCommentIsLoading] = useState(false);
@@ -67,53 +79,81 @@ const BoardCommentsForm = ({ postId }) => {
   }, [postId]);
 
   useEffect(() => {
-    endOfCommentsRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [postComments]);
+    if (!postCommentIsLoading) {
+      endOfCommentsRef.current?.scrollIntoView({ behavior: 'smooth' });
+    } // REMIND 현재는 본인이 답글 달 때만 아래로 스크롤, 추후 새로운 댓글이 달렸을 때 아래로 스크롤 하는걸 고려
+  }, [postCommentIsLoading]);
+
+  const renderCommentList = () => (
+    <CRow>
+      {postComments?.map((comment, index) => renderCommentItem(comment, index))}
+      <div ref={endOfCommentsRef} />
+    </CRow>
+  );
+
+  const renderCommentItem = (comment, key) => {
+    if (!showDeletedComments && comment.deleted) {
+      return null;
+    }
+
+    return (
+      <CCol xs={12} key={key}>
+        <CCard
+          className={`comment-item mt-2 ${comment.deleted ? 'deleted-comment' : ''}`}
+          style={{ marginBottom: '1rem' }}
+        >
+          <CCardHeader>{renderCommentAuthorAndActions(comment)}</CCardHeader>
+          <CCardBody>{renderCommentContent(comment)}</CCardBody>
+        </CCard>
+      </CCol>
+    );
+  };
+
+  const renderCommentContent = (comment) => (
+    <CRow>
+      <CCol>
+        <p style={{ textDecoration: comment.deleted ? 'line-through' : 'none' }}>{comment.content}</p>
+      </CCol>
+    </CRow>
+  );
+
+  const renderCommentAuthorAndActions = (comment) => (
+    <CRow>
+      <CCol className="d-flex justify-content-between">
+        <strong>{comment.createdByName}</strong>
+        {comment.createdByName === currentUserId && (
+          <CButton color="primary" size="sm" onClick={() => toggleCommentStatus(comment.id, !comment.deleted)}>
+            {comment.deleted ? '복구' : '삭제'}
+          </CButton>
+        )}
+      </CCol>
+    </CRow>
+  );
+
+  const renderCommentInput = () => (
+    <CInputGroup className="mb-3">
+      <CFormTextarea rows={2} placeholder="댓글을 입력해주세요." value={commentText} onChange={handleCommentChange} />
+      <CButton type="submit" color="primary" disabled={!commentText.trim()}>
+        작성
+      </CButton>
+    </CInputGroup>
+  );
 
   return (
     <CForm onSubmit={handleCommentSubmit} className="comments-section">
-      <CFormLabel htmlFor="postComments">댓글</CFormLabel>
-
-      <div style={{ height: '180px', overflowY: 'auto' }}>
-        {postComments?.map((comment, index) => (
-          <div key={index} className={`comment-item mb-2 ${comment.deleted ? 'deleted' : ''}`}>
-            <CInputGroup className="mb-1">
-              <CFormText readOnly>{`작성자 : ${comment.createdByName}`}</CFormText>
-              {/*REMIND comment 와 post 에 createdBy Id 도 반환할수있도록 변경요청*/}
-              {comment.createdByName === currentUserId && (
-                <div className="ms-auto">
-                  <CButton size="sm" onClick={() => toggleCommentStatus(comment.id, !comment.deleted)}>
-                    {comment.deleted ? '복구' : '삭제'}
-                  </CButton>
-                </div>
-              )}
-              <CFormText className="ms-2">
-                {`작성일시 : ${format(new Date(comment.createdAt), 'yyyy/MM/dd HH:mm:ss')}`}
-              </CFormText>
-            </CInputGroup>
-            <CFormText
-              className="mb-1 p-2"
-              style={{
-                textDecoration: comment.deleted ? 'line-through' : 'none',
-                height: '30px',
-                fontSize: 'small-caption',
-              }}
-              readOnly
-            >
-              {comment.content}
-            </CFormText>
-            <div ref={endOfCommentsRef} />
-          </div>
-        ))}
-      </div>
-
-      <CInputGroup className="mb-3 mt-4">
-        <CInputGroupText>댓글</CInputGroupText>
-        <CFormTextarea placeholder="댓글을 입력해주세요." value={commentText} onChange={handleCommentChange} />
-        <CButton disabled={!commentText.trim()} type="submit" style={{ cursor: 'pointer' }}>
-          작성
-        </CButton>
-      </CInputGroup>
+      <CCard className="mt-3 mb-3">
+        <CCardHeader className="d-flex justify-content-between">
+          댓글
+          <CFormCheck
+            id="showDeletedComments"
+            label="삭제된 댓글 표시"
+            checked={showDeletedComments}
+            onChange={(e) => setShowDeletedComments(e.target.checked)}
+          />
+        </CCardHeader>
+        <CCardBody style={{ height: '180px', overflowY: 'auto' }}>{renderCommentList()}</CCardBody>
+      </CCard>
+      {renderCommentInput()}
     </CForm>
   );
 };

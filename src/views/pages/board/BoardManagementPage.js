@@ -21,9 +21,9 @@ import useModal from '../../../hooks/useModal';
 import useToast from '../../../hooks/useToast';
 import BoardService from '../../../services/board/BoardService';
 import { postColumnConfig } from '../../../utils/board/postColumnConfig';
+import Page500 from '../page500/Page500';
 
 const BoardManagementPage = () => {
-  // 2. useState
   const [selectedRows, setSelectedRows] = useState([]);
   const [clickedRowId, setClickedRowId] = useState(null);
   const [postSearchResults, setPostSearchResults] = useState([]);
@@ -42,7 +42,6 @@ const BoardManagementPage = () => {
   const [searchFormData, setSearchFormData] = useState(initialSearchFormData);
   const [error, setError] = useState(null);
 
-  // 3. hooks
   const tableFields = postColumnConfig;
   const modal = useModal();
   const addToast = useToast();
@@ -51,12 +50,10 @@ const BoardManagementPage = () => {
   };
   const scopedColumns = getScopedColumns(handleClickedRowId, modal.openModal);
 
-  // 4. 컴포넌트가 사용할 함수
   const isDeletedRow = (selectedRows) => {
     return selectedRows.some((row) => row.deleted === true);
   };
 
-  // 5. 이벤트 핸들러 함수
   const handleSelectedRows = (newSelectedRows) => {
     setSelectedRows(newSelectedRows);
   };
@@ -110,16 +107,14 @@ const BoardManagementPage = () => {
       }
     } catch (error) {
       addToast({ color: 'danger', message: error.message });
+      setError(error);
     } finally {
       await handleSearchSubmit();
     }
   };
 
-  // 6. 렌더링을 돕는 작은 컴포넌트 정의
-  // 이 예시에서는 별도의 작은 컴포넌트가 정의되지 않았습니다.
-
-  // 7. 메인 렌더링 로직(return 문)
-  if (error) return <div>Error: {error.message}</div>;
+  //REMIND handle error page
+  if (error) return <Page500 />;
 
   return (
     <>
@@ -196,12 +191,14 @@ const BoardManagementPage = () => {
                     />
                   </CCol>
                 </CRow>
-                <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                  <CButton type="submit">{'검색'}</CButton>
-                  <CButton onClick={handleReset} color="primary" value="Reset">
-                    초기화
-                  </CButton>
-                </div>
+                <CRow className="mb-3">
+                  <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <CButton type="submit">{'검색'}</CButton>
+                    <CButton onClick={handleReset} color="primary" value="Reset">
+                      초기화
+                    </CButton>
+                  </CCol>
+                </CRow>
               </CForm>
             </CCardBody>
           </CCard>
@@ -209,24 +206,26 @@ const BoardManagementPage = () => {
       </CRow>
       <CCard className="row g-3 mt-2">
         <CCardBody>
-          <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-            <CButton
-              disabled={selectedRows?.length === 0 || isDeletedRow(selectedRows)}
-              onClick={() => {
-                togglePostStatus(true);
-              }}
-            >
-              {'삭제'}
-            </CButton>
-            <CButton
-              disabled={selectedRows?.length === 0 || !isDeletedRow(selectedRows)}
-              onClick={() => {
-                togglePostStatus(false);
-              }}
-            >
-              {'복구'}
-            </CButton>
-          </div>
+          <CRow className="mb-3">
+            <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
+              <CButton
+                disabled={selectedRows?.length === 0 || isDeletedRow(selectedRows)}
+                onClick={() => {
+                  togglePostStatus(true);
+                }}
+              >
+                {'삭제'}
+              </CButton>
+              <CButton
+                disabled={selectedRows?.length === 0 || !isDeletedRow(selectedRows)}
+                onClick={() => {
+                  togglePostStatus(false);
+                }}
+              >
+                {'복구'}
+              </CButton>
+            </CCol>
+          </CRow>
           <CSmartTable
             // REMIND 페이지네이션 컴포넌트 구현
             pagination
