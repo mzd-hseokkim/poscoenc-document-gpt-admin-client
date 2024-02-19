@@ -40,7 +40,7 @@ const BoardPostDetailForm = ({ clickedRowId, fetchPosts }) => {
     {
       id: postDetails?.id,
       createdByName: postDetails?.createdByName,
-      commentCount: postDetails?.comments ? postDetails.comments.length : 0, // 댓글 배열이 있다면 그 길이를, 없다면 0을 사용
+      commentCount: postDetails?.comments ? postDetails.comments.length : 0,
       viewCount: postDetails?.viewCount,
     },
   ];
@@ -184,31 +184,31 @@ const BoardPostDetailForm = ({ clickedRowId, fetchPosts }) => {
 
   return (
     <>
+      <CCard className="mb-3">
+        <CCardBody>
+          <CSmartTable
+            columns={topInfoColumns}
+            items={topInfoData}
+            tableHeadProps={infoTableHeaderProps}
+            tableProps={infoTableProps}
+          />
+          <CSmartTable
+            columns={middleInfoColumns}
+            items={middleInfoData}
+            scopedColumns={middleInfoScopedColumns}
+            tableHeadProps={infoTableHeaderProps}
+            tableProps={infoTableProps}
+          />
+        </CCardBody>
+      </CCard>
       <CForm onSubmit={handleSubmit}>
-        <CCard className="mb-3">
+        <CCard>
           <CCardBody>
-            <CSmartTable
-              columns={topInfoColumns}
-              items={topInfoData}
-              tableHeadProps={infoTableHeaderProps}
-              tableProps={infoTableProps}
-            />
-            <CSmartTable
-              tableHeadProps={infoTableHeaderProps}
-              tableProps={infoTableProps}
-              columns={middleInfoColumns}
-              items={middleInfoData}
-              scopedColumns={middleInfoScopedColumns}
-            />
+            {renderPostTitleInput()}
+            {renderPostContentTextarea()}
           </CCardBody>
         </CCard>
         <CCard>
-          <CCard>
-            <CCardBody>
-              {renderPostTitleInput()}
-              {renderPostContentTextarea()}
-            </CCardBody>
-          </CCard>
           {renderFormActions()}
           <FormLoadingCover isLoading={getDetailIsLoading} />
         </CCard>

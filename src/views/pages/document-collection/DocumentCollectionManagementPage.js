@@ -247,12 +247,12 @@ const DocumentCollectionManagementPage = () => {
           </CRow>
         </CCardBody>
       </CCard>
-      <ModalContainer visible={modal.isOpen} title="문서 집합 상세" onClose={modal.closeModal}>
+      <ModalContainer visible={modal.isOpen} title="문서 집합 상세" onClose={modal.closeModal} size="lg">
         <DocumentCollectionDetailForm
           clickedRowId={clickedRowId}
           initialFormMode={detailFormMode}
           closeModal={modal.closeModal}
-          fetchDocumentCollection={handleSubmitSearchRequest}
+          fetchDocumentCollection={searchDocumentCollectionList}
         />
       </ModalContainer>
     </>
