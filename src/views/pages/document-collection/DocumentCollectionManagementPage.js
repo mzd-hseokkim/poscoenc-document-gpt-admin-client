@@ -60,7 +60,6 @@ const DocumentCollectionManagementPage = () => {
     return selectedRows.some((row) => row.deleted === true);
   };
   const searchDocumentCollectionList = async () => {
-    console.table(searchFormData);
     setSearchResultIsLoading(true);
     try {
       const searchResult = await DocumentCollectionService.getSearchedCollectionList(searchFormData);
