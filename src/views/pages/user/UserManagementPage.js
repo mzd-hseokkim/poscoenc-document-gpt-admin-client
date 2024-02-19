@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import {
   CButton,
@@ -27,7 +27,12 @@ const UserManagementPage = () => {
   const [checkedItems, setCheckedItems] = useState([]);
   const [selectedId, setSelectedId] = useState();
   const [formMode, setFormMode] = useState('');
-
+  const [totalUserElements, setTotalUserElements] = useState(0);
+  const [pageableData, setPageableData] = useState({
+    page: 0,
+    size: 10,
+    sort: 'id,asc',
+  });
   const initialFormData = {
     name: '',
     email: '',
@@ -36,15 +41,25 @@ const UserManagementPage = () => {
     deletionOption: '',
   };
   const [formData, setFormData] = useState(initialFormData);
+  const isComponentMounted = useRef(true);
 
   const addToast = useToast();
   const modal = useModal();
 
-  const getUserList = async () => {
+  useEffect(() => {
+    if (isComponentMounted.current) {
+      isComponentMounted.current = false;
+    } else {
+      fetchUserList();
+    }
+  }, [pageableData]);
+
+  const fetchUserList = async () => {
     try {
       setIsLoading(true);
-      const data = await UserService.getUserList(formData);
+      const data = await UserService.getUsers(formData, pageableData);
       setUserList(data.content);
+      setTotalUserElements(data.totalElements);
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -55,13 +70,29 @@ const UserManagementPage = () => {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    getUserList();
+  const handleSortChange = (sorterValue) => {
+    const newSortValue = `${sorterValue.column},${sorterValue.state}`;
+    setPageableData((prev) => ({
+      ...prev,
+      sort: newSortValue,
+    }));
+  };
+
+  const handleSizeChange = (size) => {
+    setPageableData((prev) => ({ ...prev, size, page: 0 }));
+  };
+
+  const handlePageChange = (page) => {
+    setPageableData((prev) => ({ ...prev, page: page - 1 }));
   };
 
   const handleChange = ({ target: { id, value } }) => {
     setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    fetchUserList();
   };
 
   const handleReset = () => {
@@ -84,14 +115,14 @@ const UserManagementPage = () => {
     if (checkedItems.length === 1) {
       try {
         await UserService.patchDeleteSingleUser(ids, shouldDelete);
-        getUserList();
+        fetchUserList();
       } catch (error) {
         addToast({ color: 'danger', message: error.message });
       }
     } else {
       try {
         await UserService.patchDeleteMultipleUser(ids, shouldDelete);
-        getUserList();
+        fetchUserList();
       } catch (error) {
         addToast({ color: 'danger', message: error.message });
       }
@@ -151,14 +182,22 @@ const UserManagementPage = () => {
           </CRow>
           <CRow className="mb-3">
             <CSmartTable
-              pagination
-              activePage={1}
+              columnSorter={{
+                external: true,
+                resetable: false,
+              }}
+              onSorterChange={(sorterValue) => handleSortChange(sorterValue)}
+              paginationProps={{
+                activePage: pageableData.page + 1,
+                pages: Math.ceil(totalUserElements / pageableData.size) || 1,
+                onActivePageChange: handlePageChange,
+              }}
               itemsPerPageSelect
-              itemsPerPage={10}
+              itemsPerPage={pageableData.size}
+              onItemsPerPageChange={handleSizeChange}
               itemsPerPageLabel="페이지당 사용자 개수"
               noItemsLabel="검색 결과가 없습니다."
               loading={isLoading}
-              sorterValue={{ column: 'id', state: 'asc' }}
               items={userList}
               columns={userColumnConfig}
               selectable
@@ -195,7 +234,7 @@ const UserManagementPage = () => {
           selectedId={selectedId}
           initialFormMode={formMode}
           closeModal={modal.closeModal}
-          fetchUserList={getUserList}
+          fetchUserList={fetchUserList}
         />
       </ModalContainer>
     </>

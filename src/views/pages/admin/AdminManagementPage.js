@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import {
   CButton,
@@ -29,35 +29,50 @@ import {
   getOneYearAgoDate,
 } from '../../../utils/common/dateUtils';
 
+const createInitialFormData = () => ({
+  name: '',
+  urlPath: '',
+  menuOrder: '',
+  parentId: '',
+  fromCreatedAt: getOneYearAgoDate(),
+  toCreatedAt: getCurrentDate(),
+  fromModifiedAt: getOneYearAgoDate(),
+  toModifiedAt: getCurrentDate(),
+  deletionOption: 'ALL',
+});
+
 const AdminManagementPage = () => {
   const [AdminList, setAdminList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [checkedItems, setCheckedItems] = useState([]);
   const [selectedId, setSelectedId] = useState();
   const [formMode, setFormMode] = useState('');
-
-  const createInitialFormData = () => ({
-    name: '',
-    urlPath: '',
-    menuOrder: '',
-    parentId: '',
-    fromCreatedAt: getOneYearAgoDate(),
-    toCreatedAt: getCurrentDate(),
-    fromModifiedAt: getOneYearAgoDate(),
-    toModifiedAt: getCurrentDate(),
-    deletionOption: 'ALL',
+  const [totalAdminElements, setTotalAdminElements] = useState(0);
+  const [pageableData, setPageableData] = useState({
+    page: 0,
+    size: 10,
+    sort: 'id,asc',
   });
-
   const [formData, setFormData] = useState(createInitialFormData);
+  const isComponentMounted = useRef(true);
 
   const addToast = useToast();
   const modal = useModal();
 
+  useEffect(() => {
+    if (isComponentMounted.current) {
+      isComponentMounted.current = false;
+    } else {
+      fetchAdminList();
+    }
+  }, [pageableData]);
+
   const fetchAdminList = async () => {
     try {
       setIsLoading(true);
-      const data = await AdminService.getAdmins(formData);
+      const data = await AdminService.getAdmins(formData, pageableData);
       setAdminList(data.content);
+      setTotalAdminElements(data.totalElements);
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -68,13 +83,20 @@ const AdminManagementPage = () => {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    fetchAdminList();
+  const handleSortChange = (sorterValue) => {
+    const newSortValue = `${sorterValue.column},${sorterValue.state}`;
+    setPageableData((prev) => ({
+      ...prev,
+      sort: newSortValue,
+    }));
   };
 
-  const handleChange = ({ target: { id, value } }) => {
-    setFormData((prev) => ({ ...prev, [id]: value }));
+  const handleSizeChange = (size) => {
+    setPageableData((prev) => ({ ...prev, size, page: 0 }));
+  };
+
+  const handlePageChange = (page) => {
+    setPageableData((prev) => ({ ...prev, page: page - 1 }));
   };
 
   const handleDateChange = ({ id, newDate, isStartDate = true }) => {
@@ -91,14 +113,23 @@ const AdminManagementPage = () => {
     }
   };
 
-  const handleReset = () => {
-    setFormData(createInitialFormData);
+  const handleChange = ({ target: { id, value } }) => {
+    setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleRowClick = (id) => {
     setSelectedId(id);
     setFormMode('read');
     modal.openModal();
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    fetchAdminList();
+  };
+
+  const handleReset = () => {
+    setFormData(createInitialFormData);
   };
 
   const handleCreateClick = () => {
@@ -220,14 +251,22 @@ const AdminManagementPage = () => {
           </CRow>
           <CRow className="mb-3">
             <CSmartTable
-              pagination
-              activePage={1}
+              columnSorter={{
+                external: true,
+                resetable: false,
+              }}
+              onSorterChange={(sorterValue) => handleSortChange(sorterValue)}
+              paginationProps={{
+                activePage: pageableData.page + 1,
+                pages: Math.ceil(totalAdminElements / pageableData.size) || 1,
+                onActivePageChange: handlePageChange,
+              }}
               itemsPerPageSelect
-              itemsPerPage={10}
+              itemsPerPage={pageableData.size}
+              onItemsPerPageChange={handleSizeChange}
               itemsPerPageLabel="페이지당 관리자 개수"
               noItemsLabel="검색 결과가 없습니다."
               loading={isLoading}
-              sorterValue={{ column: 'id', state: 'asc' }}
               items={AdminList}
               columns={adminColumnConfig}
               selectable

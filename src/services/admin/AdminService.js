@@ -5,7 +5,7 @@ const postAdmin = async (payload) => {
   return response.data;
 };
 
-const getAdmins = async (params) => {
+const getAdmins = async (params, pageable) => {
   const response = await api.get('/admin/admin-users', {
     params: {
       email: params.email,
@@ -19,8 +19,9 @@ const getAdmins = async (params) => {
       toModifiedAt: params.toModifiedAt,
       findEmptyLogin: params.findEmptyLogin,
       deletionOption: params.deletionOption,
-      page: params.page,
-      size: params.size,
+      page: pageable.page,
+      size: pageable.size,
+      sort: pageable.sort,
     },
   });
   return response.data;
