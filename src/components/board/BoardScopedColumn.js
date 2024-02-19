@@ -2,7 +2,7 @@ import { cilPaperclip } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import { format } from 'date-fns';
 
-import StatusBadge from './BoadStatusBadge';
+import StatusBadge from '../badge/StatusBadge';
 
 export const getScopedColumns = (handleClickedRowId, openModal) => ({
   id: (item) => <td>{item.id}</td>,

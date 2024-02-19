@@ -42,7 +42,6 @@ const BoardManagementPage = () => {
   const [searchFormData, setSearchFormData] = useState(initialSearchFormData);
   const [error, setError] = useState(null);
 
-  const tableFields = postColumnConfig;
   const modal = useModal();
   const addToast = useToast();
   const handleClickedRowId = (newClickedRowId) => {
@@ -52,10 +51,6 @@ const BoardManagementPage = () => {
 
   const isDeletedRow = (selectedRows) => {
     return selectedRows.some((row) => row.deleted === true);
-  };
-
-  const handleSelectedRows = (newSelectedRows) => {
-    setSelectedRows(newSelectedRows);
   };
 
   const handleSearchFormChange = ({ target: { id, value } }) => {
@@ -82,13 +77,15 @@ const BoardManagementPage = () => {
     setEndDate(new Date());
   };
 
-  const handleSearchSubmit = async () => {
+  const handleSubmitSearchRequest = async () => {
     setSearchResultIsLoading(true);
     try {
       const searchResult = await BoardService.getSearchedPostList(searchFormData);
       setPostSearchResults(searchResult);
     } catch (error) {
-      addToast({ color: 'danger', message: error.message });
+      //REMIND 에러 핸들링 구현
+      addToast({ color: 'danger', body: error.response.data.message });
+      setError(error);
     } finally {
       setSearchResultIsLoading(false);
     }
@@ -96,20 +93,19 @@ const BoardManagementPage = () => {
 
   const togglePostStatus = async (shouldDelete) => {
     try {
-      const isSuccess = await BoardService.patchPostsDeletedOption(
+      const isSuccess = await BoardService.patchPostsDeletionOption(
         selectedRows.map((row) => row.id),
         shouldDelete
       );
 
       if (isSuccess) {
-        await handleSearchSubmit();
-        handleSelectedRows([]);
+        setSelectedRows([]);
       }
     } catch (error) {
       addToast({ color: 'danger', message: error.message });
       setError(error);
     } finally {
-      await handleSearchSubmit();
+      await handleSubmitSearchRequest();
     }
   };
 
@@ -122,7 +118,7 @@ const BoardManagementPage = () => {
         <CCol xs={12}>
           <CCard className="row g-3 needs-validation">
             <CCardBody>
-              <CForm onSubmit={handleSearchSubmit}>
+              <CForm onSubmit={handleSubmitSearchRequest}>
                 <CRow className="mb-3">
                   <CCol md={4} className="position-relative">
                     <CFormInput
@@ -210,24 +206,19 @@ const BoardManagementPage = () => {
             <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
               <CButton
                 disabled={selectedRows?.length === 0 || isDeletedRow(selectedRows)}
-                onClick={() => {
-                  togglePostStatus(true);
-                }}
+                onClick={() => togglePostStatus(true)}
               >
                 {'삭제'}
               </CButton>
               <CButton
                 disabled={selectedRows?.length === 0 || !isDeletedRow(selectedRows)}
-                onClick={() => {
-                  togglePostStatus(false);
-                }}
+                onClick={() => togglePostStatus(false)}
               >
                 {'복구'}
               </CButton>
             </CCol>
           </CRow>
           <CSmartTable
-            // REMIND 페이지네이션 컴포넌트 구현
             pagination
             activePage={1}
             itemsPerPageSelect
@@ -237,12 +228,11 @@ const BoardManagementPage = () => {
             // REMIND 커스텀 소터 구현
             sorterValue={{ column: 'id', state: 'asc' }}
             items={postSearchResults}
-            columns={tableFields}
+            columns={postColumnConfig}
             selectable
             selected={selectedRows}
             scopedColumns={scopedColumns}
-            // REMIND DOMException 처리
-            onSelectedItemsChange={(selectedItems) => handleSelectedRows(selectedItems)}
+            onSelectedItemsChange={(selectedItems) => setSelectedRows(selectedItems)}
             noItemsLabel="검색 결과가 없습니다."
             tableProps={{
               responsive: true,
@@ -250,7 +240,10 @@ const BoardManagementPage = () => {
             }}
           />
           <ModalContainer visible={modal.isOpen} title="게시글" onClose={modal.closeModal} size="lg">
-            <BoardPostDetailForm clickedRowId={clickedRowId} refreshPosts={handleSearchSubmit}></BoardPostDetailForm>
+            <BoardPostDetailForm
+              clickedRowId={clickedRowId}
+              fetchPosts={handleSubmitSearchRequest}
+            ></BoardPostDetailForm>
           </ModalContainer>
         </CCardBody>
       </CCard>

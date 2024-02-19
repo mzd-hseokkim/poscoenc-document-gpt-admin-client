@@ -14,7 +14,7 @@ import {
   CSmartTable,
 } from '@coreui/react-pro';
 
-import StatusBadge from '../../../components/board/BoadStatusBadge';
+import StatusBadge from '../../../components/badge/StatusBadge';
 import MenuDetailForm from '../../../components/menu/MenuDetailForm';
 import ModalContainer from '../../../components/modal/ModalContainer';
 import useModal from '../../../hooks/useModal';

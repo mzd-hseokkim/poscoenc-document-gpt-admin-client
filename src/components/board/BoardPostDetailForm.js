@@ -15,14 +15,14 @@ import {
 import { format } from 'date-fns';
 import { useRecoilValue } from 'recoil';
 
-import StatusBadge from './BoadStatusBadge';
 import BoardCommentsForm from './BoardCommentsForm';
 import useToast from '../../hooks/useToast';
 import BoardService from '../../services/board/BoardService';
 import { userIdSelector } from '../../states/jwtTokenState';
+import StatusBadge from '../badge/StatusBadge';
 import FormLoadingCover from '../cover/FormLoadingCover';
 
-const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
+const BoardPostDetailForm = ({ clickedRowId, fetchPosts }) => {
   const [postDetails, setPostDetails] = useState(null);
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
   const [isViewMode, setIsViewMode] = useState(true);
@@ -91,7 +91,7 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
   const fetchPostDetails = async () => {
     setGetDetailIsLoading(true);
     try {
-      const details = await BoardService.getPostDetails(clickedRowId);
+      const details = await BoardService.getPostDetail(clickedRowId);
       setPostDetails(details);
     } catch (error) {
       addToast({ color: 'danger', message: error.message });
@@ -118,13 +118,13 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
       hasFiles: submittedData.get('postFileUpload')?.size > 0 ?? false,
     };
     try {
-      await BoardService.putModifiedPostDetails(modifiedData);
+      await BoardService.putModifiedPostDetail(modifiedData);
     } catch (error) {
       addToast({ color: 'danger', message: error.message });
     }
     await fetchPostDetails();
     await handleFormMode(true);
-    await refreshPosts();
+    await fetchPosts();
   };
 
   const renderPostTitleInput = () => (
