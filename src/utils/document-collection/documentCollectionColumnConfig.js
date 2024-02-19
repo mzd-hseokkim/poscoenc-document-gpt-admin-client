@@ -7,7 +7,7 @@ export const documentCollectionColumnConfig = [
   {
     key: 'displayName',
     label: '표시명',
-    _style: { width: '50%' },
+    _style: { width: '53%' },
   },
   {
     key: 'createdByName',
@@ -22,6 +22,6 @@ export const documentCollectionColumnConfig = [
   {
     key: 'deleted',
     label: '삭제여부',
-    _style: { width: '100px' },
+    _style: { width: '12%' },
   },
 ];

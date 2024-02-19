@@ -23,6 +23,7 @@ import DocumentCollectionService from '../../../services/document-collection/Doc
 import {
   formatToIsoEndDate,
   formatToIsoStartDate,
+  formatToYMD,
   getCurrentDate,
   getOneYearAgoDate,
 } from '../../../utils/common/dateUtils';
@@ -59,6 +60,7 @@ const DocumentCollectionManagementPage = () => {
     return selectedRows.some((row) => row.deleted === true);
   };
   const searchDocumentCollectionList = async () => {
+    console.table(searchFormData);
     setSearchResultIsLoading(true);
     try {
       const searchResult = await DocumentCollectionService.getSearchedCollectionList(searchFormData);
@@ -89,6 +91,7 @@ const DocumentCollectionManagementPage = () => {
         {item.displayName}
       </td>
     ),
+    createdAt: (item) => <td>{formatToYMD(item.createdAt)}</td>,
     deleted: (item) => (
       <td>
         <StatusBadge deleted={item.deleted} />
@@ -153,7 +156,12 @@ const DocumentCollectionManagementPage = () => {
                 />
               </CCol>
               <CCol md={4}>
-                <CFormInput id="displayName" label="표시명"></CFormInput>
+                <CFormInput
+                  id="displayName"
+                  label="표시명"
+                  value={searchFormData.displayName}
+                  onChange={handleSearchFormChange}
+                ></CFormInput>
               </CCol>
               <CCol md={4} className="position-relative">
                 <CFormInput
