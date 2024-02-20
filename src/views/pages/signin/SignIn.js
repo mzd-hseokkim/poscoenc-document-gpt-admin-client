@@ -1,5 +1,3 @@
-// signIn
-
 import React, { useState } from 'react';
 
 import { cilLockLocked, cilUser } from '@coreui/icons';
@@ -18,7 +16,7 @@ import {
 } from '@coreui/react-pro';
 import { useNavigate } from 'react-router-dom';
 
-import useToast from '../../../hooks/useToast';
+import { useToast } from '../../../context/ToastContext';
 import SignInService from '../../../services/signin/SignInService';
 import { emailValidationPattern, passwordValidationPattern } from '../../../utils/validationUtils';
 
@@ -28,9 +26,11 @@ const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
-  const addToast = useToast();
+  const { addToast } = useToast();
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
     setIsLoading(true);
     try {
       const response = await SignInService.signIn(userData);
@@ -106,7 +106,7 @@ const SignIn = () => {
                     />
                   </CInputGroup>
                   <CRow>
-                    <CLoadingButton loading={isLoading} color="primary" className="px-4" onClick={handleSubmit}>
+                    <CLoadingButton loading={isLoading} color="primary" className="px-4" type="submit">
                       로그인
                     </CLoadingButton>
                   </CRow>

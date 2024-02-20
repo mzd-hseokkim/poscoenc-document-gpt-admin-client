@@ -17,8 +17,8 @@ import {
 import AdminDetailForm from '../../../components/admin/AdminDetailForm';
 import StatusBadge from '../../../components/badge/StatusBadge';
 import ModalContainer from '../../../components/modal/ModalContainer';
+import { useToast } from '../../../context/ToastContext';
 import useModal from '../../../hooks/useModal';
-import useToast from '../../../hooks/useToast';
 import AdminService from '../../../services/admin/AdminService';
 import { adminColumnConfig } from '../../../utils/admin/adminColumnConfig';
 import {
@@ -56,7 +56,7 @@ const AdminManagementPage = () => {
   const [formData, setFormData] = useState(createInitialFormData);
   const isComponentMounted = useRef(true);
 
-  const addToast = useToast();
+  const { addToast } = useToast();
   const modal = useModal();
 
   useEffect(() => {

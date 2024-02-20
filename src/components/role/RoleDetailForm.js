@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { CButton, CCol, CElementCover, CRow, CSpinner } from '@coreui/react-pro';
 
-import useToast from '../../hooks/useToast';
+import { useToast } from '../../context/ToastContext';
 import RoleService from '../../services/Role/RoleService';
 import { getAuditFields } from '../../utils/common/auditFieldUtils';
 import formModes from '../../utils/formModes';
@@ -13,7 +13,7 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
   const [formMode, setFormMode] = useState(initialFormMode);
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
   const [isLoading, setIsLoading] = useState(false);
-  const addToast = useToast();
+  const { addToast } = useToast();
 
   const roleFields = [
     {

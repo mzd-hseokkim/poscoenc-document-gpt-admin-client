@@ -1,5 +1,3 @@
-//MenuManagement
-
 import React, { useEffect, useRef, useState } from 'react';
 
 import {
@@ -19,8 +17,8 @@ import {
 import StatusBadge from '../../../components/badge/StatusBadge';
 import MenuDetailForm from '../../../components/menu/MenuDetailForm';
 import ModalContainer from '../../../components/modal/ModalContainer';
+import { useToast } from '../../../context/ToastContext';
 import useModal from '../../../hooks/useModal';
-import useToast from '../../../hooks/useToast';
 import MenuService from '../../../services/menu/MenuService';
 import {
   formatToIsoEndDate,
@@ -58,7 +56,7 @@ const MenuManagementPage = () => {
   });
   const isComponentMounted = useRef(true);
 
-  const addToast = useToast();
+  const { addToast } = useToast();
   const modal = useModal();
 
   useEffect(() => {

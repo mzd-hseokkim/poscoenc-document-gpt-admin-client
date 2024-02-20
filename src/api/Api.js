@@ -7,7 +7,7 @@ const api = axios.create({
   baseURL: SERVER_ENDPOINT,
 });
 
-export const setupInterceptors = (navigate) => {
+export const setupInterceptors = ({ navigate, addToast }) => {
   api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
     let newConfig = {
@@ -26,6 +26,7 @@ export const setupInterceptors = (navigate) => {
       } else {
         localStorage.removeItem('token');
         newConfig.headers.Authorization = '';
+        addToast({ message: '세션이 만료되었습니다. 다시 로그인 해주세요.' });
         navigate('/sign-in');
       }
     } else {
@@ -33,21 +34,24 @@ export const setupInterceptors = (navigate) => {
     }
     return newConfig;
   });
-};
 
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response) {
-      if (error.response.status === 500) {
+  api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response) {
+        if (error.response.status === 500) {
+          addToast({ message: '서버에서 오류가 발생하였습니다. 관리자에게 문의해 주세요.' });
+        }
+      } else if (error.request) {
+        addToast({ message: '서버에서 응답이 없습니다. 잠시 후 다시 시도해주세요.' });
+        console.error(error.request);
+      } else {
+        addToast({ message: '알 수 없는 오류가 발생하였습니다. 잠시 후 다시 시도해주세요.' });
+        console.log('Error', error.message);
       }
-    } else if (error.request) {
-      console.error(error.request);
-    } else {
-      console.log('Error', error.message);
+      throw error;
     }
-    throw error;
-  }
-);
+  );
+};
 
 export default api;

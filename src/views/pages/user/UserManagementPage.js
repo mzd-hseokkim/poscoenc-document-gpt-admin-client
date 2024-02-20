@@ -16,8 +16,8 @@ import {
 import StatusBadge from '../../../components/badge/StatusBadge';
 import ModalContainer from '../../../components/modal/ModalContainer';
 import UserDetailForm from '../../../components/user/UserDetailForm';
+import { useToast } from '../../../context/ToastContext';
 import useModal from '../../../hooks/useModal';
-import useToast from '../../../hooks/useToast';
 import UserService from '../../../services/UserService';
 import { userColumnConfig } from '../../../utils/user/userColumnConfig';
 
@@ -43,7 +43,7 @@ const UserManagementPage = () => {
   const [formData, setFormData] = useState(initialFormData);
   const isComponentMounted = useRef(true);
 
-  const addToast = useToast();
+  const { addToast } = useToast();
   const modal = useModal();
 
   useEffect(() => {

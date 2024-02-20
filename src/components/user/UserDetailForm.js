@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { CButton, CCol, CFormTextarea, CRow, CSpinner } from '@coreui/react-pro';
 
-import useToast from '../../hooks/useToast';
+import { useToast } from '../../context/ToastContext';
 import UserService from '../../services/UserService';
 import { getAuditFields } from '../../utils/common/auditFieldUtils';
 import formModes from '../../utils/formModes';
@@ -14,7 +14,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
   const [formMode, setFormMode] = useState(initialFormMode);
 
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
-  const addToast = useToast();
+  const { addToast } = useToast();
 
   const userFields = [
     {

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { CButton, CCol, CFormCheck, CFormSelect, CMultiSelect, CRow, CSpinner } from '@coreui/react-pro';
 
-import useToast from '../../hooks/useToast';
+import { useToast } from '../../context/ToastContext';
 import MenuService from '../../services/menu/MenuService';
 import RoleService from '../../services/Role/RoleService';
 import { getAuditFields } from '../../utils/common/auditFieldUtils';
@@ -15,7 +15,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
   const [roles, setRoles] = useState([]);
   const [parentMenus, setParentMenus] = useState(['상위 메뉴를 선택하세요.', { label: '선택하지 않음', value: '0' }]);
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
-  const addToast = useToast();
+  const { addToast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
   const menuBasicFields = [
