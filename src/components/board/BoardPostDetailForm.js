@@ -22,7 +22,7 @@ import { userIdSelector } from '../../states/jwtTokenState';
 import StatusBadge from '../badge/StatusBadge';
 import FormLoadingCover from '../cover/FormLoadingCover';
 
-const BoardPostDetailForm = ({ clickedRowId, fetchPosts }) => {
+const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
   const [postDetails, setPostDetails] = useState(null);
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
   const [isViewMode, setIsViewMode] = useState(true);

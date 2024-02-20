@@ -4,7 +4,7 @@ const postUser = async (payload) => {
   const response = await api.post('/admin/user-accounts', payload);
   return response.data;
 };
-const getUserList = async (params) => {
+const getUsers = async (params, pageable) => {
   const response = await api.get('/admin/user-accounts', {
     params: {
       name: params.name,
@@ -12,40 +12,41 @@ const getUserList = async (params) => {
       team: params.team,
       memo: params.memo,
       deletionOption: params.deletionOption,
-      page: params.page,
-      size: params.size,
+      page: pageable.page,
+      size: pageable.size,
+      sort: pageable.sort,
     },
   });
   return response.data;
 };
 
-const getUserDetail = async (id) => {
+const getUser = async (id) => {
   const response = await api.get(`/admin/user-accounts/${id}`);
   return response.data;
 };
 
-const putUserDetail = async (id, payload) => {
+const putUser = async (id, payload) => {
   const response = await api.put(`/admin/user-accounts/${id}`, payload);
   return response.data;
 };
 
-const patchDeleteSingleUser = async (id, deleted) => {
+const deleteUser = async (id, deleted) => {
   const response = await api.patch(`/admin/user-accounts/${id}/deleted?deleted=${deleted}`);
   return response.data;
 };
 
-const patchDeleteMultipleUser = async (ids, deleted) => {
+const deleteUsers = async (ids, deleted) => {
   const response = await api.patch(`/admin/user-accounts/deleted/${deleted}`, ids);
   return response.data;
 };
 
 const UserService = {
-  getUserList,
-  getUserDetail,
+  getUsers,
+  getUser,
   postUser,
-  putUserDetail,
-  patchDeleteSingleUser,
-  patchDeleteMultipleUser,
+  putUser,
+  deleteUser,
+  deleteUsers,
 };
 
 export default UserService;
