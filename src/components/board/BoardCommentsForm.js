@@ -14,7 +14,7 @@ import {
 } from '@coreui/react-pro';
 import { useRecoilValue } from 'recoil';
 
-import useToast from '../../hooks/useToast';
+import { useToast } from '../../context/ToastContext';
 import BoardCommentService from '../../services/board/BoardCommentService';
 import { userIdSelector } from '../../states/jwtTokenState';
 
@@ -28,7 +28,7 @@ const BoardCommentsForm = ({ postId }) => {
   const [postCommentIsLoading, setPostCommentIsLoading] = useState(false);
   const [deleteIsLoading, setDeleteIsLoading] = useState(false);
 
-  const addToast = useToast();
+  const { addToast } = useToast();
   const currentUserId = useRecoilValue(userIdSelector);
   const endOfCommentsRef = useRef(null);
 

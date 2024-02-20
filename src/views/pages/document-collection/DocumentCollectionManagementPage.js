@@ -17,8 +17,8 @@ import {
 import StatusBadge from '../../../components/badge/StatusBadge';
 import DocumentCollectionDetailForm from '../../../components/document-collection/DocumentCollectionDetailForm';
 import ModalContainer from '../../../components/modal/ModalContainer';
+import { useToast } from '../../../context/ToastContext';
 import useModal from '../../../hooks/useModal';
-import useToast from '../../../hooks/useToast';
 import DocumentCollectionService from '../../../services/document-collection/DocumentCollectionService';
 import {
   formatToIsoEndDate,
@@ -50,7 +50,7 @@ const DocumentCollectionManagementPage = () => {
   const [searchFormData, setSearchFormData] = useState(initialSearchFormData);
 
   const modal = useModal();
-  const addToast = useToast();
+  const { addToast } = useToast();
 
   useEffect(() => {
     setSearchResultIsLoading(false);
@@ -135,7 +135,15 @@ const DocumentCollectionManagementPage = () => {
     }
   };
 
-  const handleUploadClick = () => {};
+  const handleUploadClick = () => {
+    setDetailFormMode('create');
+    modal.openModal();
+  };
+
+  const handleCloseModal = () => {
+    modal.closeModal();
+    setClickedRowId(null);
+  };
   //REMIND handle error page
   if (error) return <Page500 />;
 
@@ -247,12 +255,17 @@ const DocumentCollectionManagementPage = () => {
           </CRow>
         </CCardBody>
       </CCard>
-      <ModalContainer visible={modal.isOpen} title="문서 집합 상세" onClose={modal.closeModal} size="lg">
+      <ModalContainer
+        visible={modal.isOpen}
+        title={detailFormMode === 'create' ? '문서 게시' : '문서 집합 상세'}
+        onClose={handleCloseModal}
+        size="lg"
+      >
         <DocumentCollectionDetailForm
           clickedRowId={clickedRowId}
           initialFormMode={detailFormMode}
-          closeModal={modal.closeModal}
-          fetchDocumentCollection={searchDocumentCollectionList}
+          closeModal={handleCloseModal}
+          refreshDocumentCollectionList={searchDocumentCollectionList}
         />
       </ModalContainer>
     </>
