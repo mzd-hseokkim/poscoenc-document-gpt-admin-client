@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { CButton, CCol, CFormTextarea, CRow, CSpinner } from '@coreui/react-pro';
+import { CButton, CCol, CElementCover, CFormTextarea, CRow, CSpinner } from '@coreui/react-pro';
 
 import { useToast } from '../../context/ToastContext';
 import UserService from '../../services/UserService';
@@ -46,7 +46,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
       const data = await UserService.getUser(selectedId);
       setFormData(data);
     } catch (error) {
-      addToast({ color: 'danger', message: error.message });
+      addToast({ message: '사용자 정보를 가져오지 못했습니다.' });
     } finally {
       setIsLoading(false);
     }
@@ -93,7 +93,6 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
@@ -112,7 +111,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
     try {
       await UserService.deleteUser(id, shouldDelete);
     } catch (error) {
-      addToast({ color: 'danger', message: error.message });
+      addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
     closeModal();
     fetchUserList();
@@ -140,38 +139,38 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
 
   return (
     <>
-      {isLoading && <CSpinner />}
-      {!isLoading && (
-        <>
-          <InputList fields={userFields} formData={formData} handleChange={handleChange} isReadMode={isReadMode} />
-          {renderMemoField()}
-          <InputList
-            fields={getAuditFields(formMode)}
-            formData={formData}
-            handleChange={handleChange}
-            isReadMode={isReadMode}
-          />
-          <CRow>
-            <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-              {isReadMode ? (
-                <>
-                  <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>
-                    {formData.deleted ? '복구' : '삭제'}
-                  </CButton>
-                  <CButton onClick={handleUpdateClick}>수정</CButton>
-                </>
-              ) : (
-                <>
-                  <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>
-                    {formData.deleted ? '복구' : '삭제'}
-                  </CButton>
-                  <CButton onClick={handleSubmit}>저장</CButton>
-                </>
-              )}
-            </CCol>
-          </CRow>
-        </>
+      {isLoading && (
+        <CElementCover>
+          <CSpinner variant="grow" color="primary" />
+        </CElementCover>
       )}
+      <InputList fields={userFields} formData={formData} handleChange={handleChange} isReadMode={isReadMode} />
+      {renderMemoField()}
+      <InputList
+        fields={getAuditFields(formMode)}
+        formData={formData}
+        handleChange={handleChange}
+        isReadMode={isReadMode}
+      />
+      <CRow>
+        <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
+          {isReadMode ? (
+            <>
+              <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>
+                {formData.deleted ? '복구' : '삭제'}
+              </CButton>
+              <CButton onClick={handleUpdateClick}>수정</CButton>
+            </>
+          ) : (
+            <>
+              <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>
+                {formData.deleted ? '복구' : '삭제'}
+              </CButton>
+              <CButton onClick={handleSubmit}>저장</CButton>
+            </>
+          )}
+        </CCol>
+      </CRow>
     </>
   );
 };

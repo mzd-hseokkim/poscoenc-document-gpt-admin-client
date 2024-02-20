@@ -18,7 +18,7 @@ export const ToastProvider = ({ children }) => {
         placement="bottom-end"
         push={
           toast && (
-            <CToast key={toast.key} autohide visible={true} color={toast.color} className="d-flex">
+            <CToast autohide visible={true} color={toast.color} className="d-flex">
               <CToastBody className="text-white">{toast.message}</CToastBody>
               <CToastClose className="me-2 m-auto" white />
             </CToast>

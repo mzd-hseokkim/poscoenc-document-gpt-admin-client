@@ -63,7 +63,7 @@ const UserManagementPage = () => {
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
-        addToast({ color: 'danger', body: error.response.data.message });
+        addToast({ message: error.response.data.message });
       }
     } finally {
       setIsLoading(false);
@@ -114,17 +114,17 @@ const UserManagementPage = () => {
     const ids = checkedItems.map((item) => item.id);
     if (checkedItems.length === 1) {
       try {
-        await UserService.patchDeleteSingleUser(ids, shouldDelete);
+        await UserService.deleteUser(ids, shouldDelete);
         fetchUserList();
       } catch (error) {
-        addToast({ color: 'danger', message: error.message });
+        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
       }
     } else {
       try {
-        await UserService.patchDeleteMultipleUser(ids, shouldDelete);
+        await UserService.deleteUsers(ids, shouldDelete);
         fetchUserList();
       } catch (error) {
-        addToast({ color: 'danger', message: error.message });
+        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
       }
     }
     setCheckedItems([]);
@@ -229,7 +229,7 @@ const UserManagementPage = () => {
           </CRow>
         </CCardBody>
       </CCard>
-      <ModalContainer visible={modal.isOpen} title="사용자 정보" onClose={modal.closeModal}>
+      <ModalContainer visible={modal.isOpen} title="사용자 정보" size="lg" onClose={modal.closeModal}>
         <UserDetailForm
           selectedId={selectedId}
           initialFormMode={formMode}

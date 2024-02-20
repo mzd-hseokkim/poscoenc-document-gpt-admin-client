@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { CButton, CCol, CFormCheck, CFormSelect, CMultiSelect, CRow, CSpinner } from '@coreui/react-pro';
+import { CButton, CCol, CElementCover, CFormCheck, CFormSelect, CMultiSelect, CRow, CSpinner } from '@coreui/react-pro';
 
 import { useToast } from '../../context/ToastContext';
 import MenuService from '../../services/menu/MenuService';
@@ -77,7 +77,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
       const allowedRoles = data.allowedRoles.map((role) => role.id);
       await getRoles(allowedRoles);
     } catch (error) {
-      addToast({ color: 'danger', message: error.message });
+      addToast({ message: '메뉴 정보를 가져오지 못하였습니다.' });
     } finally {
       setIsLoading(false);
     }
@@ -85,7 +85,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
 
   const getRoles = async (allowedRoles) => {
     try {
-      const rolesData = await RoleService.getRoleList();
+      const rolesData = await RoleService.getRoles();
       const newRoles = rolesData.map((role) => ({
         value: role.id,
         text: role.role,
@@ -93,7 +93,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
       }));
       setRoles(newRoles);
     } catch (error) {
-      addToast({ color: 'danger', message: error });
+      addToast({ message: '권한 목록을 가져오지 못했습니다.' });
     }
   };
 
@@ -108,7 +108,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
       }));
       setParentMenus((prevMenus) => [...prevMenus, ...newParentMenus]);
     } catch (error) {
-      addToast({ color: 'danger', message: error });
+      addToast({ message: '상위 메뉴 목록을 가져오지 못했습니다.' });
     }
   };
 
@@ -175,7 +175,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
     try {
       await MenuService.deleteMenu(id, shouldDelete);
     } catch (error) {
-      console.log(error);
+      addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
     closeModal();
     fetchMenuList();
@@ -213,53 +213,48 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
 
   return (
     <>
-      {isLoading && <CSpinner />}
-      {!isLoading && (
-        <>
-          <InputList fields={menuBasicFields} formData={formData} handleChange={handleChange} isReadMode={isReadMode} />
-          <CRow className="mb-3">
-            <CCol>
-              <CFormCheck
-                name="allowChildren"
-                id="allowChildren"
-                label="하위 메뉴 등록 가능 여부"
-                checked={formData.allowChildren}
-                onChange={handleChange}
-              />
-            </CCol>
-          </CRow>
-          <InputList
-            fields={menuSettingFields}
-            formData={formData}
-            handleChange={handleChange}
-            isReadMode={isReadMode}
-          />
-          {renderRoleSelect()}
-          {renderParentSelect()}
-          <InputList
-            fields={getAuditFields(formMode)}
-            formData={formData}
-            handleChange={handleChange}
-            isReadMode={isReadMode}
-          />
-          <CRow>
-            <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-              {!isCreateMode && (
-                <>
-                  <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>
-                    {formData.deleted ? '복구' : '삭제'}
-                  </CButton>
-                </>
-              )}
-              {isUpdateMode || isCreateMode ? (
-                <CButton onClick={handleSubmit}>저장</CButton>
-              ) : (
-                <CButton onClick={handleUpdateClick}>수정</CButton>
-              )}
-            </CCol>
-          </CRow>
-        </>
+      {isLoading && (
+        <CElementCover>
+          <CSpinner variant="grow" color="primary" />
+        </CElementCover>
       )}
+      <InputList fields={menuBasicFields} formData={formData} handleChange={handleChange} isReadMode={isReadMode} />
+      <CRow className="mb-3">
+        <CCol>
+          <CFormCheck
+            name="allowChildren"
+            id="allowChildren"
+            label="하위 메뉴 등록 가능 여부"
+            checked={formData.allowChildren}
+            onChange={handleChange}
+          />
+        </CCol>
+      </CRow>
+      <InputList fields={menuSettingFields} formData={formData} handleChange={handleChange} isReadMode={isReadMode} />
+      {renderRoleSelect()}
+      {renderParentSelect()}
+      <InputList
+        fields={getAuditFields(formMode)}
+        formData={formData}
+        handleChange={handleChange}
+        isReadMode={isReadMode}
+      />
+      <CRow>
+        <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
+          {!isCreateMode && (
+            <>
+              <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>
+                {formData.deleted ? '복구' : '삭제'}
+              </CButton>
+            </>
+          )}
+          {isUpdateMode || isCreateMode ? (
+            <CButton onClick={handleSubmit}>저장</CButton>
+          ) : (
+            <CButton onClick={handleUpdateClick}>수정</CButton>
+          )}
+        </CCol>
+      </CRow>
     </>
   );
 };

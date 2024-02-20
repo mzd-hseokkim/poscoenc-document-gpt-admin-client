@@ -38,6 +38,8 @@ const createInitialFormData = () => ({
   toCreatedAt: getCurrentDate(),
   fromModifiedAt: getOneYearAgoDate(),
   toModifiedAt: getCurrentDate(),
+  fromLoggedInAt: getOneYearAgoDate(),
+  toLoggedInAt: getCurrentDate(),
   deletionOption: 'ALL',
 });
 
@@ -53,6 +55,7 @@ const AdminManagementPage = () => {
     size: 10,
     sort: 'id,asc',
   });
+
   const [formData, setFormData] = useState(createInitialFormData);
   const isComponentMounted = useRef(true);
 
@@ -76,7 +79,7 @@ const AdminManagementPage = () => {
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
-        addToast({ color: 'danger', body: error.response.data.message });
+        addToast({ color: 'danger', message: error.response.data.message });
       }
     } finally {
       setIsLoading(false);
@@ -144,14 +147,14 @@ const AdminManagementPage = () => {
         await AdminService.deleteAdmin(ids, shouldDelete);
         fetchAdminList();
       } catch (error) {
-        addToast({ color: 'danger', message: error.message });
+        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
       }
     } else {
       try {
         await AdminService.deleteAdmins(ids, shouldDelete);
         fetchAdminList();
       } catch (error) {
-        addToast({ color: 'danger', message: error.message });
+        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
       }
     }
     setCheckedItems([]);
@@ -300,7 +303,7 @@ const AdminManagementPage = () => {
           </CRow>
         </CCardBody>
       </CCard>
-      <ModalContainer visible={modal.isOpen} title="관리자 정보" onClose={modal.closeModal}>
+      <ModalContainer visible={modal.isOpen} title="관리자 정보" size="lg" onClose={modal.closeModal}>
         <AdminDetailForm
           selectedId={selectedId}
           initialFormMode={formMode}
