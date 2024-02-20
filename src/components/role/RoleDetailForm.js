@@ -42,13 +42,13 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
       const data = await RoleService.getRole(selectedId);
       setFormData(data);
     } catch (error) {
-      console.log(error);
+      addToast({ message: '권한 정보를 가져오지 못했습니다.' });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const createAdmin = async () => {
+  const createRole = async () => {
     try {
       await RoleService.postRole(formData.role);
       closeModal();
@@ -56,7 +56,7 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
-        addToast({ message: '메뉴를 등록할 수 없습니다.' });
+        addToast({ message: '권한을 등록할 수 없습니다.' });
       }
       if (status === 409) {
         addToast({ message: '이미 존재하는 값입니다. 입력값을 다시 확인해주세요.' });
@@ -64,7 +64,7 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
     }
   };
 
-  const updateAdmin = async () => {
+  const updateRole = async () => {
     try {
       await RoleService.putRole(formData.id, formData.role);
       closeModal();
@@ -72,7 +72,7 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
-        addToast({ message: '메뉴를 수정할 수 없습니다.' });
+        addToast({ message: '권한을 수정할 수 없습니다.' });
       }
       if (status === 409) {
         addToast({ message: '이미 존재하는 값입니다. 입력값을 다시 확인해주세요.' });
@@ -87,9 +87,9 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
 
   const handleSubmit = () => {
     if (isCreateMode) {
-      createAdmin();
+      createRole();
     } else if (isUpdateMode) {
-      updateAdmin();
+      updateRole();
     }
   };
 
@@ -102,7 +102,7 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
     try {
       await RoleService.deleteRole(id, shouldDelete);
     } catch (error) {
-      console.log(error);
+      addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
     closeModal();
     fetchRoleList();

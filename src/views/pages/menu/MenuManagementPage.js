@@ -76,7 +76,7 @@ const MenuManagementPage = () => {
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
-        addToast({ color: 'danger', body: error.response.data.message });
+        addToast({ message: error.response.data.message });
       }
     } finally {
       setIsLoading(false);
@@ -143,14 +143,14 @@ const MenuManagementPage = () => {
         await MenuService.deleteMenu(ids, shouldDelete);
         fetchMenuList();
       } catch (error) {
-        console.log(error);
+        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
       }
     } else {
       try {
         await MenuService.deleteMenus(ids, shouldDelete);
         fetchMenuList();
       } catch (error) {
-        console.log(error);
+        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
       }
     }
     setCheckedItems([]);
@@ -295,7 +295,7 @@ const MenuManagementPage = () => {
           </CRow>
         </CCardBody>
       </CCard>
-      <ModalContainer visible={modal.isOpen} title="메뉴 정보" onClose={modal.closeModal}>
+      <ModalContainer visible={modal.isOpen} title="메뉴 정보" size="lg" onClose={modal.closeModal}>
         <MenuDetailForm
           selectedId={selectedId}
           initialFormMode={formMode}

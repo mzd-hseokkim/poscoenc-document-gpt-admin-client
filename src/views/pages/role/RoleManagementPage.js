@@ -33,7 +33,7 @@ const AdminManagementPage = () => {
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
-        addToast({ color: 'danger', body: error.response.data.message });
+        addToast({ message: error.response.data.message });
       }
     } finally {
       setIsLoading(false);
@@ -58,14 +58,14 @@ const AdminManagementPage = () => {
         await RoleService.deleteRole(ids, shouldDelete);
         fetchRoleList();
       } catch (error) {
-        addToast({ color: 'danger', message: error.message });
+        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
       }
     } else {
       try {
         await RoleService.deleteRoles(ids, shouldDelete);
         fetchRoleList();
       } catch (error) {
-        addToast({ color: 'danger', message: error.message });
+        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
       }
     }
     setCheckedItems([]);
@@ -122,7 +122,7 @@ const AdminManagementPage = () => {
           </CRow>
         </CCardBody>
       </CCard>
-      <ModalContainer visible={modal.isOpen} title="권한 정보" onClose={modal.closeModal}>
+      <ModalContainer visible={modal.isOpen} title="권한 정보" size="lg" onClose={modal.closeModal}>
         <RoleDetailForm
           selectedId={selectedId}
           initialFormMode={formMode}

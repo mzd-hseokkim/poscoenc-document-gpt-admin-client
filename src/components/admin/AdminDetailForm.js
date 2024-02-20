@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { CButton, CCol, CMultiSelect, CRow, CSpinner } from '@coreui/react-pro';
+import { CButton, CCol, CElementCover, CMultiSelect, CRow, CSpinner } from '@coreui/react-pro';
 
 import { useToast } from '../../context/ToastContext';
 import AdminService from '../../services/admin/AdminService';
@@ -61,13 +61,13 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
   useEffect(() => {
     setIsLoading(false);
     if (!isCreateMode && selectedId) {
-      fetchMenuDetail();
+      fetchAdminDetail();
     } else {
       getRoles();
     }
   }, [selectedId]);
 
-  const fetchMenuDetail = async () => {
+  const fetchAdminDetail = async () => {
     try {
       setIsLoading(true);
       const data = await AdminService.getAdmin(selectedId);
@@ -75,7 +75,7 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
       const allowedRoles = data.roles;
       await getRoles(allowedRoles);
     } catch (error) {
-      console.log(error);
+      addToast({ message: '관리자 정보를 가져오지 못했습니다.' });
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +83,7 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
 
   const getRoles = async (allowedRoles) => {
     try {
-      const rolesData = await RoleService.getRoleList();
+      const rolesData = await RoleService.getRoles();
       const newRoles = rolesData.map((role) => ({
         value: role.role,
         text: role.role,
@@ -91,7 +91,7 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
       }));
       setRoles(newRoles);
     } catch (error) {
-      addToast({ color: 'danger', message: error });
+      addToast({ message: '권한 목록을 가져오지 못했습니다.' });
     }
   };
 
@@ -158,7 +158,7 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
     try {
       await AdminService.deleteAdmin(id, shouldDelete);
     } catch (error) {
-      console.log(error);
+      addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
     closeModal();
     fetchAdminList();
@@ -182,36 +182,36 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
 
   return (
     <>
-      {isLoading && <CSpinner />}
-      {!isLoading && (
-        <>
-          <InputList fields={adminFields} formData={formData} handleChange={handleChange} isReadMode={isReadMode} />
-          {renderRoleSelect()}
-          <InputList fields={logInFields} formData={formData} handleChange={handleChange} isReadMode={isReadMode} />
-          <InputList
-            fields={getAuditFields(formMode)}
-            formData={formData}
-            handleChange={handleChange}
-            isReadMode={isReadMode}
-          />
-          <CRow>
-            <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-              {!isCreateMode && (
-                <>
-                  <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>
-                    {formData.deleted ? '복구' : '삭제'}
-                  </CButton>
-                </>
-              )}
-              {isUpdateMode || isCreateMode ? (
-                <CButton onClick={handleSubmit}>저장</CButton>
-              ) : (
-                <CButton onClick={handleUpdateClick}>수정</CButton>
-              )}
-            </CCol>
-          </CRow>
-        </>
+      {isLoading && (
+        <CElementCover>
+          <CSpinner variant="grow" color="primary" />
+        </CElementCover>
       )}
+      <InputList fields={adminFields} formData={formData} handleChange={handleChange} isReadMode={isReadMode} />
+      {renderRoleSelect()}
+      <InputList fields={logInFields} formData={formData} handleChange={handleChange} isReadMode={isReadMode} />
+      <InputList
+        fields={getAuditFields(formMode)}
+        formData={formData}
+        handleChange={handleChange}
+        isReadMode={isReadMode}
+      />
+      <CRow>
+        <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
+          {!isCreateMode && (
+            <>
+              <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>
+                {formData.deleted ? '복구' : '삭제'}
+              </CButton>
+            </>
+          )}
+          {isUpdateMode || isCreateMode ? (
+            <CButton onClick={handleSubmit}>저장</CButton>
+          ) : (
+            <CButton onClick={handleUpdateClick}>수정</CButton>
+          )}
+        </CCol>
+      </CRow>
     </>
   );
 };
