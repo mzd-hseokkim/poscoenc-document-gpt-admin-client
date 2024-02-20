@@ -110,6 +110,7 @@ const BoardPostDetailForm = ({ clickedRowId, fetchPosts }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    //REMIND Refactor formData management to useState
     const submittedData = new FormData(e.target);
     const modifiedData = {
       id: clickedRowId,
@@ -118,13 +119,15 @@ const BoardPostDetailForm = ({ clickedRowId, fetchPosts }) => {
       hasFiles: submittedData.get('postFileUpload')?.size > 0 ?? false,
     };
     try {
-      await BoardService.putModifiedPostDetail(modifiedData);
+      const isModified = await BoardService.putModifiedPostDetail(modifiedData);
+      if (isModified) {
+        await fetchPostDetails();
+        await handleFormMode(true);
+        await fetchPosts();
+      }
     } catch (error) {
       addToast({ color: 'danger', message: error.message });
     }
-    await fetchPostDetails();
-    await handleFormMode(true);
-    await fetchPosts();
   };
 
   const renderPostTitleInput = () => (
@@ -184,24 +187,24 @@ const BoardPostDetailForm = ({ clickedRowId, fetchPosts }) => {
 
   return (
     <>
-      <CCard className="mb-3">
-        <CCardBody>
-          <CSmartTable
-            columns={topInfoColumns}
-            items={topInfoData}
-            tableHeadProps={infoTableHeaderProps}
-            tableProps={infoTableProps}
-          />
-          <CSmartTable
-            columns={middleInfoColumns}
-            items={middleInfoData}
-            scopedColumns={middleInfoScopedColumns}
-            tableHeadProps={infoTableHeaderProps}
-            tableProps={infoTableProps}
-          />
-        </CCardBody>
-      </CCard>
       <CForm onSubmit={handleSubmit}>
+        <CCard className="mb-3">
+          <CCardBody>
+            <CSmartTable
+              columns={topInfoColumns}
+              items={topInfoData}
+              tableHeadProps={infoTableHeaderProps}
+              tableProps={infoTableProps}
+            />
+            <CSmartTable
+              columns={middleInfoColumns}
+              items={middleInfoData}
+              scopedColumns={middleInfoScopedColumns}
+              tableHeadProps={infoTableHeaderProps}
+              tableProps={infoTableProps}
+            />
+          </CCardBody>
+        </CCard>
         <CCard>
           <CCardBody>
             {renderPostTitleInput()}

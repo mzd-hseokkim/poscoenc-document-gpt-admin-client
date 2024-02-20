@@ -22,7 +22,8 @@ const getCollectionDetail = async (documentCollectionId) => {
 };
 
 const putModifiedCollectionDetail = async (modifiedCollection) => {
-  await api.put(`/admin/document-collections/${modifiedCollection.id}`, modifiedCollection);
+  const response = await api.put(`/admin/document-collections/${modifiedCollection.id}`, modifiedCollection);
+  return response.status === 200;
 };
 //TODO Implements post
 const postNewCollection = async (newCollection) => {

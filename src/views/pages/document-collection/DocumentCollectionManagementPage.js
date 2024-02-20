@@ -231,9 +231,9 @@ const DocumentCollectionManagementPage = () => {
               itemsPerPageSelect
               itemsPerPage={10}
               itemsPerPageLabel="페이지당 문서 집합 개수"
-              noItemsLabel="검색 결과가 없습니다."
               loading={searchResultIsLoading}
               items={documentCollectionList}
+              noItemsLabel="검색 결과가 없습니다."
               columns={documentCollectionColumnConfig}
               selectable
               selected={selectedRows}
