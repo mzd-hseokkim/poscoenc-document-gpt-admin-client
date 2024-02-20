@@ -15,7 +15,7 @@ import {
 } from '@coreui/react-pro';
 
 import AdminDetailForm from '../../../components/admin/AdminDetailForm';
-import StatusBadge from '../../../components/board/BoadStatusBadge';
+import StatusBadge from '../../../components/badge/StatusBadge';
 import ModalContainer from '../../../components/modal/ModalContainer';
 import useModal from '../../../hooks/useModal';
 import useToast from '../../../hooks/useToast';

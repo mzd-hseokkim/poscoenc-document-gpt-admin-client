@@ -1,32 +1,27 @@
-export const postColumnConfig = [
+export const documentCollectionColumnConfig = [
   {
     key: 'id',
     label: '아이디',
     _style: { width: '10%' },
   },
   {
-    key: 'title',
-    label: '제목',
+    key: 'displayName',
+    label: '표시명',
     _style: { width: '53%' },
   },
   {
     key: 'createdByName',
-    label: '작성자',
+    label: '게시자',
     _style: { width: '15%' },
   },
   {
     key: 'createdAt',
-    label: '작성일',
+    label: '게시일',
     _style: { width: '10%' },
-  },
-  {
-    key: 'viewCount',
-    label: '조회수',
-    _style: { width: '100px' },
   },
   {
     key: 'deleted',
     label: '삭제여부',
-    _style: { width: '100px' },
+    _style: { width: '12%' },
   },
 ];

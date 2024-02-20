@@ -1,6 +1,6 @@
 import api from '../../api/Api';
 
-const getPostDetails = async (postId) => {
+const getPostDetail = async (postId) => {
   const response = await api.get(`/admin/boards/${postId}`);
   return response.data;
 };
@@ -21,22 +21,26 @@ const getSearchedPostList = async (params) => {
   });
   return response?.data.content ?? [];
 };
-
-const putModifiedPostDetails = async (payload) => {
-  const response = await api.put(`/admin/boards/${payload.id}`, payload);
+//REMIND Implements post new
+const postNew = async (newPost) => {
+  const response = await api.post('/admin/boards/', newPost);
   return response.data;
 };
+const putModifiedPostDetail = async (payload) => {
+  await api.put(`/admin/boards/${payload.id}`, payload);
+};
 
-const patchPostsDeletedOption = async (boardIds, deletedOption) => {
-  const response = await api.patch(`/admin/boards/deleted/${deletedOption}`, boardIds);
+const patchPostsDeletionOption = async (boardIds, deletionOption) => {
+  const response = await api.patch(`/admin/boards/deleted/${deletionOption}`, boardIds);
   return response.status === 200;
 };
 
 const BoardService = {
-  getPostDetails,
+  getPostDetail,
   getSearchedPostList,
-  putModifiedPostDetails,
-  patchPostsDeletedOption,
+  postNew,
+  putModifiedPostDetail,
+  patchPostsDeletionOption,
 };
 
 export default BoardService;
