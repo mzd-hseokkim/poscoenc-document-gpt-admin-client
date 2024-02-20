@@ -26,9 +26,9 @@ const putModifiedCollectionDetail = async (modifiedCollection) => {
   return response.status === 200;
 };
 //TODO Implements post
-const postNewCollection = async (newCollection) => {
-  const response = await api.post('/admin/document-collections');
-  return response.data;
+const postNewCollection = async (newCollectionFormData) => {
+  const response = await api.post('/admin/document-collections', newCollectionFormData);
+  return response.status === 200;
 };
 
 const patchCollectionsDeletionOption = async (collectionIds, deletionOption) => {

@@ -29,23 +29,30 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
 
   const { addToast } = useToast();
   const currentUserId = useRecoilValue(userIdSelector);
+
+  //REMIND 칼럼 정의 변수 명 수정하기
   const topInfoColumns = [
     { key: 'id', label: 'ID', _style: { width: '20%' } },
-    { key: 'createdByName', label: '작성자', _style: { width: '30%' } },
     { key: 'commentCount', label: '댓글수', _style: { width: '25%' } },
     { key: 'viewCount', label: '조회수', _style: { width: '25%' } },
+    {
+      key: 'deleted',
+      label: '삭제 여부',
+      _style: { width: '30%' },
+    },
   ];
 
   const topInfoData = [
     {
       id: postDetails?.id,
-      createdByName: postDetails?.createdByName,
       commentCount: postDetails?.comments ? postDetails.comments.length : 0,
       viewCount: postDetails?.viewCount,
+      deleted: postDetails?.deleted,
     },
   ];
 
   const middleInfoColumns = [
+    { key: 'createdByName', label: '작성자', _style: { width: '40%' } },
     {
       key: 'createdAt',
       label: '작성일시',
@@ -56,28 +63,25 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
       label: '수정일시',
       _style: { width: '30%' },
     },
-    {
-      key: 'deleted',
-      label: '삭제 여부',
-      _style: { width: '40%' },
-    },
   ];
   const middleInfoData = [
     {
+      createdByName: postDetails?.createdByName,
       createdAt: postDetails?.createdAt,
       modifiedAt: postDetails?.modifiedAt,
-      deleted: postDetails?.deleted,
     },
   ];
 
-  const middleInfoScopedColumns = {
-    createdAt: (item) => <td>{item.createdAt ? format(new Date(item.createdAt), 'yyyy/MM/dd HH:mm:ss') : ''}</td>,
-    modifiedAt: (item) => <td>{item.modifiedAt ? format(new Date(item.modifiedAt), 'yyyy/MM/dd HH:mm:ss') : ''}</td>,
+  const topInfoScopedColumns = {
     deleted: (item) => (
       <td>
         <StatusBadge deleted={item.deleted} />
       </td>
     ),
+  };
+  const middleInfoScopedColumns = {
+    createdAt: (item) => <td>{item.createdAt ? format(new Date(item.createdAt), 'yyyy/MM/dd HH:mm:ss') : ''}</td>,
+    modifiedAt: (item) => <td>{item.modifiedAt ? format(new Date(item.modifiedAt), 'yyyy/MM/dd HH:mm:ss') : ''}</td>,
   };
 
   const infoTableHeaderProps = {
@@ -89,6 +93,9 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
   };
 
   const fetchPostDetails = async () => {
+    if (!clickedRowId) {
+      return;
+    }
     setGetDetailIsLoading(true);
     try {
       const details = await BoardService.getPostDetail(clickedRowId);
@@ -110,7 +117,6 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    //REMIND Refactor formData management to useState
     const submittedData = new FormData(e.target);
     const modifiedData = {
       id: clickedRowId,
@@ -193,6 +199,7 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
             <CSmartTable
               columns={topInfoColumns}
               items={topInfoData}
+              scopedColumns={topInfoScopedColumns}
               tableHeadProps={infoTableHeaderProps}
               tableProps={infoTableProps}
             />
