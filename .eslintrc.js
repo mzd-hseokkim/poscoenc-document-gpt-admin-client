@@ -52,7 +52,6 @@ module.exports = {
     'no-plusplus': 'error',
     'no-case-declarations': 'error',
     'no-mixed-operators': 'error',
-    'newline-per-chained-call': 'error',
     'no-whitespace-before-property': 'error',
     'no-new-wrappers': 'error',
     'import/order': [
