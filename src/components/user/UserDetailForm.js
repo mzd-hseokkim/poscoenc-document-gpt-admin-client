@@ -43,7 +43,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
   const getUserDetail = async () => {
     try {
       setIsLoading(true);
-      const data = await UserService.getUserDetail(selectedId);
+      const data = await UserService.getUser(selectedId);
       setFormData(data);
     } catch (error) {
       addToast({ color: 'danger', message: error.message });
@@ -77,7 +77,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
 
   const patchUser = async () => {
     try {
-      await UserService.putUserDetail(selectedId, formData);
+      await UserService.putUser(selectedId, formData);
       closeModal();
       fetchUserList();
     } catch (error) {
@@ -110,7 +110,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
   const handleDeleteRestoreClick = async (id) => {
     const shouldDelete = !formData.deleted;
     try {
-      await UserService.patchDeleteSingleUser(id, shouldDelete);
+      await UserService.deleteUser(id, shouldDelete);
     } catch (error) {
       addToast({ color: 'danger', message: error.message });
     }

@@ -1,6 +1,6 @@
 import api from '../../api/Api';
 
-const getMenus = async (params) => {
+const getMenus = async (params, pageable) => {
   const response = await api.get('/admin/menus', {
     params: {
       name: params.name,
@@ -12,6 +12,9 @@ const getMenus = async (params) => {
       fromModifiedAt: params.fromModifiedAt,
       toModifiedAt: params.toModifiedAt,
       deletionOption: params.deletionOption,
+      page: pageable.page,
+      size: pageable.size,
+      sort: pageable.sort,
     },
   });
   return response.data;

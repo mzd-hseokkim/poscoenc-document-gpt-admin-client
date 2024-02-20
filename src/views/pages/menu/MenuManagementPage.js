@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+//MenuManagement
+
+import React, { useEffect, useRef, useState } from 'react';
 
 import {
   CButton,
@@ -29,43 +31,50 @@ import {
 import { iconMapper } from '../../../utils/common/iconMapper';
 import { menuColumnConfig } from '../../../utils/menu/menuColumnConfig';
 
+const createInitialFormData = () => ({
+  name: '',
+  urlPath: '',
+  menuOrder: '',
+  parentId: '',
+  fromCreatedAt: getOneYearAgoDate(),
+  toCreatedAt: getCurrentDate(),
+  fromModifiedAt: getOneYearAgoDate(),
+  toModifiedAt: getCurrentDate(),
+  deletionOption: 'ALL',
+});
+
 const MenuManagementPage = () => {
   const [menuList, setMenuList] = useState([]);
   const [checkedItems, setCheckedItems] = useState([]);
   const [selectedId, setSelectedId] = useState();
   const [formMode, setFormMode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const createInitialFormData = () => ({
-    name: '',
-    urlPath: '',
-    menuOrder: '',
-    parentId: '',
-    fromCreatedAt: getOneYearAgoDate(),
-    toCreatedAt: getCurrentDate(),
-    fromModifiedAt: getOneYearAgoDate(),
-    toModifiedAt: getCurrentDate(),
-    deletionOption: 'ALL',
-  });
-
+  const [totalMenuElements, setTotalMenuElements] = useState(0);
   const [formData, setFormData] = useState(createInitialFormData);
+  const [pageableData, setPageableData] = useState({
+    page: 0,
+    size: 10,
+    sort: 'name,asc',
+  });
+  const isComponentMounted = useRef(true);
 
   const addToast = useToast();
   const modal = useModal();
 
   useEffect(() => {
-    setIsLoading(false);
-  }, []);
+    if (isComponentMounted.current) {
+      isComponentMounted.current = false;
+    } else {
+      fetchMenuList();
+    }
+  }, [pageableData]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    getMenuList();
-  };
-
-  const getMenuList = async () => {
+  const fetchMenuList = async () => {
     try {
       setIsLoading(true);
-      const data = await MenuService.getMenus(formData);
+      const data = await MenuService.getMenus(formData, pageableData);
       setMenuList(data.content);
+      setTotalMenuElements(data.totalElements);
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -76,8 +85,20 @@ const MenuManagementPage = () => {
     }
   };
 
-  const handleChange = ({ target: { id, value } }) => {
-    setFormData((prev) => ({ ...prev, [id]: value }));
+  const handleSortChange = (sorterValue) => {
+    const newSortValue = `${sorterValue.column},${sorterValue.state}`;
+    setPageableData((prev) => ({
+      ...prev,
+      sort: newSortValue,
+    }));
+  };
+
+  const handleSizeChange = (size) => {
+    setPageableData((prev) => ({ ...prev, size, page: 0 }));
+  };
+
+  const handlePageChange = (page) => {
+    setPageableData((prev) => ({ ...prev, page: page - 1 }));
   };
 
   const handleDateChange = ({ id, newDate, isStartDate = true }) => {
@@ -93,14 +114,23 @@ const MenuManagementPage = () => {
     }
   };
 
-  const handleReset = () => {
-    setFormData(createInitialFormData);
+  const handleChange = ({ target: { id, value } }) => {
+    setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleRowClick = (id) => {
     setSelectedId(id);
     setFormMode('read');
     modal.openModal();
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    fetchMenuList();
+  };
+
+  const handleReset = () => {
+    setFormData(createInitialFormData);
   };
 
   const handleCreateClick = () => {
@@ -113,14 +143,14 @@ const MenuManagementPage = () => {
     if (checkedItems.length === 1) {
       try {
         await MenuService.deleteMenu(ids, shouldDelete);
-        getMenuList();
+        fetchMenuList();
       } catch (error) {
         console.log(error);
       }
     } else {
       try {
         await MenuService.deleteMenus(ids, shouldDelete);
-        getMenuList();
+        fetchMenuList();
       } catch (error) {
         console.log(error);
       }
@@ -218,14 +248,22 @@ const MenuManagementPage = () => {
           </CRow>
           <CRow className="mb-3">
             <CSmartTable
-              pagination
-              activePage={1}
+              columnSorter={{
+                external: true,
+                resetable: false,
+              }}
+              onSorterChange={(sorterValue) => handleSortChange(sorterValue)}
               itemsPerPageSelect
-              itemsPerPage={10}
+              paginationProps={{
+                activePage: pageableData.page + 1,
+                pages: Math.ceil(totalMenuElements / pageableData.size) || 1,
+                onActivePageChange: handlePageChange,
+              }}
+              itemsPerPage={pageableData.size}
+              onItemsPerPageChange={handleSizeChange}
               itemsPerPageLabel="페이지당 메뉴 개수"
               noItemsLabel="검색 결과가 없습니다."
               loading={isLoading}
-              sorterValue={{ column: 'id', state: 'asc' }}
               items={menuList}
               columns={menuColumnConfig}
               selectable
@@ -264,7 +302,7 @@ const MenuManagementPage = () => {
           selectedId={selectedId}
           initialFormMode={formMode}
           closeModal={modal.closeModal}
-          fetchMenuList={getMenuList}
+          fetchMenuList={fetchMenuList}
         />
       </ModalContainer>
     </>
