@@ -22,7 +22,7 @@ import { userIdSelector } from '../../states/jwtTokenState';
 import StatusBadge from '../badge/StatusBadge';
 import FormLoadingCover from '../cover/FormLoadingCover';
 
-const BoardPostDetailForm = ({ clickedRowId, fetchPosts }) => {
+const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
   const [postDetails, setPostDetails] = useState(null);
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
   const [isViewMode, setIsViewMode] = useState(true);
@@ -40,7 +40,7 @@ const BoardPostDetailForm = ({ clickedRowId, fetchPosts }) => {
     {
       id: postDetails?.id,
       createdByName: postDetails?.createdByName,
-      commentCount: postDetails?.comments ? postDetails.comments.length : 0, // 댓글 배열이 있다면 그 길이를, 없다면 0을 사용
+      commentCount: postDetails?.comments ? postDetails.comments.length : 0,
       viewCount: postDetails?.viewCount,
     },
   ];
@@ -110,6 +110,7 @@ const BoardPostDetailForm = ({ clickedRowId, fetchPosts }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    //REMIND Refactor formData management to useState
     const submittedData = new FormData(e.target);
     const modifiedData = {
       id: clickedRowId,
@@ -118,13 +119,15 @@ const BoardPostDetailForm = ({ clickedRowId, fetchPosts }) => {
       hasFiles: submittedData.get('postFileUpload')?.size > 0 ?? false,
     };
     try {
-      await BoardService.putModifiedPostDetail(modifiedData);
+      const isModified = await BoardService.putModifiedPostDetail(modifiedData);
+      if (isModified) {
+        await fetchPostDetails();
+        await handleFormMode(true);
+        await refreshPosts();
+      }
     } catch (error) {
       addToast({ color: 'danger', message: error.message });
     }
-    await fetchPostDetails();
-    await handleFormMode(true);
-    await fetchPosts();
   };
 
   const renderPostTitleInput = () => (
@@ -194,21 +197,21 @@ const BoardPostDetailForm = ({ clickedRowId, fetchPosts }) => {
               tableProps={infoTableProps}
             />
             <CSmartTable
-              tableHeadProps={infoTableHeaderProps}
-              tableProps={infoTableProps}
               columns={middleInfoColumns}
               items={middleInfoData}
               scopedColumns={middleInfoScopedColumns}
+              tableHeadProps={infoTableHeaderProps}
+              tableProps={infoTableProps}
             />
           </CCardBody>
         </CCard>
         <CCard>
-          <CCard>
-            <CCardBody>
-              {renderPostTitleInput()}
-              {renderPostContentTextarea()}
-            </CCardBody>
-          </CCard>
+          <CCardBody>
+            {renderPostTitleInput()}
+            {renderPostContentTextarea()}
+          </CCardBody>
+        </CCard>
+        <CCard>
           {renderFormActions()}
           <FormLoadingCover isLoading={getDetailIsLoading} />
         </CCard>

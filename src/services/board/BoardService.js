@@ -27,7 +27,8 @@ const postNew = async (newPost) => {
   return response.data;
 };
 const putModifiedPostDetail = async (payload) => {
-  await api.put(`/admin/boards/${payload.id}`, payload);
+  const result = await api.put(`/admin/boards/${payload.id}`, payload);
+  return result.status === 200;
 };
 
 const patchPostsDeletionOption = async (boardIds, deletionOption) => {
