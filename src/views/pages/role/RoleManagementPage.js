@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { CButton, CCard, CCardBody, CCardTitle, CCol, CRow, CSmartTable } from '@coreui/react-pro';
 
-import StatusBadge from '../../../components/board/BoadStatusBadge';
+import StatusBadge from '../../../components/badge/StatusBadge';
 import ModalContainer from '../../../components/modal/ModalContainer';
 import RoleDetailForm from '../../../components/role/RoleDetailForm';
 import useModal from '../../../hooks/useModal';

@@ -123,7 +123,7 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
       if (isModified) {
         await fetchPostDetails();
         await handleFormMode(true);
-        await fetchPosts();
+        await refreshPosts();
       }
     } catch (error) {
       addToast({ color: 'danger', message: error.message });
