@@ -17,8 +17,8 @@ import {
 import StatusBadge from '../../../components/badge/StatusBadge';
 import DocumentCollectionDetailForm from '../../../components/document-collection/DocumentCollectionDetailForm';
 import ModalContainer from '../../../components/modal/ModalContainer';
+import { useToast } from '../../../context/ToastContext';
 import useModal from '../../../hooks/useModal';
-import useToast from '../../../hooks/useToast';
 import DocumentCollectionService from '../../../services/document-collection/DocumentCollectionService';
 import {
   formatToIsoEndDate,
@@ -50,7 +50,7 @@ const DocumentCollectionManagementPage = () => {
   const [searchFormData, setSearchFormData] = useState(initialSearchFormData);
 
   const modal = useModal();
-  const addToast = useToast();
+  const { addToast } = useToast();
 
   useEffect(() => {
     setSearchResultIsLoading(false);

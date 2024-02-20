@@ -16,7 +16,7 @@ import { format } from 'date-fns';
 import { useRecoilValue } from 'recoil';
 
 import BoardCommentsForm from './BoardCommentsForm';
-import useToast from '../../hooks/useToast';
+import { useToast } from '../../context/ToastContext';
 import BoardService from '../../services/board/BoardService';
 import { userIdSelector } from '../../states/jwtTokenState';
 import StatusBadge from '../badge/StatusBadge';
@@ -27,7 +27,7 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
   const [isViewMode, setIsViewMode] = useState(true);
 
-  const addToast = useToast();
+  const { addToast } = useToast();
   const currentUserId = useRecoilValue(userIdSelector);
   const topInfoColumns = [
     { key: 'id', label: 'ID', _style: { width: '20%' } },

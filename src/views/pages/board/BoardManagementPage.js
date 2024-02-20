@@ -17,8 +17,8 @@ import { format } from 'date-fns';
 import BoardPostDetailForm from '../../../components/board/BoardPostDetailForm';
 import { getScopedColumns } from '../../../components/board/BoardScopedColumn';
 import ModalContainer from '../../../components/modal/ModalContainer';
+import { useToast } from '../../../context/ToastContext';
 import useModal from '../../../hooks/useModal';
-import useToast from '../../../hooks/useToast';
 import BoardService from '../../../services/board/BoardService';
 import { postColumnConfig } from '../../../utils/board/postColumnConfig';
 import Page500 from '../page500/Page500';
@@ -43,7 +43,7 @@ const BoardManagementPage = () => {
   const [error, setError] = useState(null);
 
   const modal = useModal();
-  const addToast = useToast();
+  const { addToast } = useToast();
   const handleClickedRowId = (newClickedRowId) => {
     setClickedRowId(newClickedRowId);
   };

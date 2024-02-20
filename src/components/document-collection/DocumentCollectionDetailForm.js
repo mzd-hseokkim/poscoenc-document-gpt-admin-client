@@ -14,7 +14,7 @@ import {
 } from '@coreui/react-pro';
 import { useRecoilValue } from 'recoil';
 
-import useToast from '../../hooks/useToast';
+import { useToast } from '../../context/ToastContext';
 import DocumentCollectionFileService from '../../services/document-collection/DocumentCollectionFileService';
 import DocumentCollectionService from '../../services/document-collection/DocumentCollectionService';
 import { userIdSelector } from '../../states/jwtTokenState';
@@ -30,7 +30,7 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
 
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
 
-  const addToast = useToast();
+  const { addToast } = useToast();
   const currentUserId = useRecoilValue(userIdSelector);
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
 
