@@ -1,6 +1,6 @@
 import api from '../../api/Api';
 
-const getSearchedCollectionList = async (params) => {
+const getSearchedCollectionList = async (params, pageable) => {
   const response = await api.get('/admin/document-collections', {
     params: {
       name: params.name,
@@ -9,11 +9,12 @@ const getSearchedCollectionList = async (params) => {
       fromCreatedAt: params.fromCreatedAt,
       toCreatedAt: params.toCreatedAt,
       deletionOption: params.deletionOption,
-      page: params.page,
-      size: params.size,
+      page: pageable.page,
+      size: pageable.size,
+      sort: pageable.sort,
     },
   });
-  return response?.data.content ?? [];
+  return response?.data ?? [];
 };
 
 const getCollectionDetail = async (documentCollectionId) => {

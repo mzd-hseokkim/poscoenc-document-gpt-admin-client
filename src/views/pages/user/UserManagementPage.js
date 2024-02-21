@@ -186,21 +186,23 @@ const UserManagementPage = () => {
                 external: true,
                 resetable: false,
               }}
+              columns={userColumnConfig}
+              items={userList}
+              itemsPerPage={pageableData.size}
+              itemsPerPageLabel="페이지당 사용자 개수"
+              itemsPerPageSelect
+              loading={isLoading}
+              noItemsLabel="검색 결과가 없습니다."
+              onItemsPerPageChange={handleSizeChange}
+              onSelectedItemsChange={(items) => {
+                setCheckedItems(items);
+              }}
               onSorterChange={(sorterValue) => handleSortChange(sorterValue)}
               paginationProps={{
                 activePage: pageableData.page + 1,
                 pages: Math.ceil(totalUserElements / pageableData.size) || 1,
                 onActivePageChange: handlePageChange,
               }}
-              itemsPerPageSelect
-              itemsPerPage={pageableData.size}
-              onItemsPerPageChange={handleSizeChange}
-              itemsPerPageLabel="페이지당 사용자 개수"
-              noItemsLabel="검색 결과가 없습니다."
-              loading={isLoading}
-              items={userList}
-              columns={userColumnConfig}
-              selectable
               scopedColumns={{
                 name: (item) => (
                   <td
@@ -217,14 +219,12 @@ const UserManagementPage = () => {
                   </td>
                 ),
               }}
-              onSelectedItemsChange={(items) => {
-                setCheckedItems(items);
-              }}
-              tableProps={{
-                responsive: true,
-                hover: true,
-              }}
+              selectable
               selected={checkedItems}
+              tableProps={{
+                hover: true,
+                responsive: true,
+              }}
             />
           </CRow>
         </CCardBody>
