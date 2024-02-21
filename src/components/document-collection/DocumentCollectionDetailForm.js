@@ -99,7 +99,7 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
       const details = await DocumentCollectionService.getCollectionDetail(clickedRowId);
       setCollectionDetail(details);
     } catch (error) {
-      if (error.status === 404) {
+      if (error.response?.status === 404) {
         addToast({ message: '해당 문서 집합을 찾을 수 없습니다.' });
       } else {
         console.log(error);
@@ -130,10 +130,10 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
         setFormMode('read');
       }
     } catch (error) {
-      const statusCode = error.status;
-      if (statusCode === 400) {
+      const status = error.response?.status;
+      if (status === 400) {
         addToast({ message: '본인이 게시한 문서 집합만 수정 가능합니다.' });
-      } else if (statusCode === 404) {
+      } else if (status === 404) {
         addToast({ message: '수정할 문서 집합을 찾지 못했습니다. 다시 검색 해 주세요.' });
       } else {
         console.log(error);
@@ -167,8 +167,8 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     try {
       await DocumentCollectionFileService.getDownloadDocument(file);
     } catch (error) {
-      const statusCode = error.status;
-      if (statusCode === 404) {
+      const status = error.response?.status;
+      if (status === 404) {
         addToast({ message: '다운로드 할 파일을 찾지 못했습니다. 목록을 새로고침 해 주세요.' });
       } else {
         console.log(error);

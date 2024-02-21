@@ -101,7 +101,7 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
       const details = await BoardService.getPostDetail(clickedRowId);
       setPostDetails(details);
     } catch (error) {
-      if (error.status === 404) {
+      if (error.response?.status === 404) {
         addToast({ message: '해당 게시글을 찾을 수 없습니다.' });
       } else {
         console.log(error);
@@ -136,10 +136,10 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
         await refreshPosts();
       }
     } catch (error) {
-      const statusCode = error.status;
-      if (statusCode === 400) {
+      const status = error.response?.status;
+      if (status === 400) {
         addToast({ message: '본인이 작성한 게시글만 수정 가능합니다.' });
-      } else if (statusCode === 404) {
+      } else if (status === 404) {
         addToast({ message: '수정할 게시글을 찾지 못했습니다. 다시 검색 해 주세요.' });
       } else {
         console.log(error);

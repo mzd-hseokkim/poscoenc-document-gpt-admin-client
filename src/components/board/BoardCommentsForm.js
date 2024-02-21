@@ -56,7 +56,7 @@ const BoardCommentsForm = ({ postId }) => {
       setCommentText('');
       await fetchPostComments();
     } catch (error) {
-      if (error.status === 404) {
+      if (error.response?.status === 404) {
         addToast({ message: '댓글 저장에 실패했습니다. 게시글이 삭제되었는지 확인 해 주세요.' });
       } else {
         console.log(error);
@@ -72,7 +72,7 @@ const BoardCommentsForm = ({ postId }) => {
       await BoardCommentService.patchDeletionOptionComment(commentId, shouldDelete);
       await fetchPostComments();
     } catch (error) {
-      if (error.status === 404) {
+      if (error.response?.status === 404) {
         addToast({ message: '삭제할 댓글을 찾지 못했습니다.' });
       } else {
         console.log(error);
