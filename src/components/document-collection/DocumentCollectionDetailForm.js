@@ -23,7 +23,7 @@ import { formatFileSize } from '../../utils/common/formatFileSize';
 import formModes from '../../utils/formModes';
 import StatusBadge from '../badge/StatusBadge';
 import FormLoadingCover from '../cover/FormLoadingCover';
-//REMIND Handle closeModal
+
 const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModal, refreshDocumentCollectionList }) => {
   const [collectionDetail, setCollectionDetail] = useState(null);
   const [formMode, setFormMode] = useState(initialFormMode);
@@ -99,29 +99,26 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
       const details = await DocumentCollectionService.getCollectionDetail(clickedRowId);
       setCollectionDetail(details);
     } catch (error) {
-      addToast({ color: 'danger', message: error.message });
+      if (error.status === 404) {
+        addToast({ message: '해당 문서 집합을 찾을 수 없습니다.' });
+      } else {
+        console.log(error);
+      }
     } finally {
       setGetDetailIsLoading(false);
     }
   };
   const postNewCollection = async (e) => {
-    console.log(e);
     try {
       const formData = new FormData(e.currentTarget);
-      const newCollectionFormData = {
-        name: formData.get('name'),
-        displayName: formData.get('displayName'),
-        files: formData.get('files'),
-      };
-      console.log(newCollectionFormData);
-      //ㄱ뜨ㅑㅜㅇ 테스트 설정용 래그 ㅇㅁㅅㅁ
       const isPosted = await DocumentCollectionService.postNewCollection(formData);
       if (isPosted) {
         refreshDocumentCollectionList();
         closeModal();
       }
     } catch (error) {
-      addToast({ color: 'danger', message: '문서 집합을 게시하는데 문제가 발생했습니다.' });
+      //REMIND 생성 실패 시 500 Error
+      console.log(error);
     }
   };
 
@@ -133,7 +130,14 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
         setFormMode('read');
       }
     } catch (error) {
-      addToast({ message: '수정 작업에 실패했습니다.' });
+      const statusCode = error.status;
+      if (statusCode === 400) {
+        addToast({ message: '본인이 게시한 문서 집합만 수정 가능합니다.' });
+      } else if (statusCode === 404) {
+        addToast({ message: '수정할 문서 집합을 찾지 못했습니다. 다시 검색 해 주세요.' });
+      } else {
+        console.log(error);
+      }
     }
     //REMIND loading spinner
   };
@@ -163,7 +167,12 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     try {
       await DocumentCollectionFileService.getDownloadDocument(file);
     } catch (error) {
-      addToast({ message: '다운로드를 할 수 없습니다.' });
+      const statusCode = error.status;
+      if (statusCode === 404) {
+        addToast({ message: '다운로드 할 파일을 찾지 못했습니다. 목록을 새로고침 해 주세요.' });
+      } else {
+        console.log(error);
+      }
     }
   };
 
@@ -215,7 +224,7 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     <>
       {isReadMode ? (
         <CRow className="row justify-content-end">
-          {collectionDetail?.createdByName === currentUserId && (
+          {collectionDetail?.createdBy === currentUserId && (
             <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
               <CButton disabled={!isReadMode} onClick={handleFormModeChange}>
                 수정
@@ -281,6 +290,7 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
                     onClick={() => handleDownload(file)}
                     className="d-flex justify-content-between align-items-center"
                   >
+                    {/*REMIND 파란색 -> 클릭 시 보라색이름, 다운로드 흔적 남기기*/}
                     <span>{file.originalName}</span>
                     <small>{formatFileSize(file.size)}</small>
                   </CListGroupItem>

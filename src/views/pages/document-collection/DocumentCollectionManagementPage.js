@@ -28,7 +28,6 @@ import {
   getOneYearAgoDate,
 } from '../../../utils/common/dateUtils';
 import { documentCollectionColumnConfig } from '../../../utils/document-collection/documentCollectionColumnConfig';
-import Page500 from '../page500/Page500';
 
 const DocumentCollectionManagementPage = () => {
   const [documentCollectionList, setDocumentCollectionList] = useState([]);
@@ -36,7 +35,6 @@ const DocumentCollectionManagementPage = () => {
   const [clickedRowId, setClickedRowId] = useState();
   const [detailFormMode, setDetailFormMode] = useState('');
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   const initialSearchFormData = () => ({
     name: '',
@@ -65,9 +63,8 @@ const DocumentCollectionManagementPage = () => {
       const searchResult = await DocumentCollectionService.getSearchedCollectionList(searchFormData);
       setDocumentCollectionList(searchResult);
     } catch (error) {
-      //REMIND 에러 핸들링 구현
-      addToast({ color: 'danger', body: error.response.data.message });
-      setError(error);
+      //REMIND only sever error occur
+      console.log(error);
     } finally {
       setSearchResultIsLoading(false);
     }
@@ -128,8 +125,14 @@ const DocumentCollectionManagementPage = () => {
         setSelectedRows([]);
       }
     } catch (error) {
-      addToast({ color: 'danger', message: error.message });
-      setError(error);
+      const statusCode = error.status;
+      if (statusCode === 400) {
+        addToast({ message: '삭제할 문서 집합을 선택해주세요.' });
+      } else if (statusCode === 404) {
+        addToast({ message: '삭제할 문서 집합을 찾지 못했습니다. 다시 검색 해 주세요.' });
+      } else {
+        console.log(error);
+      }
     } finally {
       await searchDocumentCollectionList();
     }
@@ -144,8 +147,6 @@ const DocumentCollectionManagementPage = () => {
     modal.closeModal();
     setClickedRowId(null);
   };
-  //REMIND handle error page
-  if (error) return <Page500 />;
 
   return (
     <>
@@ -255,6 +256,7 @@ const DocumentCollectionManagementPage = () => {
           </CRow>
         </CCardBody>
       </CCard>
+      {/*REMIND Modal open 시 url 변경되게 수정*/}
       <ModalContainer
         visible={modal.isOpen}
         title={detailFormMode === 'create' ? '문서 게시' : '문서 집합 상세'}
