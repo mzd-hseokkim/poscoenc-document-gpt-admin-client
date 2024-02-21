@@ -39,14 +39,25 @@ export const setupInterceptors = ({ navigate, addToast }) => {
     (response) => response,
     (error) => {
       if (error.response) {
-        if (error.response.status === 500) {
-          addToast({ message: '서버에서 오류가 발생하였습니다. 관리자에게 문의해 주세요.' });
+        const status = error.response.status;
+        switch (status) {
+          case 500:
+            addToast({ message: '서버에서 오류가 발생하였습니다. 관리자에게 문의해 주세요.' });
+            break;
+          case 409:
+            addToast({ message: '이미 존재하는 값입니다. 입력값을 다시 확인해 주세요.' });
+            break;
+          case 403:
+            addToast({ message: '접근 권한이 없습니다.' });
+            break;
+          default:
+            break;
         }
       } else if (error.request) {
-        addToast({ message: '서버에서 응답이 없습니다. 잠시 후 다시 시도해주세요.' });
+        addToast({ message: '서버에서 응답이 없습니다. 잠시 후 다시 시도해 주세요.' });
         console.error(error.request);
       } else {
-        addToast({ message: '알 수 없는 오류가 발생하였습니다. 잠시 후 다시 시도해주세요.' });
+        addToast({ message: '알 수 없는 오류가 발생하였습니다. 잠시 후 다시 시도해 주세요.' });
         console.log('Error', error.message);
       }
       throw error;
