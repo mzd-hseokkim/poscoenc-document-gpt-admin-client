@@ -1,10 +1,10 @@
-import { cilPaperclip } from '@coreui/icons';
+import { cilCommentBubble, cilPaperclip } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import { format } from 'date-fns';
 
 import StatusBadge from '../badge/StatusBadge';
 
-export const getScopedColumns = (handleClickedRowId, openModal) => ({
+export const getBoardScopedColumns = (handleClickedRowId, openModal) => ({
   id: (item) => <td>{item.id}</td>,
   title: (item) => {
     return (
@@ -17,7 +17,7 @@ export const getScopedColumns = (handleClickedRowId, openModal) => ({
       >
         {item.title}
         {item.hasFiles ? <CIcon icon={cilPaperclip} size="sm" className="ms-2" /> : ''}
-        {/*REMIND 댓글 여부도 아이콘 추가*/}
+        {item.comments ? <CIcon icon={cilCommentBubble} size="sm" className="ms-2" /> : ''}
       </td>
     );
   },

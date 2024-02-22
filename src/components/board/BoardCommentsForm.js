@@ -38,7 +38,7 @@ const BoardCommentsForm = ({ postId }) => {
       const comments = await BoardCommentService.getPostComments(postId);
       setPostComments(comments);
     } catch (error) {
-      addToast({ color: 'danger', message: error.message });
+      addToast({ message: '댓글을 불러오지 못했습니다. 관리자에게 문의하세요.' });
     } finally {
       setGetIsLoading(false);
     }
@@ -48,7 +48,7 @@ const BoardCommentsForm = ({ postId }) => {
     setCommentText(event.target.value);
   };
 
-  const handleCommentSubmit = async (e) => {
+  const handleSubmitComment = async (e) => {
     e.preventDefault();
     setPostCommentIsLoading(true);
     try {
@@ -56,7 +56,11 @@ const BoardCommentsForm = ({ postId }) => {
       setCommentText('');
       await fetchPostComments();
     } catch (error) {
-      addToast({ color: 'danger', message: error.message });
+      if (error.response?.status === 404) {
+        addToast({ message: '댓글 저장에 실패했습니다. 게시글이 삭제되었는지 확인 해 주세요.' });
+      } else {
+        console.log(error);
+      }
     } finally {
       setPostCommentIsLoading(false);
     }
@@ -68,7 +72,11 @@ const BoardCommentsForm = ({ postId }) => {
       await BoardCommentService.patchDeletionOptionComment(commentId, shouldDelete);
       await fetchPostComments();
     } catch (error) {
-      addToast({ color: 'danger', message: error.message });
+      if (error.response?.status === 404) {
+        addToast({ message: '삭제할 댓글을 찾지 못했습니다.' });
+      } else {
+        console.log(error);
+      }
     } finally {
       setDeleteIsLoading(false);
     }
@@ -121,7 +129,7 @@ const BoardCommentsForm = ({ postId }) => {
     <CRow>
       <CCol className="d-flex justify-content-between">
         <strong>{comment.createdByName}</strong>
-        {comment.createdByName === currentUserId && (
+        {comment.createdBy === currentUserId && (
           <CButton color="primary" size="sm" onClick={() => toggleCommentStatus(comment.id, !comment.deleted)}>
             {comment.deleted ? '복구' : '삭제'}
           </CButton>
@@ -140,7 +148,7 @@ const BoardCommentsForm = ({ postId }) => {
   );
 
   return (
-    <CForm onSubmit={handleCommentSubmit} className="comments-section">
+    <CForm onSubmit={handleSubmitComment} className="comments-section">
       <CCard className="mt-3 mb-3">
         <CCardHeader className="d-flex justify-content-between">
           댓글

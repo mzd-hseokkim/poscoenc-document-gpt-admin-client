@@ -15,13 +15,12 @@ import {
 import { format } from 'date-fns';
 
 import BoardPostDetailForm from '../../../components/board/BoardPostDetailForm';
-import { getScopedColumns } from '../../../components/board/BoardScopedColumn';
+import { getBoardScopedColumns } from '../../../components/board/BoardScopedColumn';
 import ModalContainer from '../../../components/modal/ModalContainer';
 import { useToast } from '../../../context/ToastContext';
 import useModal from '../../../hooks/useModal';
 import BoardService from '../../../services/board/BoardService';
 import { postColumnConfig } from '../../../utils/board/postColumnConfig';
-import Page500 from '../page500/Page500';
 
 const BoardManagementPage = () => {
   const [selectedRows, setSelectedRows] = useState([]);
@@ -40,14 +39,13 @@ const BoardManagementPage = () => {
     deletionOption: '',
   };
   const [searchFormData, setSearchFormData] = useState(initialSearchFormData);
-  const [error, setError] = useState(null);
 
   const modal = useModal();
   const { addToast } = useToast();
   const handleClickedRowId = (newClickedRowId) => {
     setClickedRowId(newClickedRowId);
   };
-  const scopedColumns = getScopedColumns(handleClickedRowId, modal.openModal);
+  const scopedColumns = getBoardScopedColumns(handleClickedRowId, modal.openModal);
 
   const isDeletedRow = (selectedRows) => {
     return selectedRows.some((row) => row.deleted === true);
@@ -83,9 +81,7 @@ const BoardManagementPage = () => {
       const searchResult = await BoardService.getSearchedPostList(searchFormData);
       setPostSearchResults(searchResult);
     } catch (error) {
-      //REMIND 에러 핸들링 구현
-      addToast({ color: 'danger', body: error.response.data.message });
-      setError(error);
+      addToast({ message: '검색 조건을 확인 해 주세요.' });
     } finally {
       setSearchResultIsLoading(false);
     }
@@ -102,15 +98,18 @@ const BoardManagementPage = () => {
         setSelectedRows([]);
       }
     } catch (error) {
-      addToast({ color: 'danger', message: error.message });
-      setError(error);
+      const status = error.response?.status;
+      if (status === 400) {
+        addToast({ message: '삭제할 게시글을 선택해주세요.' });
+      } else if (status === 404) {
+        addToast({ message: '삭제할 게시글을 찾지 못했습니다. 다시 검색 해 주세요.' });
+      } else {
+        console.log(error);
+      }
     } finally {
       await handleSubmitSearchRequest();
     }
   };
-
-  //REMIND handle error page
-  if (error) return <Page500 />;
 
   return (
     <>
@@ -239,6 +238,7 @@ const BoardManagementPage = () => {
               hover: true,
             }}
           />
+          {/*REMIND Modal open 시 url 변경되게 수정*/}
           <ModalContainer visible={modal.isOpen} title="게시글" onClose={modal.closeModal} size="lg">
             <BoardPostDetailForm
               clickedRowId={clickedRowId}

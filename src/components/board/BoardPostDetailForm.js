@@ -101,7 +101,11 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
       const details = await BoardService.getPostDetail(clickedRowId);
       setPostDetails(details);
     } catch (error) {
-      addToast({ color: 'danger', message: error.message });
+      if (error.response?.status === 404) {
+        addToast({ message: '해당 게시글을 찾을 수 없습니다.' });
+      } else {
+        console.log(error);
+      }
     } finally {
       setGetDetailIsLoading(false);
     }
@@ -115,7 +119,7 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
     setIsViewMode(isViewMode);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmitModifiedData = async (e) => {
     e.preventDefault();
     const submittedData = new FormData(e.target);
     const modifiedData = {
@@ -132,7 +136,14 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
         await refreshPosts();
       }
     } catch (error) {
-      addToast({ color: 'danger', message: error.message });
+      const status = error.response?.status;
+      if (status === 400) {
+        addToast({ message: '본인이 작성한 게시글만 수정 가능합니다.' });
+      } else if (status === 404) {
+        addToast({ message: '수정할 게시글을 찾지 못했습니다. 다시 검색 해 주세요.' });
+      } else {
+        console.log(error);
+      }
     }
   };
 
@@ -171,7 +182,8 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
     <>
       {isViewMode && (
         <CRow className="row justify-content-end">
-          {postDetails?.createdByName === currentUserId && (
+          {/*TODO fix to detail's createdBy (Long Id)*/}
+          {postDetails?.createdBy === currentUserId && (
             <CCol className="col-auto mb-3">
               <CButton onClick={() => handleFormMode(false)}>수정</CButton>
             </CCol>
@@ -193,7 +205,7 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
 
   return (
     <>
-      <CForm onSubmit={handleSubmit}>
+      <CForm onSubmit={handleSubmitModifiedData}>
         <CCard className="mb-3">
           <CCardBody>
             <CSmartTable

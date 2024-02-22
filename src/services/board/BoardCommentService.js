@@ -22,5 +22,7 @@ const patchDeletionOptionComment = async (commentId, deletionOption) => {
   const response = await api.patch(`/admin/board-comments/deleted/${deletionOption}`, [commentId]);
   return response.data;
 };
+
+// REMIND 댓글 수정 대신 생성,삭제
 const BoardCommentService = { getPostComments, postComment, patchDeletionOptionComment };
 export default BoardCommentService;

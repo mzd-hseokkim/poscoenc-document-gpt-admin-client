@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import {
   CButton,
@@ -19,6 +19,7 @@ import DocumentCollectionDetailForm from '../../../components/document-collectio
 import ModalContainer from '../../../components/modal/ModalContainer';
 import { useToast } from '../../../context/ToastContext';
 import useModal from '../../../hooks/useModal';
+import usePagination from '../../../hooks/usePagination';
 import DocumentCollectionService from '../../../services/document-collection/DocumentCollectionService';
 import {
   formatToIsoEndDate,
@@ -27,8 +28,8 @@ import {
   getCurrentDate,
   getOneYearAgoDate,
 } from '../../../utils/common/dateUtils';
+import { columnSorterCustomProps, tableCustomProps } from '../../../utils/common/smartTablePropsConfig';
 import { documentCollectionColumnConfig } from '../../../utils/document-collection/documentCollectionColumnConfig';
-import Page500 from '../page500/Page500';
 
 const DocumentCollectionManagementPage = () => {
   const [documentCollectionList, setDocumentCollectionList] = useState([]);
@@ -36,7 +37,7 @@ const DocumentCollectionManagementPage = () => {
   const [clickedRowId, setClickedRowId] = useState();
   const [detailFormMode, setDetailFormMode] = useState('');
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [totalCollectionElements, setTotalCollectionElements] = useState(0);
 
   const initialSearchFormData = () => ({
     name: '',
@@ -48,13 +49,20 @@ const DocumentCollectionManagementPage = () => {
   });
 
   const [searchFormData, setSearchFormData] = useState(initialSearchFormData);
+  const isComponentMounted = useRef(true);
 
   const modal = useModal();
   const { addToast } = useToast();
+  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } =
+    usePagination(totalCollectionElements);
 
   useEffect(() => {
-    setSearchResultIsLoading(false);
-  }, []);
+    if (isComponentMounted.current) {
+      isComponentMounted.current = false;
+    } else {
+      searchDocumentCollectionList();
+    }
+  }, [pageableData]);
 
   const isDeletedRow = (selectedRows) => {
     return selectedRows.some((row) => row.deleted === true);
@@ -62,12 +70,12 @@ const DocumentCollectionManagementPage = () => {
   const searchDocumentCollectionList = async () => {
     setSearchResultIsLoading(true);
     try {
-      const searchResult = await DocumentCollectionService.getSearchedCollectionList(searchFormData);
-      setDocumentCollectionList(searchResult);
+      const searchResult = await DocumentCollectionService.getSearchedCollectionList(searchFormData, pageableData);
+      setDocumentCollectionList(searchResult.content);
+      setTotalCollectionElements(searchResult.totalElements);
     } catch (error) {
-      //REMIND 에러 핸들링 구현
-      addToast({ color: 'danger', body: error.response.data.message });
-      setError(error);
+      //REMIND only sever error occur
+      console.log(error);
     } finally {
       setSearchResultIsLoading(false);
     }
@@ -79,28 +87,9 @@ const DocumentCollectionManagementPage = () => {
     modal.openModal();
   };
 
-  const scopedColumns = {
-    displayName: (item) => (
-      <td
-        style={{ cursor: 'pointer' }}
-        onClick={() => {
-          handleRowClick(item.id);
-        }}
-      >
-        {item.displayName}
-      </td>
-    ),
-    createdAt: (item) => <td>{formatToYMD(item.createdAt)}</td>,
-    deleted: (item) => (
-      <td>
-        <StatusBadge deleted={item.deleted} />
-      </td>
-    ),
-  };
   const handleSearchFormChange = ({ target: { id, value } }) => {
     setSearchFormData((prev) => ({ ...prev, [id]: value }));
   };
-
   const handleDateChange = ({ id, newDate, isStartDate = true }) => {
     const fieldMap = {
       createdAt: isStartDate ? 'fromCreatedAt' : 'toCreatedAt',
@@ -128,24 +117,45 @@ const DocumentCollectionManagementPage = () => {
         setSelectedRows([]);
       }
     } catch (error) {
-      addToast({ color: 'danger', message: error.message });
-      setError(error);
+      const status = error.response?.status;
+      if (status === 400) {
+        addToast({ message: '삭제할 문서 집합을 선택해주세요.' });
+      } else if (status === 404) {
+        addToast({ message: '삭제할 문서 집합을 찾지 못했습니다. 다시 검색 해 주세요.' });
+      } else {
+        console.log(error);
+      }
     } finally {
       await searchDocumentCollectionList();
     }
   };
-
   const handleUploadClick = () => {
     setDetailFormMode('create');
     modal.openModal();
   };
-
   const handleCloseModal = () => {
     modal.closeModal();
     setClickedRowId(null);
   };
-  //REMIND handle error page
-  if (error) return <Page500 />;
+
+  const scopedColumns = {
+    displayName: (item) => (
+      <td
+        style={{ cursor: 'pointer' }}
+        onClick={() => {
+          handleRowClick(item.id);
+        }}
+      >
+        {item.displayName}
+      </td>
+    ),
+    createdAt: (item) => <td>{formatToYMD(item.createdAt)}</td>,
+    deleted: (item) => (
+      <td>
+        <StatusBadge deleted={item.deleted} />
+      </td>
+    ),
+  };
 
   return (
     <>
@@ -234,27 +244,27 @@ const DocumentCollectionManagementPage = () => {
           </CRow>
           <CRow className="mb-3">
             <CSmartTable
-              pagination
-              activePage={1}
-              itemsPerPageSelect
-              itemsPerPage={10}
-              itemsPerPageLabel="페이지당 문서 집합 개수"
-              loading={searchResultIsLoading}
-              items={documentCollectionList}
-              noItemsLabel="검색 결과가 없습니다."
+              columnSorter={columnSorterCustomProps}
               columns={documentCollectionColumnConfig}
+              items={documentCollectionList}
+              itemsPerPage={pageableData.size}
+              itemsPerPageLabel="페이지당 문서 집합 개수"
+              itemsPerPageSelect
+              loading={searchResultIsLoading}
+              noItemsLabel="검색 결과가 없습니다."
+              onItemsPerPageChange={handlePageSizeChange}
+              onSelectedItemsChange={setSelectedRows}
+              onSorterChange={handlePageSortChange}
+              paginationProps={smartPaginationProps}
+              scopedColumns={scopedColumns}
               selectable
               selected={selectedRows}
-              onSelectedItemsChange={(selectedItems) => setSelectedRows(selectedItems)}
-              scopedColumns={scopedColumns}
-              tableProps={{
-                responsive: true,
-                hover: true,
-              }}
+              tableProps={tableCustomProps}
             />
           </CRow>
         </CCardBody>
       </CCard>
+      {/*REMIND Modal open 시 url 변경되게 수정*/}
       <ModalContainer
         visible={modal.isOpen}
         title={detailFormMode === 'create' ? '문서 게시' : '문서 집합 상세'}
