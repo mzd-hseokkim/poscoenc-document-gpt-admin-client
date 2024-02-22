@@ -143,14 +143,20 @@ const MenuManagementPage = () => {
         await MenuService.deleteMenu(ids, shouldDelete);
         fetchMenuList();
       } catch (error) {
-        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
+        const status = error.response?.status;
+        if (status === 400) {
+          addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
+        }
       }
     } else {
       try {
         await MenuService.deleteMenus(ids, shouldDelete);
         fetchMenuList();
       } catch (error) {
-        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
+        const status = error.response?.status;
+        if (status === 400) {
+          addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
+        }
       }
     }
     setCheckedItems([]);
@@ -246,25 +252,27 @@ const MenuManagementPage = () => {
           </CRow>
           <CRow className="mb-3">
             <CSmartTable
+              columns={menuColumnConfig}
               columnSorter={{
                 external: true,
                 resetable: false,
               }}
-              onSorterChange={(sorterValue) => handleSortChange(sorterValue)}
+              items={menuList}
+              itemsPerPage={pageableData.size}
+              itemsPerPageLabel="페이지당 메뉴 개수"
               itemsPerPageSelect
+              loading={isLoading}
+              noItemsLabel="검색 결과가 없습니다."
+              onItemsPerPageChange={handleSizeChange}
+              onSelectedItemsChange={(items) => {
+                setCheckedItems(items);
+              }}
+              onSorterChange={(sorterValue) => handleSortChange(sorterValue)}
               paginationProps={{
                 activePage: pageableData.page + 1,
                 pages: Math.ceil(totalMenuElements / pageableData.size) || 1,
                 onActivePageChange: handlePageChange,
               }}
-              itemsPerPage={pageableData.size}
-              onItemsPerPageChange={handleSizeChange}
-              itemsPerPageLabel="페이지당 메뉴 개수"
-              noItemsLabel="검색 결과가 없습니다."
-              loading={isLoading}
-              items={menuList}
-              columns={menuColumnConfig}
-              selectable
               scopedColumns={{
                 name: (item) => (
                   <td
@@ -283,14 +291,11 @@ const MenuManagementPage = () => {
                   </td>
                 ),
               }}
-              onSelectedItemsChange={(items) => {
-                setCheckedItems(items);
-              }}
+              selected={checkedItems}
               tableProps={{
                 responsive: true,
                 hover: true,
               }}
-              selected={checkedItems}
             />
           </CRow>
         </CCardBody>
