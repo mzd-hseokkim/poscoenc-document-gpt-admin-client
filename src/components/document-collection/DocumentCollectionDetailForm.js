@@ -90,6 +90,14 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     files: [],
   };
 
+  const modifiableDetailInitialFormData = {
+    id: collectionDetail?.id,
+    name: collectionDetail?.name || '',
+    displayName: collectionDetail?.displayName || '',
+  };
+
+  const [modifiableDetailFormData, setModifiableDetailFormData] = useState(modifiableDetailInitialFormData);
+
   const fetchCollectionDetail = async () => {
     if (!clickedRowId) {
       return;
@@ -123,11 +131,13 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
   };
 
   const putModifiedCollection = async () => {
+    console.table(modifiableDetailFormData);
     try {
-      const isModified = await DocumentCollectionService.putModifiedCollectionDetail(collectionDetail);
+      const isModified = await DocumentCollectionService.putModifiedCollectionDetail(modifiableDetailFormData);
       if (isModified) {
+        closeModal();
         refreshDocumentCollectionList();
-        setFormMode('read');
+        await fetchCollectionDetail();
       }
     } catch (error) {
       const status = error.response?.status;
@@ -145,14 +155,21 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
   useEffect(() => {
     if (!isCreateMode) {
       fetchCollectionDetail();
+      setModifiableDetailFormData(collectionDetail);
     } else {
       setCollectionDetail(createModeInitialFormData);
     }
-  }, [clickedRowId]);
+  }, [clickedRowId, formMode]);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setCollectionDetail((prev) => ({ ...prev, [id]: value }));
+    setModifiableDetailFormData((prev) => ({ ...prev, [id]: value }));
+
+    const emailRegex = /\S+@\S+\.\S+/;
+    if (id === 'name') {
+      const isValidEmail = emailRegex.test(value);
+      setIsValid(isValidEmail);
+    }
   };
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -181,6 +198,20 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     setFormMode('update');
   };
 
+  // 유효성 감사 테스트 --------------------
+  const [email, setEmail] = useState('');
+  const [isValid, setIsValid] = useState(undefined);
+  const validateEmail = (e) => {
+    const email = e.target.value;
+    setEmail(email);
+
+    // 간단한 이메일 유효성 검사
+    const emailRegex = /\S+@\S+\.\S+/;
+    const isValidEmail = emailRegex.test(email);
+    setIsValid(isValidEmail);
+  };
+
+  // 유효성 감사 테스트 --------------------
   const topInfoScopedColumn = {
     id: (item) => <td>{item.id}</td>,
     name: (item) => (
@@ -193,6 +224,12 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
           readOnly={isReadMode}
           disabled={isReadMode}
           onChange={handleChange}
+          invalid={isValid === false}
+          valid={!isReadMode && isValid === true}
+          feedbackInvalid="유효하지 않은 이메일 주소입니다."
+          feedbackValid="유효한 이메일 주소입니다."
+          // label="이메일 주소"
+          required={!isReadMode}
         />
       </td>
     ),
@@ -206,6 +243,8 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
           readOnly={isReadMode}
           disabled={isReadMode}
           onChange={handleChange}
+          valid={!isReadMode}
+          required={!isReadMode}
         />
       </td>
     ),
@@ -235,12 +274,10 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
       ) : (
         <CRow className="mt-3 justify-content-end">
           <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-            <CButton type="submit">저장</CButton>
-            {!isCreateMode && (
-              <CButton type="reset" onClick={() => setFormMode('read')}>
-                취소
-              </CButton>
-            )}
+            <CButton type="submit" disabled={!isValid}>
+              저장
+            </CButton>
+            {!isCreateMode && <CButton onClick={() => setFormMode('read')}>취소</CButton>}
           </CCol>
         </CRow>
       )}
@@ -255,6 +292,7 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
             {isReadMode || isUpdateMode ? (
               <>
                 <CSmartTable
+                  key={formMode}
                   columns={topInfoColumns}
                   items={topInfoData}
                   tableHeadProps={infoTableHeaderProps}

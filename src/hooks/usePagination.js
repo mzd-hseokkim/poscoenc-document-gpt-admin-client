@@ -1,8 +1,6 @@
 import { useState } from 'react';
 
 const usePagination = (totalItems) => {
-  console.log(totalItems);
-
   const [pageableData, setPageableData] = useState({
     page: 0,
     size: 10,
