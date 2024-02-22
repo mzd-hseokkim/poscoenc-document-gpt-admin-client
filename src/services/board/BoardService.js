@@ -5,7 +5,7 @@ const getPostDetail = async (postId) => {
   return response.data;
 };
 
-const getSearchedPostList = async (params) => {
+const getSearchedPostList = async (params, pageable) => {
   const response = await api.get('/admin/boards', {
     params: {
       title: params.title,
@@ -14,12 +14,15 @@ const getSearchedPostList = async (params) => {
       hasFilesOption: params.hasFilesOption,
       fromCreatedAt: params.fromCreatedAt,
       toCreatedAt: params.toCreatedAt,
+      fromModifiedAt: params.fromModifiedAt,
+      toModifiedAt: params.toModifiedAt,
       deletionOption: params.deletionOption,
-      page: params.page,
-      size: params.size,
+      page: pageable.page,
+      size: pageable.size,
+      sort: pageable.sort,
     },
   });
-  return response?.data.content ?? [];
+  return response?.data;
 };
 //REMIND Implements post new
 const postNew = async (newPost) => {

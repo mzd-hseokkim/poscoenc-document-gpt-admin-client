@@ -1,8 +1,6 @@
 import { useState } from 'react';
 
 const usePagination = (totalItems) => {
-  console.log(totalItems);
-
   const [pageableData, setPageableData] = useState({
     page: 0,
     size: 10,
@@ -20,7 +18,7 @@ const usePagination = (totalItems) => {
     setPageableData((prev) => ({
       ...prev,
       size: newSize,
-      page: 0, // 크기가 변경되면 페이지를 초기화합니다.
+      page: 0,
     }));
   };
 

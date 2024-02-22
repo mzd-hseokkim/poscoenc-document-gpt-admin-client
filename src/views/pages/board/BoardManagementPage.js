@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import {
   CButton,
@@ -12,36 +12,57 @@ import {
   CRow,
   CSmartTable,
 } from '@coreui/react-pro';
-import { format } from 'date-fns';
 
 import BoardPostDetailForm from '../../../components/board/BoardPostDetailForm';
 import { getBoardScopedColumns } from '../../../components/board/BoardScopedColumn';
 import ModalContainer from '../../../components/modal/ModalContainer';
 import { useToast } from '../../../context/ToastContext';
 import useModal from '../../../hooks/useModal';
+import usePagination from '../../../hooks/usePagination';
 import BoardService from '../../../services/board/BoardService';
 import { postColumnConfig } from '../../../utils/board/postColumnConfig';
+import {
+  formatToIsoEndDate,
+  formatToIsoStartDate,
+  getCurrentDate,
+  getOneYearAgoDate,
+} from '../../../utils/common/dateUtils';
+import { columnSorterCustomProps, tableCustomProps } from '../../../utils/common/smartTablePropsConfig';
 
 const BoardManagementPage = () => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [clickedRowId, setClickedRowId] = useState(null);
-  const [postSearchResults, setPostSearchResults] = useState([]);
+  const [postList, setPostList] = useState([]);
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
-  const [startDate, setStartDate] = useState(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
-  const [endDate, setEndDate] = useState(new Date());
+  const [totalPostElements, setTotalPostElements] = useState(0);
+  //REMIND searchForm audit 정보 통합해보기.
   const initialSearchFormData = {
     title: '',
     content: '',
     createdByName: '',
     hasFilesOption: '',
-    fromCreatedAt: format(startDate, "yyyy-MM-dd'T'00:00"),
-    toCreatedAt: format(endDate, "yyyy-MM-dd'T'23:59"),
+    fromCreatedAt: getOneYearAgoDate(),
+    toCreatedAt: getCurrentDate(),
+    fromModifiedAt: getOneYearAgoDate(),
+    toModifiedAt: getCurrentDate(),
     deletionOption: '',
   };
   const [searchFormData, setSearchFormData] = useState(initialSearchFormData);
+  const isComponentMounted = useRef(true);
 
   const modal = useModal();
   const { addToast } = useToast();
+  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } =
+    usePagination(totalPostElements);
+
+  useEffect(() => {
+    if (isComponentMounted.current) {
+      isComponentMounted.current = false;
+    } else {
+      searchPostList();
+    }
+  }, [pageableData]);
+
   const handleClickedRowId = (newClickedRowId) => {
     setClickedRowId(newClickedRowId);
   };
@@ -51,40 +72,42 @@ const BoardManagementPage = () => {
     return selectedRows.some((row) => row.deleted === true);
   };
 
-  const handleSearchFormChange = ({ target: { id, value } }) => {
-    setSearchFormData((prev) => ({ ...prev, [id]: value }));
-  };
-
-  const handleStartDateChange = ({ newDate }) => {
-    setSearchFormData((prev) => ({
-      ...prev,
-      fromCreatedAt: format(new Date(newDate), "yyyy-MM-dd'T'00:00"),
-    }));
-  };
-
-  const handleEndDateChange = ({ newDate }) => {
-    setSearchFormData((prev) => ({
-      ...prev,
-      toCreatedAt: format(new Date(newDate), "yyyy-MM-dd'T'23:59"),
-    }));
-  };
-
-  const handleReset = () => {
-    setSearchFormData(initialSearchFormData);
-    setStartDate(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
-    setEndDate(new Date());
-  };
-
-  const handleSubmitSearchRequest = async () => {
+  const searchPostList = async () => {
     setSearchResultIsLoading(true);
     try {
-      const searchResult = await BoardService.getSearchedPostList(searchFormData);
-      setPostSearchResults(searchResult);
+      const searchResult = await BoardService.getSearchedPostList(searchFormData, pageableData);
+      setPostList(searchResult.content);
+      setTotalPostElements(searchResult.totalElements);
     } catch (error) {
       addToast({ message: '검색 조건을 확인 해 주세요.' });
     } finally {
       setSearchResultIsLoading(false);
     }
+  };
+  const handleSearchFormChange = ({ target: { id, value } }) => {
+    setSearchFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleDateChange = ({ id, newDate, isStartDate = true }) => {
+    const fieldMap = {
+      createdAt: isStartDate ? 'fromCreatedAt' : 'toCreatedAt',
+      modifiedAt: isStartDate ? 'fromModifiedAt' : 'toModifiedAt',
+    };
+
+    const fieldToUpdate = fieldMap[id];
+    if (fieldToUpdate) {
+      const formattedDate = isStartDate ? formatToIsoStartDate(newDate) : formatToIsoEndDate(newDate);
+      setSearchFormData((prev) => ({ ...prev, [fieldToUpdate]: formattedDate }));
+    }
+  };
+
+  const handleReset = () => {
+    setSearchFormData(initialSearchFormData);
+  };
+
+  const handleSubmitSearchRequest = async (e) => {
+    e.preventDefault();
+    await searchPostList();
   };
 
   const togglePostStatus = async (shouldDelete) => {
@@ -136,42 +159,7 @@ const BoardManagementPage = () => {
                       value={searchFormData.createdByName}
                     />
                   </CCol>
-                </CRow>
-                <CRow className="mb-3">
-                  <CCol md={12} className="position-relative">
-                    <CFormInput
-                      id="content"
-                      label="내용"
-                      onChange={handleSearchFormChange}
-                      value={searchFormData.content}
-                    />
-                  </CCol>
-                </CRow>
-                <CRow className="mb-3">
-                  <CCol md={6} className="position-relative">
-                    <CDateRangePicker
-                      label="작성일"
-                      startDate={startDate}
-                      endDate={endDate}
-                      onStartDateChange={(newDate) => handleStartDateChange({ id: 'createdAt', newDate })}
-                      onEndDateChange={(newDate) => handleEndDateChange({ id: 'createdAt', newDate })}
-                    />
-                  </CCol>
-                  <CCol md={3} className="position-relative">
-                    <CFormSelect
-                      id="hasFilesOption"
-                      label="첨부파일 없는 게시물 포함"
-                      name="hasFilesOption"
-                      value={searchFormData.hasFilesOption}
-                      options={[
-                        { label: '모든 게시글', value: '' },
-                        { label: '예', value: true },
-                        { label: '아니오', value: false },
-                      ]}
-                      onChange={handleSearchFormChange}
-                    />
-                  </CCol>
-                  <CCol md={3} className="position-relative">
+                  <CCol md={4} className="position-relative">
                     <CFormSelect
                       id="deletionOption"
                       label="게시글 상태"
@@ -186,6 +174,53 @@ const BoardManagementPage = () => {
                     />
                   </CCol>
                 </CRow>
+                <CRow className="mb-3">
+                  <CCol md={8} className="position-relative">
+                    <CFormInput
+                      id="content"
+                      label="내용"
+                      onChange={handleSearchFormChange}
+                      value={searchFormData.content}
+                    />
+                  </CCol>
+                  <CCol md={4} className="position-relative">
+                    <CFormSelect
+                      id="hasFilesOption"
+                      label="첨부파일 없는 게시물 포함"
+                      name="hasFilesOption"
+                      value={searchFormData.hasFilesOption}
+                      options={[
+                        { label: '모든 게시글', value: '' },
+                        { label: '예', value: true },
+                        { label: '아니오', value: false },
+                      ]}
+                      onChange={handleSearchFormChange}
+                    />
+                  </CCol>
+                </CRow>
+                <CRow className="mb-3">
+                  <CCol md={6}>
+                    <CDateRangePicker
+                      id="createdAt"
+                      label="생성일"
+                      startDate={searchFormData.fromCreatedAt}
+                      endDate={searchFormData.toCreatedAt}
+                      onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
+                      onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
+                    />
+                  </CCol>
+                  <CCol md={6}>
+                    <CDateRangePicker
+                      id="modifiedAt"
+                      label="수정일"
+                      startDate={searchFormData.fromModifiedAt}
+                      endDate={searchFormData.toModifiedAt}
+                      onStartDateChange={(newDate) => handleDateChange({ id: 'modifiedAt', newDate })}
+                      onEndDateChange={(newDate) => handleDateChange({ id: 'modifiedAt', newDate, isStartDate: false })}
+                    />
+                  </CCol>
+                </CRow>
+
                 <CRow className="mb-3">
                   <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
                     <CButton type="submit">{'검색'}</CButton>
@@ -218,25 +253,22 @@ const BoardManagementPage = () => {
             </CCol>
           </CRow>
           <CSmartTable
-            pagination
-            activePage={1}
-            itemsPerPageSelect
-            itemsPerPage={10}
-            itemsPerPageLabel={'페이지당 글 개수'}
-            loading={searchResultIsLoading}
-            // REMIND 커스텀 소터 구현
-            sorterValue={{ column: 'id', state: 'asc' }}
-            items={postSearchResults}
+            columnSorter={columnSorterCustomProps}
             columns={postColumnConfig}
+            items={postList}
+            itemsPerPage={pageableData.size}
+            itemsPerPageLabel={'페이지당 글 개수'}
+            itemsPerPageSelect
+            loading={searchResultIsLoading}
+            noItemsLabel="검색 결과가 없습니다."
+            onItemsPerPageChange={handlePageSizeChange}
+            onSelectedItemsChange={setSelectedRows}
+            onSorterChange={handlePageSortChange}
+            paginationProps={smartPaginationProps}
+            scopedColumns={scopedColumns}
             selectable
             selected={selectedRows}
-            scopedColumns={scopedColumns}
-            onSelectedItemsChange={(selectedItems) => setSelectedRows(selectedItems)}
-            noItemsLabel="검색 결과가 없습니다."
-            tableProps={{
-              responsive: true,
-              hover: true,
-            }}
+            tableProps={tableCustomProps}
           />
           {/*REMIND Modal open 시 url 변경되게 수정*/}
           <ModalContainer visible={modal.isOpen} title="게시글" onClose={modal.closeModal} size="lg">
