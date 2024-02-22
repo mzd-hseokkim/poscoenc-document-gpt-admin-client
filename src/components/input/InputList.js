@@ -3,19 +3,7 @@ import { Controller } from 'react-hook-form';
 
 import { formatToYMD } from '../../utils/common/dateUtils';
 
-const getFieldValue = (field, formData) => {
-  if (field.value !== undefined) {
-    return field.value;
-  }
-
-  if (formData[field.name] && field.type === 'date') {
-    return formatToYMD(formData[field.name]);
-  }
-
-  return formData[field.name];
-};
-
-const InputList = ({ fields, control, isReadMode, errors, formData }) => {
+const InputList = ({ fields, handleChange, isReadMode, formData, control, errors }) => {
   return fields.map((field) => {
     const isRendered = field.isRendered ?? true;
     if (isRendered) {
@@ -26,9 +14,9 @@ const InputList = ({ fields, control, isReadMode, errors, formData }) => {
               control={control}
               name={field.name}
               rules={field.rules}
-              defaultValue={field.defaultValue}
-              render={({ field: { onChange, onBlur, name } }) => {
-                const fieldValue = getFieldValue(field, formData);
+              defaultValue={formData[field.name]}
+              render={({ field: { onChange, onBlur, name, value } }) => {
+                const formattedValue = field.type === 'date' && value ? formatToYMD(value) : value;
 
                 return (
                   <CFormInput
@@ -38,8 +26,11 @@ const InputList = ({ fields, control, isReadMode, errors, formData }) => {
                     type={field.type === 'date' ? 'text' : field.type}
                     min={field.type === 'number' ? 0 : ''}
                     placeholder={field.placeholder}
-                    value={fieldValue}
-                    onChange={onChange}
+                    value={formattedValue}
+                    onChange={(e) => {
+                      onChange(e);
+                      handleChange(e);
+                    }}
                     onBlur={onBlur}
                     readOnly={isReadMode}
                     disabled={field.isDisabled}
