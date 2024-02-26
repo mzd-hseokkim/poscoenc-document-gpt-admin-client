@@ -13,6 +13,7 @@ export const postColumnConfig = [
     key: 'createdByName',
     label: '작성자',
     _style: { width: '15%' },
+    sorter: false,
   },
   {
     key: 'createdAt',

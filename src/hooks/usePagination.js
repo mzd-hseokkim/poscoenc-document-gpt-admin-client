@@ -18,7 +18,7 @@ const usePagination = (totalItems) => {
     setPageableData((prev) => ({
       ...prev,
       size: newSize,
-      page: 0, // 크기가 변경되면 페이지를 초기화합니다.
+      page: 0,
     }));
   };
 
