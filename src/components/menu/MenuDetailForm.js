@@ -18,18 +18,20 @@ import MenuService from '../../services/menu/MenuService';
 import RoleService from '../../services/Role/RoleService';
 import { getAuditFields } from '../../utils/common/auditFieldUtils';
 import formModes from '../../utils/formModes';
-import { menuNameValidationPattern } from '../../utils/validationUtils';
+import { itemNameValidationPattern } from '../../utils/validationUtils';
 import InputList from '../input/InputList';
 
 const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList }) => {
   const [formData, setFormData] = useState({ allowChildren: false });
   const [formMode, setFormMode] = useState(initialFormMode);
   const [roles, setRoles] = useState([]);
-  const [parentMenus, setParentMenus] = useState([{ label: '선택하지 않음', value: 0 }]);
+  const [parentMenus, setParentMenus] = useState([
+    { label: '상위 메뉴를 선택하세요.' },
+    { label: '선택하지 않음', value: 0 },
+  ]);
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
   const { addToast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-
   const {
     reset,
     handleSubmit,
@@ -51,7 +53,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
       rules: {
         required: '이름은 필수 입력 항목입니다.',
         pattern: {
-          value: menuNameValidationPattern,
+          value: itemNameValidationPattern,
           message: '한글, 알파벳, 숫자, 띄어쓰기만 허용됩니다.',
         },
       },
@@ -60,6 +62,9 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
       name: 'icon',
       label: '아이콘',
       placeholder: 'e.g. cilUser',
+      rules: {
+        required: '아이콘은 필수 입력 항목입니다.',
+      },
     },
   ];
 
@@ -67,9 +72,14 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
     {
       name: 'urlPath',
       label: 'URL',
-      value: formData.allowChildren ? '' : formData.urlPath,
       placeholder: formData.allowChildren ? '메뉴 주소를 입력할 수 없습니다.' : '메뉴 주소를 입력하세요.',
       isDisabled: formData.allowChildren,
+      rules: {
+        required: {
+          value: !formData.allowChildren,
+          message: 'URL은 필수 입력 항목입니다.',
+        },
+      },
     },
     {
       name: 'parentId',
@@ -184,12 +194,21 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
   };
 
   const handleChange = (e) => {
-    const { id, type, checked, value } = e.target;
-    if (type === 'checkbox') {
-      setFormData((prev) => ({ ...prev, [id]: checked }));
-    } else {
-      setFormData((prev) => ({ ...prev, [id]: value }));
-    }
+    const { name, type, checked, value } = e.target;
+    setFormData((prev) => {
+      const updatedFormData = { ...prev };
+
+      if (type === 'checkbox') {
+        updatedFormData[name] = checked;
+        if (name === 'allowChildren') {
+          updatedFormData.urlPath = checked ? '' : prev.urlPath;
+        }
+      } else {
+        updatedFormData[name] = value;
+      }
+
+      return updatedFormData;
+    });
   };
 
   const onSubmit = () => {
@@ -200,7 +219,13 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
     }
   };
 
-  const handleUpdateClick = () => {
+  const handleCancelClick = () => {
+    setFormMode('read');
+    fetchMenuDetail();
+  };
+
+  const handleUpdateClick = (e) => {
+    e.preventDefault();
     setFormMode('update');
   };
 
@@ -221,7 +246,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
         <Controller
           name="allowedRoles"
           control={control}
-          rules={{ required: '권한 선택은 필수입니다.' }}
+          rules={{ required: '권한은 필수 입력 항목입니다.' }}
           render={({ field: { onChange } }) => (
             <CMultiSelect
               id="allowedRoles"
@@ -281,7 +306,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
         </CElementCover>
       )}
 
-      <CForm onSubmit={handleSubmit(onSubmit)} noValidate validated={false}>
+      <CForm onSubmit={handleSubmit(onSubmit)}>
         <InputList
           fields={menuBasicFields}
           formData={formData}
@@ -321,19 +346,13 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
         />
         <CRow>
           <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
+            {isUpdateMode && <CButton onClick={handleCancelClick}>취소</CButton>}
             {!isCreateMode && (
-              <>
-                <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>
-                  {formData.deleted ? '복구' : '삭제'}
-                </CButton>
-              </>
-            )}
-            {isReadMode && (
-              <CButton type="button" onClick={handleUpdateClick}>
-                수정
+              <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>
+                {formData.deleted ? '복구' : '삭제'}
               </CButton>
             )}
-            {!isReadMode && <CButton type="submit">저장</CButton>}
+            {isReadMode ? <CButton onClick={handleUpdateClick}>수정</CButton> : <CButton type="submit">저장</CButton>}
           </CCol>
         </CRow>
       </CForm>

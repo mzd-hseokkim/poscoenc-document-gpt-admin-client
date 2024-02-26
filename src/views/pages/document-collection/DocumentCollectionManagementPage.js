@@ -138,6 +138,9 @@ const DocumentCollectionManagementPage = () => {
     setClickedRowId(null);
   };
 
+  const handleDownloadResultRequest = async () => {
+    await DocumentCollectionService.getDownloadSearchedCollectionList(searchFormData);
+  };
   const scopedColumns = {
     displayName: (item) => (
       <td
@@ -261,6 +264,11 @@ const DocumentCollectionManagementPage = () => {
               selected={selectedRows}
               tableProps={tableCustomProps}
             />
+          </CRow>
+          <CRow className="mt-3">
+            <CCol className="d-grid gap-2 justify-content-end">
+              <CButton onClick={handleDownloadResultRequest}>엑셀 다운로드</CButton>
+            </CCol>
           </CRow>
         </CCardBody>
       </CCard>

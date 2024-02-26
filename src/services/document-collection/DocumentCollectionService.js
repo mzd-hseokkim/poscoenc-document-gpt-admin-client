@@ -1,4 +1,5 @@
 import api from '../../api/Api';
+import { formatToYMD, getCurrentDate } from '../../utils/common/dateUtils';
 
 const getSearchedCollectionList = async (params, pageable) => {
   const response = await api.get('/admin/document-collections', {
@@ -36,16 +37,28 @@ const patchCollectionsDeletionOption = async (collectionIds, deletionOption) => 
   return response.status === 200;
 };
 
-//REMIND implements excel downloads
-const getCollectionExcelFile = async (params) => {
-  return await api.get('/admin/document-collections', {
-    name: params.name,
-    displayName: params.displayName,
-    createdByName: params.createdByName,
-    fromCreatedAt: params.fromCreatedAt,
-    toCreatedAt: params.toCreatedAt,
-    deletionOption: params.deletionOption,
+const getDownloadSearchedCollectionList = async (params) => {
+  const response = await api.get('/admin/document-collections/excel', {
+    params: {
+      name: params.name,
+      displayName: params.displayName,
+      createdByName: params.createdByName,
+      fromCreatedAt: params.fromCreatedAt,
+      toCreatedAt: params.toCreatedAt,
+      deletionOption: params.deletionOption,
+    },
+    responseType: 'blob',
   });
+  let fileName = `document-collection-list_${formatToYMD(getCurrentDate())}.xlsx`;
+  const downloadUrl = window.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.setAttribute('download', fileName);
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(downloadUrl);
 };
 
 const DocumentCollectionService = {
@@ -54,6 +67,6 @@ const DocumentCollectionService = {
   putModifiedCollectionDetail,
   postNewCollection,
   patchCollectionsDeletionOption,
-  getCollectionExcelFile,
+  getDownloadSearchedCollectionList,
 };
 export default DocumentCollectionService;
