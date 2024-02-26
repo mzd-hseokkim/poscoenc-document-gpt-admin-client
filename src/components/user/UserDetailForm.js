@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 
-import { CButton, CCol, CElementCover, CFormTextarea, CRow, CSpinner } from '@coreui/react-pro';
+import { CButton, CCol, CElementCover, CForm, CFormTextarea, CRow, CSpinner } from '@coreui/react-pro';
+import { useForm } from 'react-hook-form';
 
 import { useToast } from '../../context/ToastContext';
 import UserService from '../../services/UserService';
 import { getAuditFields } from '../../utils/common/auditFieldUtils';
 import formModes from '../../utils/formModes';
+import { emailValidationPattern } from '../../utils/validationUtils';
 import InputList from '../input/InputList';
 
 const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList }) => {
@@ -15,6 +17,12 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
 
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
   const { addToast } = useToast();
+  const {
+    reset,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm({ mode: 'onChange' });
 
   const userFields = [
     {
@@ -27,11 +35,21 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
       name: 'email',
       label: '이메일',
       placeholder: '이메일을 입력하세요.',
+      rules: {
+        required: '이메일은 필수 입력 항목입니다.',
+        pattern: {
+          value: emailValidationPattern,
+          message: '한글, 알파벳, 숫자, 띄어쓰기만 허용됩니다.',
+        },
+      },
     },
     {
       name: 'name',
       label: '이름',
       placeholder: '이름을 입력하세요.',
+      rules: {
+        required: '이름은 필수 입력 항목입니다.',
+      },
     },
     {
       name: 'team',
@@ -40,11 +58,12 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
     },
   ];
 
-  const getUserDetail = async () => {
+  const fetchUserDetail = async () => {
     try {
       setIsLoading(true);
       const data = await UserService.getUser(selectedId);
       setFormData(data);
+      reset(data);
     } catch (error) {
       addToast({ message: '사용자 정보를 가져오지 못했습니다.' });
     } finally {
@@ -55,7 +74,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
   useEffect(() => {
     setIsLoading(false);
     if (!isCreateMode && selectedId) {
-      getUserDetail();
+      fetchUserDetail();
     }
   }, [selectedId]);
 
@@ -96,9 +115,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
+  const onSubmit = () => {
     if (isCreateMode) {
       postUser();
     } else if (isUpdateMode) {
@@ -117,7 +134,13 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
     fetchUserList();
   };
 
-  const handleUpdateClick = () => {
+  const handleCancelClick = () => {
+    setFormMode('read');
+    fetchUserDetail();
+  };
+
+  const handleUpdateClick = (e) => {
+    e.preventDefault();
     setFormMode('update');
   };
 
@@ -144,33 +167,34 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
           <CSpinner variant="grow" color="primary" />
         </CElementCover>
       )}
-      <InputList fields={userFields} formData={formData} handleChange={handleChange} isReadMode={isReadMode} />
-      {renderMemoField()}
-      <InputList
-        fields={getAuditFields(formMode)}
-        formData={formData}
-        handleChange={handleChange}
-        isReadMode={isReadMode}
-      />
-      <CRow>
-        <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-          {isReadMode ? (
-            <>
+      <CForm onSubmit={handleSubmit(onSubmit)}>
+        <InputList
+          fields={userFields}
+          formData={formData}
+          handleChange={handleChange}
+          isReadMode={isReadMode}
+          control={control}
+          errors={errors}
+        />
+        {renderMemoField()}
+        <InputList
+          fields={getAuditFields(formMode)}
+          formData={formData}
+          handleChange={handleChange}
+          isReadMode={isReadMode}
+        />
+        <CRow>
+          <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
+            {isUpdateMode && <CButton onClick={handleCancelClick}>취소</CButton>}
+            {!isCreateMode && (
               <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>
                 {formData.deleted ? '복구' : '삭제'}
               </CButton>
-              <CButton onClick={handleUpdateClick}>수정</CButton>
-            </>
-          ) : (
-            <>
-              <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>
-                {formData.deleted ? '복구' : '삭제'}
-              </CButton>
-              <CButton onClick={handleSubmit}>저장</CButton>
-            </>
-          )}
-        </CCol>
-      </CRow>
+            )}
+            {isReadMode ? <CButton onClick={handleUpdateClick}>수정</CButton> : <CButton type="submit">저장</CButton>}
+          </CCol>
+        </CRow>
+      </CForm>
     </>
   );
 };
