@@ -12,7 +12,7 @@ import {
   CRow,
   CSmartTable,
 } from '@coreui/react-pro';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { useRecoilValue } from 'recoil';
 
 import { useToast } from '../../context/ToastContext';
@@ -95,8 +95,8 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
   };
 
   const createModeInitialFormData = {
-    name: 'defaultName',
-    displayName: 'defaultDisPlayName',
+    name: '',
+    displayName: '',
     files: [],
   };
 
@@ -164,9 +164,17 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
       setGetDetailIsLoading(false);
     }
   };
-  const postNewCollection = async (e) => {
+  const postNewCollection = async (data) => {
     try {
-      const formData = new FormData(e.currentTarget);
+      const formData = new FormData();
+      console.table(data);
+      formData.append('name', data.name);
+      formData.append('displayName', data.displayName);
+      if (data.files && data.files.length) {
+        for (const file of data.files) {
+          formData.append('files', file);
+        }
+      }
       const isPosted = await DocumentCollectionService.postNewCollection(formData);
       if (isPosted) {
         refreshDocumentCollectionList();
@@ -179,7 +187,6 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
   };
 
   const putModifiedCollection = async () => {
-    console.table(modifiableDetailFormData);
     try {
       const isModified = await DocumentCollectionService.putModifiedCollectionDetail(modifiableDetailFormData);
       if (isModified) {
@@ -204,12 +211,12 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     const { id, value } = e.target;
     setModifiableDetailFormData((prev) => ({ ...prev, [id]: value }));
   };
-  const onSubmit = (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     if (isCreateMode) {
-      postNewCollection(e);
+      await postNewCollection(data);
     } else if (isUpdateMode) {
-      putModifiedCollection();
+      //REMIND fix to useForm
+      await putModifiedCollection(modifiableDetailFormData);
     }
   };
 
@@ -226,29 +233,32 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     }
   };
 
-  const handleFormModeChange = (e) => {
-    e.preventDefault();
+  const handleFormModeChange = () => {
     setFormMode('update');
   };
 
   const topInfoScopedColumn = {
-    id: (item) => <td>{item.id}</td>,
+    id: (item) => <td className="align-middle">{item.id}</td>,
     name: (item) => (
       <td>
-        <CFormInput
-          type="text"
-          id="name"
+        <Controller
           name="name"
-          defaultValue={item?.name}
-          readOnly={isReadMode}
-          disabled={isReadMode}
-          onChange={handleChange}
-          valid={!isReadMode}
-          feedbackInvalid="유효하지 않은 이메일 주소입니다."
-          feedbackValid="유효한 이메일 주소입니다."
-          // label="이메일 주소"
-          required={!isReadMode}
-        />
+          control={control}
+          rules={{ required: '문서 집합 이름은 필수 입력 항목입니다.' }}
+          render={({ field: { onChange } }) => (
+            <CFormInput
+              type="text"
+              id="name"
+              name="name"
+              defaultValue={item?.name}
+              readOnly={isReadMode}
+              disabled={isReadMode}
+              onChange={handleChange}
+              invalid={errors.name}
+              feedbackInvalid={errors.name && errors.name.message}
+            />
+          )}
+        ></Controller>
       </td>
     ),
     displayName: (item) => (
@@ -261,13 +271,13 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
           readOnly={isReadMode}
           disabled={isReadMode}
           onChange={handleChange}
-          valid={!isReadMode}
-          required={!isReadMode}
+          // invalid={}
+          // feedbackInvalid={}
         />
       </td>
     ),
     deleted: (item) => (
-      <td>
+      <td className="align-middle">
         <StatusBadge deleted={item.deleted} />
       </td>
     ),
@@ -332,7 +342,18 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
                   control={control}
                   errors={errors}
                 />
-                <CFormInput label="첨부 문서" name="files" type="file" multiple />
+                <Controller
+                  name="files"
+                  control={control}
+                  render={({ field }) => (
+                    <CFormInput
+                      label="첨부 문서"
+                      type="file"
+                      multiple
+                      onChange={(e) => field.onChange(e.target.files)}
+                    />
+                  )}
+                />
               </>
             )}
             {renderFormActions()}
