@@ -29,7 +29,7 @@ import InputList from '../input/InputList';
 
 const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModal, refreshDocumentCollectionList }) => {
   const [collectionDetail, setCollectionDetail] = useState({});
-  const [formMode, setFormMode] = useState(initialFormMode);
+  const [formMode, setFormMode] = useState(initialFormMode || '');
 
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
 
@@ -100,12 +100,6 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     files: [],
   };
 
-  const modifiableDetailInitialFormData = {
-    id: collectionDetail?.id,
-    name: collectionDetail?.name || '',
-    displayName: collectionDetail?.displayName || '',
-  };
-
   const collectionBasicFields = [
     {
       name: 'name',
@@ -134,16 +128,14 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
       },
     },
   ];
-  const [modifiableDetailFormData, setModifiableDetailFormData] = useState(modifiableDetailInitialFormData);
 
   useEffect(() => {
     if (!isCreateMode) {
       fetchCollectionDetail();
-      setModifiableDetailFormData(collectionDetail);
     } else {
       setCollectionDetail(createModeInitialFormData);
     }
-  }, [clickedRowId, formMode]);
+  }, [clickedRowId]);
 
   const fetchCollectionDetail = async () => {
     if (!clickedRowId) {
@@ -167,7 +159,6 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
   const postNewCollection = async (data) => {
     try {
       const formData = new FormData();
-      console.table(data);
       formData.append('name', data.name);
       formData.append('displayName', data.displayName);
       if (data.files && data.files.length) {
@@ -186,9 +177,9 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     }
   };
 
-  const putModifiedCollection = async () => {
+  const putModifiedCollection = async (data) => {
     try {
-      const isModified = await DocumentCollectionService.putModifiedCollectionDetail(modifiableDetailFormData);
+      const isModified = await DocumentCollectionService.putModifiedCollectionDetail(data);
       if (isModified) {
         closeModal();
         refreshDocumentCollectionList();
@@ -209,14 +200,13 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setModifiableDetailFormData((prev) => ({ ...prev, [id]: value }));
+    setCollectionDetail((prev) => ({ ...prev, [id]: value }));
   };
   const onSubmit = async (data) => {
     if (isCreateMode) {
       await postNewCollection(data);
     } else if (isUpdateMode) {
-      //REMIND fix to useForm
-      await putModifiedCollection(modifiableDetailFormData);
+      await putModifiedCollection(data);
     }
   };
 
@@ -233,10 +223,6 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     }
   };
 
-  const handleFormModeChange = () => {
-    setFormMode('update');
-  };
-
   const topInfoScopedColumn = {
     id: (item) => <td className="align-middle">{item.id}</td>,
     name: (item) => (
@@ -244,7 +230,13 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
         <Controller
           name="name"
           control={control}
-          rules={{ required: '문서 집합 이름은 필수 입력 항목입니다.' }}
+          rules={{
+            required: '문서 집합 이름은 필수 입력 항목입니다.',
+            pattern: {
+              value: menuNameValidationPattern,
+              message: '한글, 알파벳, 숫자, 띄어쓰기만 허용됩니다.',
+            },
+          }}
           render={({ field: { onChange } }) => (
             <CFormInput
               type="text"
@@ -253,8 +245,8 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
               defaultValue={item?.name}
               readOnly={isReadMode}
               disabled={isReadMode}
-              onChange={handleChange}
-              invalid={errors.name}
+              onChange={onChange}
+              invalid={!!errors.name}
               feedbackInvalid={errors.name && errors.name.message}
             />
           )}
@@ -263,17 +255,31 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     ),
     displayName: (item) => (
       <td>
-        <CFormInput
-          type="text"
-          id="displayName"
+        <Controller
           name="displayName"
-          defaultValue={item?.displayName}
-          readOnly={isReadMode}
-          disabled={isReadMode}
-          onChange={handleChange}
-          // invalid={}
-          // feedbackInvalid={}
-        />
+          control={control}
+          //REMIND Rules 의 설정이 잘 적용되지 못하는 이슈가 발생. 백스페이스로 지우면 상관없으나 드래그 후 삭제하는 경우에 required가 적용되지 않음
+          rules={{
+            required: '표시명은 필수 입력 항목입니다.',
+            pattern: {
+              value: menuNameValidationPattern,
+              message: '한글, 알파벳, 숫자, 띄어쓰기만 허용됩니다.',
+            },
+          }}
+          render={({ field: { onChange } }) => (
+            <CFormInput
+              type="text"
+              id="displayName"
+              name="displayName"
+              defaultValue={item?.displayName}
+              readOnly={isReadMode}
+              disabled={isReadMode}
+              onChange={onChange}
+              invalid={!!errors.displayName}
+              feedbackInvalid={errors.displayName && errors.displayName.message}
+            />
+          )}
+        ></Controller>
       </td>
     ),
     deleted: (item) => (
@@ -293,7 +299,7 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
         <CRow className="row justify-content-end">
           {collectionDetail?.createdBy === currentUserId && (
             <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-              <CButton disabled={!isReadMode} onClick={handleFormModeChange}>
+              <CButton type="button" disabled={!isReadMode} onClick={() => setFormMode('update')}>
                 수정
               </CButton>
             </CCol>
@@ -302,8 +308,9 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
       ) : (
         <CRow className="mt-3 justify-content-end">
           <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-            <CButton type="submit">저장</CButton>
-            {!isCreateMode && <CButton onClick={() => setFormMode('read')}>취소</CButton>}
+            <CButton type="button" onClick={handleSubmit(onSubmit)}>
+              저장
+            </CButton>
           </CCol>
         </CRow>
       )}
@@ -318,7 +325,6 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
             {!isCreateMode ? (
               <>
                 <CSmartTable
-                  key={formMode}
                   columns={topInfoColumns}
                   items={topInfoData}
                   tableHeadProps={infoTableHeaderProps}
