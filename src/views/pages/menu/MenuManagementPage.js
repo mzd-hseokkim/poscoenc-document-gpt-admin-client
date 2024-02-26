@@ -19,6 +19,7 @@ import MenuDetailForm from '../../../components/menu/MenuDetailForm';
 import ModalContainer from '../../../components/modal/ModalContainer';
 import { useToast } from '../../../context/ToastContext';
 import useModal from '../../../hooks/useModal';
+import usePagination from '../../../hooks/usePagination';
 import MenuService from '../../../services/menu/MenuService';
 import {
   formatToIsoEndDate,
@@ -49,13 +50,11 @@ const MenuManagementPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [totalMenuElements, setTotalMenuElements] = useState(0);
   const [formData, setFormData] = useState(createInitialFormData);
-  const [pageableData, setPageableData] = useState({
-    page: 0,
-    size: 10,
-    sort: 'name,asc',
-  });
+
   const isComponentMounted = useRef(true);
 
+  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } =
+    usePagination(totalMenuElements);
   const { addToast } = useToast();
   const modal = useModal();
 
@@ -81,22 +80,6 @@ const MenuManagementPage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleSortChange = (sorterValue) => {
-    const newSortValue = `${sorterValue.column},${sorterValue.state}`;
-    setPageableData((prev) => ({
-      ...prev,
-      sort: newSortValue,
-    }));
-  };
-
-  const handleSizeChange = (size) => {
-    setPageableData((prev) => ({ ...prev, size, page: 0 }));
-  };
-
-  const handlePageChange = (page) => {
-    setPageableData((prev) => ({ ...prev, page: page - 1 }));
   };
 
   const handleDateChange = ({ id, newDate, isStartDate = true }) => {
@@ -263,16 +246,12 @@ const MenuManagementPage = () => {
               itemsPerPageSelect
               loading={isLoading}
               noItemsLabel="검색 결과가 없습니다."
-              onItemsPerPageChange={handleSizeChange}
+              onItemsPerPageChange={handlePageSizeChange}
               onSelectedItemsChange={(items) => {
                 setCheckedItems(items);
               }}
-              onSorterChange={(sorterValue) => handleSortChange(sorterValue)}
-              paginationProps={{
-                activePage: pageableData.page + 1,
-                pages: Math.ceil(totalMenuElements / pageableData.size) || 1,
-                onActivePageChange: handlePageChange,
-              }}
+              onSorterChange={(sorterValue) => handlePageSortChange(sorterValue)}
+              paginationProps={smartPaginationProps}
               scopedColumns={{
                 name: (item) => (
                   <td
