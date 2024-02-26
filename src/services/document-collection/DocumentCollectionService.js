@@ -23,20 +23,6 @@ const getCollectionDetail = async (documentCollectionId) => {
   return response.data;
 };
 
-const putModifiedCollectionDetail = async (modifiedCollection) => {
-  const response = await api.put(`/admin/document-collections/${modifiedCollection.id}`, modifiedCollection);
-  return response.status === 200;
-};
-const postNewCollection = async (newCollectionFormData) => {
-  const response = await api.post('/admin/document-collections', newCollectionFormData);
-  return response.status === 200;
-};
-
-const patchCollectionsDeletionOption = async (collectionIds, deletionOption) => {
-  const response = await api.patch(`/admin/document-collections/deleted/${deletionOption}`, collectionIds);
-  return response.status === 200;
-};
-
 const getDownloadSearchedCollectionList = async (params) => {
   const response = await api.get('/admin/document-collections/excel', {
     params: {
@@ -60,13 +46,27 @@ const getDownloadSearchedCollectionList = async (params) => {
   document.body.removeChild(link);
   window.URL.revokeObjectURL(downloadUrl);
 };
+const patchCollectionsDeletionOption = async (collectionIds, deletionOption) => {
+  const response = await api.patch(`/admin/document-collections/deleted/${deletionOption}`, collectionIds);
+  return response.status === 200;
+};
+
+const postNewCollection = async (newCollectionFormData) => {
+  const response = await api.post('/admin/document-collections', newCollectionFormData);
+  return response.status === 200;
+};
+
+const putModifiedCollectionDetail = async (modifiedCollection) => {
+  const response = await api.put(`/admin/document-collections/${modifiedCollection.id}`, modifiedCollection);
+  return response.status === 200;
+};
 
 const DocumentCollectionService = {
   getSearchedCollectionList,
   getCollectionDetail,
-  putModifiedCollectionDetail,
-  postNewCollection,
-  patchCollectionsDeletionOption,
   getDownloadSearchedCollectionList,
+  patchCollectionsDeletionOption,
+  postNewCollection,
+  putModifiedCollectionDetail,
 };
 export default DocumentCollectionService;
