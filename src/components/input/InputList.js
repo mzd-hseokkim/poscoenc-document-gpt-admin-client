@@ -1,17 +1,5 @@
 import { CCol, CFormInput, CRow } from '@coreui/react-pro';
 
-import { formatToYMD } from '../../utils/common/dateUtils';
-
-const getValue = (field, formData) => {
-  if (field.value) {
-    return field.value;
-  }
-  if (field.type === 'date' && formData[field.name]) {
-    return formatToYMD(formData[field.name]);
-  }
-  return formData[field.name];
-};
-
 const InputList = ({ fields, handleChange, isReadMode, formData, register, errors = {} }) => {
   return fields.map((field) => {
     const isRendered = field.isRendered ?? true;
@@ -42,7 +30,7 @@ const InputList = ({ fields, handleChange, isReadMode, formData, register, error
               feedbackInvalid={errors[field.name]?.message}
             />
           ) : (
-            <CFormInput {...commonProps} onChange={handleChange} value={getValue(field, formData)} />
+            <CFormInput {...commonProps} onChange={handleChange} value={field.value || formData[field.name]} />
           )}
         </CCol>
       </CRow>

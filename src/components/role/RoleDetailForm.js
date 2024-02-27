@@ -6,11 +6,11 @@ import { useForm } from 'react-hook-form';
 import { useToast } from '../../context/ToastContext';
 import RoleService from '../../services/Role/RoleService';
 import { getAuditFields } from '../../utils/common/auditFieldUtils';
+import { formatToYMD } from '../../utils/common/dateUtils';
 import formModes from '../../utils/formModes';
 import InputList from '../input/InputList';
 
 const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList }) => {
-  const [formData, setFormData] = useState([]);
   const [formMode, setFormMode] = useState(initialFormMode);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -18,10 +18,13 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
   const { addToast } = useToast();
   const {
     reset,
+    watch,
     handleSubmit,
-    control,
+    register,
     formState: { errors },
   } = useForm({ mode: 'onChange' });
+
+  const deleted = watch('deleted');
 
   const roleFields = [
     {
@@ -51,8 +54,12 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
     try {
       setIsLoading(true);
       const data = await RoleService.getRole(selectedId);
-      setFormData(data);
-      reset(data);
+      const formattedData = {
+        ...data,
+        modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
+        createdAt: data.createdAt && formatToYMD(data.createdAt),
+      };
+      reset(formattedData);
     } catch (error) {
       addToast({ message: '권한 정보를 가져오지 못했습니다.' });
     } finally {
@@ -60,9 +67,9 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
     }
   };
 
-  const createRole = async () => {
+  const createRole = async (data) => {
     try {
-      await RoleService.postRole(formData.role);
+      await RoleService.postRole(data.role);
       closeModal();
       fetchRoleList();
     } catch (error) {
@@ -76,9 +83,9 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
     }
   };
 
-  const updateRole = async () => {
+  const updateRole = async (data) => {
     try {
-      await RoleService.putRole(formData.id, formData.role);
+      await RoleService.putRole(data.id, data.role);
       closeModal();
       fetchRoleList();
     } catch (error) {
@@ -92,16 +99,11 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const onSubmit = () => {
+  const onSubmit = (data) => {
     if (isCreateMode) {
-      createRole();
+      createRole(data);
     } else if (isUpdateMode) {
-      updateRole();
+      updateRole(data);
     }
   };
 
@@ -115,7 +117,7 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
     setFormMode('update');
   };
   const handleDeleteRestoreClick = async (id) => {
-    const shouldDelete = !formData.deleted;
+    const shouldDelete = !deleted;
     try {
       await RoleService.deleteRole(id, shouldDelete);
     } catch (error) {
@@ -133,27 +135,13 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
         </CElementCover>
       )}
       <CForm onSubmit={handleSubmit(onSubmit)}>
-        <InputList
-          fields={roleFields}
-          formData={formData}
-          handleChange={handleChange}
-          isReadMode={isReadMode}
-          control={control}
-          errors={errors}
-        />
-        <InputList
-          fields={getAuditFields(formMode)}
-          formData={formData}
-          handleChange={handleChange}
-          isReadMode={isReadMode}
-        />
+        <InputList fields={roleFields} isReadMode={isReadMode} register={register} errors={errors} />
+        <InputList fields={getAuditFields(formMode)} isReadMode={isReadMode} register={register} errors={errors} />
         <CRow>
           <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
             {isUpdateMode && <CButton onClick={handleCancelClick}>취소</CButton>}
             {!isCreateMode && (
-              <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>
-                {formData.deleted ? '복구' : '삭제'}
-              </CButton>
+              <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>{deleted ? '복구' : '삭제'}</CButton>
             )}
             {isReadMode ? <CButton onClick={handleUpdateClick}>수정</CButton> : <CButton type="submit">저장</CButton>}
           </CCol>
