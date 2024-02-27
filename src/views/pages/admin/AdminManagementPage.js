@@ -19,6 +19,7 @@ import StatusBadge from '../../../components/badge/StatusBadge';
 import ModalContainer from '../../../components/modal/ModalContainer';
 import { useToast } from '../../../context/ToastContext';
 import useModal from '../../../hooks/useModal';
+import usePagination from '../../../hooks/usePagination';
 import AdminService from '../../../services/admin/AdminService';
 import { adminColumnConfig } from '../../../utils/admin/adminColumnConfig';
 import {
@@ -50,15 +51,12 @@ const AdminManagementPage = () => {
   const [selectedId, setSelectedId] = useState();
   const [formMode, setFormMode] = useState('');
   const [totalAdminElements, setTotalAdminElements] = useState(0);
-  const [pageableData, setPageableData] = useState({
-    page: 0,
-    size: 10,
-    sort: 'id,asc',
-  });
-
   const [formData, setFormData] = useState(createInitialFormData);
+
   const isComponentMounted = useRef(true);
 
+  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } =
+    usePagination(totalAdminElements);
   const { addToast } = useToast();
   const modal = useModal();
 
@@ -84,22 +82,6 @@ const AdminManagementPage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleSortChange = (sorterValue) => {
-    const newSortValue = `${sorterValue.column},${sorterValue.state}`;
-    setPageableData((prev) => ({
-      ...prev,
-      sort: newSortValue,
-    }));
-  };
-
-  const handleSizeChange = (size) => {
-    setPageableData((prev) => ({ ...prev, size, page: 0 }));
-  };
-
-  const handlePageChange = (page) => {
-    setPageableData((prev) => ({ ...prev, page: page - 1 }));
   };
 
   const handleDateChange = ({ id, newDate, isStartDate = true }) => {
@@ -258,15 +240,11 @@ const AdminManagementPage = () => {
                 external: true,
                 resetable: false,
               }}
-              onSorterChange={(sorterValue) => handleSortChange(sorterValue)}
-              paginationProps={{
-                activePage: pageableData.page + 1,
-                pages: Math.ceil(totalAdminElements / pageableData.size) || 1,
-                onActivePageChange: handlePageChange,
-              }}
+              onSorterChange={(sorterValue) => handlePageSortChange(sorterValue)}
+              paginationProps={smartPaginationProps}
               itemsPerPageSelect
               itemsPerPage={pageableData.size}
-              onItemsPerPageChange={handleSizeChange}
+              onItemsPerPageChange={handlePageSizeChange}
               itemsPerPageLabel="페이지당 관리자 개수"
               noItemsLabel="검색 결과가 없습니다."
               loading={isLoading}
