@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 
 import { CContainer, CSpinner } from '@coreui/react-pro';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 // routes config
 import routes from '../routes';
@@ -33,7 +33,6 @@ const AppContent = () => {
               )
             );
           })}
-          <Route path="/" element={<Navigate to="dashboard" replace />} />
         </Routes>
       </Suspense>
     </CContainer>
