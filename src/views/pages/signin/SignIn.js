@@ -32,23 +32,6 @@ const SignIn = () => {
     formState: { errors },
   } = useForm({ mode: 'onChange' });
 
-  const onSubmit = async (data) => {
-    setIsLoading(true);
-    try {
-      const response = await SignInService.signIn(data);
-      const { token } = response;
-      localStorage.setItem('token', token);
-      navigate('/');
-    } catch (error) {
-      const status = error.response?.status;
-      if (status === 401) {
-        addToast({ color: 'danger', message: '이메일 혹은 비밀번호가 틀렸습니다.' });
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const emailValidation = {
     ...register('email', {
       required: '이메일을 입력하세요.',
@@ -67,6 +50,23 @@ const SignIn = () => {
         message: '유효한 비밀번호를 입력하세요.',
       },
     }),
+  };
+
+  const onSubmit = async (data) => {
+    setIsLoading(true);
+    try {
+      const response = await SignInService.signIn(data);
+      const { token } = response;
+      localStorage.setItem('token', token);
+      navigate('/');
+    } catch (error) {
+      const status = error.response?.status;
+      if (status === 401) {
+        addToast({ color: 'danger', message: '이메일 혹은 비밀번호가 틀렸습니다.' });
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
