@@ -74,7 +74,6 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     {
       name: 'displayName',
       label: '표시명',
-      //REMIND 표시명이 뭔가요..?
       placeholder: '표시명을 입력해주세요.',
       rules: {
         required: '표시명은 필수 입력 항목입니다.',
@@ -193,27 +192,39 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
       }
     }
   };
+  const handleDeleteRestoreClick = async (collectionId) => {
+    const shouldDelete = !collectionDetail.deleted;
+    try {
+      await DocumentCollectionService.patchCollectionsDeletionOption([collectionId], shouldDelete);
+    } catch (error) {
+      addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
+    }
+    fetchCollectionDetail();
+    refreshDocumentCollectionList();
+  };
+
   const renderFormActions = () => (
     <>
-      {isReadMode ? (
-        <CRow className="row mt-3 justify-content-end">
-          {collectionDetail?.createdBy === currentUserId && (
-            <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-              <CButton type="button" disabled={!isReadMode} onClick={() => setFormMode('update')}>
-                수정
-              </CButton>
-            </CCol>
-          )}
-        </CRow>
-      ) : (
-        <CRow className="mt-3 justify-content-end">
-          <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
+      <CRow className="row mt-3 justify-content-end">
+        <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
+          {isReadMode ? (
+            <>
+              {collectionDetail?.createdBy === currentUserId && (
+                <CButton type="button" disabled={!isReadMode} onClick={() => setFormMode('update')}>
+                  수정
+                </CButton>
+              )}
+            </>
+          ) : (
             <CButton type="button" onClick={handleSubmit(onSubmit)}>
               저장
             </CButton>
-          </CCol>
-        </CRow>
-      )}
+          )}
+          <CButton onClick={() => handleDeleteRestoreClick(collectionDetail.id)}>
+            {collectionDetail.deleted ? '복구' : '삭제'}
+          </CButton>
+        </CCol>
+      </CRow>
     </>
   );
 
@@ -224,8 +235,6 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
           <CCardBody>
             {!isCreateMode ? (
               <>
-                {/* ID Name, Display Name, deleted,
-               author, createdAt, modifiedAt */}
                 <HorizontalCFormInputList
                   register={register}
                   fields={collectionSpecificFields}
@@ -248,13 +257,6 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
                   control={control}
                   errors={errors}
                 />
-                {/* 파일 타입도 inputlist 에 넣어주기 위해 필요한것.
-                1. getValue 에서 파일 타입일 경우 value를  '' 로 설정
-                2. multiple 설정 boolean 값 추가
-                3. value 설정이 아예 없어야 하니, value 속성을 commonProps 에서 분리
-                4. 렌더링 할 값을 file 속성인가에 따라서 다르게 렌더링.
-27일 2:20분 저장 참고
-                */}
                 <Controller
                   name="files"
                   control={control}
