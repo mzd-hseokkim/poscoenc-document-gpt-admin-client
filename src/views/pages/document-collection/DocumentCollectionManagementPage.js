@@ -15,6 +15,7 @@ import {
 } from '@coreui/react-pro';
 
 import StatusBadge from '../../../components/badge/StatusBadge';
+import ExcelDownloadCButton from '../../../components/button/ExcelDownloadCButton';
 import DocumentCollectionDetailForm from '../../../components/document-collection/DocumentCollectionDetailForm';
 import ModalContainer from '../../../components/modal/ModalContainer';
 import { useToast } from '../../../context/ToastContext';
@@ -138,9 +139,6 @@ const DocumentCollectionManagementPage = () => {
     setClickedRowId(null);
   };
 
-  const handleDownloadResultRequest = async () => {
-    await DocumentCollectionService.getDownloadSearchedCollectionList(searchFormData);
-  };
   const scopedColumns = {
     displayName: (item) => (
       <td
@@ -267,7 +265,10 @@ const DocumentCollectionManagementPage = () => {
           </CRow>
           <CRow className="mt-3">
             <CCol className="d-grid gap-2 justify-content-end">
-              <CButton onClick={handleDownloadResultRequest}>엑셀 다운로드</CButton>
+              <ExcelDownloadCButton
+                downloadFunction={DocumentCollectionService.getDownloadSearchedCollectionList}
+                searchFormData={searchFormData}
+              />
             </CCol>
           </CRow>
         </CCardBody>
@@ -281,8 +282,8 @@ const DocumentCollectionManagementPage = () => {
       >
         <DocumentCollectionDetailForm
           clickedRowId={clickedRowId}
-          initialFormMode={detailFormMode}
           closeModal={handleCloseModal}
+          initialFormMode={detailFormMode}
           refreshDocumentCollectionList={searchDocumentCollectionList}
         />
       </ModalContainer>
