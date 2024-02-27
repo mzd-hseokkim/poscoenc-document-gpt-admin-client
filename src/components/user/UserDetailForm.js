@@ -6,23 +6,26 @@ import { useForm } from 'react-hook-form';
 import { useToast } from '../../context/ToastContext';
 import UserService from '../../services/UserService';
 import { getAuditFields } from '../../utils/common/auditFieldUtils';
+import { formatToYMD } from '../../utils/common/dateUtils';
 import formModes from '../../utils/formModes';
 import { emailValidationPattern } from '../../utils/validationUtils';
 import InputList from '../input/InputList';
 
 const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState([]);
   const [formMode, setFormMode] = useState(initialFormMode);
 
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
   const { addToast } = useToast();
   const {
     reset,
+    watch,
+    register,
     handleSubmit,
-    control,
     formState: { errors },
   } = useForm({ mode: 'onChange' });
+
+  const deleted = watch('deleted');
 
   const userFields = [
     {
@@ -61,9 +64,14 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
   const fetchUserDetail = async () => {
     try {
       setIsLoading(true);
+
       const data = await UserService.getUser(selectedId);
-      setFormData(data);
-      reset(data);
+      const formattedData = {
+        ...data,
+        modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
+        createdAt: data.createdAt && formatToYMD(data.createdAt),
+      };
+      reset(formattedData);
     } catch (error) {
       addToast({ message: '사용자 정보를 가져오지 못했습니다.' });
     } finally {
@@ -78,9 +86,10 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
     }
   }, [selectedId]);
 
-  const postUser = async () => {
+  const postUser = async (data) => {
     try {
-      await UserService.postUser(formData);
+      await UserService.postUser(data);
+      closeModal();
       closeModal();
       fetchUserList();
     } catch (error) {
@@ -94,9 +103,9 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
     }
   };
 
-  const patchUser = async () => {
+  const patchUser = async (data) => {
     try {
-      await UserService.putUser(selectedId, formData);
+      await UserService.putUser(selectedId, data);
       closeModal();
       fetchUserList();
     } catch (error) {
@@ -110,21 +119,16 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
     }
   };
 
-  const handleChange = (e) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
-  };
-
-  const onSubmit = () => {
+  const onSubmit = (data) => {
     if (isCreateMode) {
-      postUser();
+      postUser(data);
     } else if (isUpdateMode) {
-      patchUser();
+      patchUser(data);
     }
   };
 
   const handleDeleteRestoreClick = async (id) => {
-    const shouldDelete = !formData.deleted;
+    const shouldDelete = !deleted;
     try {
       await UserService.deleteUser(id, shouldDelete);
     } catch (error) {
@@ -148,12 +152,11 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
     <CRow className="mb-3">
       <CCol>
         <CFormTextarea
+          {...register('memo')}
           id="memo"
           name="memo"
           label="메모"
           placeholder="메모를 입력하세요."
-          value={formData.memo || ''}
-          onChange={handleChange}
           readOnly={isReadMode}
         />
       </CCol>
@@ -168,28 +171,14 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
         </CElementCover>
       )}
       <CForm onSubmit={handleSubmit(onSubmit)}>
-        <InputList
-          fields={userFields}
-          formData={formData}
-          handleChange={handleChange}
-          isReadMode={isReadMode}
-          control={control}
-          errors={errors}
-        />
+        <InputList fields={userFields} isReadMode={isReadMode} register={register} errors={errors} />
         {renderMemoField()}
-        <InputList
-          fields={getAuditFields(formMode)}
-          formData={formData}
-          handleChange={handleChange}
-          isReadMode={isReadMode}
-        />
+        <InputList fields={getAuditFields(formMode)} isReadMode={isReadMode} register={register} errors={errors} />
         <CRow>
           <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
             {isUpdateMode && <CButton onClick={handleCancelClick}>취소</CButton>}
             {!isCreateMode && (
-              <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>
-                {formData.deleted ? '복구' : '삭제'}
-              </CButton>
+              <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>{deleted ? '복구' : '삭제'}</CButton>
             )}
             {isReadMode ? <CButton onClick={handleUpdateClick}>수정</CButton> : <CButton type="submit">저장</CButton>}
           </CCol>

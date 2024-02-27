@@ -7,12 +7,12 @@ import { useToast } from '../../context/ToastContext';
 import AdminService from '../../services/admin/AdminService';
 import RoleService from '../../services/Role/RoleService';
 import { getAuditFields } from '../../utils/common/auditFieldUtils';
+import { formatToYMD } from '../../utils/common/dateUtils';
 import formModes from '../../utils/formModes';
 import { emailValidationPattern, passwordValidationPattern } from '../../utils/validationUtils';
 import InputList from '../input/InputList';
 
 const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminList }) => {
-  const [formData, setFormData] = useState([]);
   const [formMode, setFormMode] = useState(initialFormMode);
   const [roles, setRoles] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,9 +22,13 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
   const {
     reset,
     handleSubmit,
+    register,
     control,
+    watch,
     formState: { errors },
   } = useForm({ mode: 'onChange' });
+
+  const deleted = watch('deleted');
 
   const adminFields = [
     {
@@ -96,9 +100,16 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
   const fetchAdminDetail = async () => {
     try {
       setIsLoading(true);
+
       const data = await AdminService.getAdmin(selectedId);
-      setFormData(data);
-      reset(data);
+      const formattedData = {
+        ...data,
+        modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
+        lastLoggedInAt: data.lastLoggedInAt && formatToYMD(data.lastLoggedInAt),
+        createdAt: data.createdAt && formatToYMD(data.createdAt),
+      };
+      reset(formattedData);
+
       const allowedRoles = data.roles;
       await getRoles(allowedRoles);
     } catch (error) {
@@ -122,9 +133,9 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
     }
   };
 
-  const createAdmin = async () => {
+  const createAdmin = async (data) => {
     try {
-      await AdminService.postAdmin(formData);
+      await AdminService.postAdmin(data);
       closeModal();
       fetchAdminList();
     } catch (error) {
@@ -138,9 +149,9 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
     }
   };
 
-  const updateAdmin = async () => {
+  const updateAdmin = async (data) => {
     try {
-      await AdminService.putAdmin(selectedId, formData);
+      await AdminService.putAdmin(selectedId, data);
       closeModal();
       fetchAdminList();
     } catch (error) {
@@ -154,25 +165,14 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
     }
   };
 
-  const handleMultiSelect = (list) => {
-    const roleList = list.map((item) => item.value);
-    setFormData((prev) => ({ ...prev, roles: roleList }));
-  };
+  const onSubmit = (data) => {
+    const roleList = data.roles.map((item) => item.value);
+    const updatedData = { ...data, roles: roleList };
 
-  const handleChange = (e) => {
-    const { name, type, checked, value } = e.target;
-    if (type === 'checkbox') {
-      setFormData((prev) => ({ ...prev, [name]: checked }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
-  };
-
-  const onSubmit = () => {
     if (isCreateMode) {
-      createAdmin();
+      createAdmin(updatedData);
     } else if (isUpdateMode) {
-      updateAdmin();
+      updateAdmin(updatedData);
     }
   };
 
@@ -187,7 +187,7 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
   };
 
   const handleDeleteRestoreClick = async (id) => {
-    const shouldDelete = !formData.deleted;
+    const shouldDelete = !deleted;
     try {
       await AdminService.deleteAdmin(id, shouldDelete);
     } catch (error) {
@@ -204,22 +204,18 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
           name="roles"
           control={control}
           rules={{ required: '권한은 필수 입력 항목입니다.' }}
-          render={({ field: { onChange } }) => (
+          render={({ field }) => (
             <CMultiSelect
+              {...field}
               id="roles"
-              name="roles"
-              options={roles}
               label="인가된 권한"
               placeholder="권한을 선택하세요."
               selectAllLabel="모두 선택"
+              options={roles}
               virtualScroller
-              onChange={(values) => {
-                onChange(values);
-                handleMultiSelect(values);
-              }}
               disabled={isReadMode}
-              invalid={errors.roles}
-              feedbackInvalid={errors.roles && errors.roles.message}
+              invalid={!!errors.roles}
+              feedbackInvalid={errors.roles?.message}
             />
           )}
         />
@@ -235,29 +231,15 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
         </CElementCover>
       )}
       <CForm onSubmit={handleSubmit(onSubmit)}>
-        <InputList
-          fields={adminFields}
-          formData={formData}
-          handleChange={handleChange}
-          isReadMode={isReadMode}
-          control={control}
-          errors={errors}
-        />
+        <InputList fields={adminFields} isReadMode={isReadMode} register={register} errors={errors} />
         {renderRoleSelect()}
-        <InputList fields={logInFields} formData={formData} handleChange={handleChange} isReadMode={isReadMode} />
-        <InputList
-          fields={getAuditFields(formMode)}
-          formData={formData}
-          handleChange={handleChange}
-          isReadMode={isReadMode}
-        />
+        <InputList fields={logInFields} isReadMode={isReadMode} register={register} errors={errors} />
+        <InputList fields={getAuditFields(formMode)} isReadMode={isReadMode} register={register} errors={errors} />
         <CRow>
           <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
             {isUpdateMode && <CButton onClick={handleCancelClick}>취소</CButton>}
             {!isCreateMode && (
-              <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>
-                {formData.deleted ? '복구' : '삭제'}
-              </CButton>
+              <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>{deleted ? '복구' : '삭제'}</CButton>
             )}
             {isReadMode ? <CButton onClick={handleUpdateClick}>수정</CButton> : <CButton type="submit">저장</CButton>}
           </CCol>
