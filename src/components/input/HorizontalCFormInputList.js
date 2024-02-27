@@ -4,7 +4,6 @@ import { formatToYMD } from '../../utils/common/dateUtils';
 import StatusBadge from '../badge/StatusBadge';
 
 const getValue = (field, formData) => {
-  // REMIND 첨부파일이랑 상관없음.
   if (field.value) {
     return field.value;
   }

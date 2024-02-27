@@ -51,7 +51,7 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     files: [],
   };
 
-  const collectionSpecificInfoFields = [
+  const collectionSpecificFields = [
     {
       md: 2,
       name: 'id',
@@ -228,7 +228,7 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
                author, createdAt, modifiedAt */}
                 <HorizontalCFormInputList
                   register={register}
-                  fields={collectionSpecificInfoFields}
+                  fields={collectionSpecificFields}
                   formData={collectionDetail}
                   isReadMode={isReadMode}
                 ></HorizontalCFormInputList>
@@ -242,7 +242,7 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
             ) : (
               <>
                 <InputList
-                  fields={collectionSpecificInfoFields}
+                  fields={collectionSpecificFields}
                   formData={collectionDetail}
                   handleChange={handleChange}
                   control={control}
