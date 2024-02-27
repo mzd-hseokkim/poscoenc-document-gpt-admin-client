@@ -15,6 +15,7 @@ import {
 
 import BoardPostDetailForm from '../../../components/board/BoardPostDetailForm';
 import { getBoardScopedColumns } from '../../../components/board/BoardScopedColumn';
+import ExcelDownloadCButton from '../../../components/button/ExcelDownloadCButton';
 import ModalContainer from '../../../components/modal/ModalContainer';
 import { useToast } from '../../../context/ToastContext';
 import useModal from '../../../hooks/useModal';
@@ -270,6 +271,14 @@ const BoardManagementPage = () => {
             selected={selectedRows}
             tableProps={tableCustomProps}
           />
+          <CRow className="mt-3">
+            <CCol className="d-grid gap-2 justify-content-end">
+              <ExcelDownloadCButton
+                downloadFunction={BoardService.getDownloadSearchedPostList}
+                searchFormData={searchFormData}
+              />
+            </CCol>
+          </CRow>
           {/*REMIND Modal open 시 url 변경되게 수정*/}
           <ModalContainer visible={modal.isOpen} title="게시글" onClose={modal.closeModal} size="lg">
             <BoardPostDetailForm
