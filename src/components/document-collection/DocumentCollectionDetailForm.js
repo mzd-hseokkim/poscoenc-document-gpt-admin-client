@@ -10,23 +10,26 @@ import {
   CListGroup,
   CListGroupItem,
   CRow,
-  CSmartTable,
 } from '@coreui/react-pro';
+import { Controller, useForm } from 'react-hook-form';
 import { useRecoilValue } from 'recoil';
 
 import { useToast } from '../../context/ToastContext';
 import DocumentCollectionFileService from '../../services/document-collection/DocumentCollectionFileService';
 import DocumentCollectionService from '../../services/document-collection/DocumentCollectionService';
 import { userIdSelector } from '../../states/jwtTokenState';
+import { getAuditFields } from '../../utils/common/auditFieldUtils';
 import { formatToYMD } from '../../utils/common/dateUtils';
 import { formatFileSize } from '../../utils/common/formatFileSize';
 import formModes from '../../utils/formModes';
-import StatusBadge from '../badge/StatusBadge';
+import { itemNameValidationPattern } from '../../utils/validationUtils';
 import FormLoadingCover from '../cover/FormLoadingCover';
+import HorizontalCFormInputList from '../input/HorizontalCFormInputList';
+import InputList from '../input/InputList';
 
 const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModal, refreshDocumentCollectionList }) => {
-  const [collectionDetail, setCollectionDetail] = useState(null);
-  const [formMode, setFormMode] = useState(initialFormMode);
+  const [collectionDetail, setCollectionDetail] = useState({});
+  const [formMode, setFormMode] = useState(initialFormMode || '');
 
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
 
@@ -34,55 +37,13 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
   const currentUserId = useRecoilValue(userIdSelector);
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
 
-  const topInfoColumns = [
-    { key: 'id', label: 'ID', _style: { width: '5%' } },
-    { key: 'name', label: '문서 집합 이름', _style: { width: '30%' } },
-    { key: 'displayName', label: '표시명', _style: { width: '50%' } },
-    {
-      key: 'deleted',
-      label: '삭제 여부',
-      _style: { width: '40%' },
-    },
-  ];
-
-  const topInfoData = [
-    {
-      id: collectionDetail?.id,
-      name: collectionDetail?.name,
-      displayName: collectionDetail?.displayName,
-      deleted: collectionDetail?.deleted,
-    },
-  ];
-
-  const middleInfoColumns = [
-    { key: 'createdByName', label: '작성자', _style: { width: '10%' } },
-    {
-      key: 'createdAt',
-      label: '작성일시',
-      _style: { width: '30%' },
-    },
-    {
-      key: 'modifiedAt',
-      label: '수정일시',
-      _style: { width: '30%' },
-    },
-  ];
-
-  const middleInfoData = [
-    {
-      createdByName: collectionDetail?.createdByName,
-      createdAt: collectionDetail?.createdAt,
-      modifiedAt: collectionDetail?.modifiedAt,
-    },
-  ];
-
-  const infoTableHeaderProps = {
-    color: 'light',
-  };
-
-  const infoTableProps = {
-    bordered: true,
-  };
+  const {
+    register,
+    reset,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm({ mode: 'onChange' });
 
   const createModeInitialFormData = {
     name: '',
@@ -90,14 +51,68 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     files: [],
   };
 
+  const collectionSpecificFields = [
+    {
+      md: 2,
+      name: 'id',
+      label: '아이디',
+      isDisabled: isUpdateMode,
+      isRendered: !isCreateMode,
+    },
+    {
+      name: 'name',
+      label: '문서 집합 이름',
+      placeholder: '문서 집합의 이름을 설정해주세요.',
+      rules: {
+        required: '문서 집합 이름은 필수 입력 항목입니다.',
+        pattern: {
+          value: itemNameValidationPattern,
+          message: '한글, 알파벳, 숫자, 띄어쓰기만 허용됩니다.',
+        },
+      },
+    },
+    {
+      name: 'displayName',
+      label: '표시명',
+      placeholder: '표시명을 입력해주세요.',
+      rules: {
+        required: '표시명은 필수 입력 항목입니다.',
+        pattern: {
+          value: itemNameValidationPattern,
+          message: '한글, 알파벳, 숫자, 띄어쓰기만 허용됩니다.',
+        },
+      },
+    },
+    {
+      md: 2,
+      name: 'deleted',
+      label: '삭제 여부',
+      isRendered: !isCreateMode,
+    },
+  ];
+
+  useEffect(() => {
+    if (!isCreateMode) {
+      fetchCollectionDetail();
+    } else {
+      setCollectionDetail(createModeInitialFormData);
+    }
+  }, [clickedRowId]);
+
   const fetchCollectionDetail = async () => {
     if (!clickedRowId) {
       return;
     }
     setGetDetailIsLoading(true);
     try {
-      const details = await DocumentCollectionService.getCollectionDetail(clickedRowId);
-      setCollectionDetail(details);
+      const detail = await DocumentCollectionService.getCollectionDetail(clickedRowId);
+      setCollectionDetail(detail);
+      const formattedDetail = {
+        ...detail,
+        createdAt: detail.createdAt && formatToYMD(detail.createdAt),
+        modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
+      };
+      reset(formattedDetail);
     } catch (error) {
       if (error.response?.status === 404) {
         addToast({ message: '해당 문서 집합을 찾을 수 없습니다.' });
@@ -108,9 +123,16 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
       setGetDetailIsLoading(false);
     }
   };
-  const postNewCollection = async (e) => {
+  const postNewCollection = async (data) => {
     try {
-      const formData = new FormData(e.currentTarget);
+      const formData = new FormData();
+      formData.append('name', data.name);
+      formData.append('displayName', data.displayName);
+      if (data.files && data.files.length) {
+        for (const file of data.files) {
+          formData.append('files', file);
+        }
+      }
       const isPosted = await DocumentCollectionService.postNewCollection(formData);
       if (isPosted) {
         refreshDocumentCollectionList();
@@ -122,12 +144,13 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     }
   };
 
-  const putModifiedCollection = async () => {
+  const putModifiedCollection = async (data) => {
     try {
-      const isModified = await DocumentCollectionService.putModifiedCollectionDetail(collectionDetail);
+      const isModified = await DocumentCollectionService.putModifiedCollectionDetail(data);
       if (isModified) {
+        closeModal();
         refreshDocumentCollectionList();
-        setFormMode('read');
+        await fetchCollectionDetail();
       }
     } catch (error) {
       const status = error.response?.status;
@@ -142,24 +165,18 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     //REMIND loading spinner
   };
 
-  useEffect(() => {
-    if (!isCreateMode) {
-      fetchCollectionDetail();
-    } else {
-      setCollectionDetail(createModeInitialFormData);
-    }
-  }, [clickedRowId]);
-
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setCollectionDetail((prev) => ({ ...prev, [id]: value }));
+    setCollectionDetail((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
   };
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     if (isCreateMode) {
-      postNewCollection(e);
+      await postNewCollection(data);
     } else if (isUpdateMode) {
-      putModifiedCollection();
+      await putModifiedCollection(data);
     }
   };
 
@@ -175,111 +192,89 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
       }
     }
   };
-
-  const handleFormModeChange = (e) => {
-    e.preventDefault();
-    setFormMode('update');
+  const handleDeleteRestoreClick = async (collectionId) => {
+    const shouldDelete = !collectionDetail.deleted;
+    try {
+      await DocumentCollectionService.patchCollectionsDeletionOption([collectionId], shouldDelete);
+    } catch (error) {
+      addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
+    }
+    fetchCollectionDetail();
+    refreshDocumentCollectionList();
   };
 
-  const topInfoScopedColumn = {
-    id: (item) => <td>{item.id}</td>,
-    name: (item) => (
-      <td>
-        <CFormInput
-          type="text"
-          id="name"
-          name="name"
-          defaultValue={item?.name}
-          readOnly={isReadMode}
-          disabled={isReadMode}
-          onChange={handleChange}
-        />
-      </td>
-    ),
-    displayName: (item) => (
-      <td>
-        <CFormInput
-          type="text"
-          id="displayName"
-          name="displayName"
-          defaultValue={item?.displayName}
-          readOnly={isReadMode}
-          disabled={isReadMode}
-          onChange={handleChange}
-        />
-      </td>
-    ),
-    deleted: (item) => (
-      <td>
-        <StatusBadge deleted={item.deleted} />
-      </td>
-    ),
-  };
-
-  const middleInfoScopedColumns = {
-    createdAt: (item) => <td>{formatToYMD(item.createdAt)}</td>,
-    modifiedAt: (item) => <td>{formatToYMD(item.modifiedAt)}</td>,
-  };
   const renderFormActions = () => (
     <>
-      {isReadMode ? (
-        <CRow className="row justify-content-end">
-          {collectionDetail?.createdBy === currentUserId && (
-            <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-              <CButton disabled={!isReadMode} onClick={handleFormModeChange}>
-                수정
-              </CButton>
-            </CCol>
+      <CRow className="row mt-3 justify-content-end">
+        <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
+          {isReadMode ? (
+            <>
+              {collectionDetail?.createdBy === currentUserId && (
+                <CButton type="button" disabled={!isReadMode} onClick={() => setFormMode('update')}>
+                  수정
+                </CButton>
+              )}
+            </>
+          ) : (
+            <CButton type="button" onClick={handleSubmit(onSubmit)}>
+              저장
+            </CButton>
           )}
-        </CRow>
-      ) : (
-        <CRow className="mt-3 justify-content-end">
-          <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-            <CButton type="submit">저장</CButton>
-            {!isCreateMode && (
-              <CButton type="reset" onClick={() => setFormMode('read')}>
-                취소
-              </CButton>
-            )}
-          </CCol>
-        </CRow>
-      )}
+          <CButton onClick={() => handleDeleteRestoreClick(collectionDetail.id)}>
+            {collectionDetail.deleted ? '복구' : '삭제'}
+          </CButton>
+        </CCol>
+      </CRow>
     </>
   );
 
   return (
     <>
-      <CForm onSubmit={handleSubmit}>
+      <CForm onSubmit={handleSubmit(onSubmit)}>
         <CCard className="mb-3">
           <CCardBody>
-            {isReadMode || isUpdateMode ? (
+            {!isCreateMode ? (
               <>
-                <CSmartTable
-                  columns={topInfoColumns}
-                  items={topInfoData}
-                  tableHeadProps={infoTableHeaderProps}
-                  tableProps={infoTableProps}
-                  scopedColumns={topInfoScopedColumn}
-                />
-                <CSmartTable
-                  columns={middleInfoColumns}
-                  items={middleInfoData}
-                  scopedColumns={middleInfoScopedColumns}
-                  tableHeadProps={infoTableHeaderProps}
-                  tableProps={infoTableProps}
+                <HorizontalCFormInputList
+                  register={register}
+                  fields={collectionSpecificFields}
+                  formData={collectionDetail}
+                  isReadMode={isReadMode}
+                ></HorizontalCFormInputList>
+                <HorizontalCFormInputList
+                  register={register}
+                  fields={getAuditFields(formMode)}
+                  formData={collectionDetail}
+                  isReadMode={isReadMode}
                 />
               </>
             ) : (
               <>
-                <CFormInput label="문서 집합 이름" name="name" />
-                <CFormInput label="표시명" name="displayName" className="mb-1" />
-                <CFormInput label="첨부 문서" name="files" type="file" multiple />
+                <InputList
+                  fields={collectionSpecificFields}
+                  formData={collectionDetail}
+                  handleChange={handleChange}
+                  control={control}
+                  errors={errors}
+                />
+                <Controller
+                  name="files"
+                  control={control}
+                  render={({ field }) => (
+                    <CFormInput
+                      label="첨부 문서"
+                      type="file"
+                      multiple
+                      onChange={(e) => field.onChange(e.target.files)}
+                    />
+                  )}
+                />
               </>
             )}
             {renderFormActions()}
           </CCardBody>
         </CCard>
-        {(isReadMode || isUpdateMode) && (
+        {!isCreateMode && (
           <CCard>
             <CCardBody>
               <CListGroup>
