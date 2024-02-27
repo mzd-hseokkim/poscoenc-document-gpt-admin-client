@@ -14,6 +14,7 @@ import {
   CLoadingButton,
   CRow,
 } from '@coreui/react-pro';
+import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
 import { useToast } from '../../../context/ToastContext';
@@ -21,19 +22,40 @@ import SignInService from '../../../services/signin/SignInService';
 import { emailValidationPattern, passwordValidationPattern } from '../../../utils/validationUtils';
 
 const SignIn = () => {
-  const [userData, setUserData] = useState([]);
-  const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
   const { addToast } = useToast();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({ mode: 'onChange' });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const emailValidation = {
+    ...register('email', {
+      required: '이메일을 입력하세요.',
+      pattern: {
+        value: emailValidationPattern,
+        message: '유효한 이메일 주소를 입력하세요.',
+      },
+    }),
+  };
 
+  const passwordValidation = {
+    ...register('password', {
+      required: '비밀번호를 입력하세요.',
+      pattern: {
+        value: passwordValidationPattern,
+        message: '유효한 비밀번호를 입력하세요.',
+      },
+    }),
+  };
+
+  const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      const response = await SignInService.signIn(userData);
+      const response = await SignInService.signIn(data);
       const { token } = response;
       localStorage.setItem('token', token);
       navigate('/');
@@ -47,26 +69,6 @@ const SignIn = () => {
     }
   };
 
-  const validateField = (name, value) => {
-    if (name === 'email') {
-      return !value || !emailValidationPattern.test(value) ? '유효하지 않은 이메일 주소입니다.' : '';
-    } else if (name === 'password') {
-      if (!value || value.length < 5) {
-        return '비밀번호는 최소 5자 이상이어야 합니다.';
-      }
-      if (!passwordValidationPattern.test(value)) {
-        return '유효하지 않은 비밀번호 형식입니다.';
-      }
-    }
-    return '';
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setUserData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
-  };
-
   return (
     <div className="bg-light min-vh-100 d-flex flex-row align-items-center">
       <CContainer>
@@ -74,7 +76,7 @@ const SignIn = () => {
           <CCol md={5}>
             <CCard className="p-4">
               <CCardBody>
-                <CForm onSubmit={handleSubmit}>
+                <CForm onSubmit={handleSubmit(onSubmit)}>
                   <h1>로그인</h1>
                   <CInputGroup className="mb-3">
                     <CInputGroupText>
@@ -85,9 +87,9 @@ const SignIn = () => {
                       placeholder="이메일"
                       autoComplete="email"
                       name="email"
-                      onChange={handleChange}
+                      {...emailValidation}
                       invalid={!!errors.email}
-                      feedbackInvalid={errors.email}
+                      feedbackInvalid={errors.email?.message}
                     />
                   </CInputGroup>
                   <CInputGroup className="mb-3">
@@ -100,9 +102,9 @@ const SignIn = () => {
                       placeholder="비밀번호"
                       autoComplete="current-password"
                       name="password"
-                      onChange={handleChange}
+                      {...passwordValidation}
                       invalid={!!errors.password}
-                      feedbackInvalid={errors.password}
+                      feedbackInvalid={errors.password?.message}
                     />
                   </CInputGroup>
                   <CRow>
