@@ -10,7 +10,6 @@ import {
   CListGroup,
   CListGroupItem,
   CRow,
-  CSmartTable,
 } from '@coreui/react-pro';
 import { Controller, useForm } from 'react-hook-form';
 import { useRecoilValue } from 'recoil';
@@ -19,12 +18,13 @@ import { useToast } from '../../context/ToastContext';
 import DocumentCollectionFileService from '../../services/document-collection/DocumentCollectionFileService';
 import DocumentCollectionService from '../../services/document-collection/DocumentCollectionService';
 import { userIdSelector } from '../../states/jwtTokenState';
+import { getAuditFields } from '../../utils/common/auditFieldUtils';
 import { formatToYMD } from '../../utils/common/dateUtils';
 import { formatFileSize } from '../../utils/common/formatFileSize';
 import formModes from '../../utils/formModes';
-import { menuNameValidationPattern } from '../../utils/validationUtils';
-import StatusBadge from '../badge/StatusBadge';
+import { itemNameValidationPattern } from '../../utils/validationUtils';
 import FormLoadingCover from '../cover/FormLoadingCover';
+import HorizontalCFormInputList from '../input/HorizontalCFormInputList';
 import InputList from '../input/InputList';
 
 const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModal, refreshDocumentCollectionList }) => {
@@ -38,61 +38,12 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
 
   const {
+    register,
     reset,
     handleSubmit,
     control,
     formState: { errors },
   } = useForm({ mode: 'onChange' });
-
-  const topInfoColumns = [
-    { key: 'id', label: 'ID', _style: { width: '5%' } },
-    { key: 'name', label: '문서 집합 이름', _style: { width: '30%' } },
-    { key: 'displayName', label: '표시명', _style: { width: '50%' } },
-    {
-      key: 'deleted',
-      label: '삭제 여부',
-      _style: { width: '40%' },
-    },
-  ];
-
-  const topInfoData = [
-    {
-      id: collectionDetail?.id,
-      name: collectionDetail?.name,
-      displayName: collectionDetail?.displayName,
-      deleted: collectionDetail?.deleted,
-    },
-  ];
-
-  const middleInfoColumns = [
-    { key: 'createdByName', label: '작성자', _style: { width: '10%' } },
-    {
-      key: 'createdAt',
-      label: '작성일시',
-      _style: { width: '30%' },
-    },
-    {
-      key: 'modifiedAt',
-      label: '수정일시',
-      _style: { width: '30%' },
-    },
-  ];
-
-  const middleInfoData = [
-    {
-      createdByName: collectionDetail?.createdByName,
-      createdAt: collectionDetail?.createdAt,
-      modifiedAt: collectionDetail?.modifiedAt,
-    },
-  ];
-
-  const infoTableHeaderProps = {
-    color: 'light',
-  };
-
-  const infoTableProps = {
-    bordered: true,
-  };
 
   const createModeInitialFormData = {
     name: '',
@@ -100,16 +51,22 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     files: [],
   };
 
-  const collectionBasicFields = [
+  const collectionSpecificInfoFields = [
+    {
+      md: 2,
+      name: 'id',
+      label: '아이디',
+      isDisabled: isUpdateMode,
+      isRendered: !isCreateMode,
+    },
     {
       name: 'name',
       label: '문서 집합 이름',
-      isDisabled: !isCreateMode,
       placeholder: '문서 집합의 이름을 설정해주세요.',
       rules: {
         required: '문서 집합 이름은 필수 입력 항목입니다.',
         pattern: {
-          value: menuNameValidationPattern,
+          value: itemNameValidationPattern,
           message: '한글, 알파벳, 숫자, 띄어쓰기만 허용됩니다.',
         },
       },
@@ -122,10 +79,16 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
       rules: {
         required: '표시명은 필수 입력 항목입니다.',
         pattern: {
-          value: menuNameValidationPattern,
+          value: itemNameValidationPattern,
           message: '한글, 알파벳, 숫자, 띄어쓰기만 허용됩니다.',
         },
       },
+    },
+    {
+      md: 2,
+      name: 'deleted',
+      label: '삭제 여부',
+      isRendered: !isCreateMode,
     },
   ];
 
@@ -143,9 +106,14 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     }
     setGetDetailIsLoading(true);
     try {
-      const details = await DocumentCollectionService.getCollectionDetail(clickedRowId);
-      setCollectionDetail(details);
-      reset(details);
+      const detail = await DocumentCollectionService.getCollectionDetail(clickedRowId);
+      setCollectionDetail(detail);
+      const formattedDetail = {
+        ...detail,
+        createdAt: detail.createdAt && formatToYMD(detail.createdAt),
+        modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
+      };
+      reset(formattedDetail);
     } catch (error) {
       if (error.response?.status === 404) {
         addToast({ message: '해당 문서 집합을 찾을 수 없습니다.' });
@@ -200,7 +168,10 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setCollectionDetail((prev) => ({ ...prev, [id]: value }));
+    setCollectionDetail((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
   };
   const onSubmit = async (data) => {
     if (isCreateMode) {
@@ -222,81 +193,10 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
       }
     }
   };
-
-  const topInfoScopedColumn = {
-    id: (item) => <td className="align-middle">{item.id}</td>,
-    name: (item) => (
-      <td>
-        <Controller
-          name="name"
-          control={control}
-          rules={{
-            required: '문서 집합 이름은 필수 입력 항목입니다.',
-            pattern: {
-              value: menuNameValidationPattern,
-              message: '한글, 알파벳, 숫자, 띄어쓰기만 허용됩니다.',
-            },
-          }}
-          render={({ field: { onChange } }) => (
-            <CFormInput
-              type="text"
-              id="name"
-              name="name"
-              defaultValue={item?.name}
-              readOnly={isReadMode}
-              disabled={isReadMode}
-              onChange={onChange}
-              invalid={!!errors.name}
-              feedbackInvalid={errors.name && errors.name.message}
-            />
-          )}
-        ></Controller>
-      </td>
-    ),
-    displayName: (item) => (
-      <td>
-        <Controller
-          name="displayName"
-          control={control}
-          //REMIND Rules 의 설정이 잘 적용되지 못하는 이슈가 발생. 백스페이스로 지우면 상관없으나 드래그 후 삭제하는 경우에 required가 적용되지 않음
-          rules={{
-            required: '표시명은 필수 입력 항목입니다.',
-            pattern: {
-              value: menuNameValidationPattern,
-              message: '한글, 알파벳, 숫자, 띄어쓰기만 허용됩니다.',
-            },
-          }}
-          render={({ field: { onChange } }) => (
-            <CFormInput
-              type="text"
-              id="displayName"
-              name="displayName"
-              defaultValue={item?.displayName}
-              readOnly={isReadMode}
-              disabled={isReadMode}
-              onChange={onChange}
-              invalid={!!errors.displayName}
-              feedbackInvalid={errors.displayName && errors.displayName.message}
-            />
-          )}
-        ></Controller>
-      </td>
-    ),
-    deleted: (item) => (
-      <td className="align-middle">
-        <StatusBadge deleted={item.deleted} />
-      </td>
-    ),
-  };
-
-  const middleInfoScopedColumns = {
-    createdAt: (item) => <td>{formatToYMD(item.createdAt)}</td>,
-    modifiedAt: (item) => <td>{formatToYMD(item.modifiedAt)}</td>,
-  };
   const renderFormActions = () => (
     <>
       {isReadMode ? (
-        <CRow className="row justify-content-end">
+        <CRow className="row mt-3 justify-content-end">
           {collectionDetail?.createdBy === currentUserId && (
             <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
               <CButton type="button" disabled={!isReadMode} onClick={() => setFormMode('update')}>
@@ -324,30 +224,37 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
           <CCardBody>
             {!isCreateMode ? (
               <>
-                <CSmartTable
-                  columns={topInfoColumns}
-                  items={topInfoData}
-                  tableHeadProps={infoTableHeaderProps}
-                  tableProps={infoTableProps}
-                  scopedColumns={topInfoScopedColumn}
-                />
-                <CSmartTable
-                  columns={middleInfoColumns}
-                  items={middleInfoData}
-                  scopedColumns={middleInfoScopedColumns}
-                  tableHeadProps={infoTableHeaderProps}
-                  tableProps={infoTableProps}
+                {/* ID Name, Display Name, deleted,
+               author, createdAt, modifiedAt */}
+                <HorizontalCFormInputList
+                  register={register}
+                  fields={collectionSpecificInfoFields}
+                  formData={collectionDetail}
+                  isReadMode={isReadMode}
+                ></HorizontalCFormInputList>
+                <HorizontalCFormInputList
+                  register={register}
+                  fields={getAuditFields(formMode)}
+                  formData={collectionDetail}
+                  isReadMode={isReadMode}
                 />
               </>
             ) : (
               <>
                 <InputList
-                  fields={collectionBasicFields}
+                  fields={collectionSpecificInfoFields}
                   formData={collectionDetail}
                   handleChange={handleChange}
                   control={control}
                   errors={errors}
                 />
+                {/* 파일 타입도 inputlist 에 넣어주기 위해 필요한것.
+                1. getValue 에서 파일 타입일 경우 value를  '' 로 설정
+                2. multiple 설정 boolean 값 추가
+                3. value 설정이 아예 없어야 하니, value 속성을 commonProps 에서 분리
+                4. 렌더링 할 값을 file 속성인가에 따라서 다르게 렌더링.
+27일 2:20분 저장 참고
+                */}
                 <Controller
                   name="files"
                   control={control}
