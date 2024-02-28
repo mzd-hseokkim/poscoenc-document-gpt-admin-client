@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import { cilCommentBubble, cilPaperclip } from '@coreui/icons';
+import CIcon from '@coreui/icons-react';
 import {
   CButton,
   CCard,
@@ -12,8 +14,8 @@ import {
   CRow,
   CSmartTable,
 } from '@coreui/react-pro';
+import StatusBadge from 'components/badge/StatusBadge';
 import BoardPostDetailForm from 'components/board/BoardPostDetailForm';
-import { getBoardScopedColumns } from 'components/board/BoardScopedColumn';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import ModalContainer from 'components/modal/ModalContainer';
 import { useToast } from 'context/ToastContext';
@@ -21,13 +23,20 @@ import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
 import BoardService from 'services/board/BoardService';
 import { postColumnConfig } from 'utils/board/postColumnConfig';
-import { formatToIsoEndDate, formatToIsoStartDate, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
+import {
+  formatToIsoEndDate,
+  formatToIsoStartDate,
+  formatToYMD,
+  getCurrentDate,
+  getOneYearAgoDate,
+} from 'utils/common/dateUtils';
 import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
 
 const BoardManagementPage = () => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [clickedRowId, setClickedRowId] = useState(null);
   const [postList, setPostList] = useState([]);
+  const [postFormMode, setPostFormMode] = useState('');
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
   const [totalPostElements, setTotalPostElements] = useState(0);
   //REMIND searchForm audit 정보 통합해보기.
@@ -40,7 +49,7 @@ const BoardManagementPage = () => {
     toCreatedAt: getCurrentDate(),
     fromModifiedAt: getOneYearAgoDate(),
     toModifiedAt: getCurrentDate(),
-    deletionOption: '',
+    deletionOption: 'ALL',
   };
   const [searchFormData, setSearchFormData] = useState(initialSearchFormData);
   const isComponentMounted = useRef(true);
@@ -58,11 +67,34 @@ const BoardManagementPage = () => {
     }
   }, [pageableData]);
 
-  const handleClickedRowId = (newClickedRowId) => {
+  const handleRowClick = (newClickedRowId) => {
     setClickedRowId(newClickedRowId);
+    setPostFormMode('read');
+    modal.openModal();
   };
-  const scopedColumns = getBoardScopedColumns(handleClickedRowId, modal.openModal);
 
+  const scopedColumnsUpdate = {
+    title: (item) => {
+      return (
+        <td
+          style={{ cursor: 'pointer' }}
+          onClick={() => {
+            handleRowClick(item.id);
+          }}
+        >
+          {item.title}
+          {item.hasFiles ? <CIcon icon={cilPaperclip} size="sm" className="ms-2" /> : ''}
+          {item.comments ? <CIcon icon={cilCommentBubble} size="sm" className="ms-2" /> : ''}
+        </td>
+      );
+    },
+    createdAt: (item) => <td>{formatToYMD(item.createdAt)}</td>,
+    deleted: (item) => (
+      <td>
+        <StatusBadge deleted={item.deleted} />
+      </td>
+    ),
+  };
   const isDeletedRow = (selectedRows) => {
     return selectedRows.some((row) => row.deleted === true);
   };
@@ -78,6 +110,10 @@ const BoardManagementPage = () => {
     } finally {
       setSearchResultIsLoading(false);
     }
+  };
+  const handleSubmitSearchRequest = async (e) => {
+    e.preventDefault();
+    await searchPostList();
   };
   const handleSearchFormChange = ({ target: { id, value } }) => {
     setSearchFormData((prev) => ({ ...prev, [id]: value }));
@@ -96,20 +132,16 @@ const BoardManagementPage = () => {
     }
   };
 
-  const handleReset = () => {
-    setSearchFormData(initialSearchFormData);
+  const handleCloseModal = () => {
+    modal.closeModal();
+    setClickedRowId(null);
   };
 
-  const handleSubmitSearchRequest = async (e) => {
-    e.preventDefault();
-    await searchPostList();
-  };
-
-  const togglePostStatus = async (shouldDelete) => {
+  const togglePostStatus = async (deletionOption) => {
     try {
       const isSuccess = await BoardService.patchPostsDeletionOption(
         selectedRows.map((row) => row.id),
-        shouldDelete
+        deletionOption
       );
 
       if (isSuccess) {
@@ -125,7 +157,7 @@ const BoardManagementPage = () => {
         console.log(error);
       }
     } finally {
-      await handleSubmitSearchRequest();
+      await searchPostList();
     }
   };
 
@@ -219,7 +251,13 @@ const BoardManagementPage = () => {
                 <CRow className="mb-3">
                   <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
                     <CButton type="submit">{'검색'}</CButton>
-                    <CButton onClick={handleReset} color="primary" value="Reset">
+                    <CButton
+                      onClick={() => {
+                        setSearchFormData(initialSearchFormData);
+                      }}
+                      color="primary"
+                      value="Reset"
+                    >
                       초기화
                     </CButton>
                   </CCol>
@@ -260,7 +298,7 @@ const BoardManagementPage = () => {
             onSelectedItemsChange={setSelectedRows}
             onSorterChange={handlePageSortChange}
             paginationProps={smartPaginationProps}
-            scopedColumns={scopedColumns}
+            scopedColumns={scopedColumnsUpdate}
             selectable
             selected={selectedRows}
             tableProps={tableCustomProps}
@@ -277,7 +315,9 @@ const BoardManagementPage = () => {
           <ModalContainer visible={modal.isOpen} title="게시글" onClose={modal.closeModal} size="lg">
             <BoardPostDetailForm
               clickedRowId={clickedRowId}
-              fetchPosts={handleSubmitSearchRequest}
+              closeModal={handleCloseModal}
+              initialFormMode={postFormMode}
+              refreshPosts={searchPostList}
             ></BoardPostDetailForm>
           </ModalContainer>
         </CCardBody>

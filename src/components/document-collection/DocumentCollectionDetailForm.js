@@ -253,9 +253,9 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
                   fields={collectionSpecificFields}
                   formData={collectionDetail}
                   handleChange={handleChange}
-                  control={control}
                   errors={errors}
                 />
+                {/*FixMe remove controller*/}
                 <Controller
                   name="files"
                   control={control}
