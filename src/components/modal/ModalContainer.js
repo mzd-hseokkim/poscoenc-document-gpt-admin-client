@@ -2,7 +2,7 @@ import { CButton, CModal, CModalBody, CModalFooter, CModalHeader, CModalTitle } 
 
 const ModalContainer = ({ children, visible, title, onClose, size }) => {
   return (
-    <CModal size={size} alignment="center" visible={visible} onClose={onClose} portal={false}>
+    <CModal size={size} alignment="center" visible={visible} onClose={onClose} portal={false} scrollable>
       <CModalHeader>
         <CModalTitle>{title}</CModalTitle>
       </CModalHeader>

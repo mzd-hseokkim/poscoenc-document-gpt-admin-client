@@ -280,7 +280,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
               label="상위 메뉴"
               options={parentMenus}
               disabled={isReadMode}
-              invalid={errors.parentId}
+              invalid={!!errors.parentId}
               feedbackInvalid={errors.parentId?.message}
             ></CFormSelect>
           )}
@@ -305,6 +305,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
               control={control}
               render={({ field }) => (
                 <CFormCheck
+                  {...field}
                   id="allowChildren"
                   label="하위 메뉴 등록 가능 여부"
                   checked={field.value}
