@@ -12,11 +12,10 @@ import {
   CInputGroup,
   CRow,
 } from '@coreui/react-pro';
+import { useToast } from 'context/ToastContext';
 import { useRecoilValue } from 'recoil';
-
-import { useToast } from '../../context/ToastContext';
-import BoardCommentService from '../../services/board/BoardCommentService';
-import { userIdSelector } from '../../states/jwtTokenState';
+import BoardCommentService from 'services/board/BoardCommentService';
+import { userIdSelector } from 'states/jwtTokenState';
 
 const BoardCommentsForm = ({ postId }) => {
   const [commentText, setCommentText] = useState('');

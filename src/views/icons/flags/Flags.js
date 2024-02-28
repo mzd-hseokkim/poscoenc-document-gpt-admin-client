@@ -1,8 +1,9 @@
 import React from 'react';
-import { CCard, CCardBody, CCardHeader, CRow } from '@coreui/react-pro';
-import { getIconsView } from '../brands/Brands.js';
+
 import { flagSet } from '@coreui/icons';
+import { CCard, CCardBody, CCardHeader, CRow } from '@coreui/react-pro';
 import { DocsCallout } from 'src/components';
+import { getIconsView } from 'views/icons/brands/Brands.js';
 
 const CoreUIIcons = () => {
   return (

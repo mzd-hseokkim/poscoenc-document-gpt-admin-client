@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 
+import { useNavigation } from 'context/NavigationContext';
+import { useToast } from 'context/ToastContext';
+
 import { setupInterceptors } from './Api';
-import { useNavigation } from '../context/NavigationContext';
-import { useToast } from '../context/ToastContext';
 
 const SetupInterceptors = () => {
   const navigate = useNavigation();

@@ -17,15 +17,14 @@ import {
   CTabContent,
   CTabPane,
 } from '@coreui/react-pro';
+import avatar2 from 'assets/images/avatars/2.jpg';
+import avatar3 from 'assets/images/avatars/3.jpg';
+import avatar4 from 'assets/images/avatars/4.jpg';
+import avatar5 from 'assets/images/avatars/5.jpg';
+import avatar6 from 'assets/images/avatars/6.jpg';
+import avatar7 from 'assets/images/avatars/7.jpg';
+import avatar8 from 'assets/images/avatars/8.jpg';
 import { useDispatch, useSelector } from 'react-redux';
-
-import avatar2 from './../assets/images/avatars/2.jpg';
-import avatar3 from './../assets/images/avatars/3.jpg';
-import avatar4 from './../assets/images/avatars/4.jpg';
-import avatar5 from './../assets/images/avatars/5.jpg';
-import avatar6 from './../assets/images/avatars/6.jpg';
-import avatar7 from './../assets/images/avatars/7.jpg';
-import avatar8 from './../assets/images/avatars/8.jpg';
 
 const AppAside = () => {
   const dispatch = useDispatch();

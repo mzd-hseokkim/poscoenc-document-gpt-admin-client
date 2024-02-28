@@ -1,5 +1,5 @@
-import api from '../../api/Api';
-import { formatToYMD, getCurrentDate } from '../../utils/common/dateUtils';
+import api from 'api/Api';
+import { formatToYMD, getCurrentDate } from 'utils/common/dateUtils';
 
 const getSearchedCollectionList = async (params, pageable) => {
   const response = await api.get('/admin/document-collections', {

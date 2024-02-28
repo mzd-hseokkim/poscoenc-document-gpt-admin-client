@@ -1,4 +1,4 @@
-import api from '../api/Api';
+import api from 'api/Api';
 
 const postUser = async (payload) => {
   const response = await api.post('/admin/user-accounts', payload);

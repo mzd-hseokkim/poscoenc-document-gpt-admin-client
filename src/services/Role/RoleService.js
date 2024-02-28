@@ -1,4 +1,4 @@
-import api from '../../api/Api';
+import api from 'api/Api';
 
 const getRoles = async () => {
   const response = await api.get('/admin/roles');

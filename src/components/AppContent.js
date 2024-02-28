@@ -2,9 +2,7 @@ import React, { Suspense } from 'react';
 
 import { CContainer, CSpinner } from '@coreui/react-pro';
 import { Route, Routes } from 'react-router-dom';
-
-// routes config
-import routes from '../routes';
+import routes from 'routes';
 
 const spinnerDivStyle = {
   display: 'flex',

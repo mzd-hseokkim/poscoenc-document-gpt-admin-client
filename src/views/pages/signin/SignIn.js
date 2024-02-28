@@ -14,12 +14,11 @@ import {
   CLoadingButton,
   CRow,
 } from '@coreui/react-pro';
+import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-
-import { useToast } from '../../../context/ToastContext';
-import SignInService from '../../../services/signin/SignInService';
-import { emailValidationPattern, passwordValidationPattern } from '../../../utils/validationUtils';
+import SignInService from 'services/signin/SignInService';
+import { emailValidationPattern, passwordValidationPattern } from 'utils/validationUtils';
 
 const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false);

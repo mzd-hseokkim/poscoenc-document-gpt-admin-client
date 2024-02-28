@@ -11,21 +11,20 @@ import {
   CListGroupItem,
   CRow,
 } from '@coreui/react-pro';
+import FormLoadingCover from 'components/cover/FormLoadingCover';
+import HorizontalCFormInputList from 'components/input/HorizontalCFormInputList';
+import InputList from 'components/input/InputList';
+import { useToast } from 'context/ToastContext';
 import { Controller, useForm } from 'react-hook-form';
 import { useRecoilValue } from 'recoil';
-
-import { useToast } from '../../context/ToastContext';
-import DocumentCollectionFileService from '../../services/document-collection/DocumentCollectionFileService';
-import DocumentCollectionService from '../../services/document-collection/DocumentCollectionService';
-import { userIdSelector } from '../../states/jwtTokenState';
-import { getAuditFields } from '../../utils/common/auditFieldUtils';
-import { formatToYMD } from '../../utils/common/dateUtils';
-import { formatFileSize } from '../../utils/common/formatFileSize';
-import formModes from '../../utils/formModes';
-import { itemNameValidationPattern } from '../../utils/validationUtils';
-import FormLoadingCover from '../cover/FormLoadingCover';
-import HorizontalCFormInputList from '../input/HorizontalCFormInputList';
-import InputList from '../input/InputList';
+import DocumentCollectionFileService from 'services/document-collection/DocumentCollectionFileService';
+import DocumentCollectionService from 'services/document-collection/DocumentCollectionService';
+import { userIdSelector } from 'states/jwtTokenState';
+import { getAuditFields } from 'utils/common/auditFieldUtils';
+import { formatToYMD } from 'utils/common/dateUtils';
+import { formatFileSize } from 'utils/common/formatFileSize';
+import formModes from 'utils/formModes';
+import { itemNameValidationPattern } from 'utils/validationUtils';
 
 const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModal, refreshDocumentCollectionList }) => {
   const [collectionDetail, setCollectionDetail] = useState({});

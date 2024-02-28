@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react';
 
 import { CButton, CCard, CCardBody, CCardTitle, CCol, CRow, CSmartTable } from '@coreui/react-pro';
-
-import StatusBadge from '../../../components/badge/StatusBadge';
-import ModalContainer from '../../../components/modal/ModalContainer';
-import RoleDetailForm from '../../../components/role/RoleDetailForm';
-import { useToast } from '../../../context/ToastContext';
-import useModal from '../../../hooks/useModal';
-import RoleService from '../../../services/Role/RoleService';
-import { formatToYMD } from '../../../utils/common/dateUtils';
-import { roleColumnConfig } from '../../../utils/role/roleColumnConfig';
+import StatusBadge from 'components/badge/StatusBadge';
+import ModalContainer from 'components/modal/ModalContainer';
+import RoleDetailForm from 'components/role/RoleDetailForm';
+import { useToast } from 'context/ToastContext';
+import useModal from 'hooks/useModal';
+import RoleService from 'services/Role/RoleService';
+import { formatToYMD } from 'utils/common/dateUtils';
+import { roleColumnConfig } from 'utils/role/roleColumnConfig';
 
 const AdminManagementPage = () => {
   const [RoleList, setRoleList] = useState([]);

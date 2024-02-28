@@ -11,16 +11,15 @@ import {
   CRow,
   CSpinner,
 } from '@coreui/react-pro';
+import InputList from 'components/input/InputList';
+import { useToast } from 'context/ToastContext';
 import { Controller, useForm } from 'react-hook-form';
-
-import { useToast } from '../../context/ToastContext';
-import MenuService from '../../services/menu/MenuService';
-import RoleService from '../../services/Role/RoleService';
-import { getAuditFields } from '../../utils/common/auditFieldUtils';
-import { formatToYMD } from '../../utils/common/dateUtils';
-import formModes from '../../utils/formModes';
-import { itemNameValidationPattern } from '../../utils/validationUtils';
-import InputList from '../input/InputList';
+import MenuService from 'services/menu/MenuService';
+import RoleService from 'services/Role/RoleService';
+import { getAuditFields } from 'utils/common/auditFieldUtils';
+import { formatToYMD } from 'utils/common/dateUtils';
+import formModes from 'utils/formModes';
+import { itemNameValidationPattern } from 'utils/validationUtils';
 
 const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList }) => {
   const [formMode, setFormMode] = useState(initialFormMode);

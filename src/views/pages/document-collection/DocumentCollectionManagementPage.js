@@ -13,24 +13,23 @@ import {
   CRow,
   CSmartTable,
 } from '@coreui/react-pro';
-
-import StatusBadge from '../../../components/badge/StatusBadge';
-import ExcelDownloadCButton from '../../../components/button/ExcelDownloadCButton';
-import DocumentCollectionDetailForm from '../../../components/document-collection/DocumentCollectionDetailForm';
-import ModalContainer from '../../../components/modal/ModalContainer';
-import { useToast } from '../../../context/ToastContext';
-import useModal from '../../../hooks/useModal';
-import usePagination from '../../../hooks/usePagination';
-import DocumentCollectionService from '../../../services/document-collection/DocumentCollectionService';
+import StatusBadge from 'components/badge/StatusBadge';
+import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
+import DocumentCollectionDetailForm from 'components/document-collection/DocumentCollectionDetailForm';
+import ModalContainer from 'components/modal/ModalContainer';
+import { useToast } from 'context/ToastContext';
+import useModal from 'hooks/useModal';
+import usePagination from 'hooks/usePagination';
+import DocumentCollectionService from 'services/document-collection/DocumentCollectionService';
 import {
   formatToIsoEndDate,
   formatToIsoStartDate,
   formatToYMD,
   getCurrentDate,
   getOneYearAgoDate,
-} from '../../../utils/common/dateUtils';
-import { columnSorterCustomProps, tableCustomProps } from '../../../utils/common/smartTablePropsConfig';
-import { documentCollectionColumnConfig } from '../../../utils/document-collection/documentCollectionColumnConfig';
+} from 'utils/common/dateUtils';
+import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
+import { documentCollectionColumnConfig } from 'utils/document-collection/documentCollectionColumnConfig';
 
 const DocumentCollectionManagementPage = () => {
   const [documentCollectionList, setDocumentCollectionList] = useState([]);

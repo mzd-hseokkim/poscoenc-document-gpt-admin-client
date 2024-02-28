@@ -13,22 +13,16 @@ import {
   CRow,
   CSmartTable,
 } from '@coreui/react-pro';
-
-import StatusBadge from '../../../components/badge/StatusBadge';
-import MenuDetailForm from '../../../components/menu/MenuDetailForm';
-import ModalContainer from '../../../components/modal/ModalContainer';
-import { useToast } from '../../../context/ToastContext';
-import useModal from '../../../hooks/useModal';
-import usePagination from '../../../hooks/usePagination';
-import MenuService from '../../../services/menu/MenuService';
-import {
-  formatToIsoEndDate,
-  formatToIsoStartDate,
-  getCurrentDate,
-  getOneYearAgoDate,
-} from '../../../utils/common/dateUtils';
-import { iconMapper } from '../../../utils/common/iconMapper';
-import { menuColumnConfig } from '../../../utils/menu/menuColumnConfig';
+import StatusBadge from 'components/badge/StatusBadge';
+import MenuDetailForm from 'components/menu/MenuDetailForm';
+import ModalContainer from 'components/modal/ModalContainer';
+import { useToast } from 'context/ToastContext';
+import useModal from 'hooks/useModal';
+import usePagination from 'hooks/usePagination';
+import MenuService from 'services/menu/MenuService';
+import { formatToIsoEndDate, formatToIsoStartDate, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
+import { iconMapper } from 'utils/common/iconMapper';
+import { menuColumnConfig } from 'utils/menu/menuColumnConfig';
 
 const createInitialFormData = () => ({
   name: '',
