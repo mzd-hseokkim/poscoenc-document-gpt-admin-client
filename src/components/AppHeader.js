@@ -14,9 +14,9 @@ import {
   CNavItem,
   CNavLink,
 } from '@coreui/react-pro';
+import { logo } from 'assets/brand/logo';
 import { useDispatch, useSelector } from 'react-redux';
 import { NavLink } from 'react-router-dom';
-import { logo } from 'src/assets/brand/logo';
 
 import {
   AppHeaderDropdown,

@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
 
 import { CButton, CCol, CElementCover, CForm, CMultiSelect, CRow, CSpinner } from '@coreui/react-pro';
+import InputList from 'components/input/InputList';
+import { useToast } from 'context/ToastContext';
 import { Controller, useForm } from 'react-hook-form';
-
-import { useToast } from '../../context/ToastContext';
-import AdminService from '../../services/admin/AdminService';
-import RoleService from '../../services/Role/RoleService';
-import { getAuditFields } from '../../utils/common/auditFieldUtils';
-import { formatToYMD } from '../../utils/common/dateUtils';
-import formModes from '../../utils/formModes';
-import { emailValidationPattern, passwordValidationPattern } from '../../utils/validationUtils';
-import InputList from '../input/InputList';
+import AdminService from 'services/admin/AdminService';
+import RoleService from 'services/Role/RoleService';
+import { getAuditFields } from 'utils/common/auditFieldUtils';
+import { formatToYMD } from 'utils/common/dateUtils';
+import formModes from 'utils/formModes';
+import { emailValidationPattern, passwordValidationPattern } from 'utils/validationUtils';
 
 const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminList }) => {
   const [formMode, setFormMode] = useState(initialFormMode);

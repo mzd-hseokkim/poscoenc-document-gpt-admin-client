@@ -1,10 +1,9 @@
 import { useEffect } from 'react';
 
+import { useToast } from 'context/ToastContext';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-
-import { useToast } from '../context/ToastContext';
-import MenuService from '../services/menu/MenuService';
-import { uriUtil } from '../utils/common/uriUtil';
+import MenuService from 'services/menu/MenuService';
+import { uriUtil } from 'utils/common/uriUtil';
 
 export const ProtectRoutes = () => {
   const token = localStorage.getItem('token');

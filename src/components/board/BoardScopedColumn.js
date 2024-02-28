@@ -1,8 +1,7 @@
 import { cilCommentBubble, cilPaperclip } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
+import StatusBadge from 'components/badge/StatusBadge';
 import { format } from 'date-fns';
-
-import StatusBadge from '../badge/StatusBadge';
 
 export const getBoardScopedColumns = (handleClickedRowId, openModal) => ({
   id: (item) => <td>{item.id}</td>,

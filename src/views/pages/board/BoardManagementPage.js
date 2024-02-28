@@ -12,23 +12,17 @@ import {
   CRow,
   CSmartTable,
 } from '@coreui/react-pro';
-
-import BoardPostDetailForm from '../../../components/board/BoardPostDetailForm';
-import { getBoardScopedColumns } from '../../../components/board/BoardScopedColumn';
-import ExcelDownloadCButton from '../../../components/button/ExcelDownloadCButton';
-import ModalContainer from '../../../components/modal/ModalContainer';
-import { useToast } from '../../../context/ToastContext';
-import useModal from '../../../hooks/useModal';
-import usePagination from '../../../hooks/usePagination';
-import BoardService from '../../../services/board/BoardService';
-import { postColumnConfig } from '../../../utils/board/postColumnConfig';
-import {
-  formatToIsoEndDate,
-  formatToIsoStartDate,
-  getCurrentDate,
-  getOneYearAgoDate,
-} from '../../../utils/common/dateUtils';
-import { columnSorterCustomProps, tableCustomProps } from '../../../utils/common/smartTablePropsConfig';
+import BoardPostDetailForm from 'components/board/BoardPostDetailForm';
+import { getBoardScopedColumns } from 'components/board/BoardScopedColumn';
+import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
+import ModalContainer from 'components/modal/ModalContainer';
+import { useToast } from 'context/ToastContext';
+import useModal from 'hooks/useModal';
+import usePagination from 'hooks/usePagination';
+import BoardService from 'services/board/BoardService';
+import { postColumnConfig } from 'utils/board/postColumnConfig';
+import { formatToIsoEndDate, formatToIsoStartDate, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
+import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
 
 const BoardManagementPage = () => {
   const [selectedRows, setSelectedRows] = useState([]);

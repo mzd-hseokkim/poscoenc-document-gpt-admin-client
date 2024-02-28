@@ -12,15 +12,14 @@ import {
   CRow,
   CSmartTable,
 } from '@coreui/react-pro';
+import StatusBadge from 'components/badge/StatusBadge';
+import BoardCommentsForm from 'components/board/BoardCommentsForm';
+import FormLoadingCover from 'components/cover/FormLoadingCover';
+import { useToast } from 'context/ToastContext';
 import { format } from 'date-fns';
 import { useRecoilValue } from 'recoil';
-
-import BoardCommentsForm from './BoardCommentsForm';
-import { useToast } from '../../context/ToastContext';
-import BoardService from '../../services/board/BoardService';
-import { userIdSelector } from '../../states/jwtTokenState';
-import StatusBadge from '../badge/StatusBadge';
-import FormLoadingCover from '../cover/FormLoadingCover';
+import BoardService from 'services/board/BoardService';
+import { userIdSelector } from 'states/jwtTokenState';
 
 const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
   const [postDetails, setPostDetails] = useState(null);

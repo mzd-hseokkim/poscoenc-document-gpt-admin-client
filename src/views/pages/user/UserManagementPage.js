@@ -12,15 +12,14 @@ import {
   CRow,
   CSmartTable,
 } from '@coreui/react-pro';
-
-import StatusBadge from '../../../components/badge/StatusBadge';
-import ModalContainer from '../../../components/modal/ModalContainer';
-import UserDetailForm from '../../../components/user/UserDetailForm';
-import { useToast } from '../../../context/ToastContext';
-import useModal from '../../../hooks/useModal';
-import usePagination from '../../../hooks/usePagination';
-import UserService from '../../../services/UserService';
-import { userColumnConfig } from '../../../utils/user/userColumnConfig';
+import StatusBadge from 'components/badge/StatusBadge';
+import ModalContainer from 'components/modal/ModalContainer';
+import UserDetailForm from 'components/user/UserDetailForm';
+import { useToast } from 'context/ToastContext';
+import useModal from 'hooks/useModal';
+import usePagination from 'hooks/usePagination';
+import UserService from 'services/UserService';
+import { userColumnConfig } from 'utils/user/userColumnConfig';
 
 const UserManagementPage = () => {
   const [userList, setUserList] = useState([]);

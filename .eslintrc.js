@@ -39,6 +39,7 @@ module.exports = {
     'arrow-spacing': ['error', { before: true, after: true }],
     'no-duplicate-imports': 'error',
     'import/no-mutable-exports': 'error',
+    'import/no-relative-parent-imports': 'error',
     'import/first': 'error',
     'import/no-webpack-loader-syntax': 'error',
     'no-iterator': 'error',

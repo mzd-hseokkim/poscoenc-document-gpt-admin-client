@@ -1,4 +1,4 @@
-import api from '../../api/Api';
+import api from 'api/Api';
 
 const signIn = async (payload) => {
   const response = await api.post('/admin/public/auth/sign-in', payload);

@@ -2,14 +2,15 @@ import React from 'react';
 
 import CIcon from '@coreui/icons-react';
 import { CSidebar, CSidebarBrand, CSidebarNav, CSidebarToggler } from '@coreui/react-pro';
+import { logoNegative } from 'assets/brand/logo-negative';
+import { sygnet } from 'assets/brand/sygnet';
+import useSideBarItems from 'hooks/useSideBarItems';
 import { useDispatch, useSelector } from 'react-redux';
 import SimpleBar from 'simplebar-react';
-import { logoNegative } from 'src/assets/brand/logo-negative';
-import { sygnet } from 'src/assets/brand/sygnet';
 
 import { AppSidebarNav } from './AppSidebarNav';
+
 import 'simplebar/dist/simplebar.min.css';
-import useSideBarItems from '../hooks/useSideBarItems';
 
 const AppSidebar = () => {
   const dispatch = useDispatch();

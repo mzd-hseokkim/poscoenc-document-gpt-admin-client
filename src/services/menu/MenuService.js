@@ -1,4 +1,4 @@
-import api from '../../api/Api';
+import api from 'api/Api';
 
 const getMenus = async (params, pageable) => {
   const response = await api.get('/admin/menus', {

@@ -1,5 +1,5 @@
-import api from '../../api/Api';
-import { formatToYMD, getCurrentDate } from '../../utils/common/dateUtils';
+import api from 'api/Api';
+import { formatToYMD, getCurrentDate } from 'utils/common/dateUtils';
 
 const getPostDetail = async (postId) => {
   const response = await api.get(`/admin/boards/${postId}`);

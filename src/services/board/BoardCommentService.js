@@ -1,4 +1,4 @@
-import api from '../../api/Api';
+import api from 'api/Api';
 
 const getPostComments = async (postId) => {
   const response = await api.get('/admin/board-comments', {

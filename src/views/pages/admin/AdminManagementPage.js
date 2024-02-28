@@ -13,22 +13,21 @@ import {
   CRow,
   CSmartTable,
 } from '@coreui/react-pro';
-
-import AdminDetailForm from '../../../components/admin/AdminDetailForm';
-import StatusBadge from '../../../components/badge/StatusBadge';
-import ModalContainer from '../../../components/modal/ModalContainer';
-import { useToast } from '../../../context/ToastContext';
-import useModal from '../../../hooks/useModal';
-import usePagination from '../../../hooks/usePagination';
-import AdminService from '../../../services/admin/AdminService';
-import { adminColumnConfig } from '../../../utils/admin/adminColumnConfig';
+import AdminDetailForm from 'components/admin/AdminDetailForm';
+import StatusBadge from 'components/badge/StatusBadge';
+import ModalContainer from 'components/modal/ModalContainer';
+import { useToast } from 'context/ToastContext';
+import useModal from 'hooks/useModal';
+import usePagination from 'hooks/usePagination';
+import AdminService from 'services/admin/AdminService';
+import { adminColumnConfig } from 'utils/admin/adminColumnConfig';
 import {
   formatToIsoEndDate,
   formatToIsoStartDate,
   formatToYMD,
   getCurrentDate,
   getOneYearAgoDate,
-} from '../../../utils/common/dateUtils';
+} from 'utils/common/dateUtils';
 
 const createInitialFormData = () => ({
   name: '',

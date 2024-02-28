@@ -1,4 +1,4 @@
-import api from '../../api/Api';
+import api from 'api/Api';
 
 const getDownloadDocument = async (file) => {
   const response = await api.get(`/admin/document-collection-files/download/${file.id}`, {

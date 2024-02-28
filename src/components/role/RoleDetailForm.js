@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
 
 import { CButton, CCol, CElementCover, CForm, CRow, CSpinner } from '@coreui/react-pro';
+import InputList from 'components/input/InputList';
+import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
-
-import { useToast } from '../../context/ToastContext';
-import RoleService from '../../services/Role/RoleService';
-import { getAuditFields } from '../../utils/common/auditFieldUtils';
-import { formatToYMD } from '../../utils/common/dateUtils';
-import formModes from '../../utils/formModes';
-import InputList from '../input/InputList';
+import RoleService from 'services/Role/RoleService';
+import { getAuditFields } from 'utils/common/auditFieldUtils';
+import { formatToYMD } from 'utils/common/dateUtils';
+import formModes from 'utils/formModes';
 
 const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList }) => {
   const [formMode, setFormMode] = useState(initialFormMode);

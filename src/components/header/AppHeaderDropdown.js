@@ -22,11 +22,10 @@ import {
   CDropdownMenu,
   CDropdownToggle,
 } from '@coreui/react-pro';
+import avatar8 from 'assets/images/avatars/8.jpg';
 import { useNavigate } from 'react-router-dom';
 import { useResetRecoilState } from 'recoil';
-
-import avatar8 from './../../assets/images/avatars/8.jpg';
-import { jwtTokenState } from '../../states/jwtTokenState';
+import { jwtTokenState } from 'states/jwtTokenState';
 
 const AppHeaderDropdown = () => {
   const resetJwtToken = useResetRecoilState(jwtTokenState);

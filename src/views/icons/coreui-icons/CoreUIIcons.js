@@ -3,8 +3,7 @@ import React from 'react';
 import { freeSet } from '@coreui/icons';
 import { CCard, CCardBody, CCardHeader, CRow } from '@coreui/react-pro';
 import { DocsCallout } from 'src/components';
-
-import { getIconsView } from '../brands/Brands.js';
+import { getIconsView } from 'views/icons/brands/Brands.js';
 
 const CoreUIIcons = () => {
   return (

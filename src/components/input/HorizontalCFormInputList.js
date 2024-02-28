@@ -1,7 +1,6 @@
 import { CCol, CFormInput, CFormLabel, CRow } from '@coreui/react-pro';
-
-import { formatToYMD } from '../../utils/common/dateUtils';
-import StatusBadge from '../badge/StatusBadge';
+import StatusBadge from 'components/badge/StatusBadge';
+import { formatToYMD } from 'utils/common/dateUtils';
 
 const getValue = (field, formData) => {
   if (field.value) {

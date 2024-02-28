@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react-pro';
-
-import MenuService from '../services/menu/MenuService';
-import { iconMapper } from '../utils/common/iconMapper';
+import MenuService from 'services/menu/MenuService';
+import { iconMapper } from 'utils/common/iconMapper';
 
 const fixedMenu = [
   {
