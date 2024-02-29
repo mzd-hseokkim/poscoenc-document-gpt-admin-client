@@ -159,119 +159,127 @@ const DocumentCollectionManagementPage = () => {
 
   return (
     <>
-      <CCard className="row g-3">
-        <CCardBody>
-          <CCardTitle>문서 관리</CCardTitle>
-          <CForm onSubmit={handleSubmitSearchRequest}>
-            <CRow className="mb-3">
-              <CCol md={4}>
-                <CFormInput
-                  id="name"
-                  label="문서 집합 이름"
-                  value={searchFormData.name}
-                  onChange={handleSearchFormChange}
-                />
-              </CCol>
-              <CCol md={4}>
-                <CFormInput
-                  id="displayName"
-                  label="표시명"
-                  value={searchFormData.displayName}
-                  onChange={handleSearchFormChange}
-                ></CFormInput>
-              </CCol>
-              <CCol md={4} className="position-relative">
-                <CFormInput
-                  id="createdByName"
-                  label="게시자"
-                  onChange={handleSearchFormChange}
-                  value={searchFormData.createdByName}
-                />
-              </CCol>
-            </CRow>
-            <CRow className="mb-3"></CRow>
-            <CRow className="mb-3">
-              <CCol md={6}>
-                <CDateRangePicker
-                  id="createdAt"
-                  label="생성일"
-                  startDate={searchFormData.fromCreatedAt}
-                  endDate={searchFormData.toCreatedAt}
-                  onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
-                  onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
-                />
-              </CCol>
-              <CCol md={4}>
-                <CFormSelect
-                  id="deletionOption"
-                  label="삭제된 문서 포함"
-                  name="deletionOption"
-                  options={[
-                    { label: '선택하지 않음', value: '' },
-                    { label: '예', value: 'YES' },
-                    { label: '아니오', value: 'NO' },
-                  ]}
-                  value={searchFormData.deletionOption}
-                  onChange={handleSearchFormChange}
-                />
-              </CCol>
-            </CRow>
+      <CRow>
+        <CCard className="row g-3">
+          <CCardBody>
+            <CCardTitle>문서 관리</CCardTitle>
+            <CForm onSubmit={handleSubmitSearchRequest}>
+              <CRow className="mb-3">
+                <CCol md={4}>
+                  <CFormInput
+                    id="name"
+                    label="문서 집합 이름"
+                    value={searchFormData.name}
+                    onChange={handleSearchFormChange}
+                  />
+                </CCol>
+                <CCol md={4}>
+                  <CFormInput
+                    id="displayName"
+                    label="표시명"
+                    value={searchFormData.displayName}
+                    onChange={handleSearchFormChange}
+                  ></CFormInput>
+                </CCol>
+                <CCol md={4} className="position-relative">
+                  <CFormInput
+                    id="createdByName"
+                    label="게시자"
+                    onChange={handleSearchFormChange}
+                    value={searchFormData.createdByName}
+                  />
+                </CCol>
+              </CRow>
+              <CRow className="mb-3"></CRow>
+              <CRow className="mb-3">
+                <CCol md={6}>
+                  <CDateRangePicker
+                    id="createdAt"
+                    label="생성일"
+                    startDate={searchFormData.fromCreatedAt}
+                    endDate={searchFormData.toCreatedAt}
+                    onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
+                    onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
+                  />
+                </CCol>
+                <CCol md={4}>
+                  <CFormSelect
+                    id="deletionOption"
+                    label="삭제된 문서 포함"
+                    name="deletionOption"
+                    options={[
+                      { label: '선택하지 않음', value: '' },
+                      { label: '예', value: 'YES' },
+                      { label: '아니오', value: 'NO' },
+                    ]}
+                    value={searchFormData.deletionOption}
+                    onChange={handleSearchFormChange}
+                  />
+                </CCol>
+              </CRow>
+              <CRow className="mb-3">
+                <CCol className="d-grid gap-2 d-md-flex justify-content-md-center">
+                  <CButton type="submit">검색</CButton>
+                  <CButton color="primary" value="Reset" onClick={() => setSearchFormData(initialSearchFormData)}>
+                    초기화
+                  </CButton>
+                </CCol>
+              </CRow>
+            </CForm>
+          </CCardBody>
+        </CCard>
+      </CRow>
+      <CRow>
+        <CCard className="row g-3">
+          <CCardBody>
             <CRow className="mb-3">
               <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-                <CButton type="submit">검색</CButton>
-                <CButton color="primary" value="Reset" onClick={() => setSearchFormData(initialSearchFormData)}>
-                  초기화
+                <CButton onClick={handleUploadClick}>문서 게시</CButton>
+                <CButton
+                  disabled={selectedRows?.length === 0 || isDeletedRow(selectedRows)}
+                  onClick={() => toggleDocumentCollectionStatus(true)}
+                >
+                  {'삭제'}
+                </CButton>
+                <CButton
+                  disabled={selectedRows?.length === 0 || !isDeletedRow(selectedRows)}
+                  onClick={() => toggleDocumentCollectionStatus(false)}
+                >
+                  {'복구'}
                 </CButton>
               </CCol>
             </CRow>
-          </CForm>
-          <CRow className="mb-3">
-            <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-              <CButton onClick={handleUploadClick}>문서 게시</CButton>
-              <CButton
-                disabled={selectedRows?.length === 0 || isDeletedRow(selectedRows)}
-                onClick={() => toggleDocumentCollectionStatus(true)}
-              >
-                {'삭제'}
-              </CButton>
-              <CButton
-                disabled={selectedRows?.length === 0 || !isDeletedRow(selectedRows)}
-                onClick={() => toggleDocumentCollectionStatus(false)}
-              >
-                {'복구'}
-              </CButton>
-            </CCol>
-          </CRow>
-          <CRow className="mb-3">
-            <CSmartTable
-              columnSorter={columnSorterCustomProps}
-              columns={documentCollectionColumnConfig}
-              items={documentCollectionList}
-              itemsPerPage={pageableData.size}
-              itemsPerPageLabel="페이지당 문서 집합 개수"
-              itemsPerPageSelect
-              loading={searchResultIsLoading}
-              noItemsLabel="검색 결과가 없습니다."
-              onItemsPerPageChange={handlePageSizeChange}
-              onSelectedItemsChange={setSelectedRows}
-              onSorterChange={handlePageSortChange}
-              paginationProps={smartPaginationProps}
-              scopedColumns={scopedColumns}
-              selectable
-              selected={selectedRows}
-              tableProps={tableCustomProps}
-            />
-          </CRow>
-          <CRow className="mt-3">
-            <CCol className="d-grid gap-2 justify-content-end">
-              <ExcelDownloadCButton
-                downloadFunction={DocumentCollectionService.getDownloadSearchedCollectionList}
-                searchFormData={searchFormData}
+            <CRow className="mb-3">
+              <CSmartTable
+                columnSorter={columnSorterCustomProps}
+                columns={documentCollectionColumnConfig}
+                items={documentCollectionList}
+                itemsPerPage={pageableData.size}
+                itemsPerPageLabel="페이지당 문서 집합 개수"
+                itemsPerPageSelect
+                loading={searchResultIsLoading}
+                noItemsLabel=""
+                onItemsPerPageChange={handlePageSizeChange}
+                onSelectedItemsChange={setSelectedRows}
+                onSorterChange={handlePageSortChange}
+                paginationProps={smartPaginationProps}
+                scopedColumns={scopedColumns}
+                selectable
+                selected={selectedRows}
+                tableProps={tableCustomProps}
               />
-            </CCol>
-          </CRow>
-        </CCardBody>
-      </CCard>
+            </CRow>
+            <CRow className="mt-3">
+              <CCol className="d-grid gap-2 justify-content-end">
+                <ExcelDownloadCButton
+                  downloadFunction={DocumentCollectionService.getDownloadSearchedCollectionList}
+                  searchFormData={searchFormData}
+                />
+              </CCol>
+            </CRow>
+          </CCardBody>
+        </CCard>
+      </CRow>
       {/*REMIND Modal open 시 url 변경되게 수정*/}
       <ModalContainer
         visible={modal.isOpen}
