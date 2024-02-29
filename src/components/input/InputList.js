@@ -1,4 +1,4 @@
-import { CCol, CFormInput, CRow } from '@coreui/react-pro';
+import { CCol, CFormInput, CFormLabel, CRow } from '@coreui/react-pro';
 
 const InputList = ({ fields, handleChange, isReadMode, formData, register, errors = {} }) => {
   return fields.map((field) => {
@@ -11,26 +11,40 @@ const InputList = ({ fields, handleChange, isReadMode, formData, register, error
     const commonProps = {
       id: field.name,
       name: field.name,
-      label: field.label,
       type: field.type === 'date' ? 'text' : field.type,
       min: field.type === 'number' ? 0 : '',
-      placeholder: field.placeholder,
+      placeholder: isReadMode ? '' : field.placeholder,
       readOnly: isReadMode,
       disabled: field.isDisabled,
+      plainText: isReadMode || field.isDisabled,
     };
 
     return (
       <CRow className="mb-3" key={field.name}>
         <CCol>
           {register ? (
-            <CFormInput
-              {...commonProps}
-              {...register(field.name, field.rules)}
-              invalid={!!errors[field.name]}
-              feedbackInvalid={errors[field.name]?.message}
-            />
+            <CRow>
+              <CFormLabel htmlFor="staticEmail" className="col-md-2 col-form-label fw-bold">
+                {field.label}
+              </CFormLabel>
+              <CCol>
+                <CFormInput
+                  {...commonProps}
+                  {...register(field.name, field.rules)}
+                  invalid={!!errors[field.name]}
+                  feedbackInvalid={errors[field.name]?.message}
+                />
+              </CCol>
+            </CRow>
           ) : (
-            <CFormInput {...commonProps} onChange={handleChange} value={field.value || formData[field.name]} />
+            <CRow>
+              <CFormLabel htmlFor="staticEmail" className="col-md-2 col-form-label">
+                {field.label}
+              </CFormLabel>
+              <CCol>
+                <CFormInput {...commonProps} onChange={handleChange} value={field.value || formData[field.name]} />
+              </CCol>
+            </CRow>
           )}
         </CCol>
       </CRow>
