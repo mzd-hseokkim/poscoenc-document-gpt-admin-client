@@ -1,95 +1,60 @@
 import React, { useEffect, useState } from 'react';
 
-import {
-  CButton,
-  CCard,
-  CCardBody,
-  CCol,
-  CForm,
-  CFormInput,
-  CFormLabel,
-  CFormTextarea,
-  CRow,
-  CSmartTable,
-} from '@coreui/react-pro';
-import StatusBadge from 'components/badge/StatusBadge';
+import { CButton, CCard, CCardBody, CCol, CForm, CFormInput, CFormLabel, CFormTextarea, CRow } from '@coreui/react-pro';
 import BoardCommentsForm from 'components/board/BoardCommentsForm';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
+import HorizontalCFormInputList from 'components/input/HorizontalCFormInputList';
 import { useToast } from 'context/ToastContext';
-import { format } from 'date-fns';
+import { useForm } from 'react-hook-form';
 import { useRecoilValue } from 'recoil';
 import BoardService from 'services/board/BoardService';
 import { userIdSelector } from 'states/jwtTokenState';
+import { getAuditFields } from 'utils/common/auditFieldUtils';
+import { formatToYMD } from 'utils/common/dateUtils';
+import formModes from 'utils/formModes';
 
-const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
-  const [postDetails, setPostDetails] = useState(null);
+const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refreshPosts }) => {
+  const [postDetails, setPostDetails] = useState({});
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
-  const [isViewMode, setIsViewMode] = useState(true);
+  //REMIND use setFormMode when implements posting service
+  const [formMode, setFormMode] = useState(initialFormMode || '');
 
   const { addToast } = useToast();
   const currentUserId = useRecoilValue(userIdSelector);
+  const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
+  const {
+    register,
+    reset,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({ mode: 'onChange' });
 
   //REMIND 칼럼 정의 변수 명 수정하기
-  const topInfoColumns = [
-    { key: 'id', label: 'ID', _style: { width: '20%' } },
-    { key: 'commentCount', label: '댓글수', _style: { width: '25%' } },
-    { key: 'viewCount', label: '조회수', _style: { width: '25%' } },
+
+  const postSpecificFields = [
     {
-      key: 'deleted',
+      md: 2,
+      name: 'id',
+      label: '아이디',
+      isDisabled: isUpdateMode,
+      isRendered: !isCreateMode,
+    },
+    {
+      name: 'commentCount',
+      label: '댓글수',
+      isDisabled: isUpdateMode,
+    },
+    {
+      name: 'viewCount',
+      label: '조회수',
+      isDisabled: isUpdateMode,
+    },
+    {
+      md: 2,
+      name: 'deleted',
       label: '삭제 여부',
-      _style: { width: '30%' },
     },
   ];
-
-  const topInfoData = [
-    {
-      id: postDetails?.id,
-      commentCount: postDetails?.comments ? postDetails.comments.length : 0,
-      viewCount: postDetails?.viewCount,
-      deleted: postDetails?.deleted,
-    },
-  ];
-
-  const middleInfoColumns = [
-    { key: 'createdByName', label: '작성자', _style: { width: '40%' } },
-    {
-      key: 'createdAt',
-      label: '작성일시',
-      _style: { width: '30%' },
-    },
-    {
-      key: 'modifiedAt',
-      label: '수정일시',
-      _style: { width: '30%' },
-    },
-  ];
-  const middleInfoData = [
-    {
-      createdByName: postDetails?.createdByName,
-      createdAt: postDetails?.createdAt,
-      modifiedAt: postDetails?.modifiedAt,
-    },
-  ];
-
-  const topInfoScopedColumns = {
-    deleted: (item) => (
-      <td>
-        <StatusBadge deleted={item.deleted} />
-      </td>
-    ),
-  };
-  const middleInfoScopedColumns = {
-    createdAt: (item) => <td>{item.createdAt ? format(new Date(item.createdAt), 'yyyy/MM/dd HH:mm:ss') : ''}</td>,
-    modifiedAt: (item) => <td>{item.modifiedAt ? format(new Date(item.modifiedAt), 'yyyy/MM/dd HH:mm:ss') : ''}</td>,
-  };
-
-  const infoTableHeaderProps = {
-    color: 'light',
-  };
-
-  const infoTableProps = {
-    bordered: true,
-  };
 
   const fetchPostDetails = async () => {
     if (!clickedRowId) {
@@ -97,8 +62,15 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
     }
     setGetDetailIsLoading(true);
     try {
-      const details = await BoardService.getPostDetail(clickedRowId);
-      setPostDetails(details);
+      const detail = await BoardService.getPostDetail(clickedRowId);
+      const formattedDetail = {
+        ...detail,
+        commentCount: detail.comments.length,
+        createdAt: detail.createdAt && formatToYMD(detail.createdAt),
+        modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
+      };
+      setPostDetails(formattedDetail);
+      reset(formattedDetail);
     } catch (error) {
       if (error.response?.status === 404) {
         addToast({ message: '해당 게시글을 찾을 수 없습니다.' });
@@ -111,28 +83,26 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
   };
 
   useEffect(() => {
-    fetchPostDetails();
+    if (!isCreateMode) {
+      fetchPostDetails();
+    } else {
+      //REMIND imple post service
+    }
   }, [clickedRowId]);
 
-  const handleFormMode = (isViewMode) => {
-    setIsViewMode(isViewMode);
-  };
-
-  const handleSubmitModifiedData = async (e) => {
-    e.preventDefault();
-    const submittedData = new FormData(e.target);
+  //REMIND separate modify logic with create logic when imple posting service
+  const handleSubmitModifiedData = async (data) => {
+    //REMIND hasFiles 관리 안하고 있는상태, 게시물 첨부파일 구현시 고려
     const modifiedData = {
       id: clickedRowId,
-      title: submittedData.get('postTitle'),
-      content: submittedData.get('postContents'),
-      hasFiles: submittedData.get('postFileUpload')?.size > 0 ?? false,
+      ...data,
     };
     try {
       const isModified = await BoardService.putModifiedPostDetail(modifiedData);
       if (isModified) {
+        await setFormMode('read');
+        refreshPosts();
         await fetchPostDetails();
-        await handleFormMode(true);
-        await refreshPosts();
       }
     } catch (error) {
       const status = error.response?.status;
@@ -149,13 +119,14 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
   const renderPostTitleInput = () => (
     <CRow className="mt-3">
       <CCol>
-        <CFormLabel htmlFor="postTitle">제목</CFormLabel>
+        <CFormLabel htmlFor="title">제목</CFormLabel>
         <CFormInput
           type="text"
-          id="postTitle"
-          name="postTitle"
+          id="title"
+          name="title"
           defaultValue={postDetails?.title}
-          readOnly={isViewMode}
+          readOnly={isReadMode}
+          {...register('title')}
         />
       </CCol>
     </CRow>
@@ -164,14 +135,15 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
   const renderPostContentTextarea = () => (
     <CRow className="mt-3">
       <CCol>
-        <CFormLabel htmlFor="postContents">내용</CFormLabel>
+        <CFormLabel htmlFor="content">내용</CFormLabel>
         <CFormTextarea
-          id="postContents"
-          name="postContents"
+          id="content"
+          name="content"
           rows="5"
           placeholder="내용을 작성 해 주세요."
           defaultValue={postDetails?.content}
-          readOnly={isViewMode}
+          readOnly={isReadMode}
+          {...register('content')}
         />
       </CCol>
     </CRow>
@@ -179,21 +151,22 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
 
   const renderFormActions = () => (
     <>
-      {isViewMode && (
-        <CRow className="row justify-content-end">
-          {/*TODO fix to detail's createdBy (Long Id)*/}
+      {isReadMode && (
+        <CRow className="row mt-3 justify-content-end">
           {postDetails?.createdBy === currentUserId && (
-            <CCol className="col-auto mb-3">
-              <CButton onClick={() => handleFormMode(false)}>수정</CButton>
+            <CCol className="col-auto">
+              <CButton onClick={() => setFormMode('update')}>수정</CButton>
             </CCol>
           )}
         </CRow>
       )}
-      {!isViewMode && (
+      {!isReadMode && (
         <CRow className="justify-content-end">
           <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-            <CButton type="submit">저장</CButton>
-            <CButton type="reset" onClick={() => handleFormMode(true)}>
+            <CButton type="submit" onClick={handleSubmit(handleSubmitModifiedData)}>
+              저장
+            </CButton>
+            <CButton type="reset" onClick={() => setFormMode('read')}>
               취소
             </CButton>
           </CCol>
@@ -204,22 +177,20 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
 
   return (
     <>
-      <CForm onSubmit={handleSubmitModifiedData}>
+      <CForm onSubmit={handleSubmit(handleSubmitModifiedData)}>
         <CCard className="mb-3">
           <CCardBody>
-            <CSmartTable
-              columns={topInfoColumns}
-              items={topInfoData}
-              scopedColumns={topInfoScopedColumns}
-              tableHeadProps={infoTableHeaderProps}
-              tableProps={infoTableProps}
+            <HorizontalCFormInputList
+              register={register}
+              fields={postSpecificFields}
+              formData={postDetails}
+              isReadMode={isReadMode}
             />
-            <CSmartTable
-              columns={middleInfoColumns}
-              items={middleInfoData}
-              scopedColumns={middleInfoScopedColumns}
-              tableHeadProps={infoTableHeaderProps}
-              tableProps={infoTableProps}
+            <HorizontalCFormInputList
+              register={register}
+              fields={getAuditFields(formMode)}
+              formData={postDetails}
+              isReadMode={isReadMode}
             />
           </CCardBody>
         </CCard>
@@ -227,14 +198,12 @@ const BoardPostDetailForm = ({ clickedRowId, refreshPosts }) => {
           <CCardBody>
             {renderPostTitleInput()}
             {renderPostContentTextarea()}
+            {renderFormActions()}
+            <FormLoadingCover isLoading={getDetailIsLoading} />
           </CCardBody>
         </CCard>
-        <CCard>
-          {renderFormActions()}
-          <FormLoadingCover isLoading={getDetailIsLoading} />
-        </CCard>
       </CForm>
-      {isViewMode && <BoardCommentsForm postId={clickedRowId} isViewMode={isViewMode} />}
+      {isReadMode && <BoardCommentsForm postId={clickedRowId} />}
     </>
   );
 };
