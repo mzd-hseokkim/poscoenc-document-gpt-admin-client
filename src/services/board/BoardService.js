@@ -63,8 +63,8 @@ const postNew = async (newPost) => {
   return response.data;
 };
 
-const putModifiedPostDetail = async (payload) => {
-  const result = await api.put(`/admin/boards/${payload.id}`, payload);
+const putModifiedPostDetail = async (modifiedPost) => {
+  const result = await api.put(`/admin/boards/${modifiedPost.id}`, modifiedPost);
   return result.status === 200;
 };
 const BoardService = {

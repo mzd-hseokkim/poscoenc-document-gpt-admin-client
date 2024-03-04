@@ -2,14 +2,14 @@ import { CCol, CFormInput, CFormLabel, CRow } from '@coreui/react-pro';
 import StatusBadge from 'components/badge/StatusBadge';
 import { formatToYMD } from 'utils/common/dateUtils';
 
-const getValue = (field, formData) => {
+const getValue = (field, formFieldData) => {
   if (field.value) {
     return field.value;
   }
-  if (field.type === 'date' && formData[field.name]) {
-    return formatToYMD(formData[field.name]);
+  if (field.type === 'date' && formFieldData) {
+    return formatToYMD(formFieldData);
   }
-  return formData[field.name];
+  return formFieldData;
 };
 const HorizontalCFormInputList = ({ defaultMd, fields, formData, isReadMode, register }) => {
   return (
@@ -41,7 +41,7 @@ const HorizontalCFormInputList = ({ defaultMd, fields, formData, isReadMode, reg
             multiple: field.multiple,
             readOnly: isReadMode,
             disabled: field.isDisabled,
-            defaultValue: getValue(field, formData),
+            defaultValue: getValue(field, formData[field.name]),
           };
 
           return (
