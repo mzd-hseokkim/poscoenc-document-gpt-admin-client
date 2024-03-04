@@ -34,19 +34,19 @@ import { documentCollectionColumnConfig } from 'utils/document-collection/docume
 const DocumentCollectionManagementPage = () => {
   const [documentCollectionList, setDocumentCollectionList] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
-  const [clickedRowId, setClickedRowId] = useState();
   const [detailFormMode, setDetailFormMode] = useState('');
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
   const [totalCollectionElements, setTotalCollectionElements] = useState(0);
+  const [noItemsLabel, setNoItemsLabel] = useState('');
 
-  const initialSearchFormData = () => ({
+  const initialSearchFormData = {
     name: '',
     displayName: '',
     createdByName: '',
     fromCreatedAt: getOneYearAgoDate(),
     toCreatedAt: getCurrentDate(),
     deletionOption: 'ALL',
-  });
+  };
 
   const [searchFormData, setSearchFormData] = useState(initialSearchFormData);
   const isComponentMounted = useRef(true);
@@ -73,6 +73,9 @@ const DocumentCollectionManagementPage = () => {
       const searchResult = await DocumentCollectionService.getSearchedCollectionList(searchFormData, pageableData);
       setDocumentCollectionList(searchResult.content);
       setTotalCollectionElements(searchResult.totalElements);
+      if (searchResult.content.length === 0 && noItemsLabel === '') {
+        setNoItemsLabel('검색 결과가 없습니다.');
+      }
     } catch (error) {
       //REMIND only sever error occur
       console.log(error);
@@ -82,9 +85,8 @@ const DocumentCollectionManagementPage = () => {
   };
 
   const handleRowClick = (id) => {
-    setClickedRowId(id);
     setDetailFormMode('read');
-    modal.openModal();
+    modal.openModal(`?id=${id}`);
   };
 
   const handleSearchFormChange = ({ target: { id, value } }) => {
@@ -131,7 +133,6 @@ const DocumentCollectionManagementPage = () => {
   };
   const handleCloseModal = () => {
     modal.closeModal();
-    setClickedRowId(null);
   };
 
   const scopedColumns = {
@@ -253,7 +254,7 @@ const DocumentCollectionManagementPage = () => {
                 itemsPerPageLabel="페이지당 문서 집합 개수"
                 itemsPerPageSelect
                 loading={searchResultIsLoading}
-                noItemsLabel={''}
+                noItemsLabel={noItemsLabel}
                 onItemsPerPageChange={handlePageSizeChange}
                 onSelectedItemsChange={setSelectedRows}
                 onSorterChange={handlePageSortChange}
@@ -278,7 +279,6 @@ const DocumentCollectionManagementPage = () => {
       {/*REMIND Modal open 시 url 변경되게 수정*/}
       <ModalContainer visible={modal.isOpen} title={'문서 집합 상세'} onClose={handleCloseModal} size="lg">
         <DocumentCollectionDetailForm
-          clickedRowId={clickedRowId}
           closeModal={handleCloseModal}
           initialFormMode={detailFormMode}
           refreshDocumentCollectionList={searchDocumentCollectionList}
