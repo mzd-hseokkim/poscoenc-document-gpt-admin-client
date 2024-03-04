@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { CButton, CCard, CCardBody, CCol, CForm, CFormInput, CFormLabel, CFormTextarea, CRow } from '@coreui/react-pro';
 import BoardCommentsForm from 'components/board/BoardCommentsForm';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import HorizontalCFormInputList from 'components/input/HorizontalCFormInputList';
+import InputList from 'components/input/InputList';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
 import { useRecoilValue } from 'recoil';
@@ -180,13 +180,8 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
       <CForm onSubmit={handleSubmit(handleSubmitModifiedData)}>
         <CCard className="mb-3">
           <CCardBody>
-            <HorizontalCFormInputList
-              register={register}
-              fields={postSpecificFields}
-              formData={postDetails}
-              isReadMode={isReadMode}
-            />
-            <HorizontalCFormInputList
+            <InputList register={register} fields={postSpecificFields} formData={postDetails} isReadMode={isReadMode} />
+            <InputList
               register={register}
               fields={getAuditFields(formMode)}
               formData={postDetails}

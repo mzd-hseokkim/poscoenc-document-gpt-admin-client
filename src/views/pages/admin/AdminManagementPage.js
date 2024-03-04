@@ -51,6 +51,7 @@ const AdminManagementPage = () => {
   const [formMode, setFormMode] = useState('');
   const [totalAdminElements, setTotalAdminElements] = useState(0);
   const [formData, setFormData] = useState(createInitialFormData);
+  const [noItemsLabel, setNoItemsLabel] = useState('');
 
   const isComponentMounted = useRef(true);
 
@@ -73,6 +74,9 @@ const AdminManagementPage = () => {
       const data = await AdminService.getAdmins(formData, pageableData);
       setAdminList(data.content);
       setTotalAdminElements(data.totalElements);
+      if (data.content.length === 0 && noItemsLabel === '') {
+        setNoItemsLabel('검색 결과가 없습니다.');
+      }
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -162,7 +166,7 @@ const AdminManagementPage = () => {
               <CCol md={4}>
                 <CDateRangePicker
                   id="createdAt"
-                  label="생성일"
+                  label="등록일"
                   startDate={formData.fromCreatedAt}
                   endDate={formData.toCreatedAt}
                   onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
@@ -245,7 +249,7 @@ const AdminManagementPage = () => {
               itemsPerPage={pageableData.size}
               onItemsPerPageChange={handlePageSizeChange}
               itemsPerPageLabel="페이지당 관리자 개수"
-              noItemsLabel="검색 결과가 없습니다."
+              noItemsLabel={noItemsLabel}
               loading={isLoading}
               items={AdminList}
               columns={adminColumnConfig}

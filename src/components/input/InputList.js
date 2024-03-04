@@ -1,4 +1,5 @@
 import { CCol, CFormInput, CFormLabel, CRow } from '@coreui/react-pro';
+import StatusBadge from 'components/badge/StatusBadge';
 
 const InputList = ({ fields, handleChange, isReadMode, formData, register, errors = {} }) => {
   return fields.map((field) => {
@@ -6,6 +7,19 @@ const InputList = ({ fields, handleChange, isReadMode, formData, register, error
 
     if (!isRendered) {
       return null;
+    }
+
+    if (field.name === 'deleted') {
+      return (
+        <CRow className="mb-3" key={field.name}>
+          <CCol>
+            <CFormLabel htmlFor="staticEmail" className="col-md-2 col-form-label fw-bold">
+              {field.label}
+            </CFormLabel>
+            <StatusBadge deleted={formData.deleted} />
+          </CCol>
+        </CRow>
+      );
     }
 
     const commonProps = {
