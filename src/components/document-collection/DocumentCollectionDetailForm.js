@@ -1,21 +1,10 @@
 import React, { useEffect, useState } from 'react';
 
-import {
-  CButton,
-  CCard,
-  CCardBody,
-  CCol,
-  CForm,
-  CFormInput,
-  CListGroup,
-  CListGroupItem,
-  CRow,
-} from '@coreui/react-pro';
+import { CButton, CCard, CCardBody, CCol, CForm, CListGroup, CListGroupItem, CRow } from '@coreui/react-pro';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import HorizontalCFormInputList from 'components/input/HorizontalCFormInputList';
-import InputList from 'components/input/InputList';
 import { useToast } from 'context/ToastContext';
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { useRecoilValue } from 'recoil';
 import DocumentCollectionFileService from 'services/document-collection/DocumentCollectionFileService';
 import DocumentCollectionService from 'services/document-collection/DocumentCollectionService';
@@ -34,21 +23,9 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
 
   const { addToast } = useToast();
   const currentUserId = useRecoilValue(userIdSelector);
-  const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
+  const { isReadMode, isUpdateMode } = formModes(formMode);
 
-  const {
-    register,
-    reset,
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm({ mode: 'onChange' });
-
-  const createModeInitialFormData = {
-    name: '',
-    displayName: '',
-    files: [],
-  };
+  const { register, reset, handleSubmit } = useForm({ mode: 'onChange' });
 
   const collectionSpecificFields = [
     {
@@ -56,7 +33,6 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
       name: 'id',
       label: '아이디',
       isDisabled: isUpdateMode,
-      isRendered: !isCreateMode,
     },
     {
       name: 'name',
@@ -86,16 +62,11 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
       md: 2,
       name: 'deleted',
       label: '삭제 여부',
-      isRendered: !isCreateMode,
     },
   ];
 
   useEffect(() => {
-    if (!isCreateMode) {
-      fetchCollectionDetail();
-    } else {
-      setCollectionDetail(createModeInitialFormData);
-    }
+    fetchCollectionDetail();
   }, [clickedRowId]);
 
   const fetchCollectionDetail = async () => {
@@ -122,27 +93,6 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
       setGetDetailIsLoading(false);
     }
   };
-  const postNewCollection = async (data) => {
-    try {
-      const formData = new FormData();
-      formData.append('name', data.name);
-      formData.append('displayName', data.displayName);
-      if (data.files && data.files.length) {
-        for (const file of data.files) {
-          formData.append('files', file);
-        }
-      }
-      const isPosted = await DocumentCollectionService.postNewCollection(formData);
-      if (isPosted) {
-        refreshDocumentCollectionList();
-        closeModal();
-      }
-    } catch (error) {
-      //REMIND 생성 실패 시 500 Error
-      console.log(error);
-    }
-  };
-
   const putModifiedCollection = async (data) => {
     try {
       const isModified = await DocumentCollectionService.putModifiedCollectionDetail(data);
@@ -163,20 +113,8 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     }
     //REMIND loading spinner
   };
-
-  const handleChange = (e) => {
-    const { id, value } = e.target;
-    setCollectionDetail((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
-  };
   const onSubmit = async (data) => {
-    if (isCreateMode) {
-      await postNewCollection(data);
-    } else if (isUpdateMode) {
-      await putModifiedCollection(data);
-    }
+    await putModifiedCollection(data);
   };
 
   const handleDownload = async (file) => {
@@ -191,6 +129,9 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
       }
     }
   };
+  const handleBatchDownload = async (file) => {
+    //TODO imple batch download
+  };
   const handleDeleteRestoreClick = async (collectionId) => {
     const shouldDelete = !collectionDetail.deleted;
     try {
@@ -198,7 +139,7 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     } catch (error) {
       addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
-    fetchCollectionDetail();
+    await fetchCollectionDetail();
     refreshDocumentCollectionList();
   };
 
@@ -232,67 +173,45 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
       <CForm onSubmit={handleSubmit(onSubmit)}>
         <CCard className="mb-3">
           <CCardBody>
-            {!isCreateMode ? (
-              <>
-                <HorizontalCFormInputList
-                  register={register}
-                  fields={collectionSpecificFields}
-                  formData={collectionDetail}
-                  isReadMode={isReadMode}
-                ></HorizontalCFormInputList>
-                <HorizontalCFormInputList
-                  register={register}
-                  fields={getAuditFields(formMode)}
-                  formData={collectionDetail}
-                  isReadMode={isReadMode}
-                />
-              </>
-            ) : (
-              <>
-                <InputList
-                  fields={collectionSpecificFields}
-                  formData={collectionDetail}
-                  handleChange={handleChange}
-                  errors={errors}
-                />
-                {/*FixMe remove controller*/}
-                <Controller
-                  name="files"
-                  control={control}
-                  render={({ field }) => (
-                    <CFormInput
-                      label="첨부 문서"
-                      type="file"
-                      multiple
-                      onChange={(e) => field.onChange(e.target.files)}
-                    />
-                  )}
-                />
-              </>
-            )}
+            <HorizontalCFormInputList
+              register={register}
+              fields={collectionSpecificFields}
+              formData={collectionDetail}
+              isReadMode={isReadMode}
+            ></HorizontalCFormInputList>
+            <HorizontalCFormInputList
+              register={register}
+              fields={getAuditFields(formMode)}
+              formData={collectionDetail}
+              isReadMode={isReadMode}
+            />
             {renderFormActions()}
           </CCardBody>
         </CCard>
-        {!isCreateMode && (
-          <CCard>
-            <CCardBody>
-              <CListGroup>
-                {collectionDetail?.files?.map((file, index) => (
-                  <CListGroupItem
-                    key={index}
-                    component="button"
-                    onClick={() => handleDownload(file)}
-                    className="d-flex justify-content-between align-items-center"
-                  >
-                    {/*REMIND 파란색 -> 클릭 시 보라색이름, 다운로드 흔적 남기기*/}
-                    <span>{file.originalName}</span>
+        <CCard>
+          <CCardBody>
+            <CListGroup>
+              {collectionDetail?.files?.map((file, index) => (
+                <CListGroupItem key={index} className="d-flex justify-content-between align-items-center">
+                  <div className="d-flex align-items-end">
+                    <span style={{ marginRight: `10px` }}>{file.originalName}</span>
                     <small>{formatFileSize(file.size)}</small>
-                  </CListGroupItem>
-                ))}
-              </CListGroup>
-            </CCardBody>
-          </CCard>
-        )}
+                  </div>
+                  <CButton onClick={() => handleDownload(file)}>다운로드</CButton>
+                </CListGroupItem>
+              ))}
+            </CListGroup>
+            {collectionDetail?.files?.length > 1 && (
+              <CRow>
+                <CCol className="d-flex justify-content-end">
+                  <CButton className="mt-3" onClick={handleBatchDownload}>
+                    일괄 다운로드
+                  </CButton>
+                </CCol>
+              </CRow>
+            )}
+          </CCardBody>
+        </CCard>
         <FormLoadingCover isLoading={getDetailIsLoading} />
       </CForm>
     </>
