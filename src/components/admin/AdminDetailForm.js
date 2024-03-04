@@ -210,7 +210,7 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
             <CMultiSelect
               id="detail-form-roles"
               {...field}
-              placeholder={isReadMode ? '' : '권한을 선택하세요.'}
+              placeholder="권한을 선택하세요."
               selectAllLabel="모두 선택"
               options={roles}
               virtualScroller
