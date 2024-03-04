@@ -30,7 +30,7 @@ export const AppSidebarNav = ({ items, refetchMenuList }) => {
     return (
       <>
         {icon && icon}
-        {name && <span>{name}</span>}
+        {name && name}
         {badge && (
           <CBadge color={badge.color} className="ms-auto">
             {badge.text}
@@ -76,15 +76,15 @@ export const AppSidebarNav = ({ items, refetchMenuList }) => {
   };
 
   const navGroup = (item, index) => {
-    const { component, name, icon, isFavorite, ...rest } = item;
+    const { component, name, icon, to, ...rest } = item;
     const Component = component;
 
     return (
       <Component
         idx={String(index)}
         key={index}
-        toggler={navLink(name, icon, undefined, isFavorite)}
-        visible={location.pathname.startsWith(rest.to)}
+        toggler={navLink(name, icon)}
+        visible={location.pathname.startsWith(to)}
         {...rest}
       >
         {item.items?.map((item, index) => (item.items ? navGroup(item, index) : navItem(item, index)))}
