@@ -1,10 +1,7 @@
 import React from 'react';
 
-import CIcon from '@coreui/icons-react';
 import { CSidebar, CSidebarBrand, CSidebarNav, CSidebarToggler } from '@coreui/react-pro';
-import { logoNegative } from 'assets/brand/logo-negative';
-import { sygnet } from 'assets/brand/sygnet';
-import useSideBarItems from 'hooks/useSideBarItems';
+import useSidebarItems from 'hooks/useSidebarItems';
 import { useDispatch, useSelector } from 'react-redux';
 import SimpleBar from 'simplebar-react';
 
@@ -16,7 +13,7 @@ const AppSidebar = () => {
   const dispatch = useDispatch();
   const unfoldable = useSelector((state) => state.sidebarUnfoldable);
   const sidebarShow = useSelector((state) => state.sidebarShow);
-  const navItems = useSideBarItems();
+  const { menuItems, refetchMenuList } = useSidebarItems();
 
   return (
     <CSidebar
@@ -28,12 +25,11 @@ const AppSidebar = () => {
       }}
     >
       <CSidebarBrand className="d-none d-md-flex" to="/">
-        <CIcon className="sidebar-brand-full" icon={logoNegative} height={35} />
-        <CIcon className="sidebar-brand-narrow" icon={sygnet} height={35} />
+        POSCO E&C
       </CSidebarBrand>
       <CSidebarNav>
         <SimpleBar>
-          <AppSidebarNav items={navItems} />
+          <AppSidebarNav items={menuItems} refetchMenuList={refetchMenuList} />
         </SimpleBar>
       </CSidebarNav>
       <CSidebarToggler
