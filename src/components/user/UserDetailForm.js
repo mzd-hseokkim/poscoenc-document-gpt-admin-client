@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { CButton, CCol, CElementCover, CForm, CFormTextarea, CRow, CSpinner } from '@coreui/react-pro';
+import { CButton, CCol, CElementCover, CForm, CFormLabel, CFormTextarea, CRow, CSpinner } from '@coreui/react-pro';
 import InputList from 'components/input/InputList';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
@@ -149,13 +149,16 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
 
   const renderMemoField = () => (
     <CRow className="mb-3">
+      <CFormLabel htmlFor="detail-form-memo" className="col-md-2 col-form-label fw-bold">
+        메모
+      </CFormLabel>
       <CCol>
         <CFormTextarea
           {...register('memo')}
-          id="memo"
+          id="detail-form-memo"
           name="memo"
-          label="메모"
-          placeholder="메모를 입력하세요."
+          placeholder={isReadMode ? '' : '메모를 입력하세요.'}
+          plainText={isReadMode}
           readOnly={isReadMode}
         />
       </CCol>

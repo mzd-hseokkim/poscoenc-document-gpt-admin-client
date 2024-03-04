@@ -6,6 +6,7 @@ import {
   CElementCover,
   CForm,
   CFormCheck,
+  CFormLabel,
   CFormSelect,
   CMultiSelect,
   CRow,
@@ -239,9 +240,30 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
     closeModal();
     fetchMenuList();
   };
+  const renderAllowChildrenCheck = () => (
+    <CRow className="mb-3">
+      <CFormLabel htmlFor="detail-form-allowChildren" className="col-md-3 col-form-label fw-bold">
+        하위 메뉴 등록 가능 여부
+      </CFormLabel>
+      <CCol>
+        <Controller
+          name="allowChildren"
+          control={control}
+          render={({ field }) => (
+            <CCol className="mt-2">
+              <CFormCheck {...field} id="detail-form-allowChildren" checked={field.value} disabled={isReadMode} />
+            </CCol>
+          )}
+        />
+      </CCol>
+    </CRow>
+  );
 
   const renderRoleSelect = () => (
     <CRow className="mb-3">
+      <CFormLabel htmlFor="detail-form-allowedRoles" className="col-md-2 col-form-label fw-bold">
+        인가된 권한
+      </CFormLabel>
       <CCol>
         <Controller
           name="allowedRoles"
@@ -250,8 +272,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
           render={({ field }) => (
             <CMultiSelect
               {...field}
-              id="allowedRoles"
-              label="인가된 권한"
+              id="detail-form-allowedRoles"
               placeholder="권한을 선택하세요."
               selectAllLabel="모두 선택"
               options={roles}
@@ -268,6 +289,9 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
 
   const renderParentSelect = () => (
     <CRow className="mb-3">
+      <CFormLabel htmlFor="detail-form-parentId" className="col-md-2 col-form-label fw-bold">
+        상위 메뉴
+      </CFormLabel>
       <CCol>
         <Controller
           name="parentId"
@@ -276,8 +300,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
           render={({ field }) => (
             <CFormSelect
               {...field}
-              id="parentId"
-              label="상위 메뉴"
+              id="detail-form-parentId"
               options={parentMenus}
               disabled={isReadMode}
               invalid={!!errors.parentId}
@@ -298,23 +321,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
       )}
       <CForm onSubmit={handleSubmit(onSubmit)}>
         <InputList fields={menuBasicFields} isReadMode={isReadMode} register={register} errors={errors} />
-        <CRow className="mb-3">
-          <CCol>
-            <Controller
-              name="allowChildren"
-              control={control}
-              render={({ field }) => (
-                <CFormCheck
-                  {...field}
-                  id="allowChildren"
-                  label="하위 메뉴 등록 가능 여부"
-                  checked={field.value}
-                  disabled={isReadMode}
-                />
-              )}
-            />
-          </CCol>
-        </CRow>
+        {renderAllowChildrenCheck()}
         <InputList fields={menuSettingFields} isReadMode={isReadMode} register={register} errors={errors} />
         {renderRoleSelect()}
         {renderParentSelect()}

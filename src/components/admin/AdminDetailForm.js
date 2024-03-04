@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { CButton, CCol, CElementCover, CForm, CMultiSelect, CRow, CSpinner } from '@coreui/react-pro';
+import { CButton, CCol, CElementCover, CForm, CFormLabel, CMultiSelect, CRow, CSpinner } from '@coreui/react-pro';
 import InputList from 'components/input/InputList';
 import { useToast } from 'context/ToastContext';
 import { Controller, useForm } from 'react-hook-form';
@@ -198,6 +198,9 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
 
   const renderRoleSelect = () => (
     <CRow className="mb-3">
+      <CFormLabel htmlFor="detail-form-roles" className="col-md-2 col-form-label fw-bold">
+        인가된 권한
+      </CFormLabel>
       <CCol>
         <Controller
           name="roles"
@@ -205,10 +208,9 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
           rules={{ required: '권한은 필수 입력 항목입니다.' }}
           render={({ field }) => (
             <CMultiSelect
+              id="detail-form-roles"
               {...field}
-              id="roles"
-              label="인가된 권한"
-              placeholder="권한을 선택하세요."
+              placeholder={isReadMode ? '' : '권한을 선택하세요.'}
               selectAllLabel="모두 선택"
               options={roles}
               virtualScroller
