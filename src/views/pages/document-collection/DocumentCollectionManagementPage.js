@@ -129,10 +129,6 @@ const DocumentCollectionManagementPage = () => {
       await searchDocumentCollectionList();
     }
   };
-  const handleUploadClick = () => {
-    setDetailFormMode('create');
-    modal.openModal();
-  };
   const handleCloseModal = () => {
     modal.closeModal();
     setClickedRowId(null);
@@ -195,7 +191,7 @@ const DocumentCollectionManagementPage = () => {
                 <CCol md={6}>
                   <CDateRangePicker
                     id="createdAt"
-                    label="생성일"
+                    label="등록일"
                     startDate={searchFormData.fromCreatedAt}
                     endDate={searchFormData.toCreatedAt}
                     onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
@@ -234,7 +230,6 @@ const DocumentCollectionManagementPage = () => {
           <CCardBody>
             <CRow className="mb-3">
               <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-                <CButton onClick={handleUploadClick}>문서 게시</CButton>
                 <CButton
                   disabled={selectedRows?.length === 0 || isDeletedRow(selectedRows)}
                   onClick={() => toggleDocumentCollectionStatus(true)}
@@ -258,7 +253,7 @@ const DocumentCollectionManagementPage = () => {
                 itemsPerPageLabel="페이지당 문서 집합 개수"
                 itemsPerPageSelect
                 loading={searchResultIsLoading}
-                noItemsLabel=""
+                noItemsLabel={''}
                 onItemsPerPageChange={handlePageSizeChange}
                 onSelectedItemsChange={setSelectedRows}
                 onSorterChange={handlePageSortChange}
@@ -281,12 +276,7 @@ const DocumentCollectionManagementPage = () => {
         </CCard>
       </CRow>
       {/*REMIND Modal open 시 url 변경되게 수정*/}
-      <ModalContainer
-        visible={modal.isOpen}
-        title={detailFormMode === 'create' ? '문서 게시' : '문서 집합 상세'}
-        onClose={handleCloseModal}
-        size="lg"
-      >
+      <ModalContainer visible={modal.isOpen} title={'문서 집합 상세'} onClose={handleCloseModal} size="lg">
         <DocumentCollectionDetailForm
           clickedRowId={clickedRowId}
           closeModal={handleCloseModal}
