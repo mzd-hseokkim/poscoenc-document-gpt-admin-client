@@ -1,6 +1,18 @@
 import React, { useEffect, useState } from 'react';
 
-import { CButton, CCard, CCardBody, CCol, CForm, CFormInput, CFormLabel, CFormTextarea, CRow } from '@coreui/react-pro';
+import {
+  CButton,
+  CCard,
+  CCardBody,
+  CCol,
+  CForm,
+  CFormInput,
+  CFormLabel,
+  CFormTextarea,
+  CModalBody,
+  CModalFooter,
+  CRow,
+} from '@coreui/react-pro';
 import BoardCommentsForm from 'components/board/BoardCommentsForm';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import HorizontalCFormInputList from 'components/input/HorizontalCFormInputList';
@@ -152,7 +164,7 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
   const renderFormActions = () => (
     <>
       {isReadMode && (
-        <CRow className="row mt-3 justify-content-end">
+        <CRow className="row justify-content-end">
           {postDetails?.createdBy === currentUserId && (
             <CCol className="col-auto">
               <CButton onClick={() => setFormMode('update')}>수정</CButton>
@@ -177,33 +189,36 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
 
   return (
     <>
-      <CForm onSubmit={handleSubmit(handleSubmitModifiedData)}>
-        <CCard className="mb-3">
-          <CCardBody>
-            <HorizontalCFormInputList
-              register={register}
-              fields={postSpecificFields}
-              formData={postDetails}
-              isReadMode={isReadMode}
-            />
-            <HorizontalCFormInputList
-              register={register}
-              fields={getAuditFields(formMode)}
-              formData={postDetails}
-              isReadMode={isReadMode}
-            />
-          </CCardBody>
-        </CCard>
-        <CCard>
-          <CCardBody>
-            {renderPostTitleInput()}
-            {renderPostContentTextarea()}
-            {renderFormActions()}
-            <FormLoadingCover isLoading={getDetailIsLoading} />
-          </CCardBody>
-        </CCard>
-      </CForm>
-      {isReadMode && <BoardCommentsForm postId={clickedRowId} />}
+      <FormLoadingCover isLoading={getDetailIsLoading} />
+      <CModalBody>
+        <CForm onSubmit={handleSubmit(handleSubmitModifiedData)}>
+          <CCard className="mb-3">
+            <CCardBody>
+              <HorizontalCFormInputList
+                register={register}
+                fields={postSpecificFields}
+                formData={postDetails}
+                isReadMode={isReadMode}
+              />
+              <HorizontalCFormInputList
+                register={register}
+                fields={getAuditFields(formMode)}
+                formData={postDetails}
+                isReadMode={isReadMode}
+              />
+            </CCardBody>
+          </CCard>
+          <CCard>
+            <CCardBody>
+              {renderPostTitleInput()}
+              {renderPostContentTextarea()}
+            </CCardBody>
+          </CCard>
+        </CForm>
+        {/*REMIND 댓글창 ui 리팩토링*/}
+        {isReadMode && <BoardCommentsForm postId={clickedRowId} />}
+      </CModalBody>
+      <CModalFooter>{renderFormActions()}</CModalFooter>
     </>
   );
 };

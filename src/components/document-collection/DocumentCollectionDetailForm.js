@@ -1,6 +1,17 @@
 import React, { useEffect, useState } from 'react';
 
-import { CButton, CCard, CCardBody, CCol, CForm, CListGroup, CListGroupItem, CRow } from '@coreui/react-pro';
+import {
+  CButton,
+  CCard,
+  CCardBody,
+  CCol,
+  CForm,
+  CListGroup,
+  CListGroupItem,
+  CModalBody,
+  CModalFooter,
+  CRow,
+} from '@coreui/react-pro';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import HorizontalCFormInputList from 'components/input/HorizontalCFormInputList';
 import { useToast } from 'context/ToastContext';
@@ -113,6 +124,11 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     }
     //REMIND loading spinner
   };
+
+  const handleModifyCancelClick = async () => {
+    setFormMode('read');
+    await fetchCollectionDetail();
+  };
   const onSubmit = async (data) => {
     await putModifiedCollection(data);
   };
@@ -145,7 +161,7 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
 
   const renderFormActions = () => (
     <>
-      <CRow className="row mt-3 justify-content-end">
+      <CRow className="row justify-content-end">
         <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
           {isReadMode ? (
             <>
@@ -156,12 +172,18 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
               )}
             </>
           ) : (
-            <CButton type="button" onClick={handleSubmit(onSubmit)}>
-              저장
-            </CButton>
+            <>
+              <CButton type="button" onClick={handleSubmit(onSubmit)}>
+                저장
+              </CButton>
+              <CButton onClick={handleModifyCancelClick}>취소</CButton>
+            </>
           )}
           <CButton onClick={() => handleDeleteRestoreClick(collectionDetail.id)}>
             {collectionDetail.deleted ? '복구' : '삭제'}
+          </CButton>
+          <CButton color="primary" onClick={closeModal}>
+            닫기
           </CButton>
         </CCol>
       </CRow>
@@ -170,50 +192,52 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
 
   return (
     <>
-      <CForm onSubmit={handleSubmit(onSubmit)}>
-        <CCard className="mb-3">
-          <CCardBody>
-            <HorizontalCFormInputList
-              register={register}
-              fields={collectionSpecificFields}
-              formData={collectionDetail}
-              isReadMode={isReadMode}
-            ></HorizontalCFormInputList>
-            <HorizontalCFormInputList
-              register={register}
-              fields={getAuditFields(formMode)}
-              formData={collectionDetail}
-              isReadMode={isReadMode}
-            />
-            {renderFormActions()}
-          </CCardBody>
-        </CCard>
-        <CCard>
-          <CCardBody>
-            <CListGroup>
-              {collectionDetail?.files?.map((file, index) => (
-                <CListGroupItem key={index} className="d-flex justify-content-between align-items-center">
-                  <div className="d-flex align-items-end">
-                    <span style={{ marginRight: `10px` }}>{file.originalName}</span>
-                    <small>{formatFileSize(file.size)}</small>
-                  </div>
-                  <CButton onClick={() => handleDownload(file)}>다운로드</CButton>
-                </CListGroupItem>
-              ))}
-            </CListGroup>
-            {collectionDetail?.files?.length > 1 && (
-              <CRow>
-                <CCol className="d-flex justify-content-end">
-                  <CButton className="mt-3" onClick={handleBatchDownload}>
-                    일괄 다운로드
-                  </CButton>
-                </CCol>
-              </CRow>
-            )}
-          </CCardBody>
-        </CCard>
-        <FormLoadingCover isLoading={getDetailIsLoading} />
-      </CForm>
+      <FormLoadingCover isLoading={getDetailIsLoading} />
+      <CModalBody>
+        <CForm onSubmit={handleSubmit(onSubmit)}>
+          <CCard className="mb-3">
+            <CCardBody>
+              <HorizontalCFormInputList
+                register={register}
+                fields={collectionSpecificFields}
+                formData={collectionDetail}
+                isReadMode={isReadMode}
+              ></HorizontalCFormInputList>
+              <HorizontalCFormInputList
+                register={register}
+                fields={getAuditFields(formMode)}
+                formData={collectionDetail}
+                isReadMode={isReadMode}
+              />
+            </CCardBody>
+          </CCard>
+          <CCard>
+            <CCardBody>
+              <CListGroup>
+                {collectionDetail?.files?.map((file, index) => (
+                  <CListGroupItem key={index} className="d-flex justify-content-between align-items-center">
+                    <div className="d-flex align-items-end">
+                      <span style={{ marginRight: `10px` }}>{file.originalName}</span>
+                      <small>{formatFileSize(file.size)}</small>
+                    </div>
+                    <CButton onClick={() => handleDownload(file)}>다운로드</CButton>
+                  </CListGroupItem>
+                ))}
+              </CListGroup>
+              {collectionDetail?.files?.length > 1 && (
+                <CRow>
+                  <CCol className="d-flex justify-content-end">
+                    <CButton className="mt-3" onClick={handleBatchDownload}>
+                      일괄 다운로드
+                    </CButton>
+                  </CCol>
+                </CRow>
+              )}
+            </CCardBody>
+          </CCard>
+        </CForm>
+      </CModalBody>
+      <CModalFooter>{renderFormActions()}</CModalFooter>
     </>
   );
 };
