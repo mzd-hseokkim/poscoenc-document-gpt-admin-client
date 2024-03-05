@@ -34,7 +34,6 @@ const AppHeaderDropdown = () => {
   const handleSignOut = () => {
     localStorage.removeItem('token');
     resetJwtToken();
-    console.log();
     navigate('/sign-in');
   };
 

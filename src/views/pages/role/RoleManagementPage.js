@@ -133,7 +133,7 @@ const AdminManagementPage = () => {
                   </td>
                 ),
               }}
-              // FIXME item 정보 변경될 때 item이 증가
+              // FIXME item 정보 변경된 후 checkbox 선택시 items 항목 추가됨(중복)
               onSelectedItemsChange={(items) => {
                 setCheckedItems(items);
               }}
