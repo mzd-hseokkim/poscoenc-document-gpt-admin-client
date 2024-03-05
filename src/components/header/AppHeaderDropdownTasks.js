@@ -28,48 +28,12 @@ const AppHeaderDropdownTasks = () => {
         </CDropdownHeader>
         <CDropdownItem className="d-block">
           <div className="small mb-1">
-            Upgrade NPM &amp; Bower{' '}
-            <span className="float-end">
-              <strong>0%</strong>
-            </span>
-          </div>
-          <CProgress thin color="info-gradient" value={0} />
-        </CDropdownItem>
-        <CDropdownItem className="d-block">
-          <div className="small mb-1">
-            ReactJS Version{' '}
+            ReactJS Version
             <span className="float-end">
               <strong>25%</strong>
             </span>
           </div>
           <CProgress thin color="danger-gradient" value={25} />
-        </CDropdownItem>
-        <CDropdownItem className="d-block">
-          <div className="small mb-1">
-            VueJS Version{' '}
-            <span className="float-end">
-              <strong>50%</strong>
-            </span>
-          </div>
-          <CProgress thin color="warning-gradient" value={50} />
-        </CDropdownItem>
-        <CDropdownItem className="d-block">
-          <div className="small mb-1">
-            Add new layouts{' '}
-            <span className="float-end">
-              <strong>75%</strong>
-            </span>
-          </div>
-          <CProgress thin color="info-gradient" value={75} />
-        </CDropdownItem>
-        <CDropdownItem className="d-block">
-          <div className="small mb-1">
-            Angular 2 Cli Version{' '}
-            <span className="float-end">
-              <strong>100%</strong>
-            </span>
-          </div>
-          <CProgress thin color="success-gradient" value={100} />
         </CDropdownItem>
         <CDropdownItem className="text-center border-top">
           <strong>View all tasks</strong>

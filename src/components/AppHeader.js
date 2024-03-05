@@ -51,12 +51,6 @@ const AppHeader = () => {
               Dashboard
             </CNavLink>
           </CNavItem>
-          <CNavItem>
-            <CNavLink href="#">Users</CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink href="#">Settings</CNavLink>
-          </CNavItem>
         </CHeaderNav>
         <CHeaderNav className="ms-auto me-4">
           <CButtonGroup aria-label="Theme switch">
