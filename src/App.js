@@ -34,7 +34,8 @@ function App() {
     if (token) {
       setAccessToken(token);
     }
-  }, []);
+    console.log(token);
+  });
 
   return (
     <HashRouter>
