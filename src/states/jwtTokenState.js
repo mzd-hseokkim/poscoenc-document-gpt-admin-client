@@ -14,16 +14,23 @@ export const isSignedInSelector = selector({
 export const userIdSelector = selector({
   key: 'UserIdSelector',
   get: ({ get }) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const decoded = decodeJwt(token);
-        return decoded.id;
-      } catch (error) {
-        console.error('JWT 디코딩 중 오류 발생', error);
-        return undefined;
-      }
+    const token = get(jwtTokenState);
+    if (!token) {
+      return undefined;
     }
-    return undefined;
+    const decoded = decodeJwt(token);
+    return decoded.id;
+  },
+});
+
+export const userRoleSelector = selector({
+  key: 'userRoleSelector',
+  get: ({ get }) => {
+    const token = get(jwtTokenState);
+    if (!token) {
+      return undefined;
+    }
+    const decodedToken = decodeJwt(token);
+    return decodedToken.roles;
   },
 });
