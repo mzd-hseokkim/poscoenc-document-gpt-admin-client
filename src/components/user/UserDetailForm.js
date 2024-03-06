@@ -178,13 +178,18 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
       </CModalBody>
       <CModalFooter>
         <CRow>
-          {/*REMIND 버튼 위치 조정*/}
           <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
             {isUpdateMode && <CButton onClick={handleCancelClick}>취소</CButton>}
+            {isReadMode ? (
+              <CButton onClick={handleUpdateClick}>수정</CButton>
+            ) : (
+              <CButton type="submit" onClick={handleSubmit(onSubmit)}>
+                저장
+              </CButton>
+            )}
             {!isCreateMode && (
               <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>{deleted ? '복구' : '삭제'}</CButton>
             )}
-            {isReadMode ? <CButton onClick={handleUpdateClick}>수정</CButton> : <CButton type="submit">저장</CButton>}
           </CCol>
         </CRow>
       </CModalFooter>
