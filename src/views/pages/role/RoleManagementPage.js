@@ -19,6 +19,7 @@ const AdminManagementPage = () => {
   const [checkedItems, setCheckedItems] = useState([]);
   const [selectedId, setSelectedId] = useState();
   const [formMode, setFormMode] = useState('');
+  const [noItemsLabel, setNoItemsLabel] = useState('');
   const userRole = useRecoilValue(userRoleSelector);
 
   const { addToast } = useToast();
@@ -35,6 +36,9 @@ const AdminManagementPage = () => {
       setIsLoading(true);
       const data = await RoleService.getRoles();
       setRoleList(data);
+      if (data.content.length === 0 && noItemsLabel === '') {
+        setNoItemsLabel('검색 결과가 없습니다.');
+      }
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -108,7 +112,7 @@ const AdminManagementPage = () => {
           </CRow>
           <CRow className="mb-3">
             <CSmartTable
-              noItemsLabel="검색 결과가 없습니다."
+              noItemsLabel={noItemsLabel}
               loading={isLoading}
               sorterValue={{ column: 'id', state: 'asc' }}
               items={RoleList}

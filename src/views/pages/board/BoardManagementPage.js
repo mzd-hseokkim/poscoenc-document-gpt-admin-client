@@ -39,6 +39,8 @@ const BoardManagementPage = () => {
   const [postFormMode, setPostFormMode] = useState('');
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
   const [totalPostElements, setTotalPostElements] = useState(0);
+  const [noItemsLabel, setNoItemsLabel] = useState('');
+
   //REMIND searchForm audit 정보 통합해보기.
   const initialSearchFormData = {
     title: '',
@@ -105,6 +107,9 @@ const BoardManagementPage = () => {
       const searchResult = await BoardService.getSearchedPostList(searchFormData, pageableData);
       setPostList(searchResult.content);
       setTotalPostElements(searchResult.totalElements);
+      if (searchResult.content.length === 0 && noItemsLabel === '') {
+        setNoItemsLabel('검색 결과가 없습니다.');
+      }
     } catch (error) {
       addToast({ message: '검색 조건을 확인 해 주세요.' });
     } finally {
@@ -229,7 +234,7 @@ const BoardManagementPage = () => {
                   <CCol md={6}>
                     <CDateRangePicker
                       id="createdAt"
-                      label="생성일"
+                      label="등록일"
                       startDate={searchFormData.fromCreatedAt}
                       endDate={searchFormData.toCreatedAt}
                       onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
@@ -249,8 +254,8 @@ const BoardManagementPage = () => {
                 </CRow>
 
                 <CRow className="mb-3">
-                  <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <CButton type="submit">{'검색'}</CButton>
+                  <CCol className="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <CButton type="submit">검색</CButton>
                     <CButton
                       onClick={() => {
                         setSearchFormData(initialSearchFormData);
@@ -293,7 +298,7 @@ const BoardManagementPage = () => {
             itemsPerPageLabel={'페이지당 글 개수'}
             itemsPerPageSelect
             loading={searchResultIsLoading}
-            noItemsLabel="검색 결과가 없습니다."
+            noItemsLabel={noItemsLabel}
             onItemsPerPageChange={handlePageSizeChange}
             onSelectedItemsChange={setSelectedRows}
             onSorterChange={handlePageSortChange}
