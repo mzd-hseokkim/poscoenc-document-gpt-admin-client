@@ -23,7 +23,7 @@ const InputList = ({ fields, handleChange, isReadMode, formData, register, error
     }
 
     const commonProps = {
-      id: field.name,
+      id: `input-list-${field.name}`,
       name: field.name,
       type: field.type === 'date' ? 'text' : field.type,
       min: field.type === 'number' ? 0 : '',
@@ -38,7 +38,7 @@ const InputList = ({ fields, handleChange, isReadMode, formData, register, error
         <CCol>
           {register ? (
             <CRow>
-              <CFormLabel htmlFor="staticEmail" className="col-md-2 col-form-label fw-bold">
+              <CFormLabel htmlFor={`input-list-${field.name}`} className="col-md-2 col-form-label fw-bold">
                 {field.label}
               </CFormLabel>
               <CCol>
@@ -52,7 +52,7 @@ const InputList = ({ fields, handleChange, isReadMode, formData, register, error
             </CRow>
           ) : (
             <CRow>
-              <CFormLabel htmlFor="staticEmail" className="col-md-2 col-form-label">
+              <CFormLabel htmlFor={`input-list-${field.name}`} className="col-md-2 col-form-label">
                 {field.label}
               </CFormLabel>
               <CCol>
