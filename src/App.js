@@ -25,8 +25,7 @@ const Register = React.lazy(() => import('./views/pages/register/Register'));
 const Page404 = React.lazy(() => import('./views/pages/page404/Page404'));
 const Page500 = React.lazy(() => import('./views/pages/page500/Page500'));
 
-// eslint-disable-next-line func-style
-function App() {
+const App = () => {
   const setAccessToken = useSetRecoilState(jwtTokenState);
 
   useEffect(() => {
@@ -34,7 +33,6 @@ function App() {
     if (token) {
       setAccessToken(token);
     }
-    console.log(token);
   });
 
   return (
@@ -57,6 +55,6 @@ function App() {
       </NavigationProvider>
     </HashRouter>
   );
-}
+};
 
 export default App;
