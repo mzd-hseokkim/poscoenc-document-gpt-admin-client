@@ -44,6 +44,7 @@ const MenuManagementPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [totalMenuElements, setTotalMenuElements] = useState(0);
   const [formData, setFormData] = useState(createInitialFormData);
+  const [noItemsLabel, setNoItemsLabel] = useState('');
 
   const isComponentMounted = useRef(true);
 
@@ -66,6 +67,9 @@ const MenuManagementPage = () => {
       const data = await MenuService.getMenus(formData, pageableData);
       setMenuList(data.content);
       setTotalMenuElements(data.totalElements);
+      if (data.content.length === 0 && noItemsLabel === '') {
+        setNoItemsLabel('검색 결과가 없습니다.');
+      }
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -193,7 +197,7 @@ const MenuManagementPage = () => {
               <CCol md={6}>
                 <CDateRangePicker
                   id="createdAt"
-                  label="생성일"
+                  label="등록일"
                   startDate={formData.fromCreatedAt}
                   endDate={formData.toCreatedAt}
                   onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
@@ -239,7 +243,7 @@ const MenuManagementPage = () => {
               itemsPerPageLabel="페이지당 메뉴 개수"
               itemsPerPageSelect
               loading={isLoading}
-              noItemsLabel="검색 결과가 없습니다."
+              noItemsLabel={noItemsLabel}
               onItemsPerPageChange={handlePageSizeChange}
               onSelectedItemsChange={(items) => {
                 setCheckedItems(items);

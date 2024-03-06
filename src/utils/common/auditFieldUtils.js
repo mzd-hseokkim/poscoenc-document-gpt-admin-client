@@ -6,7 +6,7 @@ export const getAuditFields = (formMode) => {
 
   return [
     { name: 'createdByName', label: '생성자', isRendered: !isCreateMode, isDisabled: isUpdateMode },
-    { name: 'createdAt', label: '생성일', type: 'date', isRendered: !isCreateMode, isDisabled: isUpdateMode },
+    { name: 'createdAt', label: '등록일', type: 'date', isRendered: !isCreateMode, isDisabled: isUpdateMode },
     { name: 'modifiedByName', label: '수정자', isRendered: !isCreateMode, isDisabled: isUpdateMode },
     { name: 'modifiedAt', label: '수정일', type: 'date', isRendered: !isCreateMode, isDisabled: isUpdateMode },
   ];

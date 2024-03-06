@@ -28,6 +28,8 @@ const UserManagementPage = () => {
   const [selectedId, setSelectedId] = useState();
   const [formMode, setFormMode] = useState('');
   const [totalUserElements, setTotalUserElements] = useState(0);
+  const [noItemsLabel, setNoItemsLabel] = useState('');
+
   const initialFormData = {
     name: '',
     email: '',
@@ -57,6 +59,9 @@ const UserManagementPage = () => {
       const data = await UserService.getUsers(formData, pageableData);
       setUserList(data.content);
       setTotalUserElements(data.totalElements);
+      if (data.content.length === 0 && noItemsLabel === '') {
+        setNoItemsLabel('검색 결과가 없습니다.');
+      }
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -173,7 +178,7 @@ const UserManagementPage = () => {
               itemsPerPageLabel="페이지당 사용자 개수"
               itemsPerPageSelect
               loading={isLoading}
-              noItemsLabel="검색 결과가 없습니다."
+              noItemsLabel={noItemsLabel}
               onItemsPerPageChange={handlePageSizeChange}
               onSelectedItemsChange={(items) => {
                 setCheckedItems(items);

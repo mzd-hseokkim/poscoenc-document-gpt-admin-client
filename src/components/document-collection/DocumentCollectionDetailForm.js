@@ -13,9 +13,10 @@ import {
   CRow,
 } from '@coreui/react-pro';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import HorizontalCFormInputList from 'components/input/HorizontalCFormInputList';
+import InputList from 'components/input/InputList';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
+import { useLocation } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import DocumentCollectionFileService from 'services/document-collection/DocumentCollectionFileService';
 import DocumentCollectionService from 'services/document-collection/DocumentCollectionService';
@@ -26,7 +27,7 @@ import { formatFileSize } from 'utils/common/formatFileSize';
 import formModes from 'utils/formModes';
 import { itemNameValidationPattern } from 'utils/validationUtils';
 
-const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModal, refreshDocumentCollectionList }) => {
+const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocumentCollectionList }) => {
   const [collectionDetail, setCollectionDetail] = useState({});
   const [formMode, setFormMode] = useState(initialFormMode || '');
 
@@ -36,8 +37,13 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
   const currentUserId = useRecoilValue(userIdSelector);
   const { isReadMode, isUpdateMode } = formModes(formMode);
 
-  const { register, reset, handleSubmit } = useForm({ mode: 'onChange' });
-
+  const {
+    register,
+    reset,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({ mode: 'onChange' });
+  const location = useLocation();
   const collectionSpecificFields = [
     {
       md: 2,
@@ -48,7 +54,6 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     {
       name: 'name',
       label: '문서 집합 이름',
-      placeholder: '문서 집합의 이름을 설정해주세요.',
       rules: {
         required: '문서 집합 이름은 필수 입력 항목입니다.',
         pattern: {
@@ -60,7 +65,6 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
     {
       name: 'displayName',
       label: '표시명',
-      placeholder: '표시명을 입력해주세요.',
       rules: {
         required: '표시명은 필수 입력 항목입니다.',
         pattern: {
@@ -77,16 +81,23 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
   ];
 
   useEffect(() => {
-    fetchCollectionDetail();
-  }, [clickedRowId]);
+    const queryParams = new URLSearchParams(location.search);
+    const collectionIdFromUrl = queryParams.get('id');
 
-  const fetchCollectionDetail = async () => {
-    if (!clickedRowId) {
+    if (!collectionIdFromUrl) {
+      closeModal();
+    }
+
+    fetchCollectionDetail(collectionIdFromUrl);
+  }, [location]);
+
+  const fetchCollectionDetail = async (collectionId) => {
+    if (!collectionId) {
       return;
     }
     setGetDetailIsLoading(true);
     try {
-      const detail = await DocumentCollectionService.getCollectionDetail(clickedRowId);
+      const detail = await DocumentCollectionService.getCollectionDetail(collectionId);
       setCollectionDetail(detail);
       const formattedDetail = {
         ...detail,
@@ -100,6 +111,7 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
       } else {
         console.log(error);
       }
+      closeModal();
     } finally {
       setGetDetailIsLoading(false);
     }
@@ -121,6 +133,7 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
       } else {
         console.log(error);
       }
+      closeModal();
     }
     //REMIND loading spinner
   };
@@ -197,13 +210,14 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
         <CForm onSubmit={handleSubmit(onSubmit)}>
           <CCard className="mb-3">
             <CCardBody>
-              <HorizontalCFormInputList
+              <InputList
                 register={register}
                 fields={collectionSpecificFields}
                 formData={collectionDetail}
                 isReadMode={isReadMode}
-              ></HorizontalCFormInputList>
-              <HorizontalCFormInputList
+                errors={errors}
+              />
+              <InputList
                 register={register}
                 fields={getAuditFields(formMode)}
                 formData={collectionDetail}
@@ -214,6 +228,7 @@ const DocumentCollectionDetailForm = ({ clickedRowId, initialFormMode, closeModa
           <CCard>
             <CCardBody>
               <CListGroup>
+                {/*REMIND detail 에서 file 만 따로 처리 할 수 있도록 리팩토링, reset 에 의해 나머지 데이터가 관리되고 있음*/}
                 {collectionDetail?.files?.map((file, index) => (
                   <CListGroupItem key={index} className="d-flex justify-content-between align-items-center">
                     <div className="d-flex align-items-end">

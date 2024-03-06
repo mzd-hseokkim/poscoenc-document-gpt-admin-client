@@ -15,7 +15,7 @@ import {
 } from '@coreui/react-pro';
 import BoardCommentsForm from 'components/board/BoardCommentsForm';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import HorizontalCFormInputList from 'components/input/HorizontalCFormInputList';
+import InputList from 'components/input/InputList';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
 import { useRecoilValue } from 'recoil';
@@ -189,36 +189,28 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
 
   return (
     <>
-      <FormLoadingCover isLoading={getDetailIsLoading} />
-      <CModalBody>
-        <CForm onSubmit={handleSubmit(handleSubmitModifiedData)}>
-          <CCard className="mb-3">
-            <CCardBody>
-              <HorizontalCFormInputList
-                register={register}
-                fields={postSpecificFields}
-                formData={postDetails}
-                isReadMode={isReadMode}
-              />
-              <HorizontalCFormInputList
-                register={register}
-                fields={getAuditFields(formMode)}
-                formData={postDetails}
-                isReadMode={isReadMode}
-              />
-            </CCardBody>
-          </CCard>
-          <CCard>
-            <CCardBody>
-              {renderPostTitleInput()}
-              {renderPostContentTextarea()}
-            </CCardBody>
-          </CCard>
-        </CForm>
-        {/*REMIND 댓글창 ui 리팩토링*/}
-        {isReadMode && <BoardCommentsForm postId={clickedRowId} />}
-      </CModalBody>
-      <CModalFooter>{renderFormActions()}</CModalFooter>
+      <CForm onSubmit={handleSubmit(handleSubmitModifiedData)}>
+        <CCard className="mb-3">
+          <CCardBody>
+            <InputList register={register} fields={postSpecificFields} formData={postDetails} isReadMode={isReadMode} />
+            <InputList
+              register={register}
+              fields={getAuditFields(formMode)}
+              formData={postDetails}
+              isReadMode={isReadMode}
+            />
+          </CCardBody>
+        </CCard>
+        <CCard>
+          <CCardBody>
+            {renderPostTitleInput()}
+            {renderPostContentTextarea()}
+            {renderFormActions()}
+            <FormLoadingCover isLoading={getDetailIsLoading} />
+          </CCardBody>
+        </CCard>
+      </CForm>
+      {isReadMode && <BoardCommentsForm postId={clickedRowId} />}
     </>
   );
 };

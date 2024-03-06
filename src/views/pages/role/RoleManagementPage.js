@@ -6,7 +6,10 @@ import ModalContainer from 'components/modal/ModalContainer';
 import RoleDetailForm from 'components/role/RoleDetailForm';
 import { useToast } from 'context/ToastContext';
 import useModal from 'hooks/useModal';
+import { useNavigate } from 'react-router-dom';
+import { useRecoilValue, useResetRecoilState } from 'recoil';
 import RoleService from 'services/Role/RoleService';
+import { jwtTokenState, userRoleSelector } from 'states/jwtTokenState';
 import { formatToYMD } from 'utils/common/dateUtils';
 import { roleColumnConfig } from 'utils/role/roleColumnConfig';
 
@@ -16,9 +19,13 @@ const AdminManagementPage = () => {
   const [checkedItems, setCheckedItems] = useState([]);
   const [selectedId, setSelectedId] = useState();
   const [formMode, setFormMode] = useState('');
+  const [noItemsLabel, setNoItemsLabel] = useState('');
+  const userRole = useRecoilValue(userRoleSelector);
 
   const { addToast } = useToast();
   const modal = useModal();
+  const navigate = useNavigate();
+  const resetJwtToken = useResetRecoilState(jwtTokenState);
 
   useEffect(() => {
     fetchRoleList();
@@ -29,6 +36,9 @@ const AdminManagementPage = () => {
       setIsLoading(true);
       const data = await RoleService.getRoles();
       setRoleList(data);
+      if (data.content.length === 0 && noItemsLabel === '') {
+        setNoItemsLabel('검색 결과가 없습니다.');
+      }
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -37,6 +47,12 @@ const AdminManagementPage = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSignOut = () => {
+    navigate('/sign-in');
+    resetJwtToken();
+    localStorage.removeItem('token');
   };
 
   const handleRowClick = (id) => {
@@ -52,17 +68,29 @@ const AdminManagementPage = () => {
 
   const handleDeleteRestoreClick = async (shouldDelete) => {
     const ids = checkedItems.map((item) => item.id);
+
     if (checkedItems.length === 1) {
       try {
-        await RoleService.deleteRole(ids, shouldDelete);
-        fetchRoleList();
+        const response = await RoleService.deleteRole(ids, shouldDelete);
+        if (shouldDelete && response.role === userRole) {
+          handleSignOut();
+        } else {
+          fetchRoleList();
+        }
       } catch (error) {
         addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
       }
     } else {
       try {
-        await RoleService.deleteRoles(ids, shouldDelete);
-        fetchRoleList();
+        const response = await RoleService.deleteRoles(ids, shouldDelete);
+        const roleNames = RoleList.filter((roleItem) => response.includes(roleItem.id)).map(
+          (filteredRoleItem) => filteredRoleItem.role
+        );
+        if (shouldDelete && roleNames.includes(userRole)) {
+          handleSignOut();
+        } else {
+          fetchRoleList();
+        }
       } catch (error) {
         addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
       }
@@ -84,7 +112,7 @@ const AdminManagementPage = () => {
           </CRow>
           <CRow className="mb-3">
             <CSmartTable
-              noItemsLabel="검색 결과가 없습니다."
+              noItemsLabel={noItemsLabel}
               loading={isLoading}
               sorterValue={{ column: 'id', state: 'asc' }}
               items={RoleList}
@@ -109,6 +137,7 @@ const AdminManagementPage = () => {
                   </td>
                 ),
               }}
+              // FIXME item 정보 변경된 후 checkbox 선택시 items 항목 추가됨(중복)
               onSelectedItemsChange={(items) => {
                 setCheckedItems(items);
               }}

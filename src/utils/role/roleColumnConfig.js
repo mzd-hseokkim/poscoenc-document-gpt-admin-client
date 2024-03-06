@@ -16,7 +16,7 @@ export const roleColumnConfig = [
   },
   {
     key: 'createdAt',
-    label: '생성일',
+    label: '등록일',
     _style: { width: '17%' },
   },
   {
