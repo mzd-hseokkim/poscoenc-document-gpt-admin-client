@@ -9,6 +9,7 @@ import {
   CCol,
   CDateRangePicker,
   CForm,
+  CFormCheck,
   CFormInput,
   CFormSelect,
   CRow,
@@ -19,6 +20,7 @@ import BoardPostDetailForm from 'components/board/BoardPostDetailForm';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import ModalContainer from 'components/modal/ModalContainer';
 import { useToast } from 'context/ToastContext';
+import { format } from 'date-fns';
 import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
 import BoardService from 'services/board/BoardService';
@@ -40,6 +42,7 @@ const BoardManagementPage = () => {
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
   const [totalPostElements, setTotalPostElements] = useState(0);
   const [noItemsLabel, setNoItemsLabel] = useState('');
+  const [isPickTime, setIsPickTime] = useState(false);
 
   //REMIND searchForm audit 정보 통합해보기.
   const initialSearchFormData = {
@@ -137,6 +140,17 @@ const BoardManagementPage = () => {
     }
   };
 
+  const handleTimePickerCheck = (e) => {
+    setIsPickTime(e.target.checked);
+    setSearchFormData((prev) => ({
+      ...prev,
+      fromCreatedAt: format(searchFormData.fromCreatedAt, "yyyy-MM-dd'T'00:00"),
+      toCreatedAt: format(searchFormData.toCreatedAt, "yyyy-MM-dd'T'23:59"),
+      fromModifiedAt: format(searchFormData.fromModifiedAt, "yyyy-MM-dd'T'00:00"),
+      toModifiedAt: format(searchFormData.toModifiedAt, "yyyy-MM-dd'T'23:59"),
+    }));
+  };
+
   const handleCloseModal = () => {
     modal.closeModal();
     setClickedRowId(null);
@@ -169,164 +183,168 @@ const BoardManagementPage = () => {
   return (
     <>
       <CRow>
-        <CCol xs={12}>
-          <CCard className="row g-3 needs-validation">
-            <CCardBody>
-              <CForm onSubmit={handleSubmitSearchRequest}>
-                <CRow className="mb-3">
-                  <CCol md={4} className="position-relative">
-                    <CFormInput
-                      type="text"
-                      id="title"
-                      label="제목"
-                      onChange={handleSearchFormChange}
-                      value={searchFormData.title}
-                    />
-                  </CCol>
-                  <CCol md={4} className="position-relative">
-                    <CFormInput
-                      id="createdByName"
-                      label="작성자"
-                      onChange={handleSearchFormChange}
-                      value={searchFormData.createdByName}
-                    />
-                  </CCol>
-                  <CCol md={4} className="position-relative">
-                    <CFormSelect
-                      id="deletionOption"
-                      label="게시글 상태"
-                      name="deletionOption"
-                      value={searchFormData.deletionOption}
-                      options={[
-                        { label: '모든 게시글', value: '' },
-                        { label: '삭제됨', value: 'Yes' },
-                        { label: '삭제되지 않음', value: 'NO' },
-                      ]}
-                      onChange={handleSearchFormChange}
-                    />
-                  </CCol>
-                </CRow>
-                <CRow className="mb-3">
-                  <CCol md={8} className="position-relative">
-                    <CFormInput
-                      id="content"
-                      label="내용"
-                      onChange={handleSearchFormChange}
-                      value={searchFormData.content}
-                    />
-                  </CCol>
-                  <CCol md={4} className="position-relative">
-                    <CFormSelect
-                      id="hasFilesOption"
-                      label="첨부파일 없는 게시물 포함"
-                      name="hasFilesOption"
-                      value={searchFormData.hasFilesOption}
-                      options={[
-                        { label: '모든 게시글', value: '' },
-                        { label: '예', value: true },
-                        { label: '아니오', value: false },
-                      ]}
-                      onChange={handleSearchFormChange}
-                    />
-                  </CCol>
-                </CRow>
-                <CRow className="mb-3">
-                  <CCol md={6}>
-                    <CDateRangePicker
-                      id="createdAt"
-                      label="등록일"
-                      startDate={searchFormData.fromCreatedAt}
-                      endDate={searchFormData.toCreatedAt}
-                      onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
-                      onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
-                    />
-                  </CCol>
-                  <CCol md={6}>
-                    <CDateRangePicker
-                      id="modifiedAt"
-                      label="수정일"
-                      startDate={searchFormData.fromModifiedAt}
-                      endDate={searchFormData.toModifiedAt}
-                      onStartDateChange={(newDate) => handleDateChange({ id: 'modifiedAt', newDate })}
-                      onEndDateChange={(newDate) => handleDateChange({ id: 'modifiedAt', newDate, isStartDate: false })}
-                    />
-                  </CCol>
-                </CRow>
-
-                <CRow className="mb-3">
-                  <CCol className="d-grid gap-2 d-md-flex justify-content-md-center">
-                    <CButton type="submit">검색</CButton>
-                    <CButton
-                      onClick={() => {
-                        setSearchFormData(initialSearchFormData);
-                      }}
-                      color="primary"
-                      value="Reset"
-                    >
-                      초기화
-                    </CButton>
-                  </CCol>
-                </CRow>
-              </CForm>
-            </CCardBody>
-          </CCard>
-        </CCol>
+        <CCard className="row g-3 needs-validation">
+          <CCardBody>
+            <CForm onSubmit={handleSubmitSearchRequest}>
+              <CRow className="mb-3">
+                <CCol md={4} className="position-relative">
+                  <CFormInput
+                    type="text"
+                    id="title"
+                    label="제목"
+                    onChange={handleSearchFormChange}
+                    value={searchFormData.title}
+                  />
+                </CCol>
+                <CCol md={4} className="position-relative">
+                  <CFormInput
+                    id="createdByName"
+                    label="작성자"
+                    onChange={handleSearchFormChange}
+                    value={searchFormData.createdByName}
+                  />
+                </CCol>
+                <CCol md={4} className="position-relative">
+                  <CFormSelect
+                    id="deletionOption"
+                    label="게시글 상태"
+                    name="deletionOption"
+                    value={searchFormData.deletionOption}
+                    options={[
+                      { label: '모든 게시글', value: '' },
+                      { label: '삭제됨', value: 'Yes' },
+                      { label: '삭제되지 않음', value: 'NO' },
+                    ]}
+                    onChange={handleSearchFormChange}
+                  />
+                </CCol>
+              </CRow>
+              <CRow className="mb-3">
+                <CCol md={8} className="position-relative">
+                  <CFormInput
+                    id="content"
+                    label="내용"
+                    onChange={handleSearchFormChange}
+                    value={searchFormData.content}
+                  />
+                </CCol>
+                <CCol md={4} className="position-relative">
+                  <CFormSelect
+                    id="hasFilesOption"
+                    label="첨부파일 없는 게시물 포함"
+                    name="hasFilesOption"
+                    value={searchFormData.hasFilesOption}
+                    options={[
+                      { label: '모든 게시글', value: '' },
+                      { label: '예', value: true },
+                      { label: '아니오', value: false },
+                    ]}
+                    onChange={handleSearchFormChange}
+                  />
+                </CCol>
+              </CRow>
+              <CRow className="mb-3">
+                <CCol md={5}>
+                  <CDateRangePicker
+                    key={`createdAt-${isPickTime}`}
+                    id="createdAt"
+                    label="등록일"
+                    startDate={searchFormData.fromCreatedAt}
+                    endDate={searchFormData.toCreatedAt}
+                    onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
+                    onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
+                    timepicker={isPickTime}
+                  />
+                </CCol>
+                <CCol md={5}>
+                  <CDateRangePicker
+                    key={`modifiedAt-${isPickTime}`}
+                    id="modifiedAt"
+                    label="수정일"
+                    startDate={searchFormData.fromModifiedAt}
+                    endDate={searchFormData.toModifiedAt}
+                    onStartDateChange={(newDate) => handleDateChange({ id: 'modifiedAt', newDate })}
+                    onEndDateChange={(newDate) => handleDateChange({ id: 'modifiedAt', newDate, isStartDate: false })}
+                    timepicker={isPickTime}
+                  />
+                </CCol>
+                <CCol md={2} className="mt-5">
+                  <CFormCheck label="시간 검색 여부" checked={isPickTime} onChange={(e) => handleTimePickerCheck(e)} />
+                </CCol>
+              </CRow>
+              <CRow className="mb-3">
+                <CCol className="d-grid gap-2 d-md-flex justify-content-md-center">
+                  <CButton type="submit">검색</CButton>
+                  <CButton
+                    onClick={() => {
+                      setSearchFormData(initialSearchFormData);
+                    }}
+                    color="primary"
+                    value="Reset"
+                  >
+                    초기화
+                  </CButton>
+                </CCol>
+              </CRow>
+            </CForm>
+          </CCardBody>
+        </CCard>
       </CRow>
-      <CCard className="row g-3 mt-2">
-        <CCardBody>
-          <CRow className="mb-3">
-            <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-              <CButton
-                disabled={selectedRows?.length === 0 || isDeletedRow(selectedRows)}
-                onClick={() => togglePostStatus(true)}
-              >
-                {'삭제'}
-              </CButton>
-              <CButton
-                disabled={selectedRows?.length === 0 || !isDeletedRow(selectedRows)}
-                onClick={() => togglePostStatus(false)}
-              >
-                {'복구'}
-              </CButton>
-            </CCol>
-          </CRow>
-          <CSmartTable
-            columnSorter={columnSorterCustomProps}
-            columns={postColumnConfig}
-            items={postList}
-            itemsPerPage={pageableData.size}
-            itemsPerPageLabel={'페이지당 글 개수'}
-            itemsPerPageSelect
-            loading={searchResultIsLoading}
-            noItemsLabel={noItemsLabel}
-            onItemsPerPageChange={handlePageSizeChange}
-            onSelectedItemsChange={setSelectedRows}
-            onSorterChange={handlePageSortChange}
-            paginationProps={smartPaginationProps}
-            scopedColumns={scopedColumnsUpdate}
-            selectable
-            selected={selectedRows}
-            tableProps={tableCustomProps}
-          />
-          <CRow className="mt-3">
-            <CCol className="d-grid gap-2 justify-content-end">
-              <ExcelDownloadCButton
-                downloadFunction={BoardService.getDownloadSearchedPostList}
-                searchFormData={searchFormData}
-              />
-            </CCol>
-          </CRow>
-          {/*REMIND Modal open 시 url 변경되게 수정*/}
-          <ModalContainer visible={modal.isOpen} title="게시글" onClose={modal.closeModal} size="lg">
-            <BoardPostDetailForm
-              clickedRowId={clickedRowId}
-              closeModal={handleCloseModal}
-              initialFormMode={postFormMode}
-              refreshPosts={searchPostList}
-            ></BoardPostDetailForm>
-          </ModalContainer>
-        </CCardBody>
-      </CCard>
+      <CRow>
+        <CCard className="row g-3">
+          <CCardBody>
+            <CRow className="mb-3">
+              <CCol className="d-grid gap-2 d-md-flex justify-content-md-start">
+                <CButton
+                  disabled={selectedRows?.length === 0 || isDeletedRow(selectedRows)}
+                  onClick={() => togglePostStatus(true)}
+                >
+                  {'삭제'}
+                </CButton>
+                <CButton
+                  disabled={selectedRows?.length === 0 || !isDeletedRow(selectedRows)}
+                  onClick={() => togglePostStatus(false)}
+                >
+                  {'복구'}
+                </CButton>
+              </CCol>
+              <CCol className="d-grid gap-2 justify-content-end">
+                <ExcelDownloadCButton
+                  downloadFunction={BoardService.getDownloadSearchedPostList}
+                  searchFormData={searchFormData}
+                />
+              </CCol>
+            </CRow>
+            <CSmartTable
+              columnSorter={columnSorterCustomProps}
+              columns={postColumnConfig}
+              items={postList}
+              itemsPerPage={pageableData.size}
+              itemsPerPageLabel={'페이지당 글 개수'}
+              itemsPerPageSelect
+              loading={searchResultIsLoading}
+              noItemsLabel={noItemsLabel}
+              onItemsPerPageChange={handlePageSizeChange}
+              onSelectedItemsChange={setSelectedRows}
+              onSorterChange={handlePageSortChange}
+              paginationProps={smartPaginationProps}
+              scopedColumns={scopedColumnsUpdate}
+              selectable
+              selected={selectedRows}
+              tableProps={tableCustomProps}
+            />
+            {/*REMIND Modal open 시 url 변경되게 수정*/}
+            <ModalContainer visible={modal.isOpen} title="게시글" onClose={modal.closeModal} size="lg">
+              <BoardPostDetailForm
+                clickedRowId={clickedRowId}
+                closeModal={handleCloseModal}
+                initialFormMode={postFormMode}
+                refreshPosts={searchPostList}
+              ></BoardPostDetailForm>
+            </ModalContainer>
+          </CCardBody>
+        </CCard>
+      </CRow>
     </>
   );
 };
