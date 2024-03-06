@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
-import { CButton, CCol, CElementCover, CForm, CFormLabel, CMultiSelect, CRow, CSpinner } from '@coreui/react-pro';
+import { CButton, CCol, CForm, CFormLabel, CModalBody, CModalFooter, CMultiSelect, CRow } from '@coreui/react-pro';
+import FormLoadingCover from 'components/cover/FormLoadingCover';
 import InputList from 'components/input/InputList';
 import { useToast } from 'context/ToastContext';
 import { Controller, useForm } from 'react-hook-form';
@@ -226,16 +227,16 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
 
   return (
     <>
-      {isLoading && (
-        <CElementCover>
-          <CSpinner variant="grow" color="primary" />
-        </CElementCover>
-      )}
-      <CForm onSubmit={handleSubmit(onSubmit)}>
-        <InputList fields={adminFields} isReadMode={isReadMode} register={register} errors={errors} />
-        {renderRoleSelect()}
-        <InputList fields={logInFields} isReadMode={isReadMode} register={register} errors={errors} />
-        <InputList fields={getAuditFields(formMode)} isReadMode={isReadMode} register={register} errors={errors} />
+      <FormLoadingCover isLoading={isLoading}></FormLoadingCover>
+      <CModalBody>
+        <CForm onSubmit={handleSubmit(onSubmit)}>
+          <InputList fields={adminFields} isReadMode={isReadMode} register={register} errors={errors} />
+          {renderRoleSelect()}
+          <InputList fields={logInFields} isReadMode={isReadMode} register={register} errors={errors} />
+          <InputList fields={getAuditFields(formMode)} isReadMode={isReadMode} register={register} errors={errors} />
+        </CForm>
+      </CModalBody>
+      <CModalFooter>
         <CRow>
           <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
             {isUpdateMode && <CButton onClick={handleCancelClick}>취소</CButton>}
@@ -245,7 +246,7 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
             {isReadMode ? <CButton onClick={handleUpdateClick}>수정</CButton> : <CButton type="submit">저장</CButton>}
           </CCol>
         </CRow>
-      </CForm>
+      </CModalFooter>
     </>
   );
 };

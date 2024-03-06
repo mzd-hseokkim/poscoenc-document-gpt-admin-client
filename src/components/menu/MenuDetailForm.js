@@ -3,15 +3,16 @@ import React, { useEffect, useState } from 'react';
 import {
   CButton,
   CCol,
-  CElementCover,
   CForm,
   CFormCheck,
   CFormLabel,
   CFormSelect,
+  CModalBody,
+  CModalFooter,
   CMultiSelect,
   CRow,
-  CSpinner,
 } from '@coreui/react-pro';
+import FormLoadingCover from 'components/cover/FormLoadingCover';
 import InputList from 'components/input/InputList';
 import { useToast } from 'context/ToastContext';
 import { Controller, useForm } from 'react-hook-form';
@@ -314,18 +315,18 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
 
   return (
     <>
-      {isLoading && (
-        <CElementCover>
-          <CSpinner variant="grow" color="primary" />
-        </CElementCover>
-      )}
-      <CForm onSubmit={handleSubmit(onSubmit)}>
-        <InputList fields={menuBasicFields} isReadMode={isReadMode} register={register} errors={errors} />
-        {renderAllowChildrenCheck()}
-        <InputList fields={menuSettingFields} isReadMode={isReadMode} register={register} errors={errors} />
-        {renderRoleSelect()}
-        {renderParentSelect()}
-        <InputList fields={getAuditFields(formMode)} isReadMode={isReadMode} register={register} errors={errors} />
+      <FormLoadingCover isLoading={isLoading} />
+      <CModalBody>
+        <CForm onSubmit={handleSubmit(onSubmit)}>
+          <InputList fields={menuBasicFields} isReadMode={isReadMode} register={register} errors={errors} />
+          {renderAllowChildrenCheck()}
+          <InputList fields={menuSettingFields} isReadMode={isReadMode} register={register} errors={errors} />
+          {renderRoleSelect()}
+          {renderParentSelect()}
+          <InputList fields={getAuditFields(formMode)} isReadMode={isReadMode} register={register} errors={errors} />
+        </CForm>
+      </CModalBody>
+      <CModalFooter>
         <CRow>
           <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
             {isUpdateMode && <CButton onClick={handleCancelClick}>취소</CButton>}
@@ -335,7 +336,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
             {isReadMode ? <CButton onClick={handleUpdateClick}>수정</CButton> : <CButton type="submit">저장</CButton>}
           </CCol>
         </CRow>
-      </CForm>
+      </CModalFooter>
     </>
   );
 };

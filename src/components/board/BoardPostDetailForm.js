@@ -1,6 +1,18 @@
 import React, { useEffect, useState } from 'react';
 
-import { CButton, CCard, CCardBody, CCol, CForm, CFormInput, CFormLabel, CFormTextarea, CRow } from '@coreui/react-pro';
+import {
+  CButton,
+  CCard,
+  CCardBody,
+  CCol,
+  CForm,
+  CFormInput,
+  CFormLabel,
+  CFormTextarea,
+  CModalBody,
+  CModalFooter,
+  CRow,
+} from '@coreui/react-pro';
 import BoardCommentsForm from 'components/board/BoardCommentsForm';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import InputList from 'components/input/InputList';
@@ -23,13 +35,14 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
   const currentUserId = useRecoilValue(userIdSelector);
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
   const {
-    register,
     reset,
+    watch,
+    register,
     handleSubmit,
     formState: { errors },
   } = useForm({ mode: 'onChange' });
 
-  //REMIND 칼럼 정의 변수 명 수정하기
+  const deleted = watch('deleted');
 
   const postSpecificFields = [
     {
@@ -116,6 +129,17 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
     }
   };
 
+  const handleDeleteRestoreClick = async (postId) => {
+    const shouldDelete = !deleted;
+    try {
+      await BoardService.patchPostsDeletionOption([postId], shouldDelete);
+    } catch (error) {
+      addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
+    }
+    await fetchPostDetails();
+    refreshPosts();
+  };
+
   const renderPostTitleInput = () => (
     <CRow className="mt-3">
       <CCol>
@@ -150,55 +174,64 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
   );
 
   const renderFormActions = () => (
-    <>
-      {isReadMode && (
-        <CRow className="row mt-3 justify-content-end">
-          {postDetails?.createdBy === currentUserId && (
-            <CCol className="col-auto">
-              <CButton onClick={() => setFormMode('update')}>수정</CButton>
-            </CCol>
+    <CRow className="justify-content-end">
+      {isReadMode && postDetails?.createdBy === currentUserId && (
+        <CCol className="d-grid d-md-flex justify-content-md-end gap-2">
+          <CButton className="me-1" onClick={() => setFormMode('update')}>
+            수정
+          </CButton>
+          {!isCreateMode && (
+            <CButton onClick={() => handleDeleteRestoreClick(clickedRowId)}>{deleted ? '복구' : '삭제'}</CButton>
           )}
-        </CRow>
+        </CCol>
       )}
       {!isReadMode && (
-        <CRow className="justify-content-end">
-          <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-            <CButton type="submit" onClick={handleSubmit(handleSubmitModifiedData)}>
-              저장
-            </CButton>
-            <CButton type="reset" onClick={() => setFormMode('read')}>
-              취소
-            </CButton>
-          </CCol>
-        </CRow>
+        <CCol className="d-grid d-md-flex justify-content-md-end gap-2">
+          <CButton className="me-1" type="submit" onClick={handleSubmit(handleSubmitModifiedData)}>
+            저장
+          </CButton>
+          <CButton className="me-1" type="reset" onClick={() => setFormMode('read')}>
+            취소
+          </CButton>
+          {!isCreateMode && (
+            <CButton onClick={() => handleDeleteRestoreClick(clickedRowId)}>{deleted ? '복구' : '삭제'}</CButton>
+          )}
+        </CCol>
       )}
-    </>
+    </CRow>
   );
 
   return (
     <>
-      <CForm onSubmit={handleSubmit(handleSubmitModifiedData)}>
-        <CCard className="mb-3">
-          <CCardBody>
-            <InputList register={register} fields={postSpecificFields} formData={postDetails} isReadMode={isReadMode} />
-            <InputList
-              register={register}
-              fields={getAuditFields(formMode)}
-              formData={postDetails}
-              isReadMode={isReadMode}
-            />
-          </CCardBody>
-        </CCard>
-        <CCard>
-          <CCardBody>
-            {renderPostTitleInput()}
-            {renderPostContentTextarea()}
-            {renderFormActions()}
-            <FormLoadingCover isLoading={getDetailIsLoading} />
-          </CCardBody>
-        </CCard>
-      </CForm>
-      {isReadMode && <BoardCommentsForm postId={clickedRowId} />}
+      <FormLoadingCover isLoading={getDetailIsLoading} />
+      <CModalBody>
+        <CForm onSubmit={handleSubmit(handleSubmitModifiedData)}>
+          <CCard className="mb-3">
+            <CCardBody>
+              <InputList
+                register={register}
+                fields={postSpecificFields}
+                formData={postDetails}
+                isReadMode={isReadMode}
+              />
+              <InputList
+                register={register}
+                fields={getAuditFields(formMode)}
+                formData={postDetails}
+                isReadMode={isReadMode}
+              />
+            </CCardBody>
+          </CCard>
+          <CCard>
+            <CCardBody>
+              {renderPostTitleInput()}
+              {renderPostContentTextarea()}
+            </CCardBody>
+          </CCard>
+        </CForm>
+        {isReadMode && <BoardCommentsForm postId={clickedRowId} />}
+      </CModalBody>
+      <CModalFooter>{renderFormActions()}</CModalFooter>
     </>
   );
 };

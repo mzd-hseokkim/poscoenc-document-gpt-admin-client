@@ -1,4 +1,4 @@
-import { CButton, CModal, CModalBody, CModalFooter, CModalHeader, CModalTitle } from '@coreui/react-pro';
+import { CModal, CModalHeader, CModalTitle } from '@coreui/react-pro';
 
 const ModalContainer = ({ children, visible, title, onClose, size }) => {
   return (
@@ -6,12 +6,7 @@ const ModalContainer = ({ children, visible, title, onClose, size }) => {
       <CModalHeader>
         <CModalTitle>{title}</CModalTitle>
       </CModalHeader>
-      <CModalBody>{children}</CModalBody>
-      <CModalFooter>
-        <CButton color="primary" onClick={onClose}>
-          닫기
-        </CButton>
-      </CModalFooter>
+      {children}
     </CModal>
   );
 };
