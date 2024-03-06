@@ -178,6 +178,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
       </CModalBody>
       <CModalFooter>
         <CRow>
+          {/*REMIND 버튼 위치 조정*/}
           <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
             {isUpdateMode && <CButton onClick={handleCancelClick}>취소</CButton>}
             {!isCreateMode && (
