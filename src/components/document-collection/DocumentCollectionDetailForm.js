@@ -12,6 +12,7 @@ import {
   CModalFooter,
   CRow,
 } from '@coreui/react-pro';
+import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import InputList from 'components/input/InputList';
 import { useToast } from 'context/ToastContext';
@@ -138,7 +139,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     //REMIND loading spinner
   };
 
-  const handleModifyCancelClick = async () => {
+  const handleModificationCancelClick = async () => {
     setFormMode('read');
     await fetchCollectionDetail();
   };
@@ -171,37 +172,6 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     await fetchCollectionDetail();
     refreshDocumentCollectionList();
   };
-
-  const renderFormActions = () => (
-    <>
-      <CRow className="row justify-content-end">
-        <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-          {isReadMode ? (
-            <>
-              {collectionDetail?.createdBy === currentUserId && (
-                <CButton type="button" disabled={!isReadMode} onClick={() => setFormMode('update')}>
-                  수정
-                </CButton>
-              )}
-            </>
-          ) : (
-            <>
-              <CButton type="button" onClick={handleSubmit(onSubmit)}>
-                저장
-              </CButton>
-              <CButton onClick={handleModifyCancelClick}>취소</CButton>
-            </>
-          )}
-          <CButton onClick={() => handleDeleteRestoreClick(collectionDetail.id)}>
-            {collectionDetail.deleted ? '복구' : '삭제'}
-          </CButton>
-          <CButton color="primary" onClick={closeModal}>
-            닫기
-          </CButton>
-        </CCol>
-      </CRow>
-    </>
-  );
 
   return (
     <>
@@ -252,7 +222,18 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
           </CCard>
         </CForm>
       </CModalBody>
-      <CModalFooter>{renderFormActions()}</CModalFooter>
+      <CModalFooter>
+        <DetailFormActionButtons
+          dataId={collectionDetail.id}
+          formModes={formModes(formMode)}
+          handleCancel={handleModificationCancelClick}
+          handleDeleteRestore={handleDeleteRestoreClick}
+          handleUpdateClick={() => setFormMode('update')}
+          isCreatedByCurrentUser={collectionDetail.createdBy === currentUserId}
+          isDataDeleted={collectionDetail.deleted}
+          onSubmit={handleSubmit(onSubmit)}
+        />
+      </CModalFooter>
     </>
   );
 };

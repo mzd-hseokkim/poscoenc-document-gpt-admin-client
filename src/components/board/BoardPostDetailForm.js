@@ -14,6 +14,7 @@ import {
   CRow,
 } from '@coreui/react-pro';
 import BoardCommentsForm from 'components/board/BoardCommentsForm';
+import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import InputList from 'components/input/InputList';
 import { useToast } from 'context/ToastContext';
@@ -128,7 +129,10 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
       }
     }
   };
-
+  const handleModificationCancelClick = async () => {
+    setFormMode('read');
+    await fetchPostDetails();
+  };
   const handleDeleteRestoreClick = async (postId) => {
     const shouldDelete = !deleted;
     try {
@@ -174,14 +178,14 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
   );
 
   const renderFormActions = () => (
-    <CRow className="justify-content-end">
+    <CRow>
       <CCol className="d-grid d-md-flex justify-content-md-end gap-2">
         {isReadMode && postDetails?.createdBy === currentUserId && (
           <CButton className="me-1" onClick={() => setFormMode('update')}>
             수정
           </CButton>
         )}
-        {!isReadMode && (
+        {isUpdateMode && (
           <>
             <CButton className="me-1" type="submit" onClick={handleSubmit(handleSubmitModifiedData)}>
               저장
@@ -210,12 +214,14 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
                 fields={postSpecificFields}
                 formData={postDetails}
                 isReadMode={isReadMode}
+                errors={errors}
               />
               <InputList
                 register={register}
                 fields={getAuditFields(formMode)}
                 formData={postDetails}
                 isReadMode={isReadMode}
+                errors={errors}
               />
             </CCardBody>
           </CCard>
@@ -228,7 +234,18 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
         </CForm>
         {isReadMode && <BoardCommentsForm postId={clickedRowId} />}
       </CModalBody>
-      <CModalFooter>{renderFormActions()}</CModalFooter>
+      <CModalFooter>
+        <DetailFormActionButtons
+          dataId={clickedRowId}
+          formModes={formModes(formMode)}
+          handleCancel={handleModificationCancelClick}
+          handleDeleteRestore={handleDeleteRestoreClick}
+          handleUpdateClick={() => setFormMode('update')}
+          isDataDeleted={deleted}
+          isCreatedByCurrentUser={postDetails?.createdBy === currentUserId}
+          onSubmit={handleSubmit(handleSubmitModifiedData)}
+        />
+      </CModalFooter>
     </>
   );
 };

@@ -30,11 +30,6 @@ const putUser = async (id, payload) => {
   return response.data;
 };
 
-const deleteUser = async (id, deleted) => {
-  const response = await api.patch(`/admin/user-accounts/${id}/deleted?deleted=${deleted}`);
-  return response.data;
-};
-
 const deleteUsers = async (ids, deleted) => {
   const response = await api.patch(`/admin/user-accounts/deleted/${deleted}`, ids);
   return response.data;
@@ -45,7 +40,6 @@ const UserService = {
   getUser,
   postUser,
   putUser,
-  deleteUser,
   deleteUsers,
 };
 
