@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import {
-  CButton,
   CCard,
   CCardBody,
   CCol,
@@ -173,31 +172,6 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
           readOnly={isReadMode}
           {...register('content')}
         />
-      </CCol>
-    </CRow>
-  );
-
-  const renderFormActions = () => (
-    <CRow>
-      <CCol className="d-grid d-md-flex justify-content-md-end gap-2">
-        {isReadMode && postDetails?.createdBy === currentUserId && (
-          <CButton className="me-1" onClick={() => setFormMode('update')}>
-            수정
-          </CButton>
-        )}
-        {isUpdateMode && (
-          <>
-            <CButton className="me-1" type="submit" onClick={handleSubmit(handleSubmitModifiedData)}>
-              저장
-            </CButton>
-            <CButton className="me-1" type="reset" onClick={() => setFormMode('read')}>
-              취소
-            </CButton>
-          </>
-        )}
-        {!isCreateMode && (
-          <CButton onClick={() => handleDeleteRestoreClick(clickedRowId)}>{deleted ? '복구' : '삭제'}</CButton>
-        )}
       </CCol>
     </CRow>
   );
