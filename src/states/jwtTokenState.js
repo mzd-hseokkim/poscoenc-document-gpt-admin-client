@@ -3,7 +3,7 @@ import { atom, selector } from 'recoil';
 
 export const jwtTokenState = atom({
   key: 'JwtTokenState',
-  default: undefined,
+  default: localStorage.getItem('token') || undefined,
 });
 
 export const isSignedInSelector = selector({
