@@ -1,12 +1,10 @@
-import React, { Suspense, useEffect } from 'react';
+import React, { Suspense } from 'react';
 
 import './scss/style.scss';
 import { NavigationProvider } from 'context/NavigationContext';
 import { ToastProvider } from 'context/ToastContext';
 import { HashRouter, Route, Routes } from 'react-router-dom';
-import { useSetRecoilState } from 'recoil';
 import { ProtectRoutes } from 'routes/ProtectRoutes';
-import { jwtTokenState } from 'states/jwtTokenState';
 
 import SetupInterceptors from './api/SetupInterceptors';
 
@@ -26,15 +24,6 @@ const Page404 = React.lazy(() => import('./views/pages/page404/Page404'));
 const Page500 = React.lazy(() => import('./views/pages/page500/Page500'));
 
 const App = () => {
-  const setAccessToken = useSetRecoilState(jwtTokenState);
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      setAccessToken(token);
-    }
-  });
-
   return (
     <HashRouter>
       <NavigationProvider>

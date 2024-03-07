@@ -68,11 +68,10 @@ const AdminManagementPage = () => {
 
   const handleDeleteRestoreClick = async (shouldDelete) => {
     const ids = checkedItems.map((item) => item.id);
-
     if (checkedItems.length === 1) {
       try {
         const response = await RoleService.deleteRole(ids, shouldDelete);
-        if (shouldDelete && response.role === userRole) {
+        if (shouldDelete && userRole.includes(response.role)) {
           handleSignOut();
         } else {
           fetchRoleList();
@@ -86,7 +85,8 @@ const AdminManagementPage = () => {
         const roleNames = RoleList.filter((roleItem) => response.includes(roleItem.id)).map(
           (filteredRoleItem) => filteredRoleItem.role
         );
-        if (shouldDelete && roleNames.includes(userRole)) {
+        const isIncludeUserRole = roleNames.some((roleName) => userRole?.includes(roleName));
+        if (shouldDelete && isIncludeUserRole) {
           handleSignOut();
         } else {
           fetchRoleList();
