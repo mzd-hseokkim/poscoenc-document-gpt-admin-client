@@ -75,6 +75,12 @@ const BoardManagementPage = () => {
     modal.openModal();
   };
 
+  const handleCreateClick = () => {
+    setPostFormMode('create');
+    //REMIND add link
+    modal.openModal();
+  };
+
   const scopedColumnsUpdate = {
     title: (item) => {
       return (
@@ -276,6 +282,7 @@ const BoardManagementPage = () => {
         <CCardBody>
           <CRow className="mb-3">
             <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
+              <CButton onClick={handleCreateClick}>{'작성'}</CButton>
               <CButton
                 disabled={selectedRows?.length === 0 || isDeletedRow(selectedRows)}
                 onClick={() => togglePostStatus(true)}

@@ -56,16 +56,19 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
       name: 'commentCount',
       label: '댓글수',
       isDisabled: isUpdateMode,
+      isRendered: !isCreateMode,
     },
     {
       name: 'viewCount',
       label: '조회수',
       isDisabled: isUpdateMode,
+      isRendered: !isCreateMode,
     },
     {
       md: 2,
       name: 'deleted',
       label: '삭제 여부',
+      isRendered: !isCreateMode,
     },
   ];
 
@@ -98,13 +101,37 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
   useEffect(() => {
     if (!isCreateMode) {
       fetchPostDetails();
-    } else {
-      //REMIND imple post service
     }
   }, [clickedRowId]);
 
-  //REMIND separate modify logic with create logic when imple posting service
-  const handleSubmitModifiedData = async (data) => {
+  const onSubmit = (data) => {
+    console.log('현재값', formMode);
+    if (isCreateMode) {
+      void handleSubmitNewPost(data);
+    } else if (isUpdateMode) {
+      void handleSubmitModifiedPost(data);
+    }
+  };
+  const handleSubmitNewPost = async (newPost) => {
+    //REMIND 첨부파일 구현시 고려
+    const newPostData = {
+      ...newPost,
+      hasFiles: false,
+    };
+    try {
+      const isSucceed = await BoardService.postNew(newPostData);
+      if (isSucceed) {
+        closeModal();
+        refreshPosts();
+      }
+    } catch (error) {
+      const status = error.response?.status;
+      if (status === 400) {
+        addToast({ message: '게시글을 등록할 수 없습니다.' });
+      }
+    }
+  };
+  const handleSubmitModifiedPost = async (data) => {
     //REMIND hasFiles 관리 안하고 있는상태, 게시물 첨부파일 구현시 고려
     const modifiedData = {
       id: clickedRowId,
@@ -140,6 +167,13 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
     refreshPosts();
   };
 
+  const handleCancelClick = () => {
+    if (isUpdateMode) {
+      setFormMode('read');
+    } else if (isCreateMode) {
+      closeModal();
+    }
+  };
   const renderPostTitleInput = () => (
     <CRow className="mt-3">
       <CCol>
@@ -187,10 +221,10 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
       )}
       {!isReadMode && (
         <CCol className="d-grid d-md-flex justify-content-md-end gap-2">
-          <CButton className="me-1" type="submit" onClick={handleSubmit(handleSubmitModifiedData)}>
+          <CButton className="me-1" type="submit" onClick={handleSubmit(onSubmit)}>
             저장
           </CButton>
-          <CButton className="me-1" type="reset" onClick={() => setFormMode('read')}>
+          <CButton className="me-1" type="reset" onClick={handleCancelClick}>
             취소
           </CButton>
           {!isCreateMode && (
@@ -205,23 +239,27 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
     <>
       <FormLoadingCover isLoading={getDetailIsLoading} />
       <CModalBody>
-        <CForm onSubmit={handleSubmit(handleSubmitModifiedData)}>
-          <CCard className="mb-3">
-            <CCardBody>
-              <InputList
-                register={register}
-                fields={postSpecificFields}
-                formData={postDetails}
-                isReadMode={isReadMode}
-              />
-              <InputList
-                register={register}
-                fields={getAuditFields(formMode)}
-                formData={postDetails}
-                isReadMode={isReadMode}
-              />
-            </CCardBody>
-          </CCard>
+        <CForm onSubmit={handleSubmit(onSubmit)}>
+          {!isCreateMode && (
+            <CCard className="mb-3">
+              <CCardBody>
+                <InputList
+                  register={register}
+                  fields={postSpecificFields}
+                  formData={postDetails}
+                  isReadMode={isReadMode}
+                  errors={errors}
+                />
+                <InputList
+                  register={register}
+                  fields={getAuditFields(formMode)}
+                  formData={postDetails}
+                  isReadMode={isReadMode}
+                  errors={errors}
+                />
+              </CCardBody>
+            </CCard>
+          )}
           <CCard>
             <CCardBody>
               {renderPostTitleInput()}

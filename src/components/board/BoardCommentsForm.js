@@ -22,24 +22,18 @@ const BoardCommentsForm = ({ postId }) => {
   const [postComments, setPostComments] = useState([]);
   const [showDeletedComments, setShowDeletedComments] = useState(true);
 
-  //REMIND imple loading spinner
-  const [getIsLoading, setGetIsLoading] = useState(true);
   const [postCommentIsLoading, setPostCommentIsLoading] = useState(false);
-  const [deleteIsLoading, setDeleteIsLoading] = useState(false);
 
   const { addToast } = useToast();
   const currentUserId = useRecoilValue(userIdSelector);
   const endOfCommentsRef = useRef(null);
 
   const fetchPostComments = async () => {
-    setGetIsLoading(true);
     try {
       const comments = await BoardCommentService.getPostComments(postId);
       setPostComments(comments);
     } catch (error) {
       addToast({ message: '댓글을 불러오지 못했습니다. 관리자에게 문의하세요.' });
-    } finally {
-      setGetIsLoading(false);
     }
   };
 
@@ -64,9 +58,14 @@ const BoardCommentsForm = ({ postId }) => {
       setPostCommentIsLoading(false);
     }
   };
+  const handleSubmitCommentAsEnter = (event) => {
+    if (event.key === 'Enter' && !event.shiftKey && commentText.trim()) {
+      event.preventDefault();
+      void handleSubmitComment(event);
+    }
+  };
 
   const toggleCommentStatus = async (commentId, shouldDelete) => {
-    setDeleteIsLoading(true);
     try {
       await BoardCommentService.patchDeletionOptionComment(commentId, shouldDelete);
       await fetchPostComments();
@@ -76,8 +75,6 @@ const BoardCommentsForm = ({ postId }) => {
       } else {
         console.log(error);
       }
-    } finally {
-      setDeleteIsLoading(false);
     }
   };
 
@@ -139,7 +136,13 @@ const BoardCommentsForm = ({ postId }) => {
 
   const renderCommentInput = () => (
     <CInputGroup className="mb-3">
-      <CFormTextarea rows={2} placeholder="댓글을 입력해주세요." value={commentText} onChange={handleCommentChange} />
+      <CFormTextarea
+        rows={2}
+        placeholder="댓글을 입력해주세요."
+        value={commentText}
+        onChange={handleCommentChange}
+        onKeyDown={handleSubmitCommentAsEnter}
+      />
       <CButton type="submit" color="primary" disabled={!commentText.trim()}>
         작성
       </CButton>

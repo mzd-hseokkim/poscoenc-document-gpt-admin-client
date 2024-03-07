@@ -52,14 +52,13 @@ const getDownloadSearchedPostList = async (params) => {
   document.body.removeChild(link);
   window.URL.revokeObjectURL(downloadUrl);
 };
-//REMIND Implements post new
 const patchPostsDeletionOption = async (boardIds, deletionOption) => {
   const response = await api.patch(`/admin/boards/deleted/${deletionOption}`, boardIds);
   return response.status === 200;
 };
 
 const postNew = async (newPost) => {
-  const response = await api.post('/admin/boards/', newPost);
+  const response = await api.post('/admin/boards', newPost);
   return response.data;
 };
 
