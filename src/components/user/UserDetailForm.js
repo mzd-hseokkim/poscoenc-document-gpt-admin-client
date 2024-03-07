@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { CButton, CCol, CForm, CFormLabel, CFormTextarea, CModalBody, CModalFooter, CRow } from '@coreui/react-pro';
+import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import InputList from 'components/input/InputList';
 import { useToast } from 'context/ToastContext';
@@ -121,16 +122,16 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
 
   const onSubmit = (data) => {
     if (isCreateMode) {
-      postUser(data);
+      void postUser(data);
     } else if (isUpdateMode) {
-      patchUser(data);
+      void patchUser(data);
     }
   };
 
   const handleDeleteRestoreClick = async (id) => {
     const shouldDelete = !deleted;
     try {
-      await UserService.deleteUser(id, shouldDelete);
+      await UserService.deleteUsers([id], shouldDelete);
     } catch (error) {
       addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
@@ -140,7 +141,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
 
   const handleCancelClick = () => {
     setFormMode('read');
-    fetchUserDetail();
+    void fetchUserDetail();
   };
 
   const handleUpdateClick = (e) => {
@@ -178,15 +179,30 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
       </CModalBody>
       <CModalFooter>
         <CRow>
-          {/*REMIND 버튼 위치 조정*/}
           <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
+            {isReadMode ? (
+              <CButton onClick={handleUpdateClick}>수정</CButton>
+            ) : (
+              <CButton type="submit" onClick={handleSubmit(onSubmit)}>
+                저장
+              </CButton>
+            )}
             {isUpdateMode && <CButton onClick={handleCancelClick}>취소</CButton>}
             {!isCreateMode && (
               <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>{deleted ? '복구' : '삭제'}</CButton>
             )}
-            {isReadMode ? <CButton onClick={handleUpdateClick}>수정</CButton> : <CButton type="submit">저장</CButton>}
           </CCol>
         </CRow>
+        <DetailFormActionButtons
+          dataId={selectedId}
+          formModes={formModes(formMode)}
+          handleCancel={handleCancelClick}
+          handleDeleteRestore={handleDeleteRestoreClick}
+          handleUpdateClick={handleUpdateClick}
+          isDataDeleted={deleted}
+          //REMIND 관리자가 사용자 정보 수정 가능한지 결정되면 props 추가
+          onSubmit={handleSubmit(onSubmit)}
+        />
       </CModalFooter>
     </>
   );

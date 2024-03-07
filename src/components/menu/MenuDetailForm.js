@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import {
-  CButton,
   CCol,
   CForm,
   CFormCheck,
@@ -12,6 +11,7 @@ import {
   CMultiSelect,
   CRow,
 } from '@coreui/react-pro';
+import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import InputList from 'components/input/InputList';
 import { useToast } from 'context/ToastContext';
@@ -327,15 +327,15 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
         </CForm>
       </CModalBody>
       <CModalFooter>
-        <CRow>
-          <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-            {isUpdateMode && <CButton onClick={handleCancelClick}>취소</CButton>}
-            {!isCreateMode && (
-              <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>{deleted ? '복구' : '삭제'}</CButton>
-            )}
-            {isReadMode ? <CButton onClick={handleUpdateClick}>수정</CButton> : <CButton type="submit">저장</CButton>}
-          </CCol>
-        </CRow>
+        <DetailFormActionButtons
+          dataId={selectedId}
+          formModes={formModes(formMode)}
+          handleCancel={handleCancelClick}
+          handleDeleteRestore={handleDeleteRestoreClick}
+          handleUpdateClick={handleUpdateClick}
+          isDataDeleted={deleted}
+          onSubmit={handleSubmit(onSubmit)}
+        />
       </CModalFooter>
     </>
   );

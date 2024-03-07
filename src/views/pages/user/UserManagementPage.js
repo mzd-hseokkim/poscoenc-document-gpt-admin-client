@@ -38,7 +38,7 @@ const UserManagementPage = () => {
     if (isComponentMounted.current) {
       isComponentMounted.current = false;
     } else {
-      fetchUserList();
+      void fetchUserList();
     }
   }, [pageableData]);
 
@@ -87,20 +87,11 @@ const UserManagementPage = () => {
 
   const handleDeleteRestoreClick = async (shouldDelete) => {
     const ids = checkedItems.map((item) => item.id);
-    if (checkedItems.length === 1) {
-      try {
-        await UserService.deleteUser(ids, shouldDelete);
-        fetchUserList();
-      } catch (error) {
-        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
-      }
-    } else {
-      try {
-        await UserService.deleteUsers(ids, shouldDelete);
-        fetchUserList();
-      } catch (error) {
-        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
-      }
+    try {
+      await UserService.deleteUsers(ids, shouldDelete);
+      void fetchUserList();
+    } catch (error) {
+      addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
     setCheckedItems([]);
   };

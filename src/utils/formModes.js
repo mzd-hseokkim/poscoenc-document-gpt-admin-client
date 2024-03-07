@@ -5,11 +5,11 @@ export const FORM_MODES = {
 };
 
 const formModes = (currentMode) => {
-  const isCreateMode = currentMode === FORM_MODES.CREATE;
   const isReadMode = currentMode === FORM_MODES.READ;
   const isUpdateMode = currentMode === FORM_MODES.UPDATE;
+  const isCreateMode = currentMode === FORM_MODES.CREATE;
 
-  return { isCreateMode, isReadMode, isUpdateMode };
+  return { isReadMode, isUpdateMode, isCreateMode };
 };
 
 export default formModes;
