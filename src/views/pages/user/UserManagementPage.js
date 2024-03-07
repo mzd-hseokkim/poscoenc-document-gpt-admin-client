@@ -1,17 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import {
-  CButton,
-  CCard,
-  CCardBody,
-  CCardTitle,
-  CCol,
-  CForm,
-  CFormInput,
-  CFormSelect,
-  CRow,
-  CSmartTable,
-} from '@coreui/react-pro';
+import { CButton, CCard, CCardBody, CCol, CForm, CFormInput, CFormSelect, CRow, CSmartTable } from '@coreui/react-pro';
 import StatusBadge from 'components/badge/StatusBadge';
 import ModalContainer from 'components/modal/ModalContainer';
 import UserDetailForm from 'components/user/UserDetailForm';
@@ -118,99 +107,106 @@ const UserManagementPage = () => {
 
   return (
     <>
-      <CCard className="row g-3">
-        <CCardBody>
-          <CCardTitle>사용자 관리</CCardTitle>
-          <CForm onSubmit={handleSubmit}>
+      <CRow>
+        <CCard className="row g-3">
+          <CCardBody>
+            <CForm onSubmit={handleSubmit}>
+              <CRow className="mb-3">
+                <CCol md={4}>
+                  <CFormInput id="name" label="이름" value={formData.name} onChange={handleChange} />
+                </CCol>
+                <CCol md={4}>
+                  <CFormInput id="email" label="이메일" value={formData.email} onChange={handleChange} />
+                </CCol>
+                <CCol md={4}>
+                  <CFormInput id="team" label="팀" value={formData.team} onChange={handleChange} />
+                </CCol>
+              </CRow>
+              <CRow className="mb-3">
+                <CCol md={4}>
+                  <CFormInput id="memo" label="메모" value={formData.memo} onChange={handleChange} />
+                </CCol>
+                <CCol md={3}>
+                  <CFormSelect
+                    id="deletionOption"
+                    label="사용자 상태"
+                    name="deletionOption"
+                    options={[
+                      { label: '모든 사용자', value: '' },
+                      { label: '삭제됨', value: 'Yes' },
+                      { label: '삭제되지 않음', value: 'NO' },
+                    ]}
+                    value={formData.deletionOption}
+                    onChange={handleChange}
+                  />
+                </CCol>
+              </CRow>
+              <CRow className="mb-3">
+                <CCol className="d-grid gap-2 d-md-flex justify-content-md-center">
+                  <CButton type="submit">검색</CButton>
+                  <CButton onClick={handleReset}>초기화</CButton>
+                </CCol>
+              </CRow>
+            </CForm>
+          </CCardBody>
+        </CCard>
+      </CRow>
+      <CRow>
+        <CCard className="row g-3">
+          <CCardBody>
             <CRow className="mb-3">
-              <CCol md={4}>
-                <CFormInput id="name" label="이름" value={formData.name} onChange={handleChange} />
-              </CCol>
-              <CCol md={4}>
-                <CFormInput id="email" label="이메일" value={formData.email} onChange={handleChange} />
-              </CCol>
-              <CCol md={4}>
-                <CFormInput id="team" label="팀" value={formData.team} onChange={handleChange} />
+              <CCol className="d-grid gap-2 d-md-flex justify-content-md-start">
+                <CButton onClick={handleCreateClick}>사용자 추가</CButton>
+                <CButton onClick={() => handleDeleteRestoreClick(true)}>삭제</CButton>
+                <CButton onClick={() => handleDeleteRestoreClick(false)}>복구</CButton>
               </CCol>
             </CRow>
             <CRow className="mb-3">
-              <CCol md={4}>
-                <CFormInput id="memo" label="메모" value={formData.memo} onChange={handleChange} />
-              </CCol>
-              <CCol md={3}>
-                <CFormSelect
-                  id="deletionOption"
-                  label="사용자 상태"
-                  name="deletionOption"
-                  options={[
-                    { label: '모든 사용자', value: '' },
-                    { label: '삭제됨', value: 'Yes' },
-                    { label: '삭제되지 않음', value: 'NO' },
-                  ]}
-                  value={formData.deletionOption}
-                  onChange={handleChange}
-                />
-              </CCol>
+              <CSmartTable
+                columnSorter={{
+                  external: true,
+                  resetable: false,
+                }}
+                columns={userColumnConfig}
+                items={userList}
+                itemsPerPage={pageableData.size}
+                itemsPerPageLabel="페이지당 사용자 개수"
+                itemsPerPageSelect
+                loading={isLoading}
+                noItemsLabel={noItemsLabel}
+                onItemsPerPageChange={handlePageSizeChange}
+                onSelectedItemsChange={(items) => {
+                  setCheckedItems(items);
+                }}
+                onSorterChange={(sorterValue) => handlePageSortChange(sorterValue)}
+                paginationProps={smartPaginationProps}
+                scopedColumns={{
+                  name: (item) => (
+                    <td
+                      onClick={() => {
+                        handleRowClick(item.id);
+                      }}
+                    >
+                      {item.name}
+                    </td>
+                  ),
+                  deleted: (item) => (
+                    <td>
+                      <StatusBadge deleted={item.deleted} />
+                    </td>
+                  ),
+                }}
+                selectable
+                selected={checkedItems}
+                tableProps={{
+                  hover: true,
+                  responsive: true,
+                }}
+              />
             </CRow>
-            <CRow className="mb-3">
-              <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-                <CButton type="submit">검색</CButton>
-                <CButton onClick={handleReset}>초기화</CButton>
-              </CCol>
-            </CRow>
-          </CForm>
-          <CRow className="mb-3">
-            <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-              <CButton onClick={handleCreateClick}>사용자 추가</CButton>
-              <CButton onClick={() => handleDeleteRestoreClick(true)}>삭제</CButton>
-              <CButton onClick={() => handleDeleteRestoreClick(false)}>복구</CButton>
-            </CCol>
-          </CRow>
-          <CRow className="mb-3">
-            <CSmartTable
-              columnSorter={{
-                external: true,
-                resetable: false,
-              }}
-              columns={userColumnConfig}
-              items={userList}
-              itemsPerPage={pageableData.size}
-              itemsPerPageLabel="페이지당 사용자 개수"
-              itemsPerPageSelect
-              loading={isLoading}
-              noItemsLabel={noItemsLabel}
-              onItemsPerPageChange={handlePageSizeChange}
-              onSelectedItemsChange={(items) => {
-                setCheckedItems(items);
-              }}
-              onSorterChange={(sorterValue) => handlePageSortChange(sorterValue)}
-              paginationProps={smartPaginationProps}
-              scopedColumns={{
-                name: (item) => (
-                  <td
-                    onClick={() => {
-                      handleRowClick(item.id);
-                    }}
-                  >
-                    {item.name}
-                  </td>
-                ),
-                deleted: (item) => (
-                  <td>
-                    <StatusBadge deleted={item.deleted} />
-                  </td>
-                ),
-              }}
-              selectable
-              selected={checkedItems}
-              tableProps={{
-                hover: true,
-                responsive: true,
-              }}
-            />
-          </CRow>
-        </CCardBody>
-      </CCard>
+          </CCardBody>
+        </CCard>
+      </CRow>
       <ModalContainer visible={modal.isOpen} title="사용자 정보" size="lg" onClose={modal.closeModal}>
         <UserDetailForm
           selectedId={selectedId}
