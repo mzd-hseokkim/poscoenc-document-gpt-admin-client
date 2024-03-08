@@ -217,8 +217,6 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
               selectAllLabel="모두 선택"
               options={roles}
               virtualScroller
-              selected={field.value}
-              value={field.value}
               disabled={isReadMode}
               invalid={!!errors.roles}
               feedbackInvalid={errors.roles?.message}

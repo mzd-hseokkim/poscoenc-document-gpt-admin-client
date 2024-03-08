@@ -279,8 +279,8 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
           rules={{ required: '권한은 필수 입력 항목입니다.' }}
           render={({ field }) => (
             <CMultiSelect
-              {...field}
               id="detail-form-allowedRoles"
+              {...field}
               placeholder="권한을 선택하세요."
               selectAllLabel="모두 선택"
               options={roles}
