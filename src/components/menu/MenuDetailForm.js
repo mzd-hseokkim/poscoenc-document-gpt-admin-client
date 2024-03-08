@@ -151,6 +151,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
   };
 
   const getRoles = async (allowedRoles) => {
+    setRoles([]);
     try {
       const rolesData = await RoleService.getRoles();
       const newRoles = rolesData.map((role) => ({
@@ -252,7 +253,13 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
           control={control}
           render={({ field }) => (
             <CCol className="mt-2">
-              <CFormCheck {...field} id="detail-form-allowChildren" checked={field.value} disabled={isReadMode} />
+              <CFormCheck
+                {...field}
+                id="detail-form-allowChildren"
+                checked={field.value}
+                disabled={isReadMode}
+                label={field.value ? '등록 가능' : '등록 불가능'}
+              />
             </CCol>
           )}
         />
