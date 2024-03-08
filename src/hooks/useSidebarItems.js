@@ -38,7 +38,7 @@ const useSidebarItems = () => {
       const transformedMenuItems = menuListWithFavorites.reduce((acc, menu) => {
         if (menu.parentId === 0) {
           const children = menuListWithFavorites.filter((child) => child.parentId === menu.id);
-          if (children.length > 0) {
+          if (menu.allowChildren) {
             acc.push({
               component: CNavGroup,
               name: menu.name,
