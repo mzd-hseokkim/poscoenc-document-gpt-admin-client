@@ -314,8 +314,6 @@ const BoardManagementPage = () => {
                 >
                   {'복구'}
                 </CButton>
-              </CCol>
-              <CCol className="d-grid gap-2 justify-content-end">
                 <ExcelDownloadCButton
                   downloadFunction={BoardService.getDownloadSearchedPostList}
                   searchFormData={searchFormData}

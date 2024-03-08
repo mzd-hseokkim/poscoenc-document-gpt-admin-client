@@ -26,7 +26,7 @@ import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/formModes';
 
 const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refreshPosts }) => {
-  const [postDetails, setPostDetails] = useState({});
+  const [postDetail, setPostDetail] = useState({});
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
   //REMIND use setFormMode when implements posting service
   const [formMode, setFormMode] = useState(initialFormMode || '');
@@ -85,7 +85,7 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
         createdAt: detail.createdAt && formatToYMD(detail.createdAt),
         modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
       };
-      setPostDetails(formattedDetail);
+      setPostDetail(formattedDetail);
       reset(formattedDetail);
     } catch (error) {
       if (error.response?.status === 404) {
@@ -100,12 +100,11 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
 
   useEffect(() => {
     if (!isCreateMode) {
-      fetchPostDetails();
+      void fetchPostDetails();
     }
   }, [clickedRowId]);
 
   const onSubmit = (data) => {
-    console.log('현재값', formMode);
     if (isCreateMode) {
       void handleSubmitNewPost(data);
     } else if (isUpdateMode) {
@@ -155,10 +154,6 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
       }
     }
   };
-  const handleModificationCancelClick = async () => {
-    setFormMode('read');
-    await fetchPostDetails();
-  };
   const handleDeleteRestoreClick = async (postId) => {
     const shouldDelete = !deleted;
     try {
@@ -170,9 +165,10 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
     refreshPosts();
   };
 
-  const handleCancelClick = () => {
+  const handleCancelClick = async () => {
     if (isUpdateMode) {
       setFormMode('read');
+      await fetchPostDetails();
     } else if (isCreateMode) {
       closeModal();
     }
@@ -185,9 +181,15 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
           type="text"
           id="title"
           name="title"
-          defaultValue={postDetails?.title}
+          placeholder="제목을 작성 해 주세요."
+          defaultValue={postDetail?.title}
           readOnly={isReadMode}
-          {...register('title')}
+          {...register('title', {
+            required: '제목을 작성 해 주세요.',
+            validate: (value) => value.trim().length > 0 || '공백만으로 제목을 작성할 수 없습니다.',
+          })}
+          invalid={!!errors.title}
+          feedbackInvalid={errors.title?.message}
         />
       </CCol>
     </CRow>
@@ -202,9 +204,14 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
           name="content"
           rows="5"
           placeholder="내용을 작성 해 주세요."
-          defaultValue={postDetails?.content}
+          defaultValue={postDetail?.content}
           readOnly={isReadMode}
-          {...register('content')}
+          {...register('content', {
+            required: '내용을 작성 해 주세요.',
+            validate: (value) => value.trim().length > 0 || '공백만으로 내용을 작성할 수 없습니다.',
+          })}
+          invalid={!!errors.content}
+          feedbackInvalid={errors.content?.message}
         />
       </CCol>
     </CRow>
@@ -221,14 +228,14 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
                 <InputList
                   register={register}
                   fields={postSpecificFields}
-                  formData={postDetails}
+                  formData={postDetail}
                   isReadMode={isReadMode}
                   errors={errors}
                 />
                 <InputList
                   register={register}
                   fields={getAuditFields(formMode)}
-                  formData={postDetails}
+                  formData={postDetail}
                   isReadMode={isReadMode}
                   errors={errors}
                 />
@@ -248,12 +255,12 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
         <DetailFormActionButtons
           dataId={clickedRowId}
           formModes={formModes(formMode)}
-          handleCancel={handleModificationCancelClick}
+          handleCancel={handleCancelClick}
           handleDeleteRestore={handleDeleteRestoreClick}
           handleUpdateClick={() => setFormMode('update')}
           isDataDeleted={deleted}
-          isCreatedByCurrentUser={postDetails?.createdBy === currentUserId}
-          onSubmit={handleSubmit(handleSubmitModifiedData)}
+          isCreatedByCurrentUser={postDetail?.createdBy === currentUserId}
+          onSubmit={handleSubmit(onSubmit)}
         />
       </CModalFooter>
     </>
