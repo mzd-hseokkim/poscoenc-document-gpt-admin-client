@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import {
-  CButton,
   CCard,
   CCardBody,
   CCol,
@@ -14,6 +13,7 @@ import {
   CRow,
 } from '@coreui/react-pro';
 import BoardCommentsForm from 'components/board/BoardCommentsForm';
+import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import InputList from 'components/input/InputList';
 import { useToast } from 'context/ToastContext';
@@ -155,7 +155,10 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
       }
     }
   };
-
+  const handleModificationCancelClick = async () => {
+    setFormMode('read');
+    await fetchPostDetails();
+  };
   const handleDeleteRestoreClick = async (postId) => {
     const shouldDelete = !deleted;
     try {
@@ -207,34 +210,6 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
     </CRow>
   );
 
-  const renderFormActions = () => (
-    <CRow className="justify-content-end">
-      {isReadMode && postDetails?.createdBy === currentUserId && (
-        <CCol className="d-grid d-md-flex justify-content-md-end gap-2">
-          <CButton className="me-1" onClick={() => setFormMode('update')}>
-            수정
-          </CButton>
-          {!isCreateMode && (
-            <CButton onClick={() => handleDeleteRestoreClick(clickedRowId)}>{deleted ? '복구' : '삭제'}</CButton>
-          )}
-        </CCol>
-      )}
-      {!isReadMode && (
-        <CCol className="d-grid d-md-flex justify-content-md-end gap-2">
-          <CButton className="me-1" type="submit" onClick={handleSubmit(onSubmit)}>
-            저장
-          </CButton>
-          <CButton className="me-1" type="reset" onClick={handleCancelClick}>
-            취소
-          </CButton>
-          {!isCreateMode && (
-            <CButton onClick={() => handleDeleteRestoreClick(clickedRowId)}>{deleted ? '복구' : '삭제'}</CButton>
-          )}
-        </CCol>
-      )}
-    </CRow>
-  );
-
   return (
     <>
       <FormLoadingCover isLoading={getDetailIsLoading} />
@@ -269,7 +244,18 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
         </CForm>
         {isReadMode && <BoardCommentsForm postId={clickedRowId} />}
       </CModalBody>
-      <CModalFooter>{renderFormActions()}</CModalFooter>
+      <CModalFooter>
+        <DetailFormActionButtons
+          dataId={clickedRowId}
+          formModes={formModes(formMode)}
+          handleCancel={handleModificationCancelClick}
+          handleDeleteRestore={handleDeleteRestoreClick}
+          handleUpdateClick={() => setFormMode('update')}
+          isDataDeleted={deleted}
+          isCreatedByCurrentUser={postDetails?.createdBy === currentUserId}
+          onSubmit={handleSubmit(handleSubmitModifiedData)}
+        />
+      </CModalFooter>
     </>
   );
 };

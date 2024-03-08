@@ -4,10 +4,10 @@ import {
   CButton,
   CCard,
   CCardBody,
-  CCardTitle,
   CCol,
   CDateRangePicker,
   CForm,
+  CFormCheck,
   CFormInput,
   CFormSelect,
   CRow,
@@ -18,6 +18,7 @@ import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import DocumentCollectionDetailForm from 'components/document-collection/DocumentCollectionDetailForm';
 import ModalContainer from 'components/modal/ModalContainer';
 import { useToast } from 'context/ToastContext';
+import { format } from 'date-fns';
 import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
 import DocumentCollectionService from 'services/document-collection/DocumentCollectionService';
@@ -38,6 +39,7 @@ const DocumentCollectionManagementPage = () => {
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
   const [totalCollectionElements, setTotalCollectionElements] = useState(0);
   const [noItemsLabel, setNoItemsLabel] = useState('');
+  const [isPickTime, setIsPickTime] = useState(false);
 
   const initialSearchFormData = {
     name: '',
@@ -95,13 +97,21 @@ const DocumentCollectionManagementPage = () => {
   const handleDateChange = ({ id, newDate, isStartDate = true }) => {
     const fieldMap = {
       createdAt: isStartDate ? 'fromCreatedAt' : 'toCreatedAt',
-      modifiedAt: isStartDate ? 'fromModifiedAt' : 'toModifiedAt',
     };
     const fieldToUpdate = fieldMap[id];
     if (fieldToUpdate) {
       const formattedDate = isStartDate ? formatToIsoStartDate(newDate) : formatToIsoEndDate(newDate);
       setSearchFormData((prev) => ({ ...prev, [fieldToUpdate]: formattedDate }));
     }
+  };
+
+  const handleTimePickerCheck = (e) => {
+    setIsPickTime(e.target.checked);
+    setSearchFormData((prev) => ({
+      ...prev,
+      fromCreatedAt: format(searchFormData.fromCreatedAt, "yyyy-MM-dd'T'00:00"),
+      toCreatedAt: format(searchFormData.toCreatedAt, "yyyy-MM-dd'T'23:59"),
+    }));
   };
 
   const handleSubmitSearchRequest = async (e) => {
@@ -159,7 +169,6 @@ const DocumentCollectionManagementPage = () => {
       <CRow>
         <CCard className="row g-3">
           <CCardBody>
-            <CCardTitle>문서 관리</CCardTitle>
             <CForm onSubmit={handleSubmitSearchRequest}>
               <CRow className="mb-3">
                 <CCol md={4}>
@@ -187,18 +196,7 @@ const DocumentCollectionManagementPage = () => {
                   />
                 </CCol>
               </CRow>
-              <CRow className="mb-3"></CRow>
               <CRow className="mb-3">
-                <CCol md={6}>
-                  <CDateRangePicker
-                    id="createdAt"
-                    label="등록일"
-                    startDate={searchFormData.fromCreatedAt}
-                    endDate={searchFormData.toCreatedAt}
-                    onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
-                    onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
-                  />
-                </CCol>
                 <CCol md={4}>
                   <CFormSelect
                     id="deletionOption"
@@ -212,6 +210,21 @@ const DocumentCollectionManagementPage = () => {
                     value={searchFormData.deletionOption}
                     onChange={handleSearchFormChange}
                   />
+                </CCol>
+                <CCol md={6}>
+                  <CDateRangePicker
+                    key={`createdAt-${isPickTime}`}
+                    id="createdAt"
+                    label="등록일"
+                    startDate={searchFormData.fromCreatedAt}
+                    endDate={searchFormData.toCreatedAt}
+                    onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
+                    onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
+                    timepicker={isPickTime}
+                  />
+                </CCol>
+                <CCol md={2} className="mt-5">
+                  <CFormCheck label="시간 검색 여부" checked={isPickTime} onChange={(e) => handleTimePickerCheck(e)} />
                 </CCol>
               </CRow>
               <CRow className="mb-3">
@@ -230,7 +243,7 @@ const DocumentCollectionManagementPage = () => {
         <CCard className="row g-3">
           <CCardBody>
             <CRow className="mb-3">
-              <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
+              <CCol className="d-grid gap-2 d-md-flex justify-content-md-start">
                 <CButton
                   disabled={selectedRows?.length === 0 || isDeletedRow(selectedRows)}
                   onClick={() => toggleDocumentCollectionStatus(true)}
@@ -243,6 +256,12 @@ const DocumentCollectionManagementPage = () => {
                 >
                   {'복구'}
                 </CButton>
+              </CCol>
+              <CCol className="d-grid gap-2 justify-content-end">
+                <ExcelDownloadCButton
+                  downloadFunction={DocumentCollectionService.getDownloadSearchedCollectionList}
+                  searchFormData={searchFormData}
+                />
               </CCol>
             </CRow>
             <CRow className="mb-3">
@@ -264,14 +283,6 @@ const DocumentCollectionManagementPage = () => {
                 selected={selectedRows}
                 tableProps={tableCustomProps}
               />
-            </CRow>
-            <CRow className="mt-3">
-              <CCol className="d-grid gap-2 justify-content-end">
-                <ExcelDownloadCButton
-                  downloadFunction={DocumentCollectionService.getDownloadSearchedCollectionList}
-                  searchFormData={searchFormData}
-                />
-              </CCol>
             </CRow>
           </CCardBody>
         </CCard>
