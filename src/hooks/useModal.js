@@ -1,25 +1,30 @@
 import { useEffect, useState } from 'react';
 
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 const useModal = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
-    //REMIND 링크로 이동시 modal 창 열기 위한 로직
-    const queryParams = new URLSearchParams(location.search);
-    const id = queryParams.get('id');
+    const id = searchParams.get('id');
     setIsOpen(!!id);
-  }, [location]);
-  const openModal = (path = '') => {
+  }, [searchParams]);
+  const openModal = (id) => {
     setIsOpen(true);
-    if (path) navigate(path, { replace: true });
+    if (!searchParams.get('id')) {
+      searchParams.set('id', id);
+      setSearchParams(searchParams, { replace: true });
+    }
   };
   const closeModal = () => {
     setIsOpen(false);
-    navigate(location.pathname, { replace: true });
+    if (searchParams.get('id')) {
+      setSearchParams((params) => {
+        params.delete('id');
+        return params;
+      });
+    }
   };
 
   return { isOpen, openModal, closeModal };
