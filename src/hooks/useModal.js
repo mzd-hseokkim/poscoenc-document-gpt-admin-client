@@ -10,9 +10,11 @@ const useModal = () => {
     const id = searchParams.get('id');
     setIsOpen(!!id);
   }, [searchParams]);
+
+  //REMIND handle with create mode ... 하아니.. 해결한줄알았드만 폼모드 초기화 안해주면 다시 열때, create 모드로 상세정보 다보임
   const openModal = (id) => {
     setIsOpen(true);
-    if (!searchParams.get('id')) {
+    if (id && !searchParams.get('id')) {
       searchParams.set('id', id);
       setSearchParams(searchParams, { replace: true });
     }

@@ -89,7 +89,7 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
         reset(formattedDetail);
       } catch (error) {
         if (error.response?.status === 404) {
-          addToast({ message: '해당 게시글을 찾을 수 없습니다.' });
+          addToast({ message: `id={${postId}} 해당 게시글을 찾을 수 없습니다.` });
         } else {
           console.log(error);
         }
@@ -100,7 +100,7 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
     },
     [addToast, closeModal, reset]
   );
-
+  //REMIND 게시글 작성 후 모달 닫을 때 formMode read 로 설정해주기
   useEffect(() => {
     const postId = searchParams.get('id');
 
@@ -138,11 +138,13 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
       } else {
         console.log(error);
       }
+    } finally {
+      setFormMode('read');
     }
   };
   const handleModificationCancelClick = async () => {
     setFormMode('read');
-    await fetchPostDetails();
+    await fetchPostDetails(postDetails.id);
   };
   const handleDeleteRestoreClick = async (postId) => {
     const shouldDelete = !deleted;
