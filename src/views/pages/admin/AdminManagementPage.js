@@ -48,7 +48,6 @@ const AdminManagementPage = () => {
   const [AdminList, setAdminList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [checkedItems, setCheckedItems] = useState([]);
-  const [selectedId, setSelectedId] = useState();
   const [formMode, setFormMode] = useState('');
   const [totalAdminElements, setTotalAdminElements] = useState(0);
   const [formData, setFormData] = useState(createInitialFormData);
@@ -66,7 +65,7 @@ const AdminManagementPage = () => {
     if (isComponentMounted.current) {
       isComponentMounted.current = false;
     } else {
-      fetchAdminList();
+      void fetchAdminList();
     }
   }, [pageableData]);
 
@@ -119,14 +118,13 @@ const AdminManagementPage = () => {
   };
 
   const handleRowClick = (id) => {
-    setSelectedId(id);
     setFormMode('read');
-    modal.openModal();
+    modal.openModal(id);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    fetchAdminList();
+    void fetchAdminList();
   };
 
   const handleReset = () => {
@@ -318,12 +316,7 @@ const AdminManagementPage = () => {
         </CCard>
       </CRow>
       <ModalContainer visible={modal.isOpen} title="관리자 정보" size="lg" onClose={modal.closeModal}>
-        <AdminDetailForm
-          selectedId={selectedId}
-          initialFormMode={formMode}
-          closeModal={modal.closeModal}
-          fetchAdminList={fetchAdminList}
-        />
+        <AdminDetailForm initialFormMode={formMode} closeModal={modal.closeModal} fetchAdminList={fetchAdminList} />
       </ModalContainer>
     </>
   );
