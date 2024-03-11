@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { CButton, CCol, CForm, CFormLabel, CFormTextarea, CModalBody, CModalFooter, CRow } from '@coreui/react-pro';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
@@ -6,6 +6,7 @@ import FormLoadingCover from 'components/cover/FormLoadingCover';
 import InputList from 'components/input/InputList';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
+import { useSearchParams } from 'react-router-dom';
 import UserService from 'services/UserService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
@@ -15,6 +16,7 @@ import { emailValidationPattern } from 'utils/validationUtils';
 const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [formMode, setFormMode] = useState(initialFormMode);
+  const [searchParams] = useSearchParams();
 
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
   const { addToast } = useToast();
@@ -62,30 +64,36 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
     },
   ];
 
-  const fetchUserDetail = async () => {
-    try {
-      setIsLoading(true);
+  const fetchUserDetail = useCallback(
+    async (userId) => {
+      try {
+        setIsLoading(true);
 
-      const data = await UserService.getUser(selectedId);
-      const formattedData = {
-        ...data,
-        modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
-        createdAt: data.createdAt && formatToYMD(data.createdAt),
-      };
-      reset(formattedData);
-    } catch (error) {
-      addToast({ message: '사용자 정보를 가져오지 못했습니다.' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        const data = await UserService.getUser(userId);
+        const formattedData = {
+          ...data,
+          modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
+          createdAt: data.createdAt && formatToYMD(data.createdAt),
+        };
+        reset(formattedData);
+      } catch (error) {
+        addToast({ message: `id={${userId}} 해당 사용자를 찾을 수 없습니다.` });
+        closeModal();
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [addToast, closeModal, reset]
+  );
 
   useEffect(() => {
     setIsLoading(false);
-    if (!isCreateMode && selectedId) {
-      fetchUserDetail();
+    const userId = searchParams.get('id');
+
+    if (!isCreateMode && userId) {
+      void fetchUserDetail(userId);
     }
-  }, [selectedId]);
+  }, [fetchUserDetail, isCreateMode, searchParams, selectedId]);
 
   const postUser = async (data) => {
     try {
