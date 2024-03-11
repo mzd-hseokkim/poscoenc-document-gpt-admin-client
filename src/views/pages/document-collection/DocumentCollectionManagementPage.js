@@ -62,7 +62,7 @@ const DocumentCollectionManagementPage = () => {
     if (isComponentMounted.current) {
       isComponentMounted.current = false;
     } else {
-      searchDocumentCollectionList();
+      void searchDocumentCollectionList();
     }
   }, [pageableData]);
 

@@ -99,7 +99,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
         reset(formattedDetail);
       } catch (error) {
         if (error.response?.status === 404) {
-          addToast({ message: '해당 문서 집합을 찾을 수 없습니다.' });
+          addToast({ message: `id={${collectionId}} 해당 문서 집합을 찾을 수 없습니다.` });
         } else {
           console.log(error);
         }
@@ -138,6 +138,8 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
       } else {
         console.log(error);
       }
+    } finally {
+      setFormMode('read');
     }
     //REMIND loading spinner
   };
