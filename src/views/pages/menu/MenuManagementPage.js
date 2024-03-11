@@ -40,7 +40,6 @@ const createInitialFormData = () => ({
 const MenuManagementPage = () => {
   const [menuList, setMenuList] = useState([]);
   const [checkedItems, setCheckedItems] = useState([]);
-  const [selectedId, setSelectedId] = useState();
   const [formMode, setFormMode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [totalMenuElements, setTotalMenuElements] = useState(0);
@@ -59,7 +58,7 @@ const MenuManagementPage = () => {
     if (isComponentMounted.current) {
       isComponentMounted.current = false;
     } else {
-      fetchMenuList();
+      void fetchMenuList();
     }
   }, [pageableData]);
 
@@ -111,14 +110,13 @@ const MenuManagementPage = () => {
   };
 
   const handleRowClick = (id) => {
-    setSelectedId(id);
     setFormMode('read');
-    modal.openModal();
+    modal.openModal(id);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    fetchMenuList();
+    void fetchMenuList();
   };
 
   const handleReset = () => {
@@ -310,12 +308,7 @@ const MenuManagementPage = () => {
       </CRow>
 
       <ModalContainer visible={modal.isOpen} title="메뉴 정보" size="lg" onClose={modal.closeModal}>
-        <MenuDetailForm
-          selectedId={selectedId}
-          initialFormMode={formMode}
-          closeModal={modal.closeModal}
-          fetchMenuList={fetchMenuList}
-        />
+        <MenuDetailForm initialFormMode={formMode} closeModal={modal.closeModal} fetchMenuList={fetchMenuList} />
       </ModalContainer>
     </>
   );

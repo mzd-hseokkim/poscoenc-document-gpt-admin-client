@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import {
   CCol,
@@ -16,6 +16,7 @@ import FormLoadingCover from 'components/cover/FormLoadingCover';
 import InputList from 'components/input/InputList';
 import { useToast } from 'context/ToastContext';
 import { Controller, useForm } from 'react-hook-form';
+import { useSearchParams } from 'react-router-dom';
 import MenuService from 'services/menu/MenuService';
 import RoleService from 'services/Role/RoleService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
@@ -23,7 +24,7 @@ import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/formModes';
 import { itemNameValidationPattern } from 'utils/validationUtils';
 
-const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList }) => {
+const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
   const [formMode, setFormMode] = useState(initialFormMode);
   const [roles, setRoles] = useState([]);
   const [parentMenus, setParentMenus] = useState([
@@ -33,6 +34,8 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
   const { addToast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+
   const {
     reset,
     watch,
@@ -48,6 +51,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
     },
   });
 
+  const menuId = watch('id');
   const allowChildren = watch('allowChildren');
   const deleted = watch('deleted');
 
@@ -115,60 +119,29 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
     }
   }, [allowChildren, setValue]);
 
-  useEffect(() => {
-    setIsLoading(false);
-    if (!isCreateMode && selectedId) {
-      fetchMenuDetail();
-    } else {
-      getRoles();
-    }
-    getParentMenu();
-  }, [selectedId]);
-
-  const fetchMenuDetail = async () => {
-    try {
-      setIsLoading(true);
-      const data = await MenuService.getMenuDetail(selectedId);
-      const formattedData = {
-        ...data,
-        modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
-        createdAt: data.createdAt && formatToYMD(data.createdAt),
-      };
-      reset(formattedData);
-      const allowedRoles = data.allowedRoles.map((role) => role.id);
-      await getRoles(allowedRoles);
-    } catch (error) {
-      const status = error.response?.status;
-      if (status === 400) {
-        addToast({ message: '메뉴 정보를 가져오지 못했습니다.' });
+  const getRoles = useCallback(
+    async (allowedRoles) => {
+      try {
+        const rolesData = await RoleService.getRoles();
+        const newRoles = rolesData.map((role) => ({
+          value: role.id,
+          text: role.role,
+          selected: allowedRoles?.length > 0 ? allowedRoles.includes(role.id) : false,
+        }));
+        setRoles(newRoles);
+      } catch (error) {
+        const status = error.response?.status;
+        if (status === 400) {
+          addToast({ message: '권한 목록을 가져오지 못했습니다.' });
+        }
       }
-      if (status === 404) {
-        addToast({ message: '메뉴를 찾을 수 없습니다.' });
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [addToast]
+  );
+  //REMIND 모달창 닫을 때 ,getParentMenu 에서 리렌더링 이슈로 자꾸 undefined 된 menuId 를  service 에 요청해버림
 
-  const getRoles = async (allowedRoles) => {
-    try {
-      const rolesData = await RoleService.getRoles();
-      const newRoles = rolesData.map((role) => ({
-        value: role.id,
-        text: role.role,
-        selected: allowedRoles?.length > 0 ? allowedRoles.includes(role.id) : false,
-      }));
-      setRoles(newRoles);
-    } catch (error) {
-      const status = error.response?.status;
-      if (status === 400) {
-        addToast({ message: '권한 목록을 가져오지 못했습니다.' });
-      }
-    }
-  };
-
-  const getParentMenu = async () => {
-    let excludedId = isCreateMode ? '' : selectedId;
+  const getParentMenu = useCallback(async () => {
+    let excludedId = isCreateMode ? '' : searchParams?.get('id');
     try {
       const data = await MenuService.getParentMenus(excludedId);
       const newParentMenus = data.map((parentMenu) => ({
@@ -182,7 +155,50 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
         addToast({ message: '상위 메뉴 목록을 가져오지 못했습니다.' });
       }
     }
-  };
+  }, [addToast, isCreateMode, searchParams]);
+  //StartFrom 3/11 병합되면 충돌 해결, 현재 발생하는 이슈는 validation에 의한 거절 후 role 값이 null 이되는 문제 발생, 내버젼에서만발생하니 알아볼것.
+  //StartFrom 일단 getParentMenu 이슈 해결했으니 적용하면서 버그만 찾아내면 될듯함.
+  const fetchMenuDetail = useCallback(
+    async (menuId) => {
+      try {
+        setIsLoading(true);
+        const data = await MenuService.getMenuDetail(menuId);
+        const formattedData = {
+          ...data,
+          modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
+          createdAt: data.createdAt && formatToYMD(data.createdAt),
+        };
+        reset(formattedData);
+        const allowedRoles = data.allowedRoles.map((role) => role.id);
+        await getRoles(allowedRoles);
+      } catch (error) {
+        //REMIND 권한 에러인지, 메뉴 에러인지 구분해서 에러 처리
+        const status = error.response?.status;
+        if (status === 400) {
+          addToast({ message: '메뉴 정보를 가져오지 못했습니다.' });
+        }
+        if (status === 404) {
+          addToast({ message: '메뉴를 찾을 수 없습니다.' });
+        }
+        closeModal();
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [addToast, closeModal, getRoles, reset]
+  );
+
+  useEffect(() => {
+    setIsLoading(false);
+    const menuId = searchParams.get('id');
+
+    if (!isCreateMode && menuId) {
+      void fetchMenuDetail(menuId);
+    } else {
+      void getRoles();
+    }
+    void getParentMenu();
+  }, [fetchMenuDetail, getParentMenu, getRoles, isCreateMode, searchParams]);
 
   const postMenu = async (data) => {
     try {
@@ -215,15 +231,15 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
     const updatedData = { ...data, allowedRoles: roleList };
 
     if (isCreateMode) {
-      postMenu(updatedData);
+      void postMenu(updatedData);
     } else if (isUpdateMode) {
-      patchMenu(updatedData);
+      void patchMenu(updatedData);
     }
   };
 
   const handleCancelClick = () => {
     setFormMode('read');
-    fetchMenuDetail();
+    void fetchMenuDetail(menuId);
   };
 
   const handleUpdateClick = (e) => {
@@ -328,7 +344,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
       </CModalBody>
       <CModalFooter>
         <DetailFormActionButtons
-          dataId={selectedId}
+          dataId={menuId}
           formModes={formModes(formMode)}
           handleCancel={handleCancelClick}
           handleDeleteRestore={handleDeleteRestoreClick}

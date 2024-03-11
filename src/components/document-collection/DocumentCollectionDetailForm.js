@@ -138,8 +138,6 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
       } else {
         console.log(error);
       }
-    } finally {
-      setFormMode('read');
     }
     //REMIND loading spinner
   };

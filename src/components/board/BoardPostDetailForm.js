@@ -104,10 +104,6 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
   useEffect(() => {
     const postId = searchParams.get('id');
 
-    if (!postId) {
-      closeModal();
-    }
-
     if (!isCreateMode) {
       void fetchPostDetails(postId);
     }
