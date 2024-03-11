@@ -62,6 +62,10 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
       placeholder: '이름을 입력하세요.',
       rules: {
         required: '이름은 필수 입력 항목입니다.',
+        maxLength: {
+          value: 12,
+          message: '메뉴 이름은 최대 12자 입니다.',
+        },
         pattern: {
           value: itemNameValidationPattern,
           message: '한글, 알파벳, 숫자, 띄어쓰기만 허용됩니다.',
