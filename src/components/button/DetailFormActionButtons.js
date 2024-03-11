@@ -30,7 +30,7 @@ const DetailFormActionButtons = ({
     <CRow>
       <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
         {shouldShowModifyButton() && <CButton onClick={handleUpdateClick}>수정</CButton>}
-        {isUpdateMode && (
+        {(isUpdateMode || isCreateMode) && (
           <>
             <CButton type="submit" onClick={onSubmit}>
               저장
