@@ -17,7 +17,6 @@ const AdminManagementPage = () => {
   const [RoleList, setRoleList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [checkedItems, setCheckedItems] = useState([]);
-  const [selectedId, setSelectedId] = useState();
   const [formMode, setFormMode] = useState('');
   const [noItemsLabel, setNoItemsLabel] = useState('');
   const userRole = useRecoilValue(userRoleSelector);
@@ -28,7 +27,7 @@ const AdminManagementPage = () => {
   const resetJwtToken = useResetRecoilState(jwtTokenState);
 
   useEffect(() => {
-    fetchRoleList();
+    void fetchRoleList();
   }, []);
 
   const fetchRoleList = async () => {
@@ -56,9 +55,8 @@ const AdminManagementPage = () => {
   };
 
   const handleRowClick = (id) => {
-    setSelectedId(id);
     setFormMode('read');
-    modal.openModal();
+    modal.openModal(id);
   };
 
   const handleCreateClick = () => {
@@ -74,7 +72,7 @@ const AdminManagementPage = () => {
         if (shouldDelete && userRole.includes(response.role)) {
           handleSignOut();
         } else {
-          fetchRoleList();
+          void fetchRoleList();
         }
       } catch (error) {
         addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
@@ -89,7 +87,7 @@ const AdminManagementPage = () => {
         if (shouldDelete && isIncludeUserRole) {
           handleSignOut();
         } else {
-          fetchRoleList();
+          void fetchRoleList();
         }
       } catch (error) {
         addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
@@ -152,12 +150,7 @@ const AdminManagementPage = () => {
       </CRow>
 
       <ModalContainer visible={modal.isOpen} title="권한 정보" size="lg" onClose={modal.closeModal}>
-        <RoleDetailForm
-          selectedId={selectedId}
-          initialFormMode={formMode}
-          closeModal={modal.closeModal}
-          fetchRoleList={fetchRoleList}
-        />
+        <RoleDetailForm initialFormMode={formMode} closeModal={modal.closeModal} fetchRoleList={fetchRoleList} />
       </ModalContainer>
     </>
   );
