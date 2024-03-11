@@ -36,7 +36,6 @@ import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTab
 
 const BoardManagementPage = () => {
   const [selectedRows, setSelectedRows] = useState([]);
-  const [clickedRowId, setClickedRowId] = useState(null);
   const [postList, setPostList] = useState([]);
   const [postFormMode, setPostFormMode] = useState('');
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
@@ -68,14 +67,13 @@ const BoardManagementPage = () => {
     if (isComponentMounted.current) {
       isComponentMounted.current = false;
     } else {
-      searchPostList();
+      void searchPostList();
     }
   }, [pageableData]);
 
-  const handleRowClick = (newClickedRowId) => {
-    setClickedRowId(newClickedRowId);
+  const handleRowClick = (itemId) => {
     setPostFormMode('read');
-    modal.openModal();
+    modal.openModal(itemId);
   };
 
   const scopedColumnsUpdate = {
@@ -149,11 +147,6 @@ const BoardManagementPage = () => {
       fromModifiedAt: format(searchFormData.fromModifiedAt, "yyyy-MM-dd'T'00:00"),
       toModifiedAt: format(searchFormData.toModifiedAt, "yyyy-MM-dd'T'23:59"),
     }));
-  };
-
-  const handleCloseModal = () => {
-    modal.closeModal();
-    setClickedRowId(null);
   };
 
   const togglePostStatus = async (deletionOption) => {
@@ -333,14 +326,12 @@ const BoardManagementPage = () => {
               selected={selectedRows}
               tableProps={tableCustomProps}
             />
-            {/*REMIND Modal open 시 url 변경되게 수정*/}
             <ModalContainer visible={modal.isOpen} title="게시글" onClose={modal.closeModal} size="lg">
               <BoardPostDetailForm
-                clickedRowId={clickedRowId}
-                closeModal={handleCloseModal}
+                closeModal={modal.closeModal}
                 initialFormMode={postFormMode}
                 refreshPosts={searchPostList}
-              ></BoardPostDetailForm>
+              />
             </ModalContainer>
           </CCardBody>
         </CCard>
