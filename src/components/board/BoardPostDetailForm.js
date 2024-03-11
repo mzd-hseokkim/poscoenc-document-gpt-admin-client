@@ -15,7 +15,7 @@ import {
 import BoardCommentsForm from 'components/board/BoardCommentsForm';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import InputList from 'components/input/InputList';
+import FromInputGrid from 'components/input/FromInputGrid';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
 import { useRecoilValue } from 'recoil';
@@ -183,14 +183,14 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
         <CForm onSubmit={handleSubmit(handleSubmitModifiedData)}>
           <CCard className="mb-3">
             <CCardBody>
-              <InputList
+              <FromInputGrid
                 register={register}
                 fields={postSpecificFields}
                 formData={postDetails}
                 isReadMode={isReadMode}
                 errors={errors}
               />
-              <InputList
+              <FromInputGrid
                 register={register}
                 fields={getAuditFields(formMode)}
                 formData={postDetails}

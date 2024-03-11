@@ -14,7 +14,7 @@ import {
 } from '@coreui/react-pro';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import InputList from 'components/input/InputList';
+import FromInputGrid from 'components/input/FromInputGrid';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
 import { useLocation } from 'react-router-dom';
@@ -180,14 +180,14 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
         <CForm onSubmit={handleSubmit(onSubmit)}>
           <CCard className="mb-3">
             <CCardBody>
-              <InputList
+              <FromInputGrid
                 register={register}
                 fields={collectionSpecificFields}
                 formData={collectionDetail}
                 isReadMode={isReadMode}
                 errors={errors}
               />
-              <InputList
+              <FromInputGrid
                 register={register}
                 fields={getAuditFields(formMode)}
                 formData={collectionDetail}

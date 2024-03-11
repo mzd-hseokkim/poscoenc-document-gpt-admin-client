@@ -5,7 +5,7 @@ export const getAuditFields = (formMode) => {
   const isUpdateMode = formMode === FORM_MODES.UPDATE;
 
   return [
-    { name: 'createdByName', label: '생성자', isRendered: !isCreateMode, isDisabled: isUpdateMode },
+    { name: 'createdByName', label: '등록자', isRendered: !isCreateMode, isDisabled: isUpdateMode },
     { name: 'createdAt', label: '등록일', type: 'date', isRendered: !isCreateMode, isDisabled: isUpdateMode },
     { name: 'modifiedByName', label: '수정자', isRendered: !isCreateMode, isDisabled: isUpdateMode },
     { name: 'modifiedAt', label: '수정일', type: 'date', isRendered: !isCreateMode, isDisabled: isUpdateMode },
