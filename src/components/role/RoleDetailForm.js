@@ -51,7 +51,6 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
         };
         reset(formattedData);
         setFormData(formattedData);
-
       } catch (error) {
         addToast({ message: `id={${roleId}} 해당 권한 정보를 찾을 수 없습니다.` });
         closeModal();
