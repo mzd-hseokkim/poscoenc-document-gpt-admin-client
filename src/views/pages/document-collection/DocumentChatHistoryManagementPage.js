@@ -90,23 +90,23 @@ const DocumentChatHistoryManagementPage = () => {
               <CRow className="mb-3">
                 <CCol md={6}>
                   <CFormInput
-                    id="question"
-                    label="질문"
-                    value={searchFormData.question}
-                    onChange={handleSearchFormChange}
-                  />
-                </CCol>
-                <CCol md={6}>
-                  <CFormInput
                     id="answer"
                     label="대답"
                     value={searchFormData.chunkSeq}
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
+                <CCol md={6}>
+                  <CFormInput
+                    id="question"
+                    label="질문"
+                    value={searchFormData.question}
+                    onChange={handleSearchFormChange}
+                  />
+                </CCol>
               </CRow>
               <CRow>
-                <CCol md={3}>
+                <CCol md={4}>
                   <CFormInput
                     id="documentCollectionId"
                     label="문서 집합 아이디"
@@ -114,6 +114,24 @@ const DocumentChatHistoryManagementPage = () => {
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
+                <CCol md={4}>
+                  <CFormInput
+                    id="documentCollectionName"
+                    label="문서 집합 이름"
+                    value={searchFormData.documentCollectionFileNameOrg}
+                    onChange={handleSearchFormChange}
+                  />
+                </CCol>
+                <CCol md={4}>
+                  <CFormInput
+                    id="documentCollectionDisplayName"
+                    label="문서 집합 표시명"
+                    value={searchFormData.documentCollectionFileNameOrg}
+                    onChange={handleSearchFormChange}
+                  />
+                </CCol>
+              </CRow>
+              <CRow>
                 <CCol md={3}>
                   <CFormInput
                     id="documentCollectionChunkId"
@@ -122,15 +140,7 @@ const DocumentChatHistoryManagementPage = () => {
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
-                <CCol md={3}>
-                  <CFormInput
-                    id="documentCollectionDisplayName"
-                    label="문서 집합 표시명"
-                    value={searchFormData.documentCollectionFileNameOrg}
-                    onChange={handleSearchFormChange}
-                  />
-                </CCol>
-                <CCol md={3}>
+                <CCol md={9}>
                   <CFormInput
                     id="chunkedText"
                     label="청크 내용"

@@ -3,12 +3,12 @@ import api from 'api/Api';
 const getSearchedDocumentChatHistory = async (params, pageable) => {
   const response = await api.get('/admin/document-collections-chat-history', {
     params: {
-      question: params.question,
       answer: params.answer,
+      question: params.question,
       documentCollectionId: params.documentCollectionId,
-      documentCollectionChunkId: params.documentCollectionChunkId,
-      documentCollectionDisplayName: params.documentCollectionDisplayName,
       documentCollectionName: params.documentCollectionName,
+      documentCollectionDisplayName: params.documentCollectionDisplayName,
+      documentCollectionChunkId: params.documentCollectionChunkId,
       chunkedText: params.chunkedText,
       fromCreatedAt: params.fromCreatedAt,
       toCreatedAt: params.toCreatedAt,
