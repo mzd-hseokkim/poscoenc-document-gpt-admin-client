@@ -255,7 +255,7 @@ const DocumentChunkManagementPage = () => {
           </CCardBody>
         </CCard>
       </CRow>
-      <ModalContainer>
+      <ModalContainer visible={modal.isOpen} title={'문서 집합 상세'} onClose={modal.closeModal} size="lg">
         <ChunkDetailForm
           closeModal={modal.closeModal}
           initialFormMode={detailFormMode}
