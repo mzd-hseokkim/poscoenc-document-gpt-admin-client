@@ -121,6 +121,7 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
   };
 
   const getRoles = async (allowedRoles) => {
+    setRoles([]);
     try {
       const rolesData = await RoleService.getRoles();
       const newRoles = rolesData.map((role) => ({
