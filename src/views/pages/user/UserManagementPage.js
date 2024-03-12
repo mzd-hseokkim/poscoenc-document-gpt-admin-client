@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { CButton, CCard, CCardBody, CCol, CForm, CFormInput, CFormSelect, CRow, CSmartTable } from '@coreui/react-pro';
 import StatusBadge from 'components/badge/StatusBadge';
+import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import ModalContainer from 'components/modal/ModalContainer';
 import UserDetailForm from 'components/user/UserDetailForm';
 import { useToast } from 'context/ToastContext';
@@ -23,7 +24,7 @@ const UserManagementPage = () => {
     email: '',
     team: '',
     memo: '',
-    deletionOption: '',
+    deletionOption: 'ALL',
   };
   const [formData, setFormData] = useState(initialFormData);
   const isComponentMounted = useRef(true);
@@ -148,6 +149,10 @@ const UserManagementPage = () => {
                 <CButton onClick={handleCreateClick}>사용자 추가</CButton>
                 <CButton onClick={() => handleDeleteRestoreClick(true)}>삭제</CButton>
                 <CButton onClick={() => handleDeleteRestoreClick(false)}>복구</CButton>
+                <ExcelDownloadCButton
+                  downloadFunction={UserService.getDownloadSearchedUserList}
+                  searchFormData={formData}
+                />
               </CCol>
             </CRow>
             <CRow className="mb-3">

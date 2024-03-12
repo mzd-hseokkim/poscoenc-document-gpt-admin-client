@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { CButton, CCard, CCardBody, CCol, CRow, CSmartTable } from '@coreui/react-pro';
 import StatusBadge from 'components/badge/StatusBadge';
+import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import ModalContainer from 'components/modal/ModalContainer';
 import RoleDetailForm from 'components/role/RoleDetailForm';
 import { useToast } from 'context/ToastContext';
@@ -106,6 +107,7 @@ const AdminManagementPage = () => {
                 <CButton onClick={handleCreateClick}>권한 추가</CButton>
                 <CButton onClick={() => handleDeleteRestoreClick(true)}>삭제</CButton>
                 <CButton onClick={() => handleDeleteRestoreClick(false)}>복구</CButton>
+                <ExcelDownloadCButton downloadFunction={RoleService.getDownloadRoleList} />
               </CCol>
             </CRow>
             <CRow className="mb-3">

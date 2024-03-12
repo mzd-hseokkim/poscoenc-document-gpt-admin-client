@@ -15,6 +15,7 @@ import {
 } from '@coreui/react-pro';
 import AdminDetailForm from 'components/admin/AdminDetailForm';
 import StatusBadge from 'components/badge/StatusBadge';
+import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import ModalContainer from 'components/modal/ModalContainer';
 import { useToast } from 'context/ToastContext';
 import { format } from 'date-fns';
@@ -265,6 +266,7 @@ const AdminManagementPage = () => {
                 <CButton onClick={handleCreateClick}>관리자 추가</CButton>
                 <CButton onClick={() => handleDeleteRestoreClick(true)}>삭제</CButton>
                 <CButton onClick={() => handleDeleteRestoreClick(false)}>복구</CButton>
+                <ExcelDownloadCButton downloadFunction={AdminService.getDownloadAdminList} searchFormData={formData} />
               </CCol>
             </CRow>
             <CRow className="mb-3">

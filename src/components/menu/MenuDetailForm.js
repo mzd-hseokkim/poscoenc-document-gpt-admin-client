@@ -240,9 +240,13 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
     }
   };
 
-  const handleCancelClick = () => {
-    setFormMode('read');
-    void fetchMenuDetail(menuId);
+  const handleCancelClick = async () => {
+    if (isUpdateMode) {
+      setFormMode('read');
+      await fetchMenuDetail();
+    } else if (isCreateMode) {
+      closeModal();
+    }
   };
 
   const handleUpdateClick = (e) => {
@@ -271,7 +275,13 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
           control={control}
           render={({ field }) => (
             <CCol className="mt-2">
-              <CFormCheck {...field} id="detail-form-allowChildren" checked={field.value} disabled={isReadMode} />
+              <CFormCheck
+                {...field}
+                id="detail-form-allowChildren"
+                checked={field.value}
+                disabled={isReadMode}
+                label={field.value ? '등록 가능' : '등록 불가능'}
+              />
             </CCol>
           )}
         />
@@ -291,8 +301,8 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
           rules={{ required: '권한은 필수 입력 항목입니다.' }}
           render={({ field }) => (
             <CMultiSelect
-              {...field}
               id="detail-form-allowedRoles"
+              {...field}
               placeholder="권한을 선택하세요."
               selectAllLabel="모두 선택"
               options={roles}

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { CButton, CCol, CForm, CFormLabel, CFormTextarea, CModalBody, CModalFooter, CRow } from '@coreui/react-pro';
+import { CCol, CForm, CFormLabel, CFormTextarea, CModalBody, CModalFooter, CRow } from '@coreui/react-pro';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import InputList from 'components/input/InputList';
@@ -147,9 +147,13 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
     fetchUserList();
   };
 
-  const handleCancelClick = () => {
-    setFormMode('read');
-    void fetchUserDetail();
+  const handleCancelClick = async () => {
+    if (isUpdateMode) {
+      setFormMode('read');
+      await fetchUserDetail();
+    } else if (isCreateMode) {
+      closeModal();
+    }
   };
 
   const handleUpdateClick = (e) => {
@@ -186,21 +190,6 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
         </CForm>
       </CModalBody>
       <CModalFooter>
-        <CRow>
-          <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-            {isReadMode ? (
-              <CButton onClick={handleUpdateClick}>수정</CButton>
-            ) : (
-              <CButton type="submit" onClick={handleSubmit(onSubmit)}>
-                저장
-              </CButton>
-            )}
-            {isUpdateMode && <CButton onClick={handleCancelClick}>취소</CButton>}
-            {!isCreateMode && (
-              <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>{deleted ? '복구' : '삭제'}</CButton>
-            )}
-          </CCol>
-        </CRow>
         <DetailFormActionButtons
           dataId={selectedId}
           formModes={formModes(formMode)}

@@ -93,6 +93,8 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
 
   const getRoles = useCallback(
     async (allowedRoles) => {
+      //REMIND 대체하는 로직 추가되었는지 확인 아래 setRoles
+      setRoles([]);
       try {
         const rolesData = await RoleService.getRoles();
         const newRoles = rolesData.map((role) => ({
@@ -192,9 +194,13 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
     }
   };
 
-  const handleCancelClick = () => {
-    setFormMode('read');
-    void fetchAdminDetail(adminId);
+  const handleCancelClick = async () => {
+    if (isUpdateMode) {
+      setFormMode('read');
+      await fetchAdminDetail();
+    } else if (isCreateMode) {
+      closeModal();
+    }
   };
 
   const handleUpdateClick = (e) => {

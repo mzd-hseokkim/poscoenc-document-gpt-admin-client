@@ -253,8 +253,6 @@ const DocumentCollectionManagementPage = () => {
                 >
                   {'복구'}
                 </CButton>
-              </CCol>
-              <CCol className="d-grid gap-2 justify-content-end">
                 <ExcelDownloadCButton
                   downloadFunction={DocumentCollectionService.getDownloadSearchedCollectionList}
                   searchFormData={searchFormData}

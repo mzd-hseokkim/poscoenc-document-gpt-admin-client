@@ -120,9 +120,13 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
     }
   };
 
-  const handleCancelClick = () => {
-    setFormMode('read');
-    fetchRoleDetail();
+  const handleCancelClick = async () => {
+    if (isUpdateMode) {
+      setFormMode('read');
+      await fetchRoleDetail();
+    } else if (isCreateMode) {
+      closeModal();
+    }
   };
 
   const handleUpdateClick = (e) => {

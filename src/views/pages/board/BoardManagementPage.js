@@ -76,6 +76,12 @@ const BoardManagementPage = () => {
     modal.openModal(itemId);
   };
 
+  const handleCreateClick = () => {
+    setPostFormMode('create');
+    //REMIND add link
+    modal.openModal();
+  };
+
   const scopedColumnsUpdate = {
     title: (item) => {
       return (
@@ -288,6 +294,7 @@ const BoardManagementPage = () => {
           <CCardBody>
             <CRow className="mb-3">
               <CCol className="d-grid gap-2 d-md-flex justify-content-md-start">
+                <CButton onClick={handleCreateClick}>{'작성'}</CButton>
                 <CButton
                   disabled={selectedRows?.length === 0 || isDeletedRow(selectedRows)}
                   onClick={() => togglePostStatus(true)}
@@ -300,8 +307,6 @@ const BoardManagementPage = () => {
                 >
                   {'복구'}
                 </CButton>
-              </CCol>
-              <CCol className="d-grid gap-2 justify-content-end">
                 <ExcelDownloadCButton
                   downloadFunction={BoardService.getDownloadSearchedPostList}
                   searchFormData={searchFormData}
