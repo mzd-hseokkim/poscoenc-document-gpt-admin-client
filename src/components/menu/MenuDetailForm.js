@@ -17,7 +17,7 @@ import {
 import StatusBadge from 'components/badge/StatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import FromInputGrid from 'components/input/FromInputGrid';
+import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { Controller, useForm } from 'react-hook-form';
 import MenuService from 'services/menu/MenuService';
@@ -149,6 +149,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
   };
 
   const getRoles = async (allowedRoles) => {
+    setRoles([]);
     try {
       const rolesData = await RoleService.getRoles();
       const newRoles = rolesData.map((role) => ({
@@ -219,9 +220,13 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
     }
   };
 
-  const handleCancelClick = () => {
-    setFormMode('read');
-    fetchMenuDetail();
+  const handleCancelClick = async () => {
+    if (isUpdateMode) {
+      setFormMode('read');
+      await fetchMenuDetail();
+    } else if (isCreateMode) {
+      closeModal();
+    }
   };
 
   const handleUpdateClick = (e) => {
@@ -250,7 +255,13 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
           control={control}
           render={({ field }) => (
             <CCol className="mt-2">
-              <CFormCheck {...field} id="detail-form-allowChildren" checked={field.value} disabled={isReadMode} />
+              <CFormCheck
+                {...field}
+                id="detail-form-allowChildren"
+                checked={field.value}
+                disabled={isReadMode}
+                label={field.value ? '등록 가능' : '등록 불가능'}
+              />
             </CCol>
           )}
         />
@@ -270,8 +281,8 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
           rules={{ required: '권한은 필수 입력 항목입니다.' }}
           render={({ field }) => (
             <CMultiSelect
-              {...field}
               id="detail-form-allowedRoles"
+              {...field}
               placeholder="권한을 선택하세요."
               selectAllLabel="모두 선택"
               options={roles}
@@ -333,7 +344,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
               </CCol>
             </CCol>
           </CRow>
-          <FromInputGrid fields={getAuditFields(formMode)} formData={formData} isReadMode={isReadMode} col={2} />
+          <FormInputGrid fields={getAuditFields(formMode)} formData={formData} isReadMode={isReadMode} col={2} />
         </CCardBody>
       </CCard>
     );
@@ -347,10 +358,10 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
           {!isCreateMode && renderAuditFields()}
           <CCard className="g-3 mb-3">
             <CCardBody>
-              <FromInputGrid fields={menuBasicFields} isReadMode={isReadMode} register={register} errors={errors} />
+              <FormInputGrid fields={menuBasicFields} isReadMode={isReadMode} register={register} errors={errors} />
               {renderParentSelect()}
               {renderAllowChildrenCheck()}
-              <FromInputGrid fields={menuSettingFields} isReadMode={isReadMode} register={register} errors={errors} />
+              <FormInputGrid fields={menuSettingFields} isReadMode={isReadMode} register={register} errors={errors} />
               {renderRoleSelect()}
             </CCardBody>
           </CCard>

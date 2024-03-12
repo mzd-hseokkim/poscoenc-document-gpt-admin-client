@@ -15,7 +15,7 @@ import {
 import BoardCommentsForm from 'components/board/BoardCommentsForm';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import FromInputGrid from 'components/input/FromInputGrid';
+import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
 import { useRecoilValue } from 'recoil';
@@ -26,7 +26,7 @@ import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/formModes';
 
 const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refreshPosts }) => {
-  const [postDetails, setPostDetails] = useState({});
+  const [postDetail, setPostDetail] = useState({});
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
   //REMIND use setFormMode when implements posting service
   const [formMode, setFormMode] = useState(initialFormMode || '');
@@ -56,16 +56,19 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
       name: 'commentCount',
       label: '댓글수',
       isDisabled: isUpdateMode,
+      isRendered: !isCreateMode,
     },
     {
       name: 'viewCount',
       label: '조회수',
       isDisabled: isUpdateMode,
+      isRendered: !isCreateMode,
     },
     {
       md: 2,
       name: 'deleted',
       label: '삭제 여부',
+      isRendered: !isCreateMode,
     },
   ];
 
@@ -82,7 +85,7 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
         createdAt: detail.createdAt && formatToYMD(detail.createdAt),
         modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
       };
-      setPostDetails(formattedDetail);
+      setPostDetail(formattedDetail);
       reset(formattedDetail);
     } catch (error) {
       if (error.response?.status === 404) {
@@ -97,14 +100,37 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
 
   useEffect(() => {
     if (!isCreateMode) {
-      fetchPostDetails();
-    } else {
-      //REMIND imple post service
+      void fetchPostDetails();
     }
   }, [clickedRowId]);
 
-  //REMIND separate modify logic with create logic when imple posting service
-  const handleSubmitModifiedData = async (data) => {
+  const onSubmit = (data) => {
+    if (isCreateMode) {
+      void handleSubmitNewPost(data);
+    } else if (isUpdateMode) {
+      void handleSubmitModifiedPost(data);
+    }
+  };
+  const handleSubmitNewPost = async (newPost) => {
+    //REMIND 첨부파일 구현시 고려
+    const newPostData = {
+      ...newPost,
+      hasFiles: false,
+    };
+    try {
+      const isSucceed = await BoardService.postNew(newPostData);
+      if (isSucceed) {
+        closeModal();
+        refreshPosts();
+      }
+    } catch (error) {
+      const status = error.response?.status;
+      if (status === 400) {
+        addToast({ message: '게시글을 등록할 수 없습니다.' });
+      }
+    }
+  };
+  const handleSubmitModifiedPost = async (data) => {
     //REMIND hasFiles 관리 안하고 있는상태, 게시물 첨부파일 구현시 고려
     const modifiedData = {
       id: clickedRowId,
@@ -143,6 +169,14 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
     refreshPosts();
   };
 
+  const handleCancelClick = async () => {
+    if (isUpdateMode) {
+      setFormMode('read');
+      await fetchPostDetails();
+    } else if (isCreateMode) {
+      closeModal();
+    }
+  };
   const renderPostTitleInput = () => (
     <CRow className="mt-3">
       <CCol>
@@ -151,9 +185,15 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
           type="text"
           id="title"
           name="title"
-          defaultValue={postDetails?.title}
+          placeholder="제목을 작성 해 주세요."
+          defaultValue={postDetail?.title}
           readOnly={isReadMode}
-          {...register('title')}
+          {...register('title', {
+            required: '제목을 작성 해 주세요.',
+            validate: (value) => value.trim().length > 0 || '공백만으로 제목을 작성할 수 없습니다.',
+          })}
+          invalid={!!errors.title}
+          feedbackInvalid={errors.title?.message}
         />
       </CCol>
     </CRow>
@@ -168,9 +208,14 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
           name="content"
           rows="5"
           placeholder="내용을 작성 해 주세요."
-          defaultValue={postDetails?.content}
+          defaultValue={postDetail?.content}
           readOnly={isReadMode}
-          {...register('content')}
+          {...register('content', {
+            required: '내용을 작성 해 주세요.',
+            validate: (value) => value.trim().length > 0 || '공백만으로 내용을 작성할 수 없습니다.',
+          })}
+          invalid={!!errors.content}
+          feedbackInvalid={errors.content?.message}
         />
       </CCol>
     </CRow>
@@ -180,25 +225,27 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
     <>
       <FormLoadingCover isLoading={getDetailIsLoading} />
       <CModalBody>
-        <CForm onSubmit={handleSubmit(handleSubmitModifiedData)}>
-          <CCard className="mb-3">
-            <CCardBody>
-              <FromInputGrid
-                register={register}
-                fields={postSpecificFields}
-                formData={postDetails}
-                isReadMode={isReadMode}
-                errors={errors}
-              />
-              <FromInputGrid
-                register={register}
-                fields={getAuditFields(formMode)}
-                formData={postDetails}
-                isReadMode={isReadMode}
-                errors={errors}
-              />
-            </CCardBody>
-          </CCard>
+        <CForm onSubmit={handleSubmit(onSubmit)}>
+          {!isCreateMode && (
+            <CCard className="mb-3">
+              <CCardBody>
+                <FormInputGrid
+                  register={register}
+                  fields={postSpecificFields}
+                  formData={postDetail}
+                  isReadMode={isReadMode}
+                  errors={errors}
+                />
+                <FormInputGrid
+                  register={register}
+                  fields={getAuditFields(formMode)}
+                  formData={postDetail}
+                  isReadMode={isReadMode}
+                  errors={errors}
+                />
+              </CCardBody>
+            </CCard>
+          )}
           <CCard>
             <CCardBody>
               {renderPostTitleInput()}
@@ -212,12 +259,12 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
         <DetailFormActionButtons
           dataId={clickedRowId}
           formModes={formModes(formMode)}
-          handleCancel={handleModificationCancelClick}
+          handleCancel={handleCancelClick}
           handleDeleteRestore={handleDeleteRestoreClick}
           handleUpdateClick={() => setFormMode('update')}
           isDataDeleted={deleted}
-          isCreatedByCurrentUser={postDetails?.createdBy === currentUserId}
-          onSubmit={handleSubmit(handleSubmitModifiedData)}
+          isCreatedByCurrentUser={postDetail?.createdBy === currentUserId}
+          onSubmit={handleSubmit(onSubmit)}
         />
       </CModalFooter>
     </>

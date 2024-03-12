@@ -4,7 +4,7 @@ import { CCard, CCardBody, CCol, CForm, CFormInput, CModalBody, CModalFooter, CR
 import StatusBadge from 'components/badge/StatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import FromInputGrid from 'components/input/FromInputGrid';
+import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
 import RoleService from 'services/Role/RoleService';
@@ -102,9 +102,13 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
     }
   };
 
-  const handleCancelClick = () => {
-    setFormMode('read');
-    fetchRoleDetail();
+  const handleCancelClick = async () => {
+    if (isUpdateMode) {
+      setFormMode('read');
+      await fetchRoleDetail();
+    } else if (isCreateMode) {
+      closeModal();
+    }
   };
 
   const handleUpdateClick = (e) => {
@@ -144,7 +148,7 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
               </CCol>
             </CCol>
           </CRow>
-          <FromInputGrid fields={getAuditFields(formMode)} formData={formData} isReadMode={isReadMode} col={2} />
+          <FormInputGrid fields={getAuditFields(formMode)} formData={formData} isReadMode={isReadMode} col={2} />
         </CCardBody>
       </CCard>
     );
@@ -158,7 +162,7 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
           {!isCreateMode && renderAuditFields()}
           <CCard className="g-3 mb-3">
             <CCardBody>
-              <FromInputGrid fields={roleFields} isReadMode={isReadMode} register={register} errors={errors} />
+              <FormInputGrid fields={roleFields} isReadMode={isReadMode} register={register} errors={errors} />
             </CCardBody>
           </CCard>
         </CForm>

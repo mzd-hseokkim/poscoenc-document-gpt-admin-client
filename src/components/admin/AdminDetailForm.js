@@ -15,7 +15,7 @@ import {
 import StatusBadge from 'components/badge/StatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import FromInputGrid from 'components/input/FromInputGrid';
+import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { Controller, useForm } from 'react-hook-form';
 import AdminService from 'services/admin/AdminService';
@@ -126,6 +126,7 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
   };
 
   const getRoles = async (allowedRoles) => {
+    setRoles([]);
     try {
       const rolesData = await RoleService.getRoles();
       const newRoles = rolesData.map((role) => ({
@@ -182,9 +183,13 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
     }
   };
 
-  const handleCancelClick = () => {
-    setFormMode('read');
-    fetchAdminDetail();
+  const handleCancelClick = async () => {
+    if (isUpdateMode) {
+      setFormMode('read');
+      await fetchAdminDetail();
+    } else if (isCreateMode) {
+      closeModal();
+    }
   };
 
   const handleUpdateClick = (e) => {
@@ -253,7 +258,7 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
               </CCol>
             </CCol>
           </CRow>
-          <FromInputGrid fields={getAuditFields(formMode)} formData={formData} isReadMode={isReadMode} col={2} />
+          <FormInputGrid fields={getAuditFields(formMode)} formData={formData} isReadMode={isReadMode} col={2} />
         </CCardBody>
       </CCard>
     );
@@ -267,7 +272,7 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
           {!isCreateMode && renderAuditFields()}
           <CCard className="g-2 mb-3">
             <CCardBody>
-              <FromInputGrid fields={adminInfoFields} isReadMode={isReadMode} register={register} errors={errors} />
+              <FormInputGrid fields={adminInfoFields} isReadMode={isReadMode} register={register} errors={errors} />
               {renderRoleSelect()}
             </CCardBody>
           </CCard>

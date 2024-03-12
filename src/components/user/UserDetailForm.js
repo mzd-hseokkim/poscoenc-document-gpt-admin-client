@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import {
-  CButton,
   CCard,
   CCardBody,
   CCol,
@@ -16,7 +15,7 @@ import {
 import StatusBadge from 'components/badge/StatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import FromInputGrid from 'components/input/FromInputGrid';
+import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
 import UserService from 'services/UserService';
@@ -147,9 +146,13 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
     fetchUserList();
   };
 
-  const handleCancelClick = () => {
-    setFormMode('read');
-    void fetchUserDetail();
+  const handleCancelClick = async () => {
+    if (isUpdateMode) {
+      setFormMode('read');
+      await fetchUserDetail();
+    } else if (isCreateMode) {
+      closeModal();
+    }
   };
 
   const handleUpdateClick = (e) => {
@@ -179,7 +182,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
               </CCol>
             </CCol>
           </CRow>
-          <FromInputGrid fields={getAuditFields(formMode)} formData={formData} isReadMode={isReadMode} col={2} />
+          <FormInputGrid fields={getAuditFields(formMode)} formData={formData} isReadMode={isReadMode} col={2} />
         </CCardBody>
       </CCard>
     );
@@ -193,7 +196,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
           {!isCreateMode && renderAuditFields()}
           <CCard className="g-3 mb-3">
             <CCardBody>
-              <FromInputGrid fields={userInfoFields} isReadMode={isReadMode} register={register} errors={errors} />
+              <FormInputGrid fields={userInfoFields} isReadMode={isReadMode} register={register} errors={errors} />
               <CFormLabel htmlFor="detail-form-memo" className="col-form-label fw-bold">
                 메모
               </CFormLabel>
@@ -210,21 +213,6 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
         </CForm>
       </CModalBody>
       <CModalFooter>
-        <CRow>
-          <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-            {isReadMode ? (
-              <CButton onClick={handleUpdateClick}>수정</CButton>
-            ) : (
-              <CButton type="submit" onClick={handleSubmit(onSubmit)}>
-                저장
-              </CButton>
-            )}
-            {isUpdateMode && <CButton onClick={handleCancelClick}>취소</CButton>}
-            {!isCreateMode && (
-              <CButton onClick={() => handleDeleteRestoreClick(selectedId)}>{deleted ? '복구' : '삭제'}</CButton>
-            )}
-          </CCol>
-        </CRow>
         <DetailFormActionButtons
           dataId={selectedId}
           formModes={formModes(formMode)}

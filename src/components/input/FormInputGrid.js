@@ -1,6 +1,6 @@
 import { CCol, CFormInput, CFormLabel, CRow } from '@coreui/react-pro';
 
-const FromInputGrid = ({ fields, handleChange, isReadMode, formData, register, errors = {}, col = 1 }) => {
+const FormInputGrid = ({ fields, handleChange, isReadMode, formData, register, errors = {}, col = 1 }) => {
   const numberOfRows = Math.ceil(fields.length / col);
 
   const paddedFields = [...fields];
@@ -60,4 +60,4 @@ const FromInputGrid = ({ fields, handleChange, isReadMode, formData, register, e
   ));
 };
 
-export default FromInputGrid;
+export default FormInputGrid;
