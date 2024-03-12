@@ -62,7 +62,7 @@ const DocumentCollectionManagementPage = () => {
     if (isComponentMounted.current) {
       isComponentMounted.current = false;
     } else {
-      searchDocumentCollectionList();
+      void searchDocumentCollectionList();
     }
   }, [pageableData]);
 
@@ -86,9 +86,9 @@ const DocumentCollectionManagementPage = () => {
     }
   };
 
-  const handleRowClick = (id) => {
+  const handleRowClick = (itemId) => {
     setDetailFormMode('read');
-    modal.openModal(`?id=${id}`);
+    modal.openModal(itemId);
   };
 
   const handleSearchFormChange = ({ target: { id, value } }) => {
@@ -140,9 +140,6 @@ const DocumentCollectionManagementPage = () => {
     } finally {
       await searchDocumentCollectionList();
     }
-  };
-  const handleCloseModal = () => {
-    modal.closeModal();
   };
 
   const scopedColumns = {
@@ -285,10 +282,9 @@ const DocumentCollectionManagementPage = () => {
           </CCardBody>
         </CCard>
       </CRow>
-      {/*REMIND Modal open 시 url 변경되게 수정*/}
-      <ModalContainer visible={modal.isOpen} title={'문서 집합 상세'} onClose={handleCloseModal} size="lg">
+      <ModalContainer visible={modal.isOpen} title={'문서 집합 상세'} onClose={modal.closeModal} size="lg">
         <DocumentCollectionDetailForm
-          closeModal={handleCloseModal}
+          closeModal={modal.closeModal}
           initialFormMode={detailFormMode}
           refreshDocumentCollectionList={searchDocumentCollectionList}
         />

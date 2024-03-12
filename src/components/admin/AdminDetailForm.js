@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import {
   CCard,
@@ -18,6 +18,7 @@ import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { Controller, useForm } from 'react-hook-form';
+import { useSearchParams } from 'react-router-dom';
 import AdminService from 'services/admin/AdminService';
 import RoleService from 'services/Role/RoleService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
@@ -25,12 +26,12 @@ import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/formModes';
 import { emailValidationPattern, passwordValidationPattern } from 'utils/validationUtils';
 
-const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminList }) => {
+const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
   const [formMode, setFormMode] = useState(initialFormMode);
   const [formData, setFormData] = useState([]);
   const [roles, setRoles] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [searchParams] = useSearchParams();
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
   const { addToast } = useToast();
   const {
@@ -43,6 +44,7 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
   } = useForm({ mode: 'onChange' });
 
   const deleted = watch('deleted');
+  const adminId = watch('id');
 
   const adminInfoFields = [
     {
@@ -94,57 +96,67 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
     },
   ];
 
+  const getRoles = useCallback(
+    async (allowedRoles = []) => {
+      try {
+        const rolesData = await RoleService.getRoles();
+        const newRoles = rolesData.map((role) => ({
+          value: role.role,
+          text: role.role,
+          selected: allowedRoles?.length > 0 ? allowedRoles.includes(role.role) : false,
+        }));
+        setRoles(newRoles);
+      } catch (error) {
+        addToast({ message: '권한 목록을 가져오지 못했습니다.' });
+      }
+    },
+    [addToast]
+  );
+
+  const fetchAdminDetail = useCallback(
+    async (adminId) => {
+      try {
+        setIsLoading(true);
+
+        const data = await AdminService.getAdmin(adminId);
+        const formattedData = {
+          ...data,
+          modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
+          lastLoggedInAt: data.lastLoggedInAt && formatToYMD(data.lastLoggedInAt),
+          createdAt: data.createdAt && formatToYMD(data.createdAt),
+        };
+        reset(formattedData);
+        setFormData(formattedData);
+
+        const allowedRoles = data.roles;
+        await getRoles(allowedRoles);
+      } catch (error) {
+        addToast({ message: `id={${adminId}} 해당 관리자를 찾을 수 없습니다.` });
+        closeModal();
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [addToast, closeModal, getRoles, reset]
+  );
   useEffect(() => {
     setIsLoading(false);
-    if (!isCreateMode && selectedId) {
-      fetchAdminDetail();
+    const adminId = searchParams.get('id');
+    if (!isCreateMode && adminId) {
+      void fetchAdminDetail(adminId);
     } else {
-      getRoles();
+      void getRoles();
     }
-  }, [selectedId]);
-
-  const fetchAdminDetail = async () => {
-    try {
-      setIsLoading(true);
-
-      const data = await AdminService.getAdmin(selectedId);
-      const formattedData = {
-        ...data,
-        modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
-        lastLoggedInAt: data.lastLoggedInAt && formatToYMD(data.lastLoggedInAt),
-        createdAt: data.createdAt && formatToYMD(data.createdAt),
-      };
-      reset(formattedData);
-      setFormData(formattedData);
-      const allowedRoles = data.roles;
-      await getRoles(allowedRoles);
-    } catch (error) {
-      addToast({ message: '관리자 정보를 가져오지 못했습니다.' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const getRoles = async (allowedRoles) => {
-    setRoles([]);
-    try {
-      const rolesData = await RoleService.getRoles();
-      const newRoles = rolesData.map((role) => ({
-        value: role.role,
-        text: role.role,
-        selected: allowedRoles?.length > 0 ? allowedRoles.includes(role.role) : false,
-      }));
-      setRoles(newRoles);
-    } catch (error) {
-      addToast({ message: '권한 목록을 가져오지 못했습니다.' });
-    }
-  };
+  }, [fetchAdminDetail, getRoles, isCreateMode, searchParams]);
 
   const createAdmin = async (data) => {
     try {
-      await AdminService.postAdmin(data);
-      closeModal();
-      fetchAdminList();
+      const result = await AdminService.postAdmin(data);
+      if (result) {
+        closeModal();
+        fetchAdminList();
+        setFormMode('read');
+      }
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -158,9 +170,12 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
 
   const updateAdmin = async (data) => {
     try {
-      await AdminService.putAdmin(selectedId, data);
-      closeModal();
-      fetchAdminList();
+      const result = await AdminService.putAdmin(adminId, data);
+      if (result) {
+        closeModal();
+        fetchAdminList();
+        setFormMode('read');
+      }
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -177,9 +192,9 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
     const updatedData = { ...data, roles: roleList };
 
     if (isCreateMode) {
-      createAdmin(updatedData);
+      void createAdmin(updatedData);
     } else if (isUpdateMode) {
-      updateAdmin(updatedData);
+      void updateAdmin(updatedData);
     }
   };
 
@@ -280,7 +295,7 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
       </CModalBody>
       <CModalFooter>
         <DetailFormActionButtons
-          dataId={selectedId}
+          dataId={adminId}
           formModes={formModes(formMode)}
           handleCancel={handleCancelClick}
           handleDeleteRestore={handleDeleteRestoreClick}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { CCard, CCardBody, CCol, CForm, CFormInput, CModalBody, CModalFooter, CRow } from '@coreui/react-pro';
 import StatusBadge from 'components/badge/StatusBadge';
@@ -7,6 +7,7 @@ import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
+import { useSearchParams } from 'react-router-dom';
 import RoleService from 'services/Role/RoleService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
@@ -16,6 +17,7 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
   const [formMode, setFormMode] = useState(initialFormMode);
   const [formData, setFormData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchParams] = useSearchParams();
 
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
   const { addToast } = useToast();
@@ -37,36 +39,43 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
     },
   ];
 
+  const fetchRoleDetail = useCallback(
+    async (roleId) => {
+      setIsLoading(true);
+      try {
+        const data = await RoleService.getRole(roleId);
+        const formattedData = {
+          ...data,
+          modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
+          createdAt: data.createdAt && formatToYMD(data.createdAt),
+        };
+        reset(formattedData);
+        setFormData(formattedData);
+      } catch (error) {
+        addToast({ message: `id={${roleId}} 해당 권한 정보를 찾을 수 없습니다.` });
+        closeModal();
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [addToast, closeModal, reset]
+  );
   useEffect(() => {
     setIsLoading(false);
-    if (!isCreateMode && selectedId) {
-      fetchRoleDetail();
+    const roleId = searchParams.get('id');
+    if (!isCreateMode && roleId) {
+      void fetchRoleDetail(roleId);
     }
-  }, [selectedId]);
-
-  const fetchRoleDetail = async () => {
-    try {
-      setIsLoading(true);
-      const data = await RoleService.getRole(selectedId);
-      const formattedData = {
-        ...data,
-        modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
-        createdAt: data.createdAt && formatToYMD(data.createdAt),
-      };
-      reset(formattedData);
-      setFormData(formattedData);
-    } catch (error) {
-      addToast({ message: '권한 정보를 가져오지 못했습니다.' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [fetchRoleDetail, isCreateMode, searchParams]);
 
   const createRole = async (data) => {
     try {
-      await RoleService.postRole(data.role);
-      closeModal();
-      fetchRoleList();
+      const result = await RoleService.postRole(data.role);
+      if (result) {
+        closeModal();
+        fetchRoleList();
+        setFormMode('read');
+      }
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -80,9 +89,12 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
 
   const updateRole = async (data) => {
     try {
-      await RoleService.putRole(data.id, data.role);
-      closeModal();
-      fetchRoleList();
+      const result = await RoleService.putRole(data.id, data.role);
+      if (result) {
+        closeModal();
+        fetchRoleList();
+        setFormMode('read');
+      }
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -96,9 +108,9 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
 
   const onSubmit = (data) => {
     if (isCreateMode) {
-      createRole(data);
+      void createRole(data);
     } else if (isUpdateMode) {
-      updateRole(data);
+      void updateRole(data);
     }
   };
 

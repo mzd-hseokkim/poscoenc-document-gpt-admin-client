@@ -15,7 +15,6 @@ const UserManagementPage = () => {
   const [userList, setUserList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [checkedItems, setCheckedItems] = useState([]);
-  const [selectedId, setSelectedId] = useState();
   const [formMode, setFormMode] = useState('');
   const [totalUserElements, setTotalUserElements] = useState(0);
   const [noItemsLabel, setNoItemsLabel] = useState('');
@@ -68,7 +67,7 @@ const UserManagementPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    fetchUserList();
+    void fetchUserList();
   };
 
   const handleReset = () => {
@@ -76,9 +75,8 @@ const UserManagementPage = () => {
   };
 
   const handleRowClick = (id) => {
-    setSelectedId(id);
     setFormMode('read');
-    modal.openModal();
+    modal.openModal(id);
   };
 
   const handleCreateClick = () => {
@@ -204,12 +202,7 @@ const UserManagementPage = () => {
         </CCard>
       </CRow>
       <ModalContainer visible={modal.isOpen} title="사용자 정보" size="lg" onClose={modal.closeModal}>
-        <UserDetailForm
-          selectedId={selectedId}
-          initialFormMode={formMode}
-          closeModal={modal.closeModal}
-          fetchUserList={fetchUserList}
-        />
+        <UserDetailForm initialFormMode={formMode} closeModal={modal.closeModal} fetchUserList={fetchUserList} />
       </ModalContainer>
     </>
   );
