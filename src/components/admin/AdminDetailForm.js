@@ -121,6 +121,7 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
   };
 
   const getRoles = async (allowedRoles) => {
+    setRoles([]);
     try {
       const rolesData = await RoleService.getRoles();
       const newRoles = rolesData.map((role) => ({
@@ -177,9 +178,13 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
     }
   };
 
-  const handleCancelClick = () => {
-    setFormMode('read');
-    fetchAdminDetail();
+  const handleCancelClick = async () => {
+    if (isUpdateMode) {
+      setFormMode('read');
+      await fetchAdminDetail();
+    } else if (isCreateMode) {
+      closeModal();
+    }
   };
 
   const handleUpdateClick = (e) => {

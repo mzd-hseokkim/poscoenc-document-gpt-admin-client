@@ -1,4 +1,5 @@
 import api from 'api/Api';
+import { formatToYMD, getCurrentDate } from 'utils/common/dateUtils';
 
 const getRoles = async () => {
   const response = await api.get('/admin/roles');
@@ -8,6 +9,22 @@ const getRoles = async () => {
 const getRole = async (id) => {
   const response = await api.get(`/admin/roles/${id}`);
   return response.data;
+};
+
+const getDownloadRoleList = async () => {
+  const response = await api.get('/admin/roles/excel', {
+    responseType: 'blob',
+  });
+  let fileName = `role-list_${formatToYMD(getCurrentDate())}.xlsx`;
+  const downloadUrl = window.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.setAttribute('download', fileName);
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(downloadUrl);
 };
 
 const postRole = async (roleName) => {
@@ -41,6 +58,7 @@ const deleteRoles = async (ids, deleted) => {
 const RoleService = {
   getRoles,
   getRole,
+  getDownloadRoleList,
   postRole,
   putRole,
   deleteRole,
