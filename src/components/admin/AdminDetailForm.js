@@ -178,9 +178,13 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
     }
   };
 
-  const handleCancelClick = () => {
-    setFormMode('read');
-    fetchAdminDetail();
+  const handleCancelClick = async () => {
+    if (isUpdateMode) {
+      setFormMode('read');
+      await fetchAdminDetail();
+    } else if (isCreateMode) {
+      closeModal();
+    }
   };
 
   const handleUpdateClick = (e) => {

@@ -1,4 +1,5 @@
 import api from 'api/Api';
+import { formatToYMD, getCurrentDate } from 'utils/common/dateUtils';
 
 const postUser = async (payload) => {
   const response = await api.post('/admin/user-accounts', payload);
@@ -20,6 +21,29 @@ const getUsers = async (params, pageable) => {
   return response.data;
 };
 
+const getDownloadSearchedUserList = async (params) => {
+  const response = await api.get('/admin/user-accounts/excel', {
+    params: {
+      name: params.name,
+      email: params.email,
+      team: params.team,
+      memo: params.memo,
+      deletionOption: params.deletionOption,
+    },
+    responseType: 'blob',
+  });
+  let fileName = `user-account-list_${formatToYMD(getCurrentDate())}.xlsx`;
+  const downloadUrl = window.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.setAttribute('download', fileName);
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(downloadUrl);
+};
+
 const getUser = async (id) => {
   const response = await api.get(`/admin/user-accounts/${id}`);
   return response.data;
@@ -38,6 +62,7 @@ const deleteUsers = async (ids, deleted) => {
 const UserService = {
   getUsers,
   getUser,
+  getDownloadSearchedUserList,
   postUser,
   putUser,
   deleteUsers,

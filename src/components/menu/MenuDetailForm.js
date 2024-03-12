@@ -222,9 +222,13 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
     }
   };
 
-  const handleCancelClick = () => {
-    setFormMode('read');
-    fetchMenuDetail();
+  const handleCancelClick = async () => {
+    if (isUpdateMode) {
+      setFormMode('read');
+      await fetchMenuDetail();
+    } else if (isCreateMode) {
+      closeModal();
+    }
   };
 
   const handleUpdateClick = (e) => {
