@@ -11,7 +11,9 @@ const DocumentCollectionManagementPage = React.lazy(() =>
 const DocumentChunkManagementPage = React.lazy(() =>
   import('views/pages/document-collection/DocumentChunkManagementPage')
 );
-const ChatHistoryManagementPage = React.lazy(() => import('views/pages/document-collection/ChatHistoryManagementPage'));
+const ChatHistoryManagementPage = React.lazy(() =>
+  import('views/pages/document-collection/DocumentChatHistoryManagementPage')
+);
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
@@ -27,13 +29,13 @@ const routes = [
     element: DocumentCollectionManagementPage,
   },
   {
-    path: '/document-collections/chunk/management',
+    path: '/document-collections-chunk/management',
     exact: true,
     name: '문서 청크 관리',
     element: DocumentChunkManagementPage,
   },
   {
-    path: '/document-collections/chat-history/management',
+    path: '/document-collections-chat-history/management',
     exact: true,
     name: '채팅 이력 관리',
     element: ChatHistoryManagementPage,

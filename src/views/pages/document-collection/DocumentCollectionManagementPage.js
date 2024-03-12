@@ -185,7 +185,7 @@ const DocumentCollectionManagementPage = () => {
                     label="표시명"
                     value={searchFormData.displayName}
                     onChange={handleSearchFormChange}
-                  ></CFormInput>
+                  />
                 </CCol>
                 <CCol md={4} className="position-relative">
                   <CFormInput

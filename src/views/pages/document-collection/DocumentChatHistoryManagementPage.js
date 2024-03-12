@@ -1,6 +1,6 @@
 import { CCard, CCardBody } from '@coreui/react-pro';
 
-const ChatHistoryManagementPage = () => {
+const DocumentChatHistoryManagementPage = () => {
   return (
     <>
       <CCard>
@@ -10,4 +10,4 @@ const ChatHistoryManagementPage = () => {
   );
 };
 
-export default ChatHistoryManagementPage;
+export default DocumentChatHistoryManagementPage;

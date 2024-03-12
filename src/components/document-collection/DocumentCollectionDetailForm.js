@@ -30,7 +30,8 @@ import { itemNameValidationPattern } from 'utils/validationUtils';
 
 const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocumentCollectionList }) => {
   const [collectionDetail, setCollectionDetail] = useState({});
-  const [formMode, setFormMode] = useState(initialFormMode || '');
+  //REMIND link 로 이동 했을 경우 바로 read 모드가 되어야 할듯 함.
+  const [formMode, setFormMode] = useState(initialFormMode || 'read');
 
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
 
