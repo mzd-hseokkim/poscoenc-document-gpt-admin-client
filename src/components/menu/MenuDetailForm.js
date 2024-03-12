@@ -1,9 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import {
+  CCard,
+  CCardBody,
   CCol,
   CForm,
   CFormCheck,
+  CFormInput,
   CFormLabel,
   CFormSelect,
   CModalBody,
@@ -11,9 +14,10 @@ import {
   CMultiSelect,
   CRow,
 } from '@coreui/react-pro';
+import StatusBadge from 'components/badge/StatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import InputList from 'components/input/InputList';
+import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { Controller, useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
@@ -27,6 +31,7 @@ import { itemNameValidationPattern } from 'utils/validationUtils';
 const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
   const [formMode, setFormMode] = useState(initialFormMode);
   const [roles, setRoles] = useState([]);
+  const [formData, setFormData] = useState([]);
   const [parentMenus, setParentMenus] = useState([
     { label: '상위 메뉴를 선택하세요.' },
     { label: '선택하지 않음', value: 0 },
@@ -53,21 +58,18 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
 
   const menuId = watch('id');
   const allowChildren = watch('allowChildren');
-  const deleted = watch('deleted');
 
   const menuBasicFields = [
-    {
-      name: 'id',
-      label: '아이디',
-      isDisabled: isUpdateMode,
-      isRendered: !isCreateMode,
-    },
     {
       name: 'name',
       label: '이름',
       placeholder: '이름을 입력하세요.',
       rules: {
         required: '이름은 필수 입력 항목입니다.',
+        maxLength: {
+          value: 12,
+          message: '메뉴 이름은 최대 12자 입니다.',
+        },
         pattern: {
           value: itemNameValidationPattern,
           message: '한글, 알파벳, 숫자, 띄어쓰기만 허용됩니다.',
@@ -96,11 +98,6 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
           message: 'URL은 필수 입력 항목입니다.',
         },
       },
-    },
-    {
-      name: 'parentId',
-      label: '상위 메뉴',
-      isRendered: isReadMode,
     },
     {
       name: 'menuOrder',
@@ -255,7 +252,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
   };
 
   const handleDeleteRestoreClick = async (id) => {
-    const shouldDelete = !deleted;
+    const shouldDelete = !formData.deleted;
     try {
       await MenuService.deleteMenu(id, shouldDelete);
     } catch (error) {
@@ -291,10 +288,10 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
 
   const renderRoleSelect = () => (
     <CRow className="mb-3">
-      <CFormLabel htmlFor="detail-form-allowedRoles" className="col-md-2 col-form-label fw-bold">
-        인가된 권한
-      </CFormLabel>
       <CCol>
+        <CFormLabel htmlFor="detail-form-allowedRoles" className="col-md-2 col-form-label fw-bold">
+          인가된 권한
+        </CFormLabel>
         <Controller
           name="allowedRoles"
           control={control}
@@ -319,10 +316,10 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
 
   const renderParentSelect = () => (
     <CRow className="mb-3">
-      <CFormLabel htmlFor="detail-form-parentId" className="col-md-2 col-form-label fw-bold">
-        상위 메뉴
-      </CFormLabel>
       <CCol>
+        <CFormLabel htmlFor="detail-form-parentId" className="col-md-2 col-form-label fw-bold">
+          상위 메뉴
+        </CFormLabel>
         <Controller
           name="parentId"
           control={control}
@@ -342,17 +339,49 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
     </CRow>
   );
 
+  const renderAuditFields = () => {
+    return (
+      <CCard className="g-3 mb-3">
+        <CCardBody>
+          <CRow>
+            <CCol className="col-md mb-2">
+              <CCol className="fw-bold">아이디</CCol>
+              <CFormInput
+                id="input-list-id"
+                name="id"
+                value={formData.id || ''}
+                disabled={!isCreateMode}
+                plainText={!isCreateMode}
+              />
+            </CCol>
+            <CCol className="col-md mb-2">
+              <CCol className="fw-bold">삭제</CCol>
+              <CCol>
+                <StatusBadge deleted={formData.deleted} />
+              </CCol>
+            </CCol>
+          </CRow>
+          <FormInputGrid fields={getAuditFields(formMode)} formData={formData} isReadMode={isReadMode} col={2} />
+        </CCardBody>
+      </CCard>
+    );
+  };
+
   return (
     <>
       <FormLoadingCover isLoading={isLoading} />
       <CModalBody>
         <CForm onSubmit={handleSubmit(onSubmit)}>
-          <InputList fields={menuBasicFields} isReadMode={isReadMode} register={register} errors={errors} />
-          {renderAllowChildrenCheck()}
-          <InputList fields={menuSettingFields} isReadMode={isReadMode} register={register} errors={errors} />
-          {renderRoleSelect()}
-          {renderParentSelect()}
-          <InputList fields={getAuditFields(formMode)} isReadMode={isReadMode} register={register} errors={errors} />
+          {!isCreateMode && renderAuditFields()}
+          <CCard className="g-3 mb-3">
+            <CCardBody>
+              <FormInputGrid fields={menuBasicFields} isReadMode={isReadMode} register={register} errors={errors} />
+              {renderParentSelect()}
+              {renderAllowChildrenCheck()}
+              <FormInputGrid fields={menuSettingFields} isReadMode={isReadMode} register={register} errors={errors} />
+              {renderRoleSelect()}
+            </CCardBody>
+          </CCard>
         </CForm>
       </CModalBody>
       <CModalFooter>
@@ -362,7 +391,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
           handleCancel={handleCancelClick}
           handleDeleteRestore={handleDeleteRestoreClick}
           handleUpdateClick={handleUpdateClick}
-          isDataDeleted={deleted}
+          isDataDeleted={formData.deleted}
           onSubmit={handleSubmit(onSubmit)}
         />
       </CModalFooter>

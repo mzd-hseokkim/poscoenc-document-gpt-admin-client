@@ -15,7 +15,7 @@ import {
 import BoardCommentsForm from 'components/board/BoardCommentsForm';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import InputList from 'components/input/InputList';
+import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
@@ -241,14 +241,14 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
           {!isCreateMode && (
             <CCard className="mb-3">
               <CCardBody>
-                <InputList
+                <FormInputGrid
                   register={register}
                   fields={postSpecificFields}
                   formData={postDetail}
                   isReadMode={isReadMode}
                   errors={errors}
                 />
-                <InputList
+                <FormInputGrid
                   register={register}
                   fields={getAuditFields(formMode)}
                   formData={postDetail}

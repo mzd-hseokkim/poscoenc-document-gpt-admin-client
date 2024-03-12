@@ -1,9 +1,21 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { CCol, CForm, CFormLabel, CModalBody, CModalFooter, CMultiSelect, CRow } from '@coreui/react-pro';
+import {
+  CCard,
+  CCardBody,
+  CCol,
+  CForm,
+  CFormInput,
+  CFormLabel,
+  CModalBody,
+  CModalFooter,
+  CMultiSelect,
+  CRow,
+} from '@coreui/react-pro';
+import StatusBadge from 'components/badge/StatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import InputList from 'components/input/InputList';
+import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { Controller, useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
@@ -16,6 +28,7 @@ import { emailValidationPattern, passwordValidationPattern } from 'utils/validat
 
 const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
   const [formMode, setFormMode] = useState(initialFormMode);
+  const [formData, setFormData] = useState([]);
   const [roles, setRoles] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchParams] = useSearchParams();
@@ -33,12 +46,14 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
   const deleted = watch('deleted');
   const adminId = watch('id');
 
-  const adminFields = [
+  const adminInfoFields = [
     {
-      name: 'id',
-      label: '아이디',
-      isDisabled: isUpdateMode,
-      isRendered: !isCreateMode,
+      name: 'name',
+      label: '이름',
+      placeholder: '이름을 입력하세요.',
+      rules: {
+        required: '이름은 필수 입력 항목입니다.',
+      },
     },
     {
       name: 'email',
@@ -50,14 +65,6 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
           value: emailValidationPattern,
           message: '유효하지 않은 이메일 주소입니다.',
         },
-      },
-    },
-    {
-      name: 'name',
-      label: '이름',
-      placeholder: '이름을 입력하세요.',
-      rules: {
-        required: '이름은 필수 입력 항목입니다.',
       },
     },
     {
@@ -74,8 +81,6 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
         },
       },
     },
-  ];
-  const logInFields = [
     {
       name: 'lastLoggedInAt',
       label: '최근 로그인',
@@ -123,6 +128,7 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
           createdAt: data.createdAt && formatToYMD(data.createdAt),
         };
         reset(formattedData);
+        setFormData(formattedData);
 
         const allowedRoles = data.roles;
         await getRoles(allowedRoles);
@@ -221,10 +227,10 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
 
   const renderRoleSelect = () => (
     <CRow className="mb-3">
-      <CFormLabel htmlFor="detail-form-roles" className="col-md-2 col-form-label fw-bold">
-        인가된 권한
-      </CFormLabel>
       <CCol>
+        <CFormLabel htmlFor="detail-form-roles" className="col-md-2 col-form-label fw-bold">
+          인가된 권한
+        </CFormLabel>
         <Controller
           name="roles"
           control={control}
@@ -247,15 +253,46 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
     </CRow>
   );
 
+  const renderAuditFields = () => {
+    return (
+      <CCard className="g-3 mb-3">
+        <CCardBody>
+          <CRow>
+            <CCol className="col-md mb-2">
+              <CCol className="fw-bold">아이디</CCol>
+              <CFormInput
+                id="input-list-id"
+                name="id"
+                value={formData.id || ''}
+                disabled={!isCreateMode}
+                plainText={!isCreateMode}
+              />
+            </CCol>
+            <CCol className="col-md mb-2">
+              <CCol className="fw-bold">삭제</CCol>
+              <CCol>
+                <StatusBadge deleted={formData.deleted} />
+              </CCol>
+            </CCol>
+          </CRow>
+          <FormInputGrid fields={getAuditFields(formMode)} formData={formData} isReadMode={isReadMode} col={2} />
+        </CCardBody>
+      </CCard>
+    );
+  };
+
   return (
     <>
       <FormLoadingCover isLoading={isLoading}></FormLoadingCover>
       <CModalBody>
         <CForm onSubmit={handleSubmit(onSubmit)}>
-          <InputList fields={adminFields} isReadMode={isReadMode} register={register} errors={errors} />
-          {renderRoleSelect()}
-          <InputList fields={logInFields} isReadMode={isReadMode} register={register} errors={errors} />
-          <InputList fields={getAuditFields(formMode)} isReadMode={isReadMode} register={register} errors={errors} />
+          {!isCreateMode && renderAuditFields()}
+          <CCard className="g-2 mb-3">
+            <CCardBody>
+              <FormInputGrid fields={adminInfoFields} isReadMode={isReadMode} register={register} errors={errors} />
+              {renderRoleSelect()}
+            </CCardBody>
+          </CCard>
         </CForm>
       </CModalBody>
       <CModalFooter>
