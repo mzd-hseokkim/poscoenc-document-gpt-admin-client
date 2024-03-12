@@ -97,9 +97,7 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
   ];
 
   const getRoles = useCallback(
-    async (allowedRoles) => {
-      //REMIND 대체하는 로직 추가되었는지 확인 아래 setRoles
-      setRoles([]);
+    async (allowedRoles = []) => {
       try {
         const rolesData = await RoleService.getRoles();
         const newRoles = rolesData.map((role) => ({
