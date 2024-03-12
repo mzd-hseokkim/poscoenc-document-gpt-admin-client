@@ -120,7 +120,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
   }, [allowChildren, setValue]);
 
   const getRoles = useCallback(
-    async (allowedRoles) => {
+    async (allowedRoles = []) => {
       try {
         const rolesData = await RoleService.getRoles();
         const newRoles = rolesData.map((role) => ({
@@ -138,10 +138,12 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
     },
     [addToast]
   );
-  //REMIND 모달창 닫을 때 ,getParentMenu 에서 리렌더링 이슈로 자꾸 undefined 된 menuId 를  service 에 요청해버림
 
   const getParentMenu = useCallback(async () => {
-    let excludedId = isCreateMode ? '' : searchParams?.get('id');
+    if (searchParams.get('id') === null) {
+      return;
+    }
+    let excludedId = isCreateMode ? '' : searchParams.get('id');
     try {
       const data = await MenuService.getParentMenus(excludedId);
       const newParentMenus = data.map((parentMenu) => ({
@@ -156,8 +158,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
       }
     }
   }, [addToast, isCreateMode, searchParams]);
-  //StartFrom 3/11 병합되면 충돌 해결, 현재 발생하는 이슈는 validation에 의한 거절 후 role 값이 null 이되는 문제 발생, 내버젼에서만발생하니 알아볼것.
-  //StartFrom 일단 getParentMenu 이슈 해결했으니 적용하면서 버그만 찾아내면 될듯함.
+
   const fetchMenuDetail = useCallback(
     async (menuId) => {
       try {
@@ -178,7 +179,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
           addToast({ message: '메뉴 정보를 가져오지 못했습니다.' });
         }
         if (status === 404) {
-          addToast({ message: '메뉴를 찾을 수 없습니다.' });
+          addToast({ message: `id={${menuId}} 해당 메뉴를 찾을 수 없습니다.` });
         }
         closeModal();
       } finally {
@@ -213,6 +214,8 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
     }
   };
 
+  //REMIND 3/11 병합되면 충돌 해결, 현재 발생하는 이슈는 validation에 의한 거절 후 role 값이 null 이되는 문제 발생, 내버젼에서만발생하니 알아볼것.
+  //REMIND 이게 아마 form validation 이 걸리지 않고 그냥 서버에서 validation 처리되고 응답으로 에러를 반환받아서 role 값에 에러가 생가는 듯 함. merge 되고나서 확인 해 볼것.
   const patchMenu = async (data) => {
     try {
       await MenuService.patchMenu(data);
