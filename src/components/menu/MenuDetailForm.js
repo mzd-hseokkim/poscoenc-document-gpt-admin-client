@@ -114,7 +114,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
       setValue('urlPath', '', { shouldValidate: true });
     }
   }, [allowChildren, setValue]);
-
+  //REMIND  저장 작업 시 await 잘 걸어서 2번 서브밋 안되게 수정하기... 한글 문자랑 연관되어 있는지 확인.
   useEffect(() => {
     setIsLoading(false);
     if (!isCreateMode && selectedId) {
@@ -167,6 +167,7 @@ const MenuDetailForm = ({ selectedId, initialFormMode, closeModal, fetchMenuList
     }
   };
 
+  //REMIND 상위 메뉴 선택하는 셀렉트 박스에서 문서관리2가 중복적으로 나타나는 현상 발생.
   const getParentMenu = async () => {
     let excludedId = isCreateMode ? '' : selectedId;
     try {
