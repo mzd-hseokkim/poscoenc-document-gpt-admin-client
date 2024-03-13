@@ -8,9 +8,6 @@ const MenuManagement = React.lazy(() => import('views/pages/menu/MenuManagementP
 const DocumentCollectionManagementPage = React.lazy(() =>
   import('views/pages/document-collection/DocumentCollectionManagementPage')
 );
-const DocumentChunkManagementPage = React.lazy(() =>
-  import('views/pages/document-collection/DocumentChunkManagementPage')
-);
 const ChatHistoryManagementPage = React.lazy(() =>
   import('views/pages/document-collection/DocumentChatHistoryManagementPage')
 );
@@ -27,12 +24,6 @@ const routes = [
     exact: true,
     name: '문서 관리',
     element: DocumentCollectionManagementPage,
-  },
-  {
-    path: '/document-collections-chunk/management',
-    exact: true,
-    name: '문서 청크 관리',
-    element: DocumentChunkManagementPage,
   },
   {
     path: '/document-collections-chat-history/management',
