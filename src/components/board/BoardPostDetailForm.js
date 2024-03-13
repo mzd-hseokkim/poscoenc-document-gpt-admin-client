@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import {
   CCard,
@@ -15,9 +15,10 @@ import {
 import BoardCommentsForm from 'components/board/BoardCommentsForm';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import InputList from 'components/input/InputList';
+import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
+import { useSearchParams } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import BoardService from 'services/board/BoardService';
 import { userIdSelector } from 'states/jwtTokenState';
@@ -25,11 +26,12 @@ import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/formModes';
 
-const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refreshPosts }) => {
+const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
   const [postDetail, setPostDetail] = useState({});
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
   //REMIND use setFormMode when implements posting service
   const [formMode, setFormMode] = useState(initialFormMode || '');
+  const [searchParams] = useSearchParams();
 
   const { addToast } = useToast();
   const currentUserId = useRecoilValue(userIdSelector);
@@ -72,37 +74,45 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
     },
   ];
 
-  const fetchPostDetails = async () => {
-    if (!clickedRowId) {
-      return;
-    }
-    setGetDetailIsLoading(true);
-    try {
-      const detail = await BoardService.getPostDetail(clickedRowId);
-      const formattedDetail = {
-        ...detail,
-        commentCount: detail.comments.length,
-        createdAt: detail.createdAt && formatToYMD(detail.createdAt),
-        modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
-      };
-      setPostDetail(formattedDetail);
-      reset(formattedDetail);
-    } catch (error) {
-      if (error.response?.status === 404) {
-        addToast({ message: '해당 게시글을 찾을 수 없습니다.' });
-      } else {
-        console.log(error);
+  const fetchPostDetails = useCallback(
+    async (postId) => {
+      if (!postId) {
+        return;
       }
-    } finally {
-      setGetDetailIsLoading(false);
-    }
-  };
-
+      setGetDetailIsLoading(true);
+      try {
+        const detail = await BoardService.getPostDetail(postId);
+        const formattedDetail = {
+          ...detail,
+          commentCount: detail.comments.length,
+          createdAt: detail.createdAt && formatToYMD(detail.createdAt),
+          modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
+        };
+        setPostDetail(formattedDetail);
+        reset(formattedDetail);
+      } catch (error) {
+        if (error.response?.status === 404) {
+          addToast({ message: `id={${postId}} 해당 게시글을 찾을 수 없습니다.` });
+        } else {
+          console.log(error);
+        }
+        closeModal();
+      } finally {
+        setGetDetailIsLoading(false);
+      }
+    },
+    [addToast, closeModal, reset]
+  );
+  //REMIND 게시글 작성 후 모달 닫을 때 formMode read 로 설정해주기
   useEffect(() => {
+    const postId = searchParams.get('id');
+
     if (!isCreateMode) {
-      void fetchPostDetails();
+      void fetchPostDetails(postId);
     }
-  }, [clickedRowId]);
+  }, [closeModal, fetchPostDetails, isCreateMode, searchParams]);
+
+  //REMIND 모달 닫을 때, 불필요한 데이터들 제거해는 로직 추가
 
   const onSubmit = (data) => {
     if (isCreateMode) {
@@ -133,7 +143,7 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
   const handleSubmitModifiedPost = async (data) => {
     //REMIND hasFiles 관리 안하고 있는상태, 게시물 첨부파일 구현시 고려
     const modifiedData = {
-      id: clickedRowId,
+      id: postDetail.id,
       ...data,
     };
     try {
@@ -152,7 +162,13 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
       } else {
         console.log(error);
       }
+    } finally {
+      setFormMode('read');
     }
+  };
+  const handleModificationCancelClick = async () => {
+    setFormMode('read');
+    await fetchPostDetails(postDetail.id);
   };
   const handleDeleteRestoreClick = async (postId) => {
     const shouldDelete = !deleted;
@@ -225,14 +241,14 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
           {!isCreateMode && (
             <CCard className="mb-3">
               <CCardBody>
-                <InputList
+                <FormInputGrid
                   register={register}
                   fields={postSpecificFields}
                   formData={postDetail}
                   isReadMode={isReadMode}
                   errors={errors}
                 />
-                <InputList
+                <FormInputGrid
                   register={register}
                   fields={getAuditFields(formMode)}
                   formData={postDetail}
@@ -249,11 +265,11 @@ const BoardPostDetailForm = ({ clickedRowId, initialFormMode, closeModal, refres
             </CCardBody>
           </CCard>
         </CForm>
-        {isReadMode && <BoardCommentsForm postId={clickedRowId} />}
+        {isReadMode && <BoardCommentsForm postId={postDetail.id} />}
       </CModalBody>
       <CModalFooter>
         <DetailFormActionButtons
-          dataId={clickedRowId}
+          dataId={postDetail.id}
           formModes={formModes(formMode)}
           handleCancel={handleCancelClick}
           handleDeleteRestore={handleDeleteRestoreClick}

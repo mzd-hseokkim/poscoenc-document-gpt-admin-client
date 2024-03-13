@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { CForm, CModalBody, CModalFooter } from '@coreui/react-pro';
+import { CCard, CCardBody, CCol, CForm, CFormInput, CModalBody, CModalFooter, CRow } from '@coreui/react-pro';
+import StatusBadge from 'components/badge/StatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import InputList from 'components/input/InputList';
+import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
+import { useSearchParams } from 'react-router-dom';
 import RoleService from 'services/Role/RoleService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
@@ -13,27 +15,20 @@ import formModes from 'utils/formModes';
 
 const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList }) => {
   const [formMode, setFormMode] = useState(initialFormMode);
+  const [formData, setFormData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchParams] = useSearchParams();
 
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
   const { addToast } = useToast();
   const {
     reset,
-    watch,
     handleSubmit,
     register,
     formState: { errors },
   } = useForm({ mode: 'onChange' });
 
-  const deleted = watch('deleted');
-
   const roleFields = [
-    {
-      name: 'id',
-      label: '아이디',
-      isDisabled: isUpdateMode,
-      isRendered: !isCreateMode,
-    },
     {
       name: 'role',
       label: '권한',
@@ -44,35 +39,43 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
     },
   ];
 
+  const fetchRoleDetail = useCallback(
+    async (roleId) => {
+      setIsLoading(true);
+      try {
+        const data = await RoleService.getRole(roleId);
+        const formattedData = {
+          ...data,
+          modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
+          createdAt: data.createdAt && formatToYMD(data.createdAt),
+        };
+        reset(formattedData);
+        setFormData(formattedData);
+      } catch (error) {
+        addToast({ message: `id={${roleId}} 해당 권한 정보를 찾을 수 없습니다.` });
+        closeModal();
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [addToast, closeModal, reset]
+  );
   useEffect(() => {
     setIsLoading(false);
-    if (!isCreateMode && selectedId) {
-      fetchRoleDetail();
+    const roleId = searchParams.get('id');
+    if (!isCreateMode && roleId) {
+      void fetchRoleDetail(roleId);
     }
-  }, [selectedId]);
-
-  const fetchRoleDetail = async () => {
-    try {
-      setIsLoading(true);
-      const data = await RoleService.getRole(selectedId);
-      const formattedData = {
-        ...data,
-        modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
-        createdAt: data.createdAt && formatToYMD(data.createdAt),
-      };
-      reset(formattedData);
-    } catch (error) {
-      addToast({ message: '권한 정보를 가져오지 못했습니다.' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [fetchRoleDetail, isCreateMode, searchParams]);
 
   const createRole = async (data) => {
     try {
-      await RoleService.postRole(data.role);
-      closeModal();
-      fetchRoleList();
+      const result = await RoleService.postRole(data.role);
+      if (result) {
+        closeModal();
+        fetchRoleList();
+        setFormMode('read');
+      }
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -86,9 +89,12 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
 
   const updateRole = async (data) => {
     try {
-      await RoleService.putRole(data.id, data.role);
-      closeModal();
-      fetchRoleList();
+      const result = await RoleService.putRole(data.id, data.role);
+      if (result) {
+        closeModal();
+        fetchRoleList();
+        setFormMode('read');
+      }
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -102,9 +108,9 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
 
   const onSubmit = (data) => {
     if (isCreateMode) {
-      createRole(data);
+      void createRole(data);
     } else if (isUpdateMode) {
-      updateRole(data);
+      void updateRole(data);
     }
   };
 
@@ -122,9 +128,9 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
     setFormMode('update');
   };
   const handleDeleteRestoreClick = async (id) => {
-    const shouldDelete = !deleted;
+    const shouldDelete = !formData.deleted;
     try {
-      await RoleService.deleteRole(id, shouldDelete);
+      await RoleService.deleteRoles([id], shouldDelete);
     } catch (error) {
       addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
@@ -132,13 +138,45 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
     fetchRoleList();
   };
 
+  const renderAuditFields = () => {
+    return (
+      <CCard className="g-3 mb-3">
+        <CCardBody>
+          <CRow>
+            <CCol className="col-md mb-2">
+              <CCol className="fw-bold">아이디</CCol>
+              <CFormInput
+                id="input-list-id"
+                name="id"
+                value={formData.id || ''}
+                disabled={!isCreateMode}
+                plainText={!isCreateMode}
+              />
+            </CCol>
+            <CCol className="col-md mb-2">
+              <CCol className="fw-bold">삭제</CCol>
+              <CCol>
+                <StatusBadge deleted={formData.deleted} />
+              </CCol>
+            </CCol>
+          </CRow>
+          <FormInputGrid fields={getAuditFields(formMode)} formData={formData} isReadMode={isReadMode} col={2} />
+        </CCardBody>
+      </CCard>
+    );
+  };
+
   return (
     <>
       <FormLoadingCover isLoading={isLoading} />
       <CModalBody>
         <CForm onSubmit={handleSubmit(onSubmit)}>
-          <InputList fields={roleFields} isReadMode={isReadMode} register={register} errors={errors} />
-          <InputList fields={getAuditFields(formMode)} isReadMode={isReadMode} register={register} errors={errors} />
+          {!isCreateMode && renderAuditFields()}
+          <CCard className="g-3 mb-3">
+            <CCardBody>
+              <FormInputGrid fields={roleFields} isReadMode={isReadMode} register={register} errors={errors} />
+            </CCardBody>
+          </CCard>
         </CForm>
       </CModalBody>
       <CModalFooter>
@@ -148,7 +186,7 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
           handleCancel={handleCancelClick}
           handleDeleteRestore={handleDeleteRestoreClick}
           handleUpdateClick={handleUpdateClick}
-          isDataDeleted={deleted}
+          isDataDeleted={formData.deleted}
           onSubmit={handleSubmit(onSubmit)}
         />
       </CModalFooter>

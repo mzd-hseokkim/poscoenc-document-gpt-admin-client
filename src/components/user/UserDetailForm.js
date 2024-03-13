@@ -1,11 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { CCol, CForm, CFormLabel, CFormTextarea, CModalBody, CModalFooter, CRow } from '@coreui/react-pro';
+import {
+  CCard,
+  CCardBody,
+  CCol,
+  CForm,
+  CFormInput,
+  CFormLabel,
+  CFormTextarea,
+  CModalBody,
+  CModalFooter,
+  CRow,
+} from '@coreui/react-pro';
+import StatusBadge from 'components/badge/StatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import InputList from 'components/input/InputList';
+import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
+import { useSearchParams } from 'react-router-dom';
 import UserService from 'services/UserService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
@@ -15,6 +28,8 @@ import { emailValidationPattern } from 'utils/validationUtils';
 const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [formMode, setFormMode] = useState(initialFormMode);
+  const [formData, setFormData] = useState([]);
+  const [searchParams] = useSearchParams();
 
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
   const { addToast } = useToast();
@@ -28,13 +43,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
 
   const deleted = watch('deleted');
 
-  const userFields = [
-    {
-      name: 'id',
-      label: '아이디',
-      isDisabled: isUpdateMode,
-      isRendered: !isCreateMode,
-    },
+  const userInfoFields = [
     {
       name: 'email',
       label: '이메일',
@@ -62,30 +71,37 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
     },
   ];
 
-  const fetchUserDetail = async () => {
-    try {
-      setIsLoading(true);
+  const fetchUserDetail = useCallback(
+    async (userId) => {
+      try {
+        setIsLoading(true);
 
-      const data = await UserService.getUser(selectedId);
-      const formattedData = {
-        ...data,
-        modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
-        createdAt: data.createdAt && formatToYMD(data.createdAt),
-      };
-      reset(formattedData);
-    } catch (error) {
-      addToast({ message: '사용자 정보를 가져오지 못했습니다.' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        const data = await UserService.getUser(userId);
+        const formattedData = {
+          ...data,
+          modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
+          createdAt: data.createdAt && formatToYMD(data.createdAt),
+        };
+        reset(formattedData);
+        setFormData(formattedData);
+      } catch (error) {
+        addToast({ message: `id={${userId}} 해당 사용자를 찾을 수 없습니다.` });
+        closeModal();
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [addToast, closeModal, reset]
+  );
 
   useEffect(() => {
     setIsLoading(false);
-    if (!isCreateMode && selectedId) {
-      fetchUserDetail();
+    const userId = searchParams.get('id');
+
+    if (!isCreateMode && userId) {
+      void fetchUserDetail(userId);
     }
-  }, [selectedId]);
+  }, [fetchUserDetail, isCreateMode, searchParams, selectedId]);
 
   const postUser = async (data) => {
     try {
@@ -153,32 +169,56 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
     setFormMode('update');
   };
 
-  const renderMemoField = () => (
-    <CRow className="mb-3">
-      <CFormLabel htmlFor="detail-form-memo" className="col-md-2 col-form-label fw-bold">
-        메모
-      </CFormLabel>
-      <CCol>
-        <CFormTextarea
-          {...register('memo')}
-          id="detail-form-memo"
-          name="memo"
-          placeholder={isReadMode ? '' : '메모를 입력하세요.'}
-          plainText={isReadMode}
-          readOnly={isReadMode}
-        />
-      </CCol>
-    </CRow>
-  );
+  const renderAuditFields = () => {
+    return (
+      <CCard className="g-3 mb-3">
+        <CCardBody>
+          <CRow>
+            <CCol className="col-md mb-2">
+              <CCol className="fw-bold">아이디</CCol>
+              <CFormInput
+                id="input-list-id"
+                name="id"
+                value={formData.id || ''}
+                disabled={!isCreateMode}
+                plainText={!isCreateMode}
+              />
+            </CCol>
+            <CCol className="col-md mb-2">
+              <CCol className="fw-bold">삭제</CCol>
+              <CCol>
+                <StatusBadge deleted={formData.deleted} />
+              </CCol>
+            </CCol>
+          </CRow>
+          <FormInputGrid fields={getAuditFields(formMode)} formData={formData} isReadMode={isReadMode} col={2} />
+        </CCardBody>
+      </CCard>
+    );
+  };
 
   return (
     <>
       <FormLoadingCover isLoading={isLoading} />
       <CModalBody>
         <CForm onSubmit={handleSubmit(onSubmit)}>
-          <InputList fields={userFields} isReadMode={isReadMode} register={register} errors={errors} />
-          {renderMemoField()}
-          <InputList fields={getAuditFields(formMode)} isReadMode={isReadMode} register={register} errors={errors} />
+          {!isCreateMode && renderAuditFields()}
+          <CCard className="g-3 mb-3">
+            <CCardBody>
+              <FormInputGrid fields={userInfoFields} isReadMode={isReadMode} register={register} errors={errors} />
+              <CFormLabel htmlFor="detail-form-memo" className="col-form-label fw-bold">
+                메모
+              </CFormLabel>
+              <CFormTextarea
+                {...register('memo')}
+                id="detail-form-memo"
+                name="memo"
+                placeholder={isReadMode ? '' : '메모를 입력하세요.'}
+                plainText={isReadMode}
+                readOnly={isReadMode}
+              />
+            </CCardBody>
+          </CCard>
         </CForm>
       </CModalBody>
       <CModalFooter>

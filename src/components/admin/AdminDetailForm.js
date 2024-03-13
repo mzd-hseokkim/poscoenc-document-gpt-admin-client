@@ -1,11 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { CCol, CForm, CFormLabel, CModalBody, CModalFooter, CMultiSelect, CRow } from '@coreui/react-pro';
+import {
+  CCard,
+  CCardBody,
+  CCol,
+  CForm,
+  CFormInput,
+  CFormLabel,
+  CModalBody,
+  CModalFooter,
+  CMultiSelect,
+  CRow,
+} from '@coreui/react-pro';
+import StatusBadge from 'components/badge/StatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import InputList from 'components/input/InputList';
+import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { Controller, useForm } from 'react-hook-form';
+import { useSearchParams } from 'react-router-dom';
 import AdminService from 'services/admin/AdminService';
 import RoleService from 'services/Role/RoleService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
@@ -13,11 +26,12 @@ import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/formModes';
 import { emailValidationPattern, passwordValidationPattern } from 'utils/validationUtils';
 
-const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminList }) => {
+const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
   const [formMode, setFormMode] = useState(initialFormMode);
+  const [formData, setFormData] = useState([]);
   const [roles, setRoles] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [searchParams] = useSearchParams();
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
   const { addToast } = useToast();
   const {
@@ -30,13 +44,16 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
   } = useForm({ mode: 'onChange' });
 
   const deleted = watch('deleted');
+  const adminId = watch('id');
 
-  const adminFields = [
+  const adminInfoFields = [
     {
-      name: 'id',
-      label: '아이디',
-      isDisabled: isUpdateMode,
-      isRendered: !isCreateMode,
+      name: 'name',
+      label: '이름',
+      placeholder: '이름을 입력하세요.',
+      rules: {
+        required: '이름은 필수 입력 항목입니다.',
+      },
     },
     {
       name: 'email',
@@ -48,14 +65,6 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
           value: emailValidationPattern,
           message: '유효하지 않은 이메일 주소입니다.',
         },
-      },
-    },
-    {
-      name: 'name',
-      label: '이름',
-      placeholder: '이름을 입력하세요.',
-      rules: {
-        required: '이름은 필수 입력 항목입니다.',
       },
     },
     {
@@ -72,8 +81,6 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
         },
       },
     },
-  ];
-  const logInFields = [
     {
       name: 'lastLoggedInAt',
       label: '최근 로그인',
@@ -89,57 +96,67 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
     },
   ];
 
+  const getRoles = useCallback(
+    async (allowedRoles = []) => {
+      try {
+        const rolesData = await RoleService.getRoles();
+        const newRoles = rolesData.map((role) => ({
+          value: role.role,
+          text: role.role,
+          selected: allowedRoles?.length > 0 ? allowedRoles.includes(role.role) : false,
+        }));
+        setRoles(newRoles);
+      } catch (error) {
+        addToast({ message: '권한 목록을 가져오지 못했습니다.' });
+      }
+    },
+    [addToast]
+  );
+
+  const fetchAdminDetail = useCallback(
+    async (adminId) => {
+      try {
+        setIsLoading(true);
+
+        const data = await AdminService.getAdmin(adminId);
+        const formattedData = {
+          ...data,
+          modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
+          lastLoggedInAt: data.lastLoggedInAt && formatToYMD(data.lastLoggedInAt),
+          createdAt: data.createdAt && formatToYMD(data.createdAt),
+        };
+        reset(formattedData);
+        setFormData(formattedData);
+
+        const allowedRoles = data.roles;
+        await getRoles(allowedRoles);
+      } catch (error) {
+        addToast({ message: `id={${adminId}} 해당 관리자를 찾을 수 없습니다.` });
+        closeModal();
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [addToast, closeModal, getRoles, reset]
+  );
   useEffect(() => {
     setIsLoading(false);
-    if (!isCreateMode && selectedId) {
-      fetchAdminDetail();
+    const adminId = searchParams.get('id');
+    if (!isCreateMode && adminId) {
+      void fetchAdminDetail(adminId);
     } else {
-      getRoles();
+      void getRoles();
     }
-  }, [selectedId]);
-
-  const fetchAdminDetail = async () => {
-    try {
-      setIsLoading(true);
-
-      const data = await AdminService.getAdmin(selectedId);
-      const formattedData = {
-        ...data,
-        modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
-        lastLoggedInAt: data.lastLoggedInAt && formatToYMD(data.lastLoggedInAt),
-        createdAt: data.createdAt && formatToYMD(data.createdAt),
-      };
-      reset(formattedData);
-
-      const allowedRoles = data.roles;
-      await getRoles(allowedRoles);
-    } catch (error) {
-      addToast({ message: '관리자 정보를 가져오지 못했습니다.' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const getRoles = async (allowedRoles) => {
-    setRoles([]);
-    try {
-      const rolesData = await RoleService.getRoles();
-      const newRoles = rolesData.map((role) => ({
-        value: role.role,
-        text: role.role,
-        selected: allowedRoles?.length > 0 ? allowedRoles.includes(role.role) : false,
-      }));
-      setRoles(newRoles);
-    } catch (error) {
-      addToast({ message: '권한 목록을 가져오지 못했습니다.' });
-    }
-  };
+  }, [fetchAdminDetail, getRoles, isCreateMode, searchParams]);
 
   const createAdmin = async (data) => {
     try {
-      await AdminService.postAdmin(data);
-      closeModal();
-      fetchAdminList();
+      const result = await AdminService.postAdmin(data);
+      if (result) {
+        closeModal();
+        fetchAdminList();
+        setFormMode('read');
+      }
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -153,9 +170,12 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
 
   const updateAdmin = async (data) => {
     try {
-      await AdminService.putAdmin(selectedId, data);
-      closeModal();
-      fetchAdminList();
+      const result = await AdminService.putAdmin(adminId, data);
+      if (result) {
+        closeModal();
+        fetchAdminList();
+        setFormMode('read');
+      }
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -172,9 +192,9 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
     const updatedData = { ...data, roles: roleList };
 
     if (isCreateMode) {
-      createAdmin(updatedData);
+      void createAdmin(updatedData);
     } else if (isUpdateMode) {
-      updateAdmin(updatedData);
+      void updateAdmin(updatedData);
     }
   };
 
@@ -205,10 +225,10 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
 
   const renderRoleSelect = () => (
     <CRow className="mb-3">
-      <CFormLabel htmlFor="detail-form-roles" className="col-md-2 col-form-label fw-bold">
-        인가된 권한
-      </CFormLabel>
       <CCol>
+        <CFormLabel htmlFor="detail-form-roles" className="col-md-2 col-form-label fw-bold">
+          인가된 권한
+        </CFormLabel>
         <Controller
           name="roles"
           control={control}
@@ -231,20 +251,51 @@ const AdminDetailForm = ({ selectedId, initialFormMode, closeModal, fetchAdminLi
     </CRow>
   );
 
+  const renderAuditFields = () => {
+    return (
+      <CCard className="g-3 mb-3">
+        <CCardBody>
+          <CRow>
+            <CCol className="col-md mb-2">
+              <CCol className="fw-bold">아이디</CCol>
+              <CFormInput
+                id="input-list-id"
+                name="id"
+                value={formData.id || ''}
+                disabled={!isCreateMode}
+                plainText={!isCreateMode}
+              />
+            </CCol>
+            <CCol className="col-md mb-2">
+              <CCol className="fw-bold">삭제</CCol>
+              <CCol>
+                <StatusBadge deleted={formData.deleted} />
+              </CCol>
+            </CCol>
+          </CRow>
+          <FormInputGrid fields={getAuditFields(formMode)} formData={formData} isReadMode={isReadMode} col={2} />
+        </CCardBody>
+      </CCard>
+    );
+  };
+
   return (
     <>
       <FormLoadingCover isLoading={isLoading}></FormLoadingCover>
       <CModalBody>
         <CForm onSubmit={handleSubmit(onSubmit)}>
-          <InputList fields={adminFields} isReadMode={isReadMode} register={register} errors={errors} />
-          {renderRoleSelect()}
-          <InputList fields={logInFields} isReadMode={isReadMode} register={register} errors={errors} />
-          <InputList fields={getAuditFields(formMode)} isReadMode={isReadMode} register={register} errors={errors} />
+          {!isCreateMode && renderAuditFields()}
+          <CCard className="g-2 mb-3">
+            <CCardBody>
+              <FormInputGrid fields={adminInfoFields} isReadMode={isReadMode} register={register} errors={errors} />
+              {renderRoleSelect()}
+            </CCardBody>
+          </CCard>
         </CForm>
       </CModalBody>
       <CModalFooter>
         <DetailFormActionButtons
-          dataId={selectedId}
+          dataId={adminId}
           formModes={formModes(formMode)}
           handleCancel={handleCancelClick}
           handleDeleteRestore={handleDeleteRestoreClick}

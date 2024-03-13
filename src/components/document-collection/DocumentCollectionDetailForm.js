@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import {
   CButton,
@@ -14,10 +14,10 @@ import {
 } from '@coreui/react-pro';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import InputList from 'components/input/InputList';
+import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
-import { useLocation } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import DocumentCollectionFileService from 'services/document-collection/DocumentCollectionFileService';
 import DocumentCollectionService from 'services/document-collection/DocumentCollectionService';
@@ -34,6 +34,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
   const [formMode, setFormMode] = useState(initialFormMode || 'read');
 
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
+  const [searchParams] = useSearchParams();
 
   const { addToast } = useToast();
   const currentUserId = useRecoilValue(userIdSelector);
@@ -45,7 +46,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     handleSubmit,
     formState: { errors },
   } = useForm({ mode: 'onChange' });
-  const location = useLocation();
+
   const collectionSpecificFields = [
     {
       md: 2,
@@ -82,49 +83,52 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     },
   ];
 
-  useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const collectionIdFromUrl = queryParams.get('id');
-
-    if (!collectionIdFromUrl) {
-      closeModal();
-    }
-
-    fetchCollectionDetail(collectionIdFromUrl);
-  }, [location]);
-
-  const fetchCollectionDetail = async (collectionId) => {
-    if (!collectionId) {
-      return;
-    }
-    setGetDetailIsLoading(true);
-    try {
-      const detail = await DocumentCollectionService.getCollectionDetail(collectionId);
-      setCollectionDetail(detail);
-      const formattedDetail = {
-        ...detail,
-        createdAt: detail.createdAt && formatToYMD(detail.createdAt),
-        modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
-      };
-      reset(formattedDetail);
-    } catch (error) {
-      if (error.response?.status === 404) {
-        addToast({ message: '해당 문서 집합을 찾을 수 없습니다.' });
-      } else {
-        console.log(error);
+  const fetchCollectionDetail = useCallback(
+    async (collectionId) => {
+      if (!collectionId) {
+        return;
       }
+      setGetDetailIsLoading(true);
+      try {
+        const detail = await DocumentCollectionService.getCollectionDetail(collectionId);
+        setCollectionDetail(detail);
+        const formattedDetail = {
+          ...detail,
+          createdAt: detail.createdAt && formatToYMD(detail.createdAt),
+          modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
+        };
+        reset(formattedDetail);
+      } catch (error) {
+        if (error.response?.status === 404) {
+          addToast({ message: `id={${collectionId}} 해당 문서 집합을 찾을 수 없습니다.` });
+        } else {
+          console.log(error);
+        }
+        closeModal();
+      } finally {
+        setGetDetailIsLoading(false);
+      }
+    },
+    [addToast, closeModal, reset]
+  );
+
+  useEffect(() => {
+    const collectionId = searchParams.get('id');
+
+    if (!collectionId) {
       closeModal();
-    } finally {
-      setGetDetailIsLoading(false);
     }
-  };
+
+    void fetchCollectionDetail(collectionId);
+  }, [closeModal, fetchCollectionDetail, searchParams]);
   const putModifiedCollection = async (data) => {
     try {
       const isModified = await DocumentCollectionService.putModifiedCollectionDetail(data);
       if (isModified) {
         closeModal();
+        setCollectionDetail({});
+        setFormMode('');
         refreshDocumentCollectionList();
-        await fetchCollectionDetail();
       }
     } catch (error) {
       const status = error.response?.status;
@@ -135,7 +139,6 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
       } else {
         console.log(error);
       }
-      closeModal();
     }
     //REMIND loading spinner
   };
@@ -181,14 +184,14 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
         <CForm onSubmit={handleSubmit(onSubmit)}>
           <CCard className="mb-3">
             <CCardBody>
-              <InputList
+              <FormInputGrid
                 register={register}
                 fields={collectionSpecificFields}
                 formData={collectionDetail}
                 isReadMode={isReadMode}
                 errors={errors}
               />
-              <InputList
+              <FormInputGrid
                 register={register}
                 fields={getAuditFields(formMode)}
                 formData={collectionDetail}
