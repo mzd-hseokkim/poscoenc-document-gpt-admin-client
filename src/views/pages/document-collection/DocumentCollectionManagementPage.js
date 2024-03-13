@@ -118,7 +118,7 @@ const DocumentCollectionManagementPage = () => {
     e.preventDefault();
     await searchDocumentCollectionList();
   };
-  const toggleDocumentCollectionStatus = async (deletionOption) => {
+  const toggleDocumentCollectionDeleted = async (deletionOption) => {
     try {
       const isSuccess = await DocumentCollectionService.patchCollectionsDeletionOption(
         selectedRows.map((row) => row.id),
@@ -243,13 +243,13 @@ const DocumentCollectionManagementPage = () => {
               <CCol className="d-grid gap-2 d-md-flex justify-content-md-start">
                 <CButton
                   disabled={selectedRows?.length === 0 || isDeletedRow(selectedRows)}
-                  onClick={() => toggleDocumentCollectionStatus(true)}
+                  onClick={() => toggleDocumentCollectionDeleted(true)}
                 >
                   {'삭제'}
                 </CButton>
                 <CButton
                   disabled={selectedRows?.length === 0 || !isDeletedRow(selectedRows)}
-                  onClick={() => toggleDocumentCollectionStatus(false)}
+                  onClick={() => toggleDocumentCollectionDeleted(false)}
                 >
                   {'복구'}
                 </CButton>

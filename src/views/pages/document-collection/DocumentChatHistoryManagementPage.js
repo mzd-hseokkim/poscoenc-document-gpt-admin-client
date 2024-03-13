@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   CButton,
@@ -11,15 +11,27 @@ import {
   CFormInput,
   CFormLabel,
   CRow,
+  CSmartTable,
 } from '@coreui/react-pro';
+import StatusBadge from 'components/badge/StatusBadge';
+import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import DocumentCollectionDetailForm from 'components/document-collection/DocumentCollectionDetailForm';
+import DocumentChatHistoryDetailForm from 'components/document-collection/DocumentChatHistoryDetailForm';
 import ModalContainer from 'components/modal/ModalContainer';
 import { useToast } from 'context/ToastContext';
 import { format } from 'date-fns';
 import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
-import { formatToIsoEndDate, formatToIsoStartDate, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
+import DocumentChatHistoryService from 'services/document-collection/DocumentChatHistoryService';
+import {
+  formatToIsoEndDate,
+  formatToIsoStartDate,
+  formatToYMD,
+  getCurrentDate,
+  getOneYearAgoDate,
+} from 'utils/common/dateUtils';
+import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
+import { documentChatHistoryColumnConfig } from 'utils/document-collection/documentChatHistoryColumnConfig';
 
 const DocumentChatHistoryManagementPage = () => {
   const [chatHistoryList, setChatHistoryList] = useState([]);
@@ -47,10 +59,70 @@ const DocumentChatHistoryManagementPage = () => {
   const isComponentMounted = useRef(true);
   const { addToast } = useToast();
   const modal = useModal();
-
   const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } =
     usePagination(totalChatHistoryElements);
-  const searchChatHistoryList = async () => {};
+
+  const searchChatHistoryList = useCallback(async () => {
+    setSearchResultIsLoading(true);
+    try {
+      const searchResult = await DocumentChatHistoryService.getSearchedDocumentChatHistory(
+        searchFormData,
+        pageableData
+      );
+      if (searchResult) {
+        setChatHistoryList(searchResult.content);
+        setTotalChatHistoryElements(searchResult.totalElements);
+      }
+
+      if (searchResult?.content?.length === 0 && noItemsLabel === '') {
+        setNoItemsLabel('검색 결과가 없습니다.');
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setSearchResultIsLoading(false);
+    }
+  }, [pageableData, searchFormData]);
+  useEffect(() => {
+    if (isComponentMounted.current) {
+      isComponentMounted.current = false;
+    } else {
+      void searchChatHistoryList();
+    }
+  }, [pageableData, searchChatHistoryList]);
+
+  const isDeletedRow = (selectedRows) => {
+    return selectedRows.some((row) => row.deleted === true);
+  };
+
+  const toggleChatHistoryDeleted = async (deletionOption) => {
+    try {
+      const isSuccess = await DocumentChatHistoryService.patchChatHisotryDeletionOption(
+        selectedRows.map((row) => row.id),
+        deletionOption
+      );
+
+      if (isSuccess) {
+        setSelectedRows([]);
+      }
+    } catch (error) {
+      const status = error.response?.status;
+      if (status === 400) {
+        addToast({ message: '삭제할 채팅 이력을 선택해주세요.' });
+      } else if (status === 404) {
+        addToast({ message: '삭제할 채팅 이력을 찾지 못했습니다. 다시 검색 해 주세요.' });
+      } else {
+        console.log(error);
+      }
+    } finally {
+      await searchChatHistoryList();
+    }
+  };
+
+  const handleRowClick = (itemId) => {
+    setDetailFormMode('read');
+    modal.openModal(itemId);
+  };
   const handleSubmitSearchRequest = async (e) => {
     e.preventDefault();
     await searchChatHistoryList();
@@ -80,6 +152,62 @@ const DocumentChatHistoryManagementPage = () => {
       toCreatedAt: format(searchFormData.toCreatedAt, "yyyy-MM-dd'T'23:59"),
     }));
   };
+
+  const scopedColumns = {
+    documentCollectionId: (item) => (
+      <td
+        style={{ cursor: 'pointer' }}
+        onClick={() => {
+          handleRowClick(item.id);
+        }}
+      >
+        {item.documentCollectionId}
+      </td>
+    ),
+    answer: (item) => (
+      <td
+        onClick={() => {
+          handleRowClick(item.id);
+        }}
+      >
+        <div
+          style={{
+            maxWidth: `180px`, // 적절한 최대 너비 설정
+            whiteSpace: `nowrap`,
+            overflow: `hidden`,
+            textOverflow: `ellipsis`,
+          }}
+        >
+          {item.answer}
+        </div>
+      </td>
+    ),
+    question: (item) => (
+      <td
+        onClick={() => {
+          handleRowClick(item.id);
+        }}
+      >
+        <div
+          style={{
+            maxWidth: `200px`, // 적절한 최대 너비 설정
+            whiteSpace: `nowrap`,
+            overflow: `hidden`,
+            textOverflow: `ellipsis`,
+          }}
+        >
+          {item.question}
+        </div>
+      </td>
+    ),
+    createdAt: (item) => <td>{formatToYMD(item.createdAt)}</td>,
+    deleted: (item) => (
+      <td>
+        <StatusBadge deleted={item.deleted} />
+      </td>
+    ),
+  };
+
   return (
     <>
       <FormLoadingCover isLoading={searchResultIsLoading} />
@@ -91,7 +219,7 @@ const DocumentChatHistoryManagementPage = () => {
                 <CCol md={6}>
                   <CFormInput
                     id="answer"
-                    label="대답"
+                    label="답변"
                     value={searchFormData.chunkSeq}
                     onChange={handleSearchFormChange}
                   />
@@ -189,11 +317,52 @@ const DocumentChatHistoryManagementPage = () => {
       </CRow>
       <CRow>
         <CCard className="row g-3">
-          <CCardBody></CCardBody>
+          <CCardBody>
+            <CRow className="mb-3">
+              <CCol className="d-grid gap-2 d-md-flex justify-content-md-start">
+                <CButton
+                  disabled={selectedRows?.length === 0 || isDeletedRow(selectedRows)}
+                  onClick={() => toggleChatHistoryDeleted(true)}
+                >
+                  {'삭제'}
+                </CButton>
+                <CButton
+                  disabled={selectedRows?.length === 0 || !isDeletedRow(selectedRows)}
+                  onClick={() => toggleChatHistoryDeleted(false)}
+                >
+                  {'복구'}
+                </CButton>
+                <ExcelDownloadCButton
+                  downloadFunction={DocumentChatHistoryService.getDownloadSearchedCollectionList}
+                  searchFormData={searchFormData}
+                />
+              </CCol>
+            </CRow>
+            <CRow className="mb-3">
+              <CSmartTable
+                columnSorter={columnSorterCustomProps}
+                columns={documentChatHistoryColumnConfig}
+                items={chatHistoryList}
+                itemsPerPage={pageableData.size}
+                itemsPerPageLabel="페이지당 대화 이력 개수"
+                itemsPerPageSelect
+                loading={searchResultIsLoading}
+                noItemsLabel={noItemsLabel}
+                onItemsPerPageChange={handlePageSizeChange}
+                onSelectedItemsChange={setSelectedRows}
+                onSorterChange={handlePageSortChange}
+                paginationProps={smartPaginationProps}
+                scopedColumns={scopedColumns}
+                selectable
+                selected={selectedRows}
+                tableProps={tableCustomProps}
+              />
+            </CRow>
+          </CCardBody>
         </CCard>
       </CRow>
-      <ModalContainer visible={modal.isOpen} title={'문서 집합 상세'} onClose={modal.closeModal} size="lg">
-        <DocumentCollectionDetailForm
+      <ModalContainer visible={modal.isOpen} title={'채팅 이력'} onClose={modal.closeModal} size="lg">
+        <DocumentChatHistoryDetailForm
           closeModal={modal.closeModal}
           initialFormMode={detailFormMode}
           refreshDocumentCollectionList={searchChatHistoryList}

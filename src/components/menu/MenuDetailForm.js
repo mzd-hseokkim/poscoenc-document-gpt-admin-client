@@ -137,9 +137,10 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
   );
 
   const getParentMenu = useCallback(async () => {
-    if (searchParams.get('id') === null) {
+    if (!isCreateMode && searchParams.get('id') === null) {
       return;
     }
+    //create 모드일때는 빈값으로  상위메뉴를 요청해야함, 그러면서 서치파람에 있을 경우에는
     let excludedId = isCreateMode ? '' : searchParams.get('id');
     try {
       const data = await MenuService.getParentMenus(excludedId);
@@ -167,6 +168,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
           createdAt: data.createdAt && formatToYMD(data.createdAt),
         };
         reset(formattedData);
+        setFormData(formattedData);
         const allowedRoles = data.allowedRoles.map((role) => role.id);
         await getRoles(allowedRoles);
       } catch (error) {
@@ -240,7 +242,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
   const handleCancelClick = async () => {
     if (isUpdateMode) {
       setFormMode('read');
-      await fetchMenuDetail();
+      await fetchMenuDetail(searchParams.get('id'));
     } else if (isCreateMode) {
       closeModal();
     }
