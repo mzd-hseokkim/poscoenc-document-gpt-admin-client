@@ -15,6 +15,7 @@ import {
 } from '@coreui/react-pro';
 import StatusBadge from 'components/badge/StatusBadge';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
+import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import MenuDetailForm from 'components/menu/MenuDetailForm';
 import ModalContainer from 'components/modal/ModalContainer';
 import { useToast } from 'context/ToastContext';
@@ -45,7 +46,7 @@ const MenuManagementPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [totalMenuElements, setTotalMenuElements] = useState(0);
   const [formData, setFormData] = useState(createInitialFormData);
-  const [noItemsLabel, setNoItemsLabel] = useState('');
+  const [isSearchPerformed, setIsSearchPerformed] = useState(false);
   const [isSelectTime, setIsSelectTime] = useState(false);
 
   const isComponentMounted = useRef(true);
@@ -64,14 +65,14 @@ const MenuManagementPage = () => {
   }, [pageableData]);
 
   const fetchMenuList = async () => {
+    if (!isSearchPerformed) {
+      setIsSearchPerformed(true);
+    }
     try {
       setIsLoading(true);
       const data = await MenuService.getMenus(formData, pageableData);
       setMenuList(data.content);
       setTotalMenuElements(data.totalElements);
-      if (data.content.length === 0 && noItemsLabel === '') {
-        setNoItemsLabel('검색 결과가 없습니다.');
-      }
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -276,7 +277,9 @@ const MenuManagementPage = () => {
                 itemsPerPageLabel="페이지당 메뉴 개수"
                 itemsPerPageSelect
                 loading={isLoading}
-                noItemsLabel={noItemsLabel}
+                noItemsLabel={
+                  <CSmartTableNoItemLabel contentLength={menuList.length} isSearchPerformed={isSearchPerformed} />
+                }
                 onItemsPerPageChange={handlePageSizeChange}
                 onSelectedItemsChange={(items) => {
                   setCheckedItems(items);

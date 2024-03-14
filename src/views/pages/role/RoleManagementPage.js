@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { CButton, CCard, CCardBody, CCol, CRow, CSmartTable } from '@coreui/react-pro';
 import StatusBadge from 'components/badge/StatusBadge';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
+import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import ModalContainer from 'components/modal/ModalContainer';
 import RoleDetailForm from 'components/role/RoleDetailForm';
 import { useToast } from 'context/ToastContext';
@@ -15,11 +16,11 @@ import { formatToYMD } from 'utils/common/dateUtils';
 import { roleColumnConfig } from 'utils/role/roleColumnConfig';
 
 const AdminManagementPage = () => {
-  const [RoleList, setRoleList] = useState([]);
+  const [roleList, setRoleList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [checkedItems, setCheckedItems] = useState([]);
   const [formMode, setFormMode] = useState('');
-  const [noItemsLabel, setNoItemsLabel] = useState('');
+  const [isSearchPerformed, setIsSearchPerformed] = useState(false);
   const userRole = useRecoilValue(userRoleSelector);
 
   const { addToast } = useToast();
@@ -32,13 +33,13 @@ const AdminManagementPage = () => {
   }, []);
 
   const fetchRoleList = async () => {
+    if (!isSearchPerformed) {
+      setIsSearchPerformed(true);
+    }
     try {
       setIsLoading(true);
       const data = await RoleService.getRoles();
       setRoleList(data);
-      if (data.content.length === 0 && noItemsLabel === '') {
-        setNoItemsLabel('검색 결과가 없습니다.');
-      }
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -81,9 +82,9 @@ const AdminManagementPage = () => {
     } else {
       try {
         const response = await RoleService.deleteRoles(ids, shouldDelete);
-        const roleNames = RoleList.filter((roleItem) => response.includes(roleItem.id)).map(
-          (filteredRoleItem) => filteredRoleItem.role
-        );
+        const roleNames = roleList
+          .filter((roleItem) => response.includes(roleItem.id))
+          .map((filteredRoleItem) => filteredRoleItem.role);
         const isIncludeUserRole = roleNames.some((roleName) => userRole?.includes(roleName));
         if (shouldDelete && isIncludeUserRole) {
           handleSignOut();
@@ -112,10 +113,12 @@ const AdminManagementPage = () => {
             </CRow>
             <CRow className="mb-3">
               <CSmartTable
-                noItemsLabel={noItemsLabel}
+                noItemsLabel={
+                  <CSmartTableNoItemLabel contentLength={roleList.length} isSearchPerformed={isSearchPerformed} />
+                }
                 loading={isLoading}
                 sorterValue={{ column: 'id', state: 'asc' }}
-                items={RoleList}
+                items={roleList}
                 columns={roleColumnConfig}
                 selectable
                 scopedColumns={{
