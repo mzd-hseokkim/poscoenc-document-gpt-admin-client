@@ -57,6 +57,7 @@ const postNewCollection = async (newCollectionFormData) => {
 };
 
 const putModifiedCollectionDetail = async (modifiedCollection) => {
+  console.table(modifiedCollection);
   const response = await api.put(`/admin/document-collections/${modifiedCollection.id}`, modifiedCollection);
   return response.status === 200;
 };
