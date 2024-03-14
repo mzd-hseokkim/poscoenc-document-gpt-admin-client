@@ -167,6 +167,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
           createdAt: data.createdAt && formatToYMD(data.createdAt),
         };
         reset(formattedData);
+        setFormData(formattedData);
         const allowedRoles = data.allowedRoles.map((role) => role.id);
         await getRoles(allowedRoles);
       } catch (error) {
