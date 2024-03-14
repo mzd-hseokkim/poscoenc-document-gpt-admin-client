@@ -29,7 +29,7 @@ import formModes from 'utils/formModes';
 import { itemNameValidationPattern } from 'utils/validationUtils';
 
 const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
-  const [formMode, setFormMode] = useState(initialFormMode);
+  const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [roles, setRoles] = useState([]);
   const [formData, setFormData] = useState([]);
   const [parentMenus, setParentMenus] = useState([

@@ -27,7 +27,7 @@ import { emailValidationPattern } from 'utils/validationUtils';
 
 const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [formMode, setFormMode] = useState(initialFormMode);
+  const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [formData, setFormData] = useState([]);
   const [searchParams] = useSearchParams();
 
