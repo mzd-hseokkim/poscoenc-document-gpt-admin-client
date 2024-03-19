@@ -137,10 +137,13 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
   );
 
   const getParentMenu = useCallback(async () => {
-    if (searchParams.get('id') === null) {
+    //REMIND 작성 모드일때는 상위 메뉴 못가져옴..
+    const excludedId = isCreateMode ? '' : searchParams.get('id');
+
+    if (!isCreateMode && !excludedId) {
       return;
     }
-    let excludedId = isCreateMode ? '' : searchParams.get('id');
+
     try {
       const data = await MenuService.getParentMenus(excludedId);
       const newParentMenus = data.map((parentMenu) => ({
