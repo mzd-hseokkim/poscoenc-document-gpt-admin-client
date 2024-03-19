@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import {
+  CBadge,
   CButton,
   CCard,
   CCardBody,
@@ -82,8 +83,11 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
       name: 'deleted',
       label: '삭제 여부',
     },
+    {
+      name: 'status',
+      label: '문서 상태',
+    },
   ];
-
   const fetchCollectionDetail = useCallback(
     async (collectionId) => {
       if (!collectionId) {
@@ -225,6 +229,9 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                       <div className="d-flex align-items-end mb-1">
                         <span style={{ marginRight: `10px` }}>{file.originalName}</span>
                         <small>{formatFileSize(file.size)}</small>
+                        <small style={{ marginLeft: `10px` }}>
+                          <CBadge color="primary">{file.status}</CBadge>
+                        </small>
                       </div>
                       <div>
                         <small className="text-muted">{`설명 : ${file.description || ''}`}</small>
