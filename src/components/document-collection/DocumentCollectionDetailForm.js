@@ -3,10 +3,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { cilArrowThickToBottom } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import {
+  CBadge,
   CButton,
   CCard,
   CCardBody,
   CForm,
+  CFormLabel,
+  CFormTextarea,
   CListGroup,
   CListGroupItem,
   CModalBody,
@@ -79,8 +82,11 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
       name: 'deleted',
       label: '삭제 여부',
     },
+    {
+      name: 'status',
+      label: '문서 상태',
+    },
   ];
-
   const fetchCollectionDetail = useCallback(
     async (collectionId) => {
       if (!collectionId) {
@@ -180,16 +186,31 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
             <CCardBody>
               <FormInputGrid
                 register={register}
+                fields={getAuditFields(formMode)}
+                formData={collectionDetail}
+                isReadMode={isReadMode}
+              />
+            </CCardBody>
+          </CCard>
+          <CCard className="mb-3">
+            <CCardBody>
+              <FormInputGrid
+                register={register}
                 fields={collectionSpecificFields}
                 formData={collectionDetail}
                 isReadMode={isReadMode}
                 errors={errors}
               />
-              <FormInputGrid
-                register={register}
-                fields={getAuditFields(formMode)}
-                formData={collectionDetail}
-                isReadMode={isReadMode}
+              <CFormLabel htmlFor="detail-form-description" className="col-form-label fw-bold">
+                설명
+              </CFormLabel>
+              <CFormTextarea
+                {...register('description')}
+                id="detail-form-description"
+                name="description"
+                placeholder={isReadMode ? '' : '문서 설명을 작성해주세요.'}
+                plainText={isReadMode}
+                readOnly={isReadMode}
               />
             </CCardBody>
           </CCard>
@@ -198,10 +219,18 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
               <CListGroup>
                 {/*REMIND detail 에서 file 만 따로 처리 할 수 있도록 리팩토링, reset 에 의해 나머지 데이터가 관리되고 있음*/}
                 {collectionDetail?.files?.map((file, index) => (
-                  <CListGroupItem key={index} className="d-flex justify-content-between align-items-center">
-                    <div className="d-flex align-items-end">
-                      <span style={{ marginRight: `10px` }}>{file.originalName}</span>
-                      <small>{formatFileSize(file.size)}</small>
+                  <CListGroupItem key={index} className="d-flex justify-content-between align-items-start">
+                    <div>
+                      <div className="d-flex align-items-end mb-1">
+                        <span style={{ marginRight: `10px` }}>{file.originalName}</span>
+                        <small>{formatFileSize(file.size)}</small>
+                        <small style={{ marginLeft: `10px` }}>
+                          <CBadge color="primary">{file.status}</CBadge>
+                        </small>
+                      </div>
+                      <div>
+                        <small className="text-muted">{`설명 : ${file.description || ''}`}</small>
+                      </div>
                     </div>
                     <CButton onClick={() => handleDownload(file)}>
                       <CIcon icon={cilArrowThickToBottom} size={'lg'} />
