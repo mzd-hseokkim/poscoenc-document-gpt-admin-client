@@ -31,7 +31,6 @@ import { itemNameValidationPattern } from 'utils/validationUtils';
 const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocumentCollectionList }) => {
   const [collectionDetail, setCollectionDetail] = useState({});
   const [formMode, setFormMode] = useState(initialFormMode || 'read');
-  console.log(initialFormMode);
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
   const [searchParams] = useSearchParams();
 
@@ -113,7 +112,6 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
 
   useEffect(() => {
     const collectionId = searchParams.get('id');
-    console.log(isReadMode);
     if (!collectionId) {
       closeModal();
     }
