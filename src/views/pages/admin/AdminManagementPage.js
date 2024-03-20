@@ -43,7 +43,7 @@ const createInitialFormData = () => ({
   fromLoggedInAt: getOneYearAgoDate(),
   toLoggedInAt: getCurrentDate(),
   deletionOption: 'ALL',
-  findEmptyLogin: false,
+  findEmptyLogin: true,
 });
 
 const AdminManagementPage = () => {
