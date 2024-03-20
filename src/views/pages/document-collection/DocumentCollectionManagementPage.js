@@ -16,6 +16,7 @@ import {
 import StatusBadge from 'components/badge/StatusBadge';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import DocumentCollectionDetailForm from 'components/document-collection/DocumentCollectionDetailForm';
+import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import ModalContainer from 'components/modal/ModalContainer';
 import { useToast } from 'context/ToastContext';
 import { format } from 'date-fns';
@@ -38,7 +39,7 @@ const DocumentCollectionManagementPage = () => {
   const [detailFormMode, setDetailFormMode] = useState('');
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
   const [totalCollectionElements, setTotalCollectionElements] = useState(0);
-  const [noItemsLabel, setNoItemsLabel] = useState('');
+  const [isSearchPerformed, setIsSearchPerformed] = useState(false);
   const [isPickTime, setIsPickTime] = useState(false);
 
   const initialSearchFormData = {
@@ -71,13 +72,13 @@ const DocumentCollectionManagementPage = () => {
   };
   const searchDocumentCollectionList = async () => {
     setSearchResultIsLoading(true);
+    if (!isSearchPerformed) {
+      setIsSearchPerformed(true);
+    }
     try {
       const searchResult = await DocumentCollectionService.getSearchedCollectionList(searchFormData, pageableData);
       setDocumentCollectionList(searchResult.content);
       setTotalCollectionElements(searchResult.totalElements);
-      if (searchResult.content.length === 0 && noItemsLabel === '') {
-        setNoItemsLabel('검색 결과가 없습니다.');
-      }
     } catch (error) {
       //REMIND only sever error occur
       console.log(error);
@@ -268,7 +269,12 @@ const DocumentCollectionManagementPage = () => {
                 itemsPerPageLabel="페이지당 문서 집합 개수"
                 itemsPerPageSelect
                 loading={searchResultIsLoading}
-                noItemsLabel={noItemsLabel}
+                noItemsLabel={
+                  <CSmartTableNoItemLabel
+                    contentLength={documentCollectionList.length}
+                    isSearchPerformed={isSearchPerformed}
+                  />
+                }
                 onItemsPerPageChange={handlePageSizeChange}
                 onSelectedItemsChange={setSelectedRows}
                 onSorterChange={handlePageSortChange}

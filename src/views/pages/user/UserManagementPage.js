@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { CButton, CCard, CCardBody, CCol, CForm, CFormInput, CFormSelect, CRow, CSmartTable } from '@coreui/react-pro';
 import StatusBadge from 'components/badge/StatusBadge';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
+import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import ModalContainer from 'components/modal/ModalContainer';
 import UserDetailForm from 'components/user/UserDetailForm';
 import { useToast } from 'context/ToastContext';
@@ -17,7 +18,7 @@ const UserManagementPage = () => {
   const [checkedItems, setCheckedItems] = useState([]);
   const [formMode, setFormMode] = useState('');
   const [totalUserElements, setTotalUserElements] = useState(0);
-  const [noItemsLabel, setNoItemsLabel] = useState('');
+  const [isSearchPerformed, setIsSearchPerformed] = useState(false);
 
   const initialFormData = {
     name: '',
@@ -43,14 +44,14 @@ const UserManagementPage = () => {
   }, [pageableData]);
 
   const fetchUserList = async () => {
+    if (!isSearchPerformed) {
+      setIsSearchPerformed(true);
+    }
     try {
       setIsLoading(true);
       const data = await UserService.getUsers(formData, pageableData);
       setUserList(data.content);
       setTotalUserElements(data.totalElements);
-      if (data.content.length === 0 && noItemsLabel === '') {
-        setNoItemsLabel('검색 결과가 없습니다.');
-      }
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -167,7 +168,9 @@ const UserManagementPage = () => {
                 itemsPerPageLabel="페이지당 사용자 개수"
                 itemsPerPageSelect
                 loading={isLoading}
-                noItemsLabel={noItemsLabel}
+                noItemsLabel={
+                  <CSmartTableNoItemLabel contentLength={userList.length} isSearchPerformed={isSearchPerformed} />
+                }
                 onItemsPerPageChange={handlePageSizeChange}
                 onSelectedItemsChange={(items) => {
                   setCheckedItems(items);
