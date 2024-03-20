@@ -30,7 +30,7 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
   const [postDetail, setPostDetail] = useState({});
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
   //REMIND use setFormMode when implements posting service
-  const [formMode, setFormMode] = useState(initialFormMode || '');
+  const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [searchParams] = useSearchParams();
 
   const { addToast } = useToast();

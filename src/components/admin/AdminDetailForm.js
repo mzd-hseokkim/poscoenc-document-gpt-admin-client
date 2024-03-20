@@ -27,7 +27,7 @@ import formModes from 'utils/formModes';
 import { emailValidationPattern, passwordValidationPattern } from 'utils/validationUtils';
 
 const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
-  const [formMode, setFormMode] = useState(initialFormMode);
+  const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [formData, setFormData] = useState([]);
   const [roles, setRoles] = useState([]);
   const [isLoading, setIsLoading] = useState(false);

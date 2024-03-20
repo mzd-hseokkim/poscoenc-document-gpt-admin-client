@@ -1,16 +1,16 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { cilArrowThickToBottom } from '@coreui/icons';
+import CIcon from '@coreui/icons-react';
 import {
   CButton,
   CCard,
   CCardBody,
-  CCol,
   CForm,
   CListGroup,
   CListGroupItem,
   CModalBody,
   CModalFooter,
-  CRow,
 } from '@coreui/react-pro';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
@@ -30,8 +30,7 @@ import { itemNameValidationPattern } from 'utils/validationUtils';
 
 const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocumentCollectionList }) => {
   const [collectionDetail, setCollectionDetail] = useState({});
-  const [formMode, setFormMode] = useState(initialFormMode || '');
-
+  const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
   const [searchParams] = useSearchParams();
 
@@ -113,7 +112,6 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
 
   useEffect(() => {
     const collectionId = searchParams.get('id');
-
     if (!collectionId) {
       closeModal();
     }
@@ -162,9 +160,6 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
       }
     }
   };
-  const handleBatchDownload = async (file) => {
-    //TODO imple batch download
-  };
   const handleDeleteRestoreClick = async (collectionId) => {
     const shouldDelete = !collectionDetail.deleted;
     try {
@@ -208,19 +203,12 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                       <span style={{ marginRight: `10px` }}>{file.originalName}</span>
                       <small>{formatFileSize(file.size)}</small>
                     </div>
-                    <CButton onClick={() => handleDownload(file)}>다운로드</CButton>
+                    <CButton onClick={() => handleDownload(file)}>
+                      <CIcon icon={cilArrowThickToBottom} size={'lg'} />
+                    </CButton>
                   </CListGroupItem>
                 ))}
               </CListGroup>
-              {collectionDetail?.files?.length > 1 && (
-                <CRow>
-                  <CCol className="d-flex justify-content-end">
-                    <CButton className="mt-3" onClick={handleBatchDownload}>
-                      일괄 다운로드
-                    </CButton>
-                  </CCol>
-                </CRow>
-              )}
             </CCardBody>
           </CCard>
         </CForm>

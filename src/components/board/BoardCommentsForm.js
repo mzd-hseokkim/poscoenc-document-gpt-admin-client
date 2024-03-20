@@ -21,7 +21,7 @@ const BoardCommentsForm = ({ postId }) => {
   const [commentText, setCommentText] = useState('');
   const [postComments, setPostComments] = useState([]);
   const [showDeletedComments, setShowDeletedComments] = useState(true);
-
+  const [isComposing, setIsComposing] = useState(false);
   const [postCommentIsLoading, setPostCommentIsLoading] = useState(false);
 
   const { addToast } = useToast();
@@ -40,7 +40,9 @@ const BoardCommentsForm = ({ postId }) => {
   const handleCommentChange = (event) => {
     setCommentText(event.target.value);
   };
-
+  const handleCompositionEnd = () => {
+    setIsComposing(false);
+  };
   const handleSubmitComment = async (e) => {
     e.preventDefault();
     setPostCommentIsLoading(true);
@@ -59,9 +61,11 @@ const BoardCommentsForm = ({ postId }) => {
     }
   };
   const handleSubmitCommentAsEnter = (event) => {
-    if (event.key === 'Enter' && !event.shiftKey && commentText.trim()) {
+    if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
-      void handleSubmitComment(event);
+      if (!isComposing && commentText.trim()) {
+        void handleSubmitComment(event);
+      }
     }
   };
 
@@ -79,8 +83,8 @@ const BoardCommentsForm = ({ postId }) => {
   };
 
   useEffect(() => {
-    fetchPostComments();
-  }, [postId]);
+    void fetchPostComments();
+  }, [fetchPostComments, postId]);
 
   useEffect(() => {
     if (!postCommentIsLoading) {
@@ -142,6 +146,8 @@ const BoardCommentsForm = ({ postId }) => {
         value={commentText}
         onChange={handleCommentChange}
         onKeyDown={handleSubmitCommentAsEnter}
+        onCompositionStart={() => setIsComposing(true)}
+        onCompositionEnd={handleCompositionEnd}
       />
       <CButton type="submit" color="primary" disabled={!commentText.trim()}>
         작성
