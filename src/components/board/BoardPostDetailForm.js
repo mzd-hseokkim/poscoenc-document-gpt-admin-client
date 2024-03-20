@@ -71,6 +71,7 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
       name: 'deleted',
       label: '삭제 여부',
       isRendered: !isCreateMode,
+      isDisabled: isUpdateMode,
     },
   ];
 
@@ -192,7 +193,9 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
   const renderPostTitleInput = () => (
     <CRow className="mt-3">
       <CCol>
-        <CFormLabel htmlFor="title">제목</CFormLabel>
+        <CFormLabel htmlFor="title" className="border-bottom">
+          제목
+        </CFormLabel>
         <CFormInput
           type="text"
           id="title"
@@ -200,6 +203,7 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
           placeholder="제목을 작성 해 주세요."
           defaultValue={postDetail?.title}
           readOnly={isReadMode}
+          plainText={isReadMode}
           {...register('title', {
             required: '제목을 작성 해 주세요.',
             validate: (value) => value.trim().length > 0 || '공백만으로 제목을 작성할 수 없습니다.',
@@ -214,7 +218,9 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
   const renderPostContentTextarea = () => (
     <CRow className="mt-3">
       <CCol>
-        <CFormLabel htmlFor="content">내용</CFormLabel>
+        <CFormLabel htmlFor="content" className="border-bottom">
+          내용
+        </CFormLabel>
         <CFormTextarea
           id="content"
           name="content"
@@ -222,12 +228,14 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
           placeholder="내용을 작성 해 주세요."
           defaultValue={postDetail?.content}
           readOnly={isReadMode}
+          plainText={isReadMode}
           {...register('content', {
             required: '내용을 작성 해 주세요.',
             validate: (value) => value.trim().length > 0 || '공백만으로 내용을 작성할 수 없습니다.',
           })}
           invalid={!!errors.content}
           feedbackInvalid={errors.content?.message}
+          className="border-dark"
         />
       </CCol>
     </CRow>
@@ -258,7 +266,7 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
               </CCardBody>
             </CCard>
           )}
-          <CCard>
+          <CCard className="border-3">
             <CCardBody>
               {renderPostTitleInput()}
               {renderPostContentTextarea()}

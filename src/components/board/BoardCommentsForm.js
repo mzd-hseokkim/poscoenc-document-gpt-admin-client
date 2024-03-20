@@ -129,11 +129,9 @@ const BoardCommentsForm = ({ postId }) => {
     <CRow>
       <CCol className="d-flex justify-content-between">
         <strong>{comment.createdByName}</strong>
-        {comment.createdBy === currentUserId && (
-          <CButton color="primary" size="sm" onClick={() => toggleCommentStatus(comment.id, !comment.deleted)}>
-            {comment.deleted ? '복구' : '삭제'}
-          </CButton>
-        )}
+        <CButton color="primary" size="sm" onClick={() => toggleCommentStatus(comment.id, !comment.deleted)}>
+          {comment.deleted ? '복구' : '삭제'}
+        </CButton>
       </CCol>
     </CRow>
   );
@@ -167,7 +165,7 @@ const BoardCommentsForm = ({ postId }) => {
             onChange={(e) => setShowDeletedComments(e.target.checked)}
           />
         </CCardHeader>
-        <CCardBody style={{ height: '180px', overflowY: 'auto' }}>{renderCommentList()}</CCardBody>
+        <CCardBody style={{ height: '300px', overflowY: 'auto' }}>{renderCommentList()}</CCardBody>
       </CCard>
       {renderCommentInput()}
     </CForm>

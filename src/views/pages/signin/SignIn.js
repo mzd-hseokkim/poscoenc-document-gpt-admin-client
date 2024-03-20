@@ -48,6 +48,10 @@ const SignIn = () => {
         value: passwordValidationPattern,
         message: '유효한 비밀번호를 입력하세요.',
       },
+      minLength: {
+        value: 5,
+        message: '비밀번호는 5자 이상입력해야 합니다.',
+      },
     }),
   };
 

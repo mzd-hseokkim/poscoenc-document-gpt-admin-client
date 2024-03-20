@@ -73,6 +73,9 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
 
   const fetchUserDetail = useCallback(
     async (userId) => {
+      if (!isCreateMode && !userId) {
+        return;
+      }
       try {
         setIsLoading(true);
 
@@ -158,7 +161,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
   const handleCancelClick = async () => {
     if (isUpdateMode) {
       setFormMode('read');
-      await fetchUserDetail();
+      await fetchUserDetail(searchParams.get('id'));
     } else if (isCreateMode) {
       closeModal();
     }
