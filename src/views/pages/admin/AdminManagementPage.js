@@ -33,10 +33,9 @@ import {
 } from 'utils/common/dateUtils';
 
 const createInitialFormData = () => ({
+  email: '',
   name: '',
-  urlPath: '',
-  menuOrder: '',
-  parentId: '',
+  role: '',
   fromCreatedAt: getOneYearAgoDate(),
   toCreatedAt: getCurrentDate(),
   fromModifiedAt: getOneYearAgoDate(),
@@ -44,6 +43,7 @@ const createInitialFormData = () => ({
   fromLoggedInAt: getOneYearAgoDate(),
   toLoggedInAt: getCurrentDate(),
   deletionOption: 'ALL',
+  findEmptyLogin: false,
 });
 
 const AdminManagementPage = () => {
