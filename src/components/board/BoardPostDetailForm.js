@@ -12,7 +12,8 @@ import {
   CModalFooter,
   CRow,
 } from '@coreui/react-pro';
-import BoardCommentsForm from 'components/board/BoardCommentsForm';
+import StatusBadge from 'components/badge/StatusBadge';
+import PostCommentsForm from 'components/board/PostCommentsForm';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
@@ -24,7 +25,7 @@ import BoardService from 'services/board/BoardService';
 import { userIdSelector } from 'states/jwtTokenState';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
-import formModes from 'utils/formModes';
+import formModes from 'utils/common/formModes';
 
 const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
   const [postDetail, setPostDetail] = useState({});
@@ -45,35 +46,6 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
   } = useForm({ mode: 'onChange' });
 
   const deleted = watch('deleted');
-
-  const postSpecificFields = [
-    {
-      md: 2,
-      name: 'id',
-      label: '아이디',
-      isDisabled: isUpdateMode,
-      isRendered: !isCreateMode,
-    },
-    {
-      name: 'commentCount',
-      label: '댓글수',
-      isDisabled: isUpdateMode,
-      isRendered: !isCreateMode,
-    },
-    {
-      name: 'viewCount',
-      label: '조회수',
-      isDisabled: isUpdateMode,
-      isRendered: !isCreateMode,
-    },
-    {
-      md: 2,
-      name: 'deleted',
-      label: '삭제 여부',
-      isRendered: !isCreateMode,
-      isDisabled: isUpdateMode,
-    },
-  ];
 
   const fetchPostDetails = useCallback(
     async (postId) => {
@@ -167,10 +139,6 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
       setFormMode('read');
     }
   };
-  const handleModificationCancelClick = async () => {
-    setFormMode('read');
-    await fetchPostDetails(postDetail.id);
-  };
   const handleDeleteRestoreClick = async (postId) => {
     const shouldDelete = !deleted;
     try {
@@ -212,6 +180,11 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
           feedbackInvalid={errors.title?.message}
         />
       </CCol>
+      <CCol xs={2} className="text-end">
+        <small>
+          <CFormLabel className="text-muted">조회수 {postDetail?.viewCount}</CFormLabel>
+        </small>
+      </CCol>
     </CRow>
   );
 
@@ -241,31 +214,40 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
     </CRow>
   );
 
+  const renderAuditFields = () => {
+    return (
+      <CCard className="g-3 mb-3">
+        <CCardBody>
+          <CRow>
+            <CCol className="col-md mb-2">
+              <CCol className="fw-bold">아이디</CCol>
+              <CFormInput
+                id="input-list-id"
+                name="id"
+                value={postDetail.id || ''}
+                disabled={!isCreateMode}
+                plainText={!isCreateMode}
+              />
+            </CCol>
+            <CCol className="col-md mb-2">
+              <CCol className="fw-bold">삭제 여부</CCol>
+              <CCol>
+                <StatusBadge deleted={postDetail.deleted} />
+              </CCol>
+            </CCol>
+          </CRow>
+          <FormInputGrid fields={getAuditFields(formMode)} formData={postDetail} isReadMode={isReadMode} col={2} />
+        </CCardBody>
+      </CCard>
+    );
+  };
+
   return (
     <>
       <FormLoadingCover isLoading={getDetailIsLoading} />
       <CModalBody>
         <CForm onSubmit={handleSubmit(onSubmit)}>
-          {!isCreateMode && (
-            <CCard className="mb-3">
-              <CCardBody>
-                <FormInputGrid
-                  register={register}
-                  fields={postSpecificFields}
-                  formData={postDetail}
-                  isReadMode={isReadMode}
-                  errors={errors}
-                />
-                <FormInputGrid
-                  register={register}
-                  fields={getAuditFields(formMode)}
-                  formData={postDetail}
-                  isReadMode={isReadMode}
-                  errors={errors}
-                />
-              </CCardBody>
-            </CCard>
-          )}
+          {!isCreateMode && renderAuditFields()}
           <CCard className="border-3">
             <CCardBody>
               {renderPostTitleInput()}
@@ -273,7 +255,7 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
             </CCardBody>
           </CCard>
         </CForm>
-        {isReadMode && <BoardCommentsForm postId={postDetail.id} />}
+        {isReadMode && <PostCommentsForm postId={postDetail.id} />}
       </CModalBody>
       <CModalFooter>
         <DetailFormActionButtons
