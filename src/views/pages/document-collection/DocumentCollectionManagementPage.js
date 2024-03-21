@@ -144,6 +144,16 @@ const DocumentCollectionManagementPage = () => {
   };
 
   const scopedColumns = {
+    name: (item) => (
+      <td
+        style={{ cursor: 'pointer' }}
+        onClick={() => {
+          handleRowClick(item.id);
+        }}
+      >
+        {item.name}
+      </td>
+    ),
     displayName: (item) => (
       <td
         style={{ cursor: 'pointer' }}
