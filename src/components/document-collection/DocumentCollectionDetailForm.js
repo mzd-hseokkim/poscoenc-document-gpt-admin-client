@@ -28,8 +28,8 @@ import { userIdSelector } from 'states/jwtTokenState';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import { formatFileSize } from 'utils/common/formatFileSize';
-import formModes from 'utils/formModes';
-import { itemNameValidationPattern } from 'utils/validationUtils';
+import formModes from 'utils/common/formModes';
+import { itemNameValidationPattern } from 'utils/common/validationUtils';
 
 const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocumentCollectionList }) => {
   const [collectionDetail, setCollectionDetail] = useState({});

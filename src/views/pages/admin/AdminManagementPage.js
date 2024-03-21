@@ -23,7 +23,6 @@ import { format } from 'date-fns';
 import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
 import AdminService from 'services/admin/AdminService';
-import { adminColumnConfig } from 'utils/admin/adminColumnConfig';
 import {
   formatToIsoEndDate,
   formatToIsoStartDate,
@@ -31,6 +30,7 @@ import {
   getCurrentDate,
   getOneYearAgoDate,
 } from 'utils/common/dateUtils';
+import { adminColumnConfig } from 'views/pages/admin/adminColumnConfig';
 
 const createInitialFormData = () => ({
   email: '',
@@ -267,7 +267,11 @@ const AdminManagementPage = () => {
                 <CButton onClick={handleCreateClick}>관리자 추가</CButton>
                 <CButton onClick={() => handleDeleteRestoreClick(true)}>삭제</CButton>
                 <CButton onClick={() => handleDeleteRestoreClick(false)}>복구</CButton>
-                <ExcelDownloadCButton downloadFunction={AdminService.getDownloadAdminList} searchFormData={formData} />
+                <ExcelDownloadCButton
+                  downloadFunction={AdminService.getDownloadAdminList}
+                  searchFormData={formData}
+                  hasSearchResults={adminList.length !== 0}
+                />
               </CCol>
             </CRow>
             <CRow className="mb-3">

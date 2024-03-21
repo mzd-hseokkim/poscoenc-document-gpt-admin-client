@@ -10,7 +10,7 @@ import { useToast } from 'context/ToastContext';
 import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
 import UserService from 'services/UserService';
-import { userColumnConfig } from 'utils/user/userColumnConfig';
+import { userColumnConfig } from 'views/pages/user/userColumnConfig';
 
 const UserManagementPage = () => {
   const [userList, setUserList] = useState([]);
@@ -153,6 +153,7 @@ const UserManagementPage = () => {
                 <ExcelDownloadCButton
                   downloadFunction={UserService.getDownloadSearchedUserList}
                   searchFormData={formData}
+                  hasSearchResults={userList.length !== 0}
                 />
               </CCol>
             </CRow>

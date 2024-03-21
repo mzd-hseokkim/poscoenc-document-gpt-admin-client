@@ -18,7 +18,7 @@ import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import SignInService from 'services/signin/SignInService';
-import { emailValidationPattern, passwordValidationPattern } from 'utils/validationUtils';
+import { emailValidationPattern, passwordValidationPattern } from 'utils/common/validationUtils';
 
 const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false);

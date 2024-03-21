@@ -7,22 +7,22 @@ export const postColumnConfig = [
   {
     key: 'title',
     label: '제목',
-    _style: { width: '43%' },
-  },
-  {
-    key: 'createdByName',
-    label: '작성자',
-    _style: { width: '15%' },
-    sorter: false,
-  },
-  {
-    key: 'createdAt',
-    label: '작성일',
-    _style: { width: '10%' },
+    _style: { width: '48%' },
   },
   {
     key: 'viewCount',
     label: '조회수',
+    _style: { width: '10%' },
+  },
+  {
+    key: 'createdByName',
+    label: '등록자',
+    _style: { width: '10%' },
+    sorter: false,
+  },
+  {
+    key: 'createdAt',
+    label: '등록일',
     _style: { width: '10%' },
   },
   {
