@@ -132,27 +132,16 @@ const MenuManagementPage = () => {
 
   const handleDeleteRestoreClick = async (shouldDelete) => {
     const ids = checkedItems.map((item) => item.id);
-    if (checkedItems.length === 1) {
-      try {
-        await MenuService.deleteMenu(ids, shouldDelete);
-        fetchMenuList();
-      } catch (error) {
-        const status = error.response?.status;
-        if (status === 400) {
-          addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
-        }
-      }
-    } else {
-      try {
-        await MenuService.deleteMenus(ids, shouldDelete);
-        fetchMenuList();
-      } catch (error) {
-        const status = error.response?.status;
-        if (status === 400) {
-          addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
-        }
+    try {
+      await MenuService.deleteMenus(ids, shouldDelete);
+      fetchMenuList();
+    } catch (error) {
+      const status = error.response?.status;
+      if (status === 400) {
+        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
       }
     }
+
     setCheckedItems([]);
   };
 

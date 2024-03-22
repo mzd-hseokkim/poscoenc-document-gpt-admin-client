@@ -68,33 +68,21 @@ const AdminManagementPage = () => {
 
   const handleDeleteRestoreClick = async (shouldDelete) => {
     const ids = checkedItems.map((item) => item.id);
-    if (checkedItems.length === 1) {
-      try {
-        const response = await RoleService.deleteRole(ids, shouldDelete);
-        if (shouldDelete && userRole.includes(response.role)) {
-          handleSignOut();
-        } else {
-          void fetchRoleList();
-        }
-      } catch (error) {
-        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
+    try {
+      const response = await RoleService.deleteRoles(ids, shouldDelete);
+      const roleNames = roleList
+        .filter((roleItem) => response.includes(roleItem.id))
+        .map((filteredRoleItem) => filteredRoleItem.role);
+      const isIncludeUserRole = roleNames.some((roleName) => userRole?.includes(roleName));
+      if (shouldDelete && isIncludeUserRole) {
+        handleSignOut();
+      } else {
+        void fetchRoleList();
       }
-    } else {
-      try {
-        const response = await RoleService.deleteRoles(ids, shouldDelete);
-        const roleNames = roleList
-          .filter((roleItem) => response.includes(roleItem.id))
-          .map((filteredRoleItem) => filteredRoleItem.role);
-        const isIncludeUserRole = roleNames.some((roleName) => userRole?.includes(roleName));
-        if (shouldDelete && isIncludeUserRole) {
-          handleSignOut();
-        } else {
-          void fetchRoleList();
-        }
-      } catch (error) {
-        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
-      }
+    } catch (error) {
+      addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
+
     setCheckedItems([]);
   };
 

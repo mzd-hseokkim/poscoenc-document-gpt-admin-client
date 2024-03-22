@@ -45,11 +45,6 @@ const putRole = async (id, roleName) => {
   return response.data;
 };
 
-const deleteRole = async (id, deleted) => {
-  const response = await api.patch(`/admin/roles/${id}/deleted?deleted=${deleted}`);
-  return response.data;
-};
-
 const deleteRoles = async (ids, deleted) => {
   const response = await api.patch(`/admin/roles/deleted/${deleted}`, ids);
   return response.data;
@@ -61,7 +56,6 @@ const RoleService = {
   getDownloadRoleList,
   postRole,
   putRole,
-  deleteRole,
   deleteRoles,
 };
 

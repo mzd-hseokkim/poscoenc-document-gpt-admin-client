@@ -140,20 +140,11 @@ const AdminManagementPage = () => {
 
   const handleDeleteRestoreClick = async (shouldDelete) => {
     const ids = checkedItems.map((item) => item.id);
-    if (checkedItems.length === 1) {
-      try {
-        await AdminService.deleteAdmin(ids, shouldDelete);
-        fetchAdminList();
-      } catch (error) {
-        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
-      }
-    } else {
-      try {
-        await AdminService.deleteAdmins(ids, shouldDelete);
-        fetchAdminList();
-      } catch (error) {
-        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
-      }
+    try {
+      await AdminService.deleteAdmins(ids, shouldDelete);
+      await fetchAdminList();
+    } catch (error) {
+      addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
     setCheckedItems([]);
   };
