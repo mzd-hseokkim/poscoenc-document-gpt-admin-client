@@ -274,6 +274,7 @@ const MenuManagementPage = () => {
                 onSelectedItemsChange={(items) => {
                   setCheckedItems(items);
                 }}
+                selectable
                 onSorterChange={(sorterValue) => handlePageSortChange(sorterValue)}
                 paginationProps={smartPaginationProps}
                 scopedColumns={{
