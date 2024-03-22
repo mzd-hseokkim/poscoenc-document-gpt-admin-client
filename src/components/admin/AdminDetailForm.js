@@ -20,7 +20,7 @@ import { useToast } from 'context/ToastContext';
 import { Controller, useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
 import AdminService from 'services/admin/AdminService';
-import RoleService from 'services/Role/RoleService';
+import RoleService from 'services/role/RoleService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/common/formModes';
@@ -115,6 +115,9 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
 
   const fetchAdminDetail = useCallback(
     async (adminId) => {
+      if (!isCreateMode && !adminId) {
+        return;
+      }
       try {
         setIsLoading(true);
 
@@ -137,8 +140,9 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
         setIsLoading(false);
       }
     },
-    [addToast, closeModal, getRoles, reset]
+    [addToast, closeModal, getRoles, isCreateMode, reset]
   );
+
   useEffect(() => {
     setIsLoading(false);
     const adminId = searchParams.get('id');
@@ -258,13 +262,7 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
           <CRow>
             <CCol className="col-md mb-2">
               <CCol className="fw-bold">아이디</CCol>
-              <CFormInput
-                id="input-list-id"
-                name="id"
-                value={formData.id || ''}
-                disabled={!isCreateMode}
-                plainText={!isCreateMode}
-              />
+              <CFormInput id="input-list-id" name="id" value={formData.id || ''} disabled={!isCreateMode} plainText />
             </CCol>
             <CCol className="col-md mb-2">
               <CCol className="fw-bold">삭제</CCol>

@@ -45,6 +45,7 @@ const DocumentCollectionManagementPage = () => {
   const initialSearchFormData = {
     name: '',
     displayName: '',
+    statusOption: '',
     createdByName: '',
     fromCreatedAt: getOneYearAgoDate(),
     toCreatedAt: getCurrentDate(),
@@ -193,18 +194,33 @@ const DocumentCollectionManagementPage = () => {
                     label="표시명"
                     value={searchFormData.displayName}
                     onChange={handleSearchFormChange}
-                  ></CFormInput>
+                  />
                 </CCol>
                 <CCol md={4} className="position-relative">
                   <CFormInput
                     id="createdByName"
-                    label="게시자"
+                    label="등록자"
                     onChange={handleSearchFormChange}
                     value={searchFormData.createdByName}
                   />
                 </CCol>
               </CRow>
-              <CRow className="mb-3">
+              <CRow>
+                <CCol md={4}>
+                  <CFormSelect
+                    id="statusOption"
+                    label="문서 집합 상태"
+                    name="statusOption"
+                    options={[
+                      { label: '모두 (ALL)', value: 'ALL' },
+                      { label: '미결 상태 (PENDING)', value: 'PENDING' },
+                      { label: '저장 중 (INGESTING)', value: 'INGESTING' },
+                      { label: '완료됨 (COMPLETED)', value: 'COMPLETED' },
+                    ]}
+                    value={searchFormData.statusOption}
+                    onChange={handleSearchFormChange}
+                  />
+                </CCol>
                 <CCol md={4}>
                   <CFormSelect
                     id="deletionOption"
@@ -219,6 +235,8 @@ const DocumentCollectionManagementPage = () => {
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
+              </CRow>
+              <CRow className="mb-3">
                 <CCol md={6}>
                   <CDateRangePicker
                     key={`createdAt-${isPickTime}`}

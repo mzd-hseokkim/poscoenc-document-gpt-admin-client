@@ -8,7 +8,7 @@ import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
-import RoleService from 'services/Role/RoleService';
+import RoleService from 'services/role/RoleService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/common/formModes';
@@ -41,6 +41,9 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
 
   const fetchRoleDetail = useCallback(
     async (roleId) => {
+      if (!isCreateMode && !roleId) {
+        return;
+      }
       setIsLoading(true);
       try {
         const data = await RoleService.getRole(roleId);
@@ -58,7 +61,7 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
         setIsLoading(false);
       }
     },
-    [addToast, closeModal, reset]
+    [addToast, closeModal, isCreateMode, reset]
   );
   useEffect(() => {
     setIsLoading(false);
@@ -117,7 +120,7 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
   const handleCancelClick = async () => {
     if (isUpdateMode) {
       setFormMode('read');
-      await fetchRoleDetail();
+      await fetchRoleDetail(searchParams.get('id'));
     } else if (isCreateMode) {
       closeModal();
     }

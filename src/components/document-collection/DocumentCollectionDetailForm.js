@@ -7,14 +7,18 @@ import {
   CButton,
   CCard,
   CCardBody,
+  CCol,
   CForm,
+  CFormInput,
   CFormLabel,
   CFormTextarea,
   CListGroup,
   CListGroupItem,
   CModalBody,
   CModalFooter,
+  CRow,
 } from '@coreui/react-pro';
+import StatusBadge from 'components/badge/StatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
@@ -50,12 +54,6 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
 
   const collectionSpecificFields = [
     {
-      md: 2,
-      name: 'id',
-      label: '아이디',
-      isDisabled: isUpdateMode,
-    },
-    {
       name: 'name',
       label: '문서 집합 이름',
       rules: {
@@ -78,13 +76,9 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
       },
     },
     {
-      md: 2,
-      name: 'deleted',
-      label: '삭제 여부',
-    },
-    {
       name: 'status',
       label: '문서 상태',
+      isDisabled: isUpdateMode,
     },
   ];
   const fetchCollectionDetail = useCallback(
@@ -128,9 +122,8 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     try {
       const isModified = await DocumentCollectionService.putModifiedCollectionDetail(data);
       if (isModified) {
-        closeModal();
         setCollectionDetail({});
-        setFormMode('');
+        setFormMode('read');
         refreshDocumentCollectionList();
       }
     } catch (error) {
@@ -148,7 +141,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
 
   const handleModificationCancelClick = async () => {
     setFormMode('read');
-    await fetchCollectionDetail();
+    await fetchCollectionDetail(searchParams.get('id'));
   };
   const onSubmit = async (data) => {
     await putModifiedCollection(data);
@@ -173,8 +166,34 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     } catch (error) {
       addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
-    await fetchCollectionDetail();
+    await fetchCollectionDetail(searchParams.get('id'));
     refreshDocumentCollectionList();
+  };
+  const renderAuditFields = () => {
+    return (
+      <CCard className="g-3 mb-3">
+        <CCardBody>
+          <CRow>
+            <CCol className="col-md mb-2">
+              <CCol className="fw-bold">아이디</CCol>
+              <CFormInput id="input-list-id" name="id" value={collectionDetail.id || ''} plainText />
+            </CCol>
+            <CCol className="col-md mb-2">
+              <CCol className="fw-bold">삭제</CCol>
+              <CCol>
+                <StatusBadge deleted={collectionDetail.deleted} />
+              </CCol>
+            </CCol>
+          </CRow>
+          <FormInputGrid
+            fields={getAuditFields(formMode)}
+            formData={collectionDetail}
+            isReadMode={isReadMode}
+            col={2}
+          />
+        </CCardBody>
+      </CCard>
+    );
   };
 
   return (
@@ -182,16 +201,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
       <FormLoadingCover isLoading={getDetailIsLoading} />
       <CModalBody>
         <CForm onSubmit={handleSubmit(onSubmit)}>
-          <CCard className="mb-3">
-            <CCardBody>
-              <FormInputGrid
-                register={register}
-                fields={getAuditFields(formMode)}
-                formData={collectionDetail}
-                isReadMode={isReadMode}
-              />
-            </CCardBody>
-          </CCard>
+          {renderAuditFields()}
           <CCard className="mb-3">
             <CCardBody>
               <FormInputGrid
@@ -214,32 +224,34 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
               />
             </CCardBody>
           </CCard>
-          <CCard>
-            <CCardBody>
-              <CListGroup>
-                {/*REMIND detail 에서 file 만 따로 처리 할 수 있도록 리팩토링, reset 에 의해 나머지 데이터가 관리되고 있음*/}
-                {collectionDetail?.files?.map((file, index) => (
-                  <CListGroupItem key={index} className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <div className="d-flex align-items-end mb-1">
-                        <span style={{ marginRight: `10px` }}>{file.originalName}</span>
-                        <small>{formatFileSize(file.size)}</small>
-                        <small style={{ marginLeft: `10px` }}>
-                          <CBadge color="primary">{file.status}</CBadge>
-                        </small>
-                      </div>
+          {collectionDetail?.files?.length !== 0 && (
+            <CCard>
+              <CCardBody>
+                <CListGroup>
+                  {/*REMIND detail 에서 file 만 따로 처리 할 수 있도록 리팩토링, reset 에 의해 나머지 데이터가 관리되고 있음*/}
+                  {collectionDetail?.files?.map((file, index) => (
+                    <CListGroupItem key={index} className="d-flex justify-content-between align-items-start">
                       <div>
-                        <small className="text-muted">{`설명 : ${file.description || ''}`}</small>
+                        <div className="d-flex align-items-end mb-1">
+                          <span style={{ marginRight: `10px` }}>{file.originalName}</span>
+                          <small>{formatFileSize(file.size)}</small>
+                          <small style={{ marginLeft: `10px` }}>
+                            <CBadge color="primary">{file.status}</CBadge>
+                          </small>
+                        </div>
+                        <div>
+                          <small className="text-muted">{`설명 : ${file.description || ''}`}</small>
+                        </div>
                       </div>
-                    </div>
-                    <CButton onClick={() => handleDownload(file)}>
-                      <CIcon icon={cilArrowThickToBottom} size={'lg'} />
-                    </CButton>
-                  </CListGroupItem>
-                ))}
-              </CListGroup>
-            </CCardBody>
-          </CCard>
+                      <CButton className="mt-2" onClick={() => handleDownload(file)}>
+                        <CIcon icon={cilArrowThickToBottom} size={'lg'} />
+                      </CButton>
+                    </CListGroupItem>
+                  ))}
+                </CListGroup>
+              </CCardBody>
+            </CCard>
+          )}
         </CForm>
       </CModalBody>
       <CModalFooter>

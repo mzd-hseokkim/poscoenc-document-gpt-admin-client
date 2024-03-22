@@ -6,6 +6,7 @@ const getSearchedCollectionList = async (params, pageable) => {
     params: {
       name: params.name,
       displayName: params.displayName,
+      statusOption: params.statusOption,
       createdByName: params.createdByName,
       fromCreatedAt: params.fromCreatedAt,
       toCreatedAt: params.toCreatedAt,
@@ -28,6 +29,7 @@ const getDownloadSearchedCollectionList = async (params) => {
     params: {
       name: params.name,
       displayName: params.displayName,
+      statusOption: params.statusOption,
       createdByName: params.createdByName,
       fromCreatedAt: params.fromCreatedAt,
       toCreatedAt: params.toCreatedAt,

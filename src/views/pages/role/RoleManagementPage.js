@@ -10,7 +10,7 @@ import { useToast } from 'context/ToastContext';
 import useModal from 'hooks/useModal';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilValue, useResetRecoilState } from 'recoil';
-import RoleService from 'services/Role/RoleService';
+import RoleService from 'services/role/RoleService';
 import { jwtTokenState, userRoleSelector } from 'states/jwtTokenState';
 import { formatToYMD } from 'utils/common/dateUtils';
 import { roleColumnConfig } from 'views/pages/role/roleColumnConfig';
