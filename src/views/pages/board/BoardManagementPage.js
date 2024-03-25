@@ -25,7 +25,6 @@ import { format } from 'date-fns';
 import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
 import BoardService from 'services/board/BoardService';
-import { postColumnConfig } from 'utils/board/postColumnConfig';
 import {
   formatToIsoEndDate,
   formatToIsoStartDate,
@@ -34,6 +33,7 @@ import {
   getOneYearAgoDate,
 } from 'utils/common/dateUtils';
 import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
+import { postColumnConfig } from 'views/pages/board/postColumnConfig';
 
 const BoardManagementPage = () => {
   const [selectedRows, setSelectedRows] = useState([]);
@@ -92,9 +92,17 @@ const BoardManagementPage = () => {
             handleRowClick(item.id);
           }}
         >
+          {item.hasFiles ? <CIcon icon={cilPaperclip} size="sm" className="me-1" /> : ''}
           {item.title}
-          {item.hasFiles ? <CIcon icon={cilPaperclip} size="sm" className="ms-2" /> : ''}
-          {item.comments ? <CIcon icon={cilCommentBubble} size="sm" className="ms-2" /> : ''}
+
+          {item.comments ? (
+            <>
+              <CIcon icon={cilCommentBubble} size="sm" className="ms-2" />
+              {item.comments.length}
+            </>
+          ) : (
+            ''
+          )}
         </td>
       );
     },
@@ -311,6 +319,7 @@ const BoardManagementPage = () => {
                 <ExcelDownloadCButton
                   downloadFunction={BoardService.getDownloadSearchedPostList}
                   searchFormData={searchFormData}
+                  hasSearchResults={postList.length !== 0}
                 />
               </CCol>
             </CRow>

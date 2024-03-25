@@ -31,7 +31,7 @@ import {
   getOneYearAgoDate,
 } from 'utils/common/dateUtils';
 import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
-import { documentCollectionColumnConfig } from 'utils/document-collection/documentCollectionColumnConfig';
+import { documentCollectionColumnConfig } from 'views/pages/document-collection/documentCollectionColumnConfig';
 
 const DocumentCollectionManagementPage = () => {
   const [documentCollectionList, setDocumentCollectionList] = useState([]);
@@ -267,6 +267,7 @@ const DocumentCollectionManagementPage = () => {
                 <ExcelDownloadCButton
                   downloadFunction={DocumentCollectionService.getDownloadSearchedCollectionList}
                   searchFormData={searchFormData}
+                  hasSearchResults={documentCollectionList.length !== 0}
                 />
               </CCol>
             </CRow>

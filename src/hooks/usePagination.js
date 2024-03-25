@@ -4,7 +4,7 @@ const usePagination = (totalItems) => {
   const [pageableData, setPageableData] = useState({
     page: 0,
     size: 10,
-    sort: 'id,asc',
+    sort: 'id,desc',
   });
 
   const handlePageChange = (newPage) => {

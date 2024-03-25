@@ -25,8 +25,8 @@ import MenuService from 'services/menu/MenuService';
 import RoleService from 'services/Role/RoleService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
-import formModes from 'utils/formModes';
-import { itemNameValidationPattern } from 'utils/validationUtils';
+import formModes from 'utils/common/formModes';
+import { itemNameValidationPattern } from 'utils/common/validationUtils';
 
 const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
   const [formMode, setFormMode] = useState(initialFormMode || 'read');

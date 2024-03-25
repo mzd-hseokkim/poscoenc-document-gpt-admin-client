@@ -13,7 +13,7 @@ import { useRecoilValue, useResetRecoilState } from 'recoil';
 import RoleService from 'services/Role/RoleService';
 import { jwtTokenState, userRoleSelector } from 'states/jwtTokenState';
 import { formatToYMD } from 'utils/common/dateUtils';
-import { roleColumnConfig } from 'utils/role/roleColumnConfig';
+import { roleColumnConfig } from 'views/pages/role/roleColumnConfig';
 
 const AdminManagementPage = () => {
   const [roleList, setRoleList] = useState([]);
@@ -108,7 +108,10 @@ const AdminManagementPage = () => {
                 <CButton onClick={handleCreateClick}>권한 추가</CButton>
                 <CButton onClick={() => handleDeleteRestoreClick(true)}>삭제</CButton>
                 <CButton onClick={() => handleDeleteRestoreClick(false)}>복구</CButton>
-                <ExcelDownloadCButton downloadFunction={RoleService.getDownloadRoleList} />
+                <ExcelDownloadCButton
+                  downloadFunction={RoleService.getDownloadRoleList}
+                  searchFormData={roleList.length !== 0}
+                />
               </CCol>
             </CRow>
             <CRow className="mb-3">

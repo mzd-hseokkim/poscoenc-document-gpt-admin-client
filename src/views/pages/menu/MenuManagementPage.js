@@ -25,7 +25,7 @@ import usePagination from 'hooks/usePagination';
 import MenuService from 'services/menu/MenuService';
 import { formatToIsoEndDate, formatToIsoStartDate, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
 import { iconMapper } from 'utils/common/iconMapper';
-import { menuColumnConfig } from 'utils/menu/menuColumnConfig';
+import { menuColumnConfig } from 'views/pages/menu/menuColumnConfig';
 
 const createInitialFormData = () => ({
   name: '',
@@ -262,6 +262,7 @@ const MenuManagementPage = () => {
                 <ExcelDownloadCButton
                   downloadFunction={MenuService.getDownloadSearchedMenuList}
                   searchFormData={formData}
+                  hasSearchResults={menuList.length !== 0}
                 />
               </CCol>
             </CRow>

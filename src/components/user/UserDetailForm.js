@@ -22,8 +22,8 @@ import { useSearchParams } from 'react-router-dom';
 import UserService from 'services/UserService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
-import formModes from 'utils/formModes';
-import { emailValidationPattern } from 'utils/validationUtils';
+import formModes from 'utils/common/formModes';
+import { emailValidationPattern } from 'utils/common/validationUtils';
 
 const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -188,7 +188,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
               />
             </CCol>
             <CCol className="col-md mb-2">
-              <CCol className="fw-bold">삭제</CCol>
+              <CCol className="fw-bold">삭제 여부</CCol>
               <CCol>
                 <StatusBadge deleted={formData.deleted} />
               </CCol>
