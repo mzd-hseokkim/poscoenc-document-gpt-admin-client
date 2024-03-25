@@ -25,12 +25,12 @@ const AppSidebar = () => {
         dispatch({ type: 'set', sidebarShow: visible });
       }}
     >
-      <CSidebarBrand className="d-none d-md-flex" to="/">
+      <CSidebarBrand className="d-none d-md-flex bg-white" to="/">
         <img
           className="sidebar-brand-full "
           src={SideBarFullLogo}
           alt="POSCO E&C Full Logo"
-          style={{ width: '256px', height: '64px' }}
+          style={{ width: '175px', height: '64px' }}
         />
         <img
           className="sidebar-brand-narrow"
