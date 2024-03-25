@@ -6,18 +6,18 @@ export const documentChatHistoryColumnConfig = [
   },
   {
     key: 'documentCollectionId',
-    label: '문서 집합 아이디',
-    _style: { width: '16%' },
+    label: '',
+    _style: { width: '15%' },
   },
   {
     key: 'answer',
     label: '답변',
-    _style: { width: '15%' },
+    _style: { width: '30%' },
   },
   {
     key: 'question',
     label: '질문',
-    _style: { width: '15%' },
+    _style: { width: '30%' },
   },
   {
     key: 'createdByName',
@@ -28,7 +28,7 @@ export const documentChatHistoryColumnConfig = [
   },
   {
     key: 'createdAt',
-    label: '질문한 날짜',
+    label: '등록일',
     _style: { width: '12%' },
   },
 ];

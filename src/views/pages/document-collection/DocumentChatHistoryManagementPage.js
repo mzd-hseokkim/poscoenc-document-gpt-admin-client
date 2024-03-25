@@ -47,8 +47,6 @@ const DocumentChatHistoryManagementPage = () => {
     fromCreatedAt: getOneYearAgoDate(),
     toCreatedAt: getCurrentDate(),
     createdByName: '',
-    fromModifiedAt: getOneYearAgoDate(),
-    toModifiedAt: getCurrentDate(),
     isPickTime: false,
   };
 
@@ -231,20 +229,6 @@ const DocumentChatHistoryManagementPage = () => {
                     endDate={searchFormData.toCreatedAt}
                     onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
                     onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
-                    timepicker={searchFormData.isPickTime}
-                  />
-                </CCol>
-              </CRow>
-              <CRow className="mb-3">
-                <CCol md={8}>
-                  <CDateRangePicker
-                    key={`modifiedAt-${searchFormData.isPickTime}`}
-                    id="modifiedAt"
-                    label="수정일"
-                    startDate={searchFormData.fromModifiedAt}
-                    endDate={searchFormData.toModifiedAt}
-                    onStartDateChange={(newDate) => handleDateChange('modifiedAt', newDate, true)}
-                    onEndDateChange={(newDate) => handleDateChange('modifiedAt', newDate, false)}
                     timepicker={searchFormData.isPickTime}
                   />
                 </CCol>

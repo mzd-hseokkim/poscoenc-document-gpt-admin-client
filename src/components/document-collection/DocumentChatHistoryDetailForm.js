@@ -71,7 +71,6 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
 
   const onSubmit = () => {};
   const renderAuditFields = () => {
-    console.log(chatHistory);
     return (
       <CCard className="g-3 mb-3">
         <CCardBody>
@@ -111,6 +110,7 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
                 fields={chatHistoryInfoFields}
                 formData={chatHistory}
                 isReadMode={isReadMode}
+                col={2}
               />
             </CCardBody>
           </CCard>
