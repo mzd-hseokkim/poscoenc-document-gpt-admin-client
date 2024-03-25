@@ -18,13 +18,13 @@ import {
 import StatusBadge from 'components/badge/StatusBadge';
 import BoardPostDetailForm from 'components/board/BoardPostDetailForm';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
+import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import ModalContainer from 'components/modal/ModalContainer';
 import { useToast } from 'context/ToastContext';
 import { format } from 'date-fns';
 import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
 import BoardService from 'services/board/BoardService';
-import { postColumnConfig } from 'utils/board/postColumnConfig';
 import {
   formatToIsoEndDate,
   formatToIsoStartDate,
@@ -33,6 +33,7 @@ import {
   getOneYearAgoDate,
 } from 'utils/common/dateUtils';
 import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
+import { postColumnConfig } from 'views/pages/board/postColumnConfig';
 
 const BoardManagementPage = () => {
   const [selectedRows, setSelectedRows] = useState([]);
@@ -40,7 +41,7 @@ const BoardManagementPage = () => {
   const [postFormMode, setPostFormMode] = useState('');
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
   const [totalPostElements, setTotalPostElements] = useState(0);
-  const [noItemsLabel, setNoItemsLabel] = useState('');
+  const [isSearchPerformed, setIsSearchPerformed] = useState(false);
   const [isPickTime, setIsPickTime] = useState(false);
 
   //REMIND searchForm audit 정보 통합해보기.
@@ -91,9 +92,17 @@ const BoardManagementPage = () => {
             handleRowClick(item.id);
           }}
         >
+          {item.hasFiles ? <CIcon icon={cilPaperclip} size="sm" className="me-1" /> : ''}
           {item.title}
-          {item.hasFiles ? <CIcon icon={cilPaperclip} size="sm" className="ms-2" /> : ''}
-          {item.comments ? <CIcon icon={cilCommentBubble} size="sm" className="ms-2" /> : ''}
+
+          {item.comments ? (
+            <>
+              <CIcon icon={cilCommentBubble} size="sm" className="ms-2" />
+              {item.comments.length}
+            </>
+          ) : (
+            ''
+          )}
         </td>
       );
     },
@@ -110,13 +119,13 @@ const BoardManagementPage = () => {
 
   const searchPostList = async () => {
     setSearchResultIsLoading(true);
+    if (!isSearchPerformed) {
+      setIsSearchPerformed(true);
+    }
     try {
       const searchResult = await BoardService.getSearchedPostList(searchFormData, pageableData);
       setPostList(searchResult.content);
       setTotalPostElements(searchResult.totalElements);
-      if (searchResult.content.length === 0 && noItemsLabel === '') {
-        setNoItemsLabel('검색 결과가 없습니다.');
-      }
     } catch (error) {
       addToast({ message: '검색 조건을 확인 해 주세요.' });
     } finally {
@@ -310,6 +319,7 @@ const BoardManagementPage = () => {
                 <ExcelDownloadCButton
                   downloadFunction={BoardService.getDownloadSearchedPostList}
                   searchFormData={searchFormData}
+                  hasSearchResults={postList.length !== 0}
                 />
               </CCol>
             </CRow>
@@ -321,7 +331,9 @@ const BoardManagementPage = () => {
               itemsPerPageLabel={'페이지당 글 개수'}
               itemsPerPageSelect
               loading={searchResultIsLoading}
-              noItemsLabel={noItemsLabel}
+              noItemsLabel={
+                <CSmartTableNoItemLabel contentLength={postList.length} isSearchPerformed={isSearchPerformed} />
+              }
               onItemsPerPageChange={handlePageSizeChange}
               onSelectedItemsChange={setSelectedRows}
               onSorterChange={handlePageSortChange}

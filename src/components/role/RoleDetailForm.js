@@ -11,10 +11,10 @@ import { useSearchParams } from 'react-router-dom';
 import RoleService from 'services/Role/RoleService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
-import formModes from 'utils/formModes';
+import formModes from 'utils/common/formModes';
 
 const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList }) => {
-  const [formMode, setFormMode] = useState(initialFormMode);
+  const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [formData, setFormData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchParams] = useSearchParams();

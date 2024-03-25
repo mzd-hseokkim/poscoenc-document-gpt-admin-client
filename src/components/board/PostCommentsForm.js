@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   CButton,
@@ -13,34 +13,33 @@ import {
   CRow,
 } from '@coreui/react-pro';
 import { useToast } from 'context/ToastContext';
-import { useRecoilValue } from 'recoil';
 import BoardCommentService from 'services/board/BoardCommentService';
-import { userIdSelector } from 'states/jwtTokenState';
 
-const BoardCommentsForm = ({ postId }) => {
+const PostCommentsForm = ({ postId }) => {
   const [commentText, setCommentText] = useState('');
   const [postComments, setPostComments] = useState([]);
   const [showDeletedComments, setShowDeletedComments] = useState(true);
-
+  const [isComposing, setIsComposing] = useState(false);
   const [postCommentIsLoading, setPostCommentIsLoading] = useState(false);
 
   const { addToast } = useToast();
-  const currentUserId = useRecoilValue(userIdSelector);
   const endOfCommentsRef = useRef(null);
 
-  const fetchPostComments = async () => {
+  const fetchPostComments = useCallback(async () => {
     try {
       const comments = await BoardCommentService.getPostComments(postId);
       setPostComments(comments);
     } catch (error) {
       addToast({ message: '댓글을 불러오지 못했습니다. 관리자에게 문의하세요.' });
     }
-  };
+  }, [addToast, postId]);
 
   const handleCommentChange = (event) => {
     setCommentText(event.target.value);
   };
-
+  const handleCompositionEnd = () => {
+    setIsComposing(false);
+  };
   const handleSubmitComment = async (e) => {
     e.preventDefault();
     setPostCommentIsLoading(true);
@@ -59,9 +58,11 @@ const BoardCommentsForm = ({ postId }) => {
     }
   };
   const handleSubmitCommentAsEnter = (event) => {
-    if (event.key === 'Enter' && !event.shiftKey && commentText.trim()) {
+    if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
-      void handleSubmitComment(event);
+      if (!isComposing && commentText.trim()) {
+        void handleSubmitComment(event);
+      }
     }
   };
 
@@ -79,8 +80,8 @@ const BoardCommentsForm = ({ postId }) => {
   };
 
   useEffect(() => {
-    fetchPostComments();
-  }, [postId]);
+    void fetchPostComments();
+  }, [fetchPostComments, postId]);
 
   useEffect(() => {
     if (!postCommentIsLoading) {
@@ -125,11 +126,9 @@ const BoardCommentsForm = ({ postId }) => {
     <CRow>
       <CCol className="d-flex justify-content-between">
         <strong>{comment.createdByName}</strong>
-        {comment.createdBy === currentUserId && (
-          <CButton color="primary" size="sm" onClick={() => toggleCommentStatus(comment.id, !comment.deleted)}>
-            {comment.deleted ? '복구' : '삭제'}
-          </CButton>
-        )}
+        <CButton color="primary" size="sm" onClick={() => toggleCommentStatus(comment.id, !comment.deleted)}>
+          {comment.deleted ? '복구' : '삭제'}
+        </CButton>
       </CCol>
     </CRow>
   );
@@ -142,6 +141,8 @@ const BoardCommentsForm = ({ postId }) => {
         value={commentText}
         onChange={handleCommentChange}
         onKeyDown={handleSubmitCommentAsEnter}
+        onCompositionStart={() => setIsComposing(true)}
+        onCompositionEnd={handleCompositionEnd}
       />
       <CButton type="submit" color="primary" disabled={!commentText.trim()}>
         작성
@@ -152,8 +153,10 @@ const BoardCommentsForm = ({ postId }) => {
   return (
     <CForm onSubmit={handleSubmitComment} className="comments-section">
       <CCard className="mt-3 mb-3">
-        <CCardHeader className="d-flex justify-content-between">
-          댓글
+        <CCardHeader className="d-flex justify-content-between align-items-center">
+          <div>
+            댓글 <small className="text-muted">{`${postComments.length} 개`}</small>
+          </div>
           <CFormCheck
             id="showDeletedComments"
             label="삭제된 댓글 표시"
@@ -161,10 +164,10 @@ const BoardCommentsForm = ({ postId }) => {
             onChange={(e) => setShowDeletedComments(e.target.checked)}
           />
         </CCardHeader>
-        <CCardBody style={{ height: '180px', overflowY: 'auto' }}>{renderCommentList()}</CCardBody>
+        <CCardBody style={{ height: '300px', overflowY: 'auto' }}>{renderCommentList()}</CCardBody>
       </CCard>
       {renderCommentInput()}
     </CForm>
   );
 };
-export default BoardCommentsForm;
+export default PostCommentsForm;

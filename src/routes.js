@@ -22,7 +22,7 @@ const routes = [
   {
     path: '/document-collections/management',
     exact: true,
-    name: '문서 관리',
+    name: '문서 집합 관리',
     element: DocumentCollectionManagementPage,
   },
   {

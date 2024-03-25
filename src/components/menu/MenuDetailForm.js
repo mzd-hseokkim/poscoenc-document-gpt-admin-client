@@ -25,11 +25,11 @@ import MenuService from 'services/menu/MenuService';
 import RoleService from 'services/Role/RoleService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
-import formModes from 'utils/formModes';
-import { itemNameValidationPattern } from 'utils/validationUtils';
+import formModes from 'utils/common/formModes';
+import { itemNameValidationPattern } from 'utils/common/validationUtils';
 
 const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
-  const [formMode, setFormMode] = useState(initialFormMode);
+  const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [roles, setRoles] = useState([]);
   const [formData, setFormData] = useState([]);
   const [parentMenus, setParentMenus] = useState([
@@ -137,11 +137,13 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
   );
 
   const getParentMenu = useCallback(async () => {
-    if (!isCreateMode && searchParams.get('id') === null) {
+    //REMIND 작성 모드일때는 상위 메뉴 못가져옴..
+    const excludedId = isCreateMode ? '' : searchParams.get('id');
+
+    if (!isCreateMode && !excludedId) {
       return;
     }
-    //create 모드일때는 빈값으로  상위메뉴를 요청해야함, 그러면서 서치파람에 있을 경우에는
-    let excludedId = isCreateMode ? '' : searchParams.get('id');
+
     try {
       const data = await MenuService.getParentMenus(excludedId);
       const newParentMenus = data.map((parentMenu) => ({
@@ -242,7 +244,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
   const handleCancelClick = async () => {
     if (isUpdateMode) {
       setFormMode('read');
-      await fetchMenuDetail(searchParams.get('id'));
+      await fetchMenuDetail();
     } else if (isCreateMode) {
       closeModal();
     }

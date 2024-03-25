@@ -23,11 +23,11 @@ import AdminService from 'services/admin/AdminService';
 import RoleService from 'services/Role/RoleService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
-import formModes from 'utils/formModes';
-import { emailValidationPattern, passwordValidationPattern } from 'utils/validationUtils';
+import formModes from 'utils/common/formModes';
+import { emailValidationPattern, passwordValidationPattern } from 'utils/common/validationUtils';
 
 const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
-  const [formMode, setFormMode] = useState(initialFormMode);
+  const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [formData, setFormData] = useState([]);
   const [roles, setRoles] = useState([]);
   const [isLoading, setIsLoading] = useState(false);

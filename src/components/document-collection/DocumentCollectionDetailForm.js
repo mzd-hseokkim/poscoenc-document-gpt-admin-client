@@ -1,16 +1,19 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { cilArrowThickToBottom } from '@coreui/icons';
+import CIcon from '@coreui/icons-react';
 import {
+  CBadge,
   CButton,
   CCard,
   CCardBody,
-  CCol,
   CForm,
+  CFormLabel,
+  CFormTextarea,
   CListGroup,
   CListGroupItem,
   CModalBody,
   CModalFooter,
-  CRow,
 } from '@coreui/react-pro';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
@@ -25,14 +28,12 @@ import { userIdSelector } from 'states/jwtTokenState';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import { formatFileSize } from 'utils/common/formatFileSize';
-import formModes from 'utils/formModes';
-import { itemNameValidationPattern } from 'utils/validationUtils';
+import formModes from 'utils/common/formModes';
+import { itemNameValidationPattern } from 'utils/common/validationUtils';
 
 const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocumentCollectionList }) => {
   const [collectionDetail, setCollectionDetail] = useState({});
-  //REMIND link 로 이동 했을 경우 바로 read 모드가 되어야 할듯 함.
   const [formMode, setFormMode] = useState(initialFormMode || 'read');
-
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
   const [searchParams] = useSearchParams();
 
@@ -81,8 +82,11 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
       name: 'deleted',
       label: '삭제 여부',
     },
+    {
+      name: 'status',
+      label: '문서 상태',
+    },
   ];
-
   const fetchCollectionDetail = useCallback(
     async (collectionId) => {
       if (!collectionId) {
@@ -114,7 +118,6 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
 
   useEffect(() => {
     const collectionId = searchParams.get('id');
-
     if (!collectionId) {
       closeModal();
     }
@@ -163,9 +166,6 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
       }
     }
   };
-  const handleBatchDownload = async (file) => {
-    //TODO imple batch download
-  };
   const handleDeleteRestoreClick = async (collectionId) => {
     const shouldDelete = !collectionDetail.deleted;
     try {
@@ -186,16 +186,31 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
             <CCardBody>
               <FormInputGrid
                 register={register}
+                fields={getAuditFields(formMode)}
+                formData={collectionDetail}
+                isReadMode={isReadMode}
+              />
+            </CCardBody>
+          </CCard>
+          <CCard className="mb-3">
+            <CCardBody>
+              <FormInputGrid
+                register={register}
                 fields={collectionSpecificFields}
                 formData={collectionDetail}
                 isReadMode={isReadMode}
                 errors={errors}
               />
-              <FormInputGrid
-                register={register}
-                fields={getAuditFields(formMode)}
-                formData={collectionDetail}
-                isReadMode={isReadMode}
+              <CFormLabel htmlFor="detail-form-description" className="col-form-label fw-bold">
+                설명
+              </CFormLabel>
+              <CFormTextarea
+                {...register('description')}
+                id="detail-form-description"
+                name="description"
+                placeholder={isReadMode ? '' : '문서 설명을 작성해주세요.'}
+                plainText={isReadMode}
+                readOnly={isReadMode}
               />
             </CCardBody>
           </CCard>
@@ -204,24 +219,25 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
               <CListGroup>
                 {/*REMIND detail 에서 file 만 따로 처리 할 수 있도록 리팩토링, reset 에 의해 나머지 데이터가 관리되고 있음*/}
                 {collectionDetail?.files?.map((file, index) => (
-                  <CListGroupItem key={index} className="d-flex justify-content-between align-items-center">
-                    <div className="d-flex align-items-end">
-                      <span style={{ marginRight: `10px` }}>{file.originalName}</span>
-                      <small>{formatFileSize(file.size)}</small>
+                  <CListGroupItem key={index} className="d-flex justify-content-between align-items-start">
+                    <div>
+                      <div className="d-flex align-items-end mb-1">
+                        <span style={{ marginRight: `10px` }}>{file.originalName}</span>
+                        <small>{formatFileSize(file.size)}</small>
+                        <small style={{ marginLeft: `10px` }}>
+                          <CBadge color="primary">{file.status}</CBadge>
+                        </small>
+                      </div>
+                      <div>
+                        <small className="text-muted">{`설명 : ${file.description || ''}`}</small>
+                      </div>
                     </div>
-                    <CButton onClick={() => handleDownload(file)}>다운로드</CButton>
+                    <CButton onClick={() => handleDownload(file)}>
+                      <CIcon icon={cilArrowThickToBottom} size={'lg'} />
+                    </CButton>
                   </CListGroupItem>
                 ))}
               </CListGroup>
-              {collectionDetail?.files?.length > 1 && (
-                <CRow>
-                  <CCol className="d-flex justify-content-end">
-                    <CButton className="mt-3" onClick={handleBatchDownload}>
-                      일괄 다운로드
-                    </CButton>
-                  </CCol>
-                </CRow>
-              )}
             </CCardBody>
           </CCard>
         </CForm>

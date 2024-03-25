@@ -18,7 +18,7 @@ import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import SignInService from 'services/signin/SignInService';
-import { emailValidationPattern, passwordValidationPattern } from 'utils/validationUtils';
+import { emailValidationPattern, passwordValidationPattern } from 'utils/common/validationUtils';
 
 const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -47,6 +47,10 @@ const SignIn = () => {
       pattern: {
         value: passwordValidationPattern,
         message: '유효한 비밀번호를 입력하세요.',
+      },
+      minLength: {
+        value: 5,
+        message: '비밀번호는 5자 이상입력해야 합니다.',
       },
     }),
   };

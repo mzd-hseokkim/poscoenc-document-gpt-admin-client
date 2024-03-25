@@ -1,4 +1,4 @@
-import { FORM_MODES } from 'utils/formModes';
+import { FORM_MODES } from 'utils/common/formModes';
 
 export const getAuditFields = (formMode) => {
   const isCreateMode = formMode === FORM_MODES.CREATE;

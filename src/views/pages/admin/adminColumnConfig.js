@@ -20,7 +20,6 @@ export const adminColumnConfig = [
   //   label: '권한',
   //   _style: { width: '12%' },
   // },
-
   {
     key: 'lastLoggedInAt',
     label: '최근 로그인',

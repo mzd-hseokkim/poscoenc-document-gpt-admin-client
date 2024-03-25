@@ -5,9 +5,14 @@ export const documentCollectionColumnConfig = [
     _style: { width: '10%' },
   },
   {
+    key: 'name',
+    label: '문서 집합 이름',
+    _style: { width: '23%' },
+  },
+  {
     key: 'displayName',
     label: '표시명',
-    _style: { width: '53%' },
+    _style: { width: '30%' },
   },
   {
     key: 'createdByName',

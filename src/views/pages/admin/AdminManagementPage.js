@@ -16,13 +16,13 @@ import {
 import AdminDetailForm from 'components/admin/AdminDetailForm';
 import StatusBadge from 'components/badge/StatusBadge';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
+import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import ModalContainer from 'components/modal/ModalContainer';
 import { useToast } from 'context/ToastContext';
 import { format } from 'date-fns';
 import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
 import AdminService from 'services/admin/AdminService';
-import { adminColumnConfig } from 'utils/admin/adminColumnConfig';
 import {
   formatToIsoEndDate,
   formatToIsoStartDate,
@@ -30,12 +30,12 @@ import {
   getCurrentDate,
   getOneYearAgoDate,
 } from 'utils/common/dateUtils';
+import { adminColumnConfig } from 'views/pages/admin/adminColumnConfig';
 
 const createInitialFormData = () => ({
+  email: '',
   name: '',
-  urlPath: '',
-  menuOrder: '',
-  parentId: '',
+  role: '',
   fromCreatedAt: getOneYearAgoDate(),
   toCreatedAt: getCurrentDate(),
   fromModifiedAt: getOneYearAgoDate(),
@@ -43,16 +43,17 @@ const createInitialFormData = () => ({
   fromLoggedInAt: getOneYearAgoDate(),
   toLoggedInAt: getCurrentDate(),
   deletionOption: 'ALL',
+  findEmptyLogin: true,
 });
 
 const AdminManagementPage = () => {
-  const [AdminList, setAdminList] = useState([]);
+  const [adminList, setAdminList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [checkedItems, setCheckedItems] = useState([]);
   const [formMode, setFormMode] = useState('');
   const [totalAdminElements, setTotalAdminElements] = useState(0);
   const [formData, setFormData] = useState(createInitialFormData);
-  const [noItemsLabel, setNoItemsLabel] = useState('');
+  const [isSearchPerformed, setIsSearchPerformed] = useState(false);
   const [isPickTime, setIsPickTime] = useState(false);
 
   const isComponentMounted = useRef(true);
@@ -71,14 +72,14 @@ const AdminManagementPage = () => {
   }, [pageableData]);
 
   const fetchAdminList = async () => {
+    if (!isSearchPerformed) {
+      setIsSearchPerformed(true);
+    }
     try {
       setIsLoading(true);
       const data = await AdminService.getAdmins(formData, pageableData);
       setAdminList(data.content);
       setTotalAdminElements(data.totalElements);
-      if (data.content.length === 0 && noItemsLabel === '') {
-        setNoItemsLabel('검색 결과가 없습니다.');
-      }
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -266,7 +267,11 @@ const AdminManagementPage = () => {
                 <CButton onClick={handleCreateClick}>관리자 추가</CButton>
                 <CButton onClick={() => handleDeleteRestoreClick(true)}>삭제</CButton>
                 <CButton onClick={() => handleDeleteRestoreClick(false)}>복구</CButton>
-                <ExcelDownloadCButton downloadFunction={AdminService.getDownloadAdminList} searchFormData={formData} />
+                <ExcelDownloadCButton
+                  downloadFunction={AdminService.getDownloadAdminList}
+                  searchFormData={formData}
+                  hasSearchResults={adminList.length !== 0}
+                />
               </CCol>
             </CRow>
             <CRow className="mb-3">
@@ -281,9 +286,11 @@ const AdminManagementPage = () => {
                 itemsPerPage={pageableData.size}
                 onItemsPerPageChange={handlePageSizeChange}
                 itemsPerPageLabel="페이지당 관리자 개수"
-                noItemsLabel={noItemsLabel}
+                noItemsLabel={
+                  <CSmartTableNoItemLabel contentLength={adminList.length} isSearchPerformed={isSearchPerformed} />
+                }
                 loading={isLoading}
-                items={AdminList}
+                items={adminList}
                 columns={adminColumnConfig}
                 selectable
                 scopedColumns={{
