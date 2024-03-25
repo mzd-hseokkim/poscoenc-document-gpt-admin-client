@@ -1,5 +1,6 @@
 import { createStore } from 'redux';
 
+//REMIND update to use Redux Toolkit
 const initialState = {
   sidebarShow: true,
   asideShow: false,

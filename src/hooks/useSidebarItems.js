@@ -75,8 +75,14 @@ const useSidebarItems = () => {
           to: '/dashboard',
           icon: iconMapper({ iconName: 'cilSpeedometer', type: 'nav' }),
         },
-        { component: CNavTitle, name: '즐겨찾기' },
-        ...favoriteItems,
+        {
+          component: CNavGroup,
+          name: '즐겨찾기',
+          to: '/',
+          active: false,
+          icon: iconMapper({ iconName: 'cilStar', type: 'nav' }),
+          items: favoriteItems,
+        },
         { component: CNavTitle, name: '메뉴' },
         ...transformedMenuItems,
       ];
@@ -88,7 +94,7 @@ const useSidebarItems = () => {
   };
 
   useEffect(() => {
-    getMenuList();
+    void getMenuList();
   }, []);
 
   return { menuItems, refetchMenuList: getMenuList };

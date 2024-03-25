@@ -53,7 +53,7 @@ export const AppSidebarNav = ({ items, refetchMenuList }) => {
               <div
                 onClick={(e) => {
                   e.preventDefault();
-                  deleteFavoriteMenu(favoriteMenuId);
+                  void deleteFavoriteMenu(favoriteMenuId);
                   refetchMenuList();
                 }}
               >
@@ -63,7 +63,7 @@ export const AppSidebarNav = ({ items, refetchMenuList }) => {
               <div
                 onClick={(e) => {
                   e.preventDefault();
-                  postFavoriteMenu(id);
+                  void postFavoriteMenu(id);
                   refetchMenuList();
                 }}
               >
