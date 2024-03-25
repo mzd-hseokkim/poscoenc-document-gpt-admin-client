@@ -44,6 +44,7 @@ const DocumentChatHistoryManagementPage = () => {
     answer: '',
     question: '',
     documentCollectionId: '',
+    documentCollectionDisplayName: '',
     fromCreatedAt: getOneYearAgoDate(),
     toCreatedAt: getCurrentDate(),
     createdByName: '',
@@ -205,6 +206,14 @@ const DocumentChatHistoryManagementPage = () => {
                     id="documentCollectionId"
                     label="문서 집합 아이디"
                     value={searchFormData.documentCollectionId}
+                    onChange={handleSearchFormChange}
+                  />
+                </CCol>
+                <CCol md={4}>
+                  <CFormInput
+                    id="documentCollectionDisplayName"
+                    label="문서 집합 표시명"
+                    value={searchFormData.documentCollectionDisplayName}
                     onChange={handleSearchFormChange}
                   />
                 </CCol>

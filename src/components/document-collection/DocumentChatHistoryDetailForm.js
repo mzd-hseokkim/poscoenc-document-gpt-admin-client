@@ -69,7 +69,9 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
     }
   };
 
-  const onSubmit = () => {};
+  const onSubmit = () => {
+    //REMIND FormInputGrid 를 사용하기 위해 CForm 내부에 선언해줘야합니다. 다만 수정, 삭제 등의 로직이 없기 때문에 Submit 함수를 비워두었습니다.
+  };
   const renderAuditFields = () => {
     return (
       <CCard className="g-3 mb-3">

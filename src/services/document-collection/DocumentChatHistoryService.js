@@ -7,6 +7,7 @@ const getSearchedDocumentChatHistory = async (params, pageable) => {
       answer: params.answer,
       question: params.question,
       documentCollectionId: params.documentCollectionId,
+      documentCollectionDisplayName: params.documentCollectionDisplayName,
       fromCreatedAt: params.fromCreatedAt,
       toCreatedAt: params.toCreatedAt,
       createdByName: params.createdByName,
