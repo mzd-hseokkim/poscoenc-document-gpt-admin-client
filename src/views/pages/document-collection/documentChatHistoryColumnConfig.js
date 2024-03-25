@@ -29,11 +29,6 @@ export const documentChatHistoryColumnConfig = [
   {
     key: 'createdAt',
     label: '질문한 날짜',
-    _style: { width: '12' + '%' },
-  },
-  {
-    key: 'deleted',
-    label: '삭제여부',
     _style: { width: '12%' },
   },
 ];

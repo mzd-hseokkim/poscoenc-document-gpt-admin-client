@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import {
   CButton,
@@ -13,7 +13,6 @@ import {
   CRow,
   CSmartTable,
 } from '@coreui/react-pro';
-import StatusBadge from 'components/badge/StatusBadge';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import DocumentChatHistoryDetailForm from 'components/document-collection/DocumentChatHistoryDetailForm';
@@ -31,7 +30,7 @@ import {
   getOneYearAgoDate,
 } from 'utils/common/dateUtils';
 import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
-import { documentChatHistoryColumnConfig } from 'utils/document-collection/documentChatHistoryColumnConfig';
+import { documentChatHistoryColumnConfig } from 'views/pages/document-collection/documentChatHistoryColumnConfig';
 
 const DocumentChatHistoryManagementPage = () => {
   const [chatHistoryList, setChatHistoryList] = useState([]);
@@ -40,19 +39,17 @@ const DocumentChatHistoryManagementPage = () => {
   const [detailFormMode, setDetailFormMode] = useState('');
   const [noItemsLabel, setNoItemsLabel] = useState('');
   const [totalChatHistoryElements, setTotalChatHistoryElements] = useState(0);
-  const [isPickTime, setIsPickTime] = useState(false);
 
   const initialSearchFormData = {
-    question: '',
     answer: '',
+    question: '',
     documentCollectionId: '',
-    documentCollectionChunkId: '',
-    documentCollectionDisplayName: '',
-    documentCollectionName: '',
-    chunkedText: '',
     fromCreatedAt: getOneYearAgoDate(),
     toCreatedAt: getCurrentDate(),
     createdByName: '',
+    fromModifiedAt: getOneYearAgoDate(),
+    toModifiedAt: getCurrentDate(),
+    isPickTime: false,
   };
 
   const [searchFormData, setSearchFormData] = useState(initialSearchFormData);
@@ -62,7 +59,7 @@ const DocumentChatHistoryManagementPage = () => {
   const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } =
     usePagination(totalChatHistoryElements);
 
-  const searchChatHistoryList = useCallback(async () => {
+  const searchChatHistoryList = async () => {
     setSearchResultIsLoading(true);
     try {
       const searchResult = await DocumentChatHistoryService.getSearchedDocumentChatHistory(
@@ -82,42 +79,15 @@ const DocumentChatHistoryManagementPage = () => {
     } finally {
       setSearchResultIsLoading(false);
     }
-  }, [pageableData, searchFormData]);
+  };
+
   useEffect(() => {
     if (isComponentMounted.current) {
       isComponentMounted.current = false;
     } else {
       void searchChatHistoryList();
     }
-  }, [pageableData, searchChatHistoryList]);
-
-  const isDeletedRow = (selectedRows) => {
-    return selectedRows.some((row) => row.deleted === true);
-  };
-
-  const toggleChatHistoryDeleted = async (deletionOption) => {
-    try {
-      const isSuccess = await DocumentChatHistoryService.patchChatHisotryDeletionOption(
-        selectedRows.map((row) => row.id),
-        deletionOption
-      );
-
-      if (isSuccess) {
-        setSelectedRows([]);
-      }
-    } catch (error) {
-      const status = error.response?.status;
-      if (status === 400) {
-        addToast({ message: '삭제할 채팅 이력을 선택해주세요.' });
-      } else if (status === 404) {
-        addToast({ message: '삭제할 채팅 이력을 찾지 못했습니다. 다시 검색 해 주세요.' });
-      } else {
-        console.log(error);
-      }
-    } finally {
-      await searchChatHistoryList();
-    }
-  };
+  }, [pageableData]);
 
   const handleRowClick = (itemId) => {
     setDetailFormMode('read');
@@ -142,15 +112,18 @@ const DocumentChatHistoryManagementPage = () => {
   };
 
   const handleTimePickerCheck = (e) => {
-    setIsPickTime(e.target.checked);
-    if (searchFormData.fromCreatedAt == null || searchFormData.toCreatedAt == null) {
-      return;
-    }
-    setSearchFormData((prev) => ({
-      ...prev,
-      fromCreatedAt: format(searchFormData.fromCreatedAt, "yyyy-MM-dd'T'00:00"),
-      toCreatedAt: format(searchFormData.toCreatedAt, "yyyy-MM-dd'T'23:59"),
-    }));
+    const isChecked = e.target.checked;
+
+    setSearchFormData((prev) => {
+      const updatedForm = { ...prev, isPickTime: isChecked };
+
+      if (prev.fromCreatedAt != null && prev.toCreatedAt != null) {
+        updatedForm.fromCreatedAt = format(prev.fromCreatedAt, "yyyy-MM-dd'T'00:00");
+        updatedForm.toCreatedAt = format(prev.toCreatedAt, "yyyy-MM-dd'T'23:59");
+      }
+
+      return updatedForm;
+    });
   };
 
   const scopedColumns = {
@@ -172,7 +145,7 @@ const DocumentChatHistoryManagementPage = () => {
       >
         <div
           style={{
-            maxWidth: `180px`, // 적절한 최대 너비 설정
+            maxWidth: `180px`,
             whiteSpace: `nowrap`,
             overflow: `hidden`,
             textOverflow: `ellipsis`,
@@ -190,7 +163,7 @@ const DocumentChatHistoryManagementPage = () => {
       >
         <div
           style={{
-            maxWidth: `200px`, // 적절한 최대 너비 설정
+            maxWidth: `200px`,
             whiteSpace: `nowrap`,
             overflow: `hidden`,
             textOverflow: `ellipsis`,
@@ -201,11 +174,6 @@ const DocumentChatHistoryManagementPage = () => {
       </td>
     ),
     createdAt: (item) => <td>{formatToYMD(item.createdAt)}</td>,
-    deleted: (item) => (
-      <td>
-        <StatusBadge deleted={item.deleted} />
-      </td>
-    ),
   };
 
   return (
@@ -220,7 +188,7 @@ const DocumentChatHistoryManagementPage = () => {
                   <CFormInput
                     id="answer"
                     label="답변"
-                    value={searchFormData.chunkSeq}
+                    value={searchFormData.answer}
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
@@ -242,67 +210,55 @@ const DocumentChatHistoryManagementPage = () => {
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
-                <CCol md={4}>
-                  <CFormInput
-                    id="documentCollectionName"
-                    label="문서 집합 이름"
-                    value={searchFormData.documentCollectionFileNameOrg}
-                    onChange={handleSearchFormChange}
-                  />
-                </CCol>
-                <CCol md={4}>
-                  <CFormInput
-                    id="documentCollectionDisplayName"
-                    label="문서 집합 표시명"
-                    value={searchFormData.documentCollectionFileNameOrg}
-                    onChange={handleSearchFormChange}
-                  />
-                </CCol>
-              </CRow>
-              <CRow>
-                <CCol md={3}>
-                  <CFormInput
-                    id="documentCollectionChunkId"
-                    label="문서 집합의 청크 아이디"
-                    value={searchFormData.documentCollectionFileId}
-                    onChange={handleSearchFormChange}
-                  />
-                </CCol>
-                <CCol md={9}>
-                  <CFormInput
-                    id="chunkedText"
-                    label="청크 내용"
-                    value={searchFormData.pageId}
-                    onChange={handleSearchFormChange}
-                  />
-                </CCol>
               </CRow>
               <CRow className="mb-3">
                 <CCol md={3} className="position-relative">
                   <CFormInput
                     id="createdByName"
-                    label="게시자"
+                    label="질문한 사람"
                     onChange={handleSearchFormChange}
                     value={searchFormData.createdByName}
                   />
                 </CCol>
-                <CCol md={6}>
+              </CRow>
+              <CRow className="mb-3">
+                <CCol md={8}>
                   <CDateRangePicker
-                    key={`createdAt-${isPickTime}`}
+                    key={`createdAt-${searchFormData.isPickTime}`}
                     id="createdAt"
                     label="등록일"
                     startDate={searchFormData.fromCreatedAt}
                     endDate={searchFormData.toCreatedAt}
                     onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
                     onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
-                    timepicker={isPickTime}
+                    timepicker={searchFormData.isPickTime}
+                  />
+                </CCol>
+              </CRow>
+              <CRow className="mb-3">
+                <CCol md={8}>
+                  <CDateRangePicker
+                    key={`modifiedAt-${searchFormData.isPickTime}`}
+                    id="modifiedAt"
+                    label="수정일"
+                    startDate={searchFormData.fromModifiedAt}
+                    endDate={searchFormData.toModifiedAt}
+                    onStartDateChange={(newDate) => handleDateChange('modifiedAt', newDate, true)}
+                    onEndDateChange={(newDate) => handleDateChange('modifiedAt', newDate, false)}
+                    timepicker={searchFormData.isPickTime}
                   />
                 </CCol>
                 <CCol md={3} className="mt-3">
                   <CFormLabel />
-                  <CFormCheck label="시간 검색 여부" checked={isPickTime} onChange={(e) => handleTimePickerCheck(e)} />
+                  <CFormCheck
+                    id="timepicker"
+                    label="시간 검색 여부"
+                    checked={searchFormData.isPickTime}
+                    onChange={(e) => handleTimePickerCheck(e)}
+                  />
                 </CCol>
               </CRow>
+
               <CRow className="mb-3">
                 <CCol className="d-grid gap-2 d-md-flex justify-content-md-center">
                   <CButton type="submit">검색</CButton>
@@ -320,21 +276,10 @@ const DocumentChatHistoryManagementPage = () => {
           <CCardBody>
             <CRow className="mb-3">
               <CCol className="d-grid gap-2 d-md-flex justify-content-md-start">
-                <CButton
-                  disabled={selectedRows?.length === 0 || isDeletedRow(selectedRows)}
-                  onClick={() => toggleChatHistoryDeleted(true)}
-                >
-                  {'삭제'}
-                </CButton>
-                <CButton
-                  disabled={selectedRows?.length === 0 || !isDeletedRow(selectedRows)}
-                  onClick={() => toggleChatHistoryDeleted(false)}
-                >
-                  {'복구'}
-                </CButton>
                 <ExcelDownloadCButton
-                  downloadFunction={DocumentChatHistoryService.getDownloadSearchedCollectionList}
+                  downloadFunction={DocumentChatHistoryService.getDownloadSearchedChatHistoryList}
                   searchFormData={searchFormData}
+                  hasSearchResults={chatHistoryList.length !== 0}
                 />
               </CCol>
             </CRow>

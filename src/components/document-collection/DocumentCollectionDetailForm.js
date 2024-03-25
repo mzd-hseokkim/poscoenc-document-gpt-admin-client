@@ -214,32 +214,34 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
               />
             </CCardBody>
           </CCard>
-          <CCard>
-            <CCardBody>
-              <CListGroup>
-                {/*REMIND detail 에서 file 만 따로 처리 할 수 있도록 리팩토링, reset 에 의해 나머지 데이터가 관리되고 있음*/}
-                {collectionDetail?.files?.map((file, index) => (
-                  <CListGroupItem key={index} className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <div className="d-flex align-items-end mb-1">
-                        <span style={{ marginRight: `10px` }}>{file.originalName}</span>
-                        <small>{formatFileSize(file.size)}</small>
-                        <small style={{ marginLeft: `10px` }}>
-                          <CBadge color="primary">{file.status}</CBadge>
-                        </small>
-                      </div>
+          {collectionDetail?.files?.length !== 0 && (
+            <CCard>
+              <CCardBody>
+                <CListGroup>
+                  {/*REMIND detail 에서 file 만 따로 처리 할 수 있도록 리팩토링, reset 에 의해 나머지 데이터가 관리되고 있음*/}
+                  {collectionDetail?.files?.map((file, index) => (
+                    <CListGroupItem key={index} className="d-flex justify-content-between align-items-start">
                       <div>
-                        <small className="text-muted">{`설명 : ${file.description || ''}`}</small>
+                        <div className="d-flex align-items-end mb-1">
+                          <span style={{ marginRight: `10px` }}>{file.originalName}</span>
+                          <small>{formatFileSize(file.size)}</small>
+                          <small style={{ marginLeft: `10px` }}>
+                            <CBadge color="primary">{file.status}</CBadge>
+                          </small>
+                        </div>
+                        <div>
+                          <small className="text-muted">{`설명 : ${file.description || ''}`}</small>
+                        </div>
                       </div>
-                    </div>
-                    <CButton onClick={() => handleDownload(file)}>
-                      <CIcon icon={cilArrowThickToBottom} size={'lg'} />
-                    </CButton>
-                  </CListGroupItem>
-                ))}
-              </CListGroup>
-            </CCardBody>
-          </CCard>
+                      <CButton className="mt-2" onClick={() => handleDownload(file)}>
+                        <CIcon icon={cilArrowThickToBottom} size={'lg'} />
+                      </CButton>
+                    </CListGroupItem>
+                  ))}
+                </CListGroup>
+              </CCardBody>
+            </CCard>
+          )}
         </CForm>
       </CModalBody>
       <CModalFooter>
