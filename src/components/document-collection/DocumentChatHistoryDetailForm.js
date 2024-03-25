@@ -36,6 +36,22 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
       name: 'documentCollectionDisplayName',
       label: '문서 집합 표시명',
     },
+    {
+      name: 'input_tokens',
+      label: '인풋 토큰',
+    },
+    {
+      name: 'output_tokens',
+      label: '아웃풋 토큰',
+    },
+    {
+      name: 'bing_searchs',
+      label: 'Bing 검색 횟수',
+    },
+    {
+      name: 'dall_e_3_generations',
+      label: '답변 생성 횟수',
+    },
   ];
 
   useEffect(() => {
