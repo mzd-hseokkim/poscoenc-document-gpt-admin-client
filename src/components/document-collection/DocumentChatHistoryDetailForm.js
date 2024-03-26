@@ -1,21 +1,35 @@
 import React, { useEffect, useState } from 'react';
 
-import { CCard, CCardBody, CCol, CForm, CFormInput, CModalBody, CModalFooter, CRow } from '@coreui/react-pro';
+import {
+  CCard,
+  CCardBody,
+  CCardHeader,
+  CCol,
+  CForm,
+  CFormInput,
+  CModalBody,
+  CModalFooter,
+  CRow,
+} from '@coreui/react-pro';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
+import ReactMarkdown from 'react-markdown';
 import { useSearchParams } from 'react-router-dom';
+import remarkGfm from 'remark-gfm';
 import DocumentChatHistoryService from 'services/document-collection/DocumentChatHistoryService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/common/formModes';
 
+import 'components/document-collection/ChatHistoryQnA.css';
+
 const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDocumentCollectionList }) => {
-  const [formMode, setFormMode] = useState(initialFormMode);
+  const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [chatHistory, setChatHistory] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
+  const { isCreateMode, isReadMode } = formModes(formMode);
   const [searchParams] = useSearchParams();
   const { addToast } = useToast();
 
@@ -27,7 +41,7 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
     formState: { errors },
   } = useForm({ mode: 'onChange' });
 
-  const chatHistoryInfoFields = [
+  const chatHistoryAttributeFields = [
     {
       name: 'documentCollectionId',
       label: '문서 집합 아이디',
@@ -37,20 +51,20 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
       label: '문서 집합 표시명',
     },
     {
-      name: 'input_tokens',
+      name: 'inputTokens',
       label: '인풋 토큰',
     },
     {
-      name: 'output_tokens',
+      name: 'outputTokens',
       label: '아웃풋 토큰',
     },
     {
-      name: 'bing_searchs',
+      name: 'bingSearchs',
       label: 'Bing 검색 횟수',
     },
     {
-      name: 'dall_e_3_generations',
-      label: '답변 생성 횟수',
+      name: 'dallE3Generations',
+      label: 'Dall_E_3 답변 생성 횟수',
     },
   ];
 
@@ -91,6 +105,7 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
   const renderAuditFields = () => {
     return (
       <CCard className="g-3 mb-3">
+        <CCardHeader className="h5">Audit</CCardHeader>
         <CCardBody>
           <CRow>
             <CCol className="col-md mb-2">
@@ -122,18 +137,36 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
         <CForm onSubmit={handleSubmit(onSubmit())}>
           {renderAuditFields()}
           <CCard className="mb-3">
+            <CCardHeader className="h5">Attributes</CCardHeader>
             <CCardBody>
               <FormInputGrid
                 register={register}
-                fields={chatHistoryInfoFields}
+                fields={chatHistoryAttributeFields}
                 formData={chatHistory}
                 isReadMode={isReadMode}
                 col={2}
               />
             </CCardBody>
           </CCard>
-          <CCard>
-            <CCardBody>{/*TODO 회의 후 구현*/} 채팅 내용</CCardBody>
+          <CCard className="d-flex border-3">
+            <CCardBody>
+              <CCard className="mb-3 border-1">
+                <CCardHeader className="bold h4">질문</CCardHeader>
+                <CCardBody className="mt-2">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} className="markdown-content">
+                    {chatHistory.question}
+                  </ReactMarkdown>
+                </CCardBody>
+              </CCard>
+              <CCard className="border-1">
+                <CCardHeader className="bold h4">답변</CCardHeader>
+                <CCardBody>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} className="reactMarkdown">
+                    {chatHistory.answer}
+                  </ReactMarkdown>
+                </CCardBody>
+              </CCard>
+            </CCardBody>
           </CCard>
         </CForm>
       </CModalBody>
