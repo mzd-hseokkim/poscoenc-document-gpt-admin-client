@@ -5,9 +5,9 @@ import CIcon from '@coreui/icons-react';
 import { CChartLine } from '@coreui/react-chartjs';
 import { CDropdown, CDropdownItem, CDropdownMenu, CDropdownToggle, CWidgetStatsA } from '@coreui/react-pro';
 import chartPastYearMonthsLabels from 'components/chart/chartPastYearMonthsLabels';
-import { getNonGridLineChartOptions } from 'components/chart/getNonGridLineChartOptions';
+import { getNonGridLineChartOptions } from 'components/chart/options/getNonGridLineChartOptions';
 
-export const DallE3GenerationChart = () => {
+export const DallE3GenerationChart = (statisticsData) => {
   return (
     <CWidgetStatsA
       className="mb-3"
@@ -47,7 +47,7 @@ export const DallE3GenerationChart = () => {
                 borderColor: 'rgba(255,255,255,.55)',
                 pointBackgroundColor: '#bad7f3',
                 //REMIND 단위 추가 '1회'
-                data: [1, 18, 9, 17, 34, 22, 11],
+                data: statisticsData,
               },
             ],
           }}

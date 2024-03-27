@@ -2,9 +2,9 @@ import React from 'react';
 
 import { CChart } from '@coreui/react-chartjs';
 import chartPastYearMonthsLabels from 'components/chart/chartPastYearMonthsLabels';
-import { getCoreUILineChartOptions } from 'components/chart/getCoreUILineChartOptions';
+import { getCoreUILineChartOptions } from 'components/chart/options/getCoreUILineChartOptions';
 
-export const InputTokenChart = () => {
+export const InputTokenChart = (statisticsData) => {
   return (
     <>
       {/*REMIND 커버 구현하기 <CElementCover />*/}
@@ -20,7 +20,7 @@ export const InputTokenChart = () => {
               borderColor: 'rgba(151, 187, 205, 1)',
               pointBackgroundColor: 'rgba(151, 187, 205, 1)',
               pointBorderColor: '#fff',
-              data: [50, 12, 28, 29, 7, 25, 12, 70, 60],
+              data: statisticsData,
             },
           ],
         }}

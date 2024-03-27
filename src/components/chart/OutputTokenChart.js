@@ -4,7 +4,7 @@ import { CChart } from '@coreui/react-chartjs';
 import { getStyle } from '@coreui/utils';
 import chartPastYearMonthsLabels from 'components/chart/chartPastYearMonthsLabels';
 
-export const OutputTokenChart = () => {
+export const OutputTokenChart = (statisticsData) => {
   return (
     <CChart
       type="line"
@@ -17,7 +17,7 @@ export const OutputTokenChart = () => {
             borderColor: 'rgba(220, 220, 220, 1)',
             pointBackgroundColor: 'rgba(220, 220, 220, 1)',
             pointBorderColor: '#fff',
-            data: [40, 20, 12, 39, 10, 40, 39, 80, 40, 5000],
+            data: statisticsData,
           },
         ],
       }}

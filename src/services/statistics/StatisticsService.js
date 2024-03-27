@@ -1,3 +1,5 @@
+import api from 'api/Api';
+
 const getMonthlyStatisticsData = async (params) => {
   const response = await api.get('/admin/statistics/month', {
     criteria: params.criteria,

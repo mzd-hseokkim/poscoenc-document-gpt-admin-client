@@ -28,6 +28,7 @@ import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
+import StatisticsService from 'services/statistics/StatisticsService';
 import UserService from 'services/UserService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
@@ -38,6 +39,12 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
   const [isLoading, setIsLoading] = useState(false);
   const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [formData, setFormData] = useState([]);
+  const [statisticsData, setStatisticsData] = useState({
+    inputTokenData: [],
+    outputTokenData: [],
+    bingSearchsData: [],
+    dallE3GenerationsData: [],
+  });
   const [searchParams] = useSearchParams();
 
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
@@ -106,14 +113,45 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
     [addToast, closeModal, reset]
   );
 
+  const [selectedCriteria, setSelectedCriteria] = useState('createdBy');
+  const fetchStatisticsData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const statisticsData = await StatisticsService.getMonthlyStatisticsData({
+        criteria: selectedCriteria,
+        criteriaKey: formData.id,
+        endData: new Date().toISOString().split('T')[0],
+      });
+      setStatisticsData({
+        inputTokenData: statisticsData.list.map((item) => ({ label: item.aggregationKey, value: item.sumInputTokens })),
+        outputTokenData: statisticsData.list.map((item) => ({
+          label: item.aggregationKey,
+          value: item.sumOutputTokens,
+        })),
+        bingSearchsData: statisticsData.list.map((item) => ({
+          label: item.aggregationKey,
+          value: item.sumBingSearchs,
+        })),
+        dallE3GenerationsData: statisticsData.list.map((item) => ({
+          label: item.aggregationKey,
+          value: item.sumDallE3Generations,
+        })),
+      });
+    } catch (error) {
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedCriteria, formData.id]);
+
   useEffect(() => {
     setIsLoading(false);
     const userId = searchParams.get('id');
 
     if (!isCreateMode && userId) {
       void fetchUserDetail(userId);
+      void fetchStatisticsData();
     }
-  }, [fetchUserDetail, isCreateMode, searchParams, selectedId]);
+  }, [fetchStatisticsData, fetchUserDetail, isCreateMode, searchParams, selectedId]);
 
   const postUser = async (data) => {
     try {
@@ -247,8 +285,14 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
                 </CButton>
                 {/*REMIND 차트 criteria 필터 버튼 기능 적용하기 */}
                 <CButtonGroup className="float-end me-3">
-                  {['Day', 'Month'].map((value) => (
-                    <CButton color="outline-secondary" key={value} className="mx-0" active={value === 'Month'}>
+                  {['createdBy', 'documentCollection'].map((value) => (
+                    <CButton
+                      color="outline-secondary"
+                      key={value}
+                      className="mx-0"
+                      active={value === selectedCriteria}
+                      onClick={() => setSelectedCriteria(value)} // 클릭 이벤트 핸들러
+                    >
                       {value}
                     </CButton>
                   ))}
@@ -257,20 +301,21 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
             </CRow>
           </CCardHeader>
           <CCardBody>
+            {/*StartFrom criteria 설정 문제 해결부터 시작. */}
             <CRow md="3" className="mb-3">
               <CCol md="6">
-                <InputTokenChart />
+                <InputTokenChart data={statisticsData.inputTokenData} />
               </CCol>
               <CCol md="6">
-                <OutputTokenChart />
+                <OutputTokenChart data={statisticsData.outputTokenData} />
               </CCol>
             </CRow>
             <CRow>
               <CCol sm={6}>
-                <BingSearchsChart />
+                <BingSearchsChart data={statisticsData.bingSearchsData} />
               </CCol>
               <CCol sm={6}>
-                <DallE3GenerationChart />
+                <DallE3GenerationChart data={statisticsData.dallE3GenerationsData} />
               </CCol>
             </CRow>
           </CCardBody>

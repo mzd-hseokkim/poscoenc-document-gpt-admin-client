@@ -5,9 +5,9 @@ import CIcon from '@coreui/icons-react';
 import { CChartLine } from '@coreui/react-chartjs';
 import { CDropdown, CDropdownItem, CDropdownMenu, CDropdownToggle, CWidgetStatsA } from '@coreui/react-pro';
 import chartPastYearMonthsLabels from 'components/chart/chartPastYearMonthsLabels';
-import { getNonGridLineChartOptions } from 'components/chart/getNonGridLineChartOptions';
+import { getNonGridLineChartOptions } from 'components/chart/options/getNonGridLineChartOptions';
 
-export const BingSearchsChart = () => {
+export const BingSearchsChart = (statisticsData) => {
   return (
     <CWidgetStatsA
       className="mb-3"
@@ -51,7 +51,7 @@ export const BingSearchsChart = () => {
                 backgroundColor: 'transparent',
                 borderColor: 'rgba(255,255,255,.55)',
                 pointBackgroundColor: '#e5d746',
-                data: [65, 59, 84, 84, 51, 55, 40],
+                data: statisticsData,
               },
             ],
           }}
