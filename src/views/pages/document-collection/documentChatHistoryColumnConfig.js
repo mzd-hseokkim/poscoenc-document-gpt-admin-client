@@ -10,13 +10,13 @@ export const documentChatHistoryColumnConfig = [
     _style: { width: '15%' },
   },
   {
-    key: 'answer',
-    label: '답변',
+    key: 'question',
+    label: '질문',
     _style: { width: '25%' },
   },
   {
-    key: 'question',
-    label: '질문',
+    key: 'answer',
+    label: '답변',
     _style: { width: '25%' },
   },
   {
