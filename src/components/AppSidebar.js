@@ -5,6 +5,7 @@ import SideBarFullLogo from 'assets/images/pocEnglishFullLogo.png';
 import SideBarLogo from 'assets/images/poscoenclogo.jpg';
 import useSidebarItems from 'hooks/useSidebarItems';
 import { useDispatch, useSelector } from 'react-redux';
+import SimpleBar from 'simplebar-react';
 
 import { AppSidebarNav } from './AppSidebarNav';
 
@@ -40,9 +41,9 @@ const AppSidebar = () => {
         />
       </CSidebarBrand>
       <CSidebarNav>
-        {/*<SimpleBar>*/}
-        <AppSidebarNav items={menuItems} refetchMenuList={refetchMenuList} />
-        {/*</SimpleBar>*/}
+        <SimpleBar>
+          <AppSidebarNav items={menuItems} refetchMenuList={refetchMenuList} />
+        </SimpleBar>
       </CSidebarNav>
       <CSidebarToggler
         className="d-none d-lg-flex"

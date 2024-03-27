@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react-pro';
+import { CNavGroup, CNavGroupItems, CNavItem, CNavTitle } from '@coreui/react-pro';
 import { useToast } from 'context/ToastContext';
 import MenuService from 'services/menu/MenuService';
 import { iconMapper } from 'utils/common/iconMapper';
@@ -76,10 +76,13 @@ const useSidebarItems = () => {
           icon: iconMapper({ iconName: 'cilSpeedometer', type: 'nav' }),
         },
         {
-          component: CNavGroup,
+          component: CNavTitle,
           name: '즐겨찾기',
-          to: '/',
-          active: false,
+        },
+        {
+          component: CNavGroupItems,
+          name: '즐겨찾기',
+          active: 'false', //REMIND custom props boolean value issue
           icon: iconMapper({ iconName: 'cilStar', type: 'nav' }),
           items: favoriteItems,
         },

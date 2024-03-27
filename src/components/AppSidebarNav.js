@@ -4,6 +4,7 @@ import { CBadge, CCol } from '@coreui/react-pro';
 import { useToast } from 'context/ToastContext';
 import PropTypes from 'prop-types';
 import { NavLink, useLocation } from 'react-router-dom';
+import routes from 'routes';
 import MenuService from 'services/menu/MenuService';
 
 export const AppSidebarNav = ({ items, refetchMenuList }) => {
@@ -40,16 +41,28 @@ export const AppSidebarNav = ({ items, refetchMenuList }) => {
     );
   };
 
+  const getRouteName = (pathname, routes) => {
+    const currentRoute = routes.find((route) => route.path === pathname);
+    return currentRoute ? currentRoute.name : false;
+  };
   const navItem = (item, index, depth = 0) => {
     const { component, name, badge, icon, isFavorite, favoriteMenuId, id, ...rest } = item;
     const Component = component;
+    const indentStyle = {
+      paddingLeft: `${(depth + 1) * 16}px`,
+    };
+
+    const getClassNameForNavItem = (itemPath, currentPath) => {
+      return itemPath === currentPath ? 'active' : undefined;
+    };
 
     return (
       <Component
         {...(rest.to && !rest.items && { component: NavLink })}
         key={index}
         {...rest}
-        style={{ ...rest.style, ...getIndentStyle(depth) }}
+        style={indentStyle}
+        className={getClassNameForNavItem(rest.to, location.pathname)}
       >
         {navLink(name, icon, badge)}
         <CCol className="d-grid justify-content-md-end">
@@ -83,22 +96,25 @@ export const AppSidebarNav = ({ items, refetchMenuList }) => {
   const navGroup = (item, index, depth = 0) => {
     const { component, name, icon, to, ...rest } = item;
     const Component = component;
-
-    //TODO 여기서 ClassName 을 붙여주는데 최초 사이드바 렌더링 시 즐겨찾기가 열려있게 기본적으로 세팅되어 있어야한다.
-    // 그 후로는 알아서 ... 새로고침하면 즐겨찾기가 열려있게만.
-    // navGroup 의 className 을 고정시켜놔도 적용되는건 없다.
+    const hasActiveItem = item.items?.some(
+      (subItem) => getRouteName(subItem.to, routes) === getRouteName(location.pathname, routes)
+    );
+    const indentStyle = {
+      paddingLeft: `${depth * 16}px`,
+    };
 
     return (
       <Component
         idx={String(index)}
         key={index}
         toggler={navLink(name, icon)}
-        visible={location.pathname.startsWith(to)}
-        style={getIndentStyle(depth)}
+        style={indentStyle}
+        visible={location.pathname.startsWith(to) ? 'true' : undefined} //REMIND custom props issue
+        className={hasActiveItem ? 'show' : undefined}
         {...rest}
       >
         {item.items?.map((subItem, subIndex) =>
-          subItem.items ? navGroup(subItem, subIndex, depth + 1) : navItem(subItem, subIndex, depth + 1)
+          subItem.items ? navGroup(subItem, subIndex, depth + 4) : navItem(subItem, subIndex, depth + 4)
         )}
       </Component>
     );
@@ -106,14 +122,11 @@ export const AppSidebarNav = ({ items, refetchMenuList }) => {
 
   return (
     <React.Fragment>
-      {items && items.map((item, index) => (item.items ? navGroup(item, index) : navItem(item, index)))}
+      {items && items.map((item, index) => (item.items ? navGroup(item, index, 0) : navItem(item, index, 0)))}
     </React.Fragment>
   );
 };
 
-const getIndentStyle = (depth) => ({
-  paddingLeft: `${depth * 20}px`,
-});
 AppSidebarNav.propTypes = {
   items: PropTypes.arrayOf(PropTypes.any).isRequired,
 };
