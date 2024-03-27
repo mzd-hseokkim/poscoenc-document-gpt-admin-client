@@ -152,8 +152,8 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
             <CCardBody>
               <CCard className="mb-3 border-1">
                 <CCardHeader className="bold h4">질문</CCardHeader>
-                <CCardBody className="mt-2">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]} className="markdown-content">
+                <CCardBody>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} className="markdown-content mt-3">
                     {chatHistory.question}
                   </ReactMarkdown>
                 </CCardBody>
