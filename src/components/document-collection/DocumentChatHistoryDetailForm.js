@@ -52,11 +52,11 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
     },
     {
       name: 'inputTokens',
-      label: '인풋 토큰',
+      label: '인풋 토큰 개수',
     },
     {
       name: 'outputTokens',
-      label: '아웃풋 토큰',
+      label: '아웃풋 토큰 개수',
     },
     {
       name: 'bingSearchs',
@@ -82,6 +82,10 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
       const detail = await DocumentChatHistoryService.getDocumentChatHistory(chatId);
       const formattedDetail = {
         ...detail,
+        inputTokens: `${detail.inputTokens} 개`,
+        outputTokens: `${detail.outputTokens} 개`,
+        bingSearchs: `${detail.bingSearchs} 회`,
+        dallE3Generations: `${detail.dallE3Generations} 회`,
         createdAt: detail.createdAt && formatToYMD(detail.createdAt),
         modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
       };
