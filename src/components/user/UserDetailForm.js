@@ -1,8 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { cilCloudDownload } from '@coreui/icons';
+import CIcon from '@coreui/icons-react';
 import {
+  CButton,
+  CButtonGroup,
   CCard,
   CCardBody,
+  CCardHeader,
   CCol,
   CForm,
   CFormInput,
@@ -14,6 +19,10 @@ import {
 } from '@coreui/react-pro';
 import StatusBadge from 'components/badge/StatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
+import { BingSearchsChart } from 'components/chart/BingSearchsChart';
+import { DallE3GenerationChart } from 'components/chart/DallE3GenerationChart';
+import { InputTokenChart } from 'components/chart/InputTokenChart';
+import { OutputTokenChart } from 'components/chart/OutputTokenChart';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
@@ -223,6 +232,49 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
             </CCardBody>
           </CCard>
         </CForm>
+        <CCard>
+          <CCardHeader>
+            <CRow>
+              <CCol sm={5}>
+                <h4 id="statistics" className="card-title mb-2 mt-1">
+                  Statistics
+                </h4>
+              </CCol>
+              <CCol sm={7} className="d-none d-md-block">
+                {/*REMIND 차트 엑셀 다운로드 구현 가능 */}
+                <CButton color="primary" className="float-end">
+                  <CIcon icon={cilCloudDownload} />
+                </CButton>
+                {/*REMIND 차트 criteria 필터 버튼 기능 적용하기 */}
+                <CButtonGroup className="float-end me-3">
+                  {['Day', 'Month'].map((value) => (
+                    <CButton color="outline-secondary" key={value} className="mx-0" active={value === 'Month'}>
+                      {value}
+                    </CButton>
+                  ))}
+                </CButtonGroup>
+              </CCol>
+            </CRow>
+          </CCardHeader>
+          <CCardBody>
+            <CRow md="3" className="mb-3">
+              <CCol md="6">
+                <InputTokenChart />
+              </CCol>
+              <CCol md="6">
+                <OutputTokenChart />
+              </CCol>
+            </CRow>
+            <CRow>
+              <CCol sm={6}>
+                <BingSearchsChart />
+              </CCol>
+              <CCol sm={6}>
+                <DallE3GenerationChart />
+              </CCol>
+            </CRow>
+          </CCardBody>
+        </CCard>
       </CModalBody>
       <CModalFooter>
         <DetailFormActionButtons

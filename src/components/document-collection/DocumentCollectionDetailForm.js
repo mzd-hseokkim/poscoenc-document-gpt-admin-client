@@ -1,12 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { cilArrowThickToBottom } from '@coreui/icons';
+import { cilArrowThickToBottom, cilCloudDownload } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import {
   CBadge,
   CButton,
+  CButtonGroup,
   CCard,
   CCardBody,
+  CCardHeader,
+  CCol,
   CForm,
   CFormLabel,
   CFormTextarea,
@@ -14,8 +17,11 @@ import {
   CListGroupItem,
   CModalBody,
   CModalFooter,
+  CRow,
 } from '@coreui/react-pro';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
+import { InputTokenChart } from 'components/chart/InputTokenChart';
+import { OutputTokenChart } from 'components/chart/OutputTokenChart';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
@@ -215,7 +221,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
             </CCardBody>
           </CCard>
           {collectionDetail?.files?.length !== 0 && (
-            <CCard>
+            <CCard className="mb-3">
               <CCardBody>
                 <CListGroup>
                   {/*REMIND detail 에서 file 만 따로 처리 할 수 있도록 리팩토링, reset 에 의해 나머지 데이터가 관리되고 있음*/}
@@ -243,6 +249,39 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
             </CCard>
           )}
         </CForm>
+        <CCard className="mb-3">
+          <CCardHeader>
+            <CRow>
+              <CCol sm={5}>
+                <h4 id="statistics" className="card-title mb-2 mt-1">
+                  Statistics
+                </h4>
+              </CCol>
+              <CCol sm={7} className="d-none d-md-block">
+                <CButton color="primary" className="float-end">
+                  <CIcon icon={cilCloudDownload} />
+                </CButton>
+                <CButtonGroup className="float-end me-3">
+                  {['Day', 'Month'].map((value) => (
+                    <CButton color="outline-secondary" key={value} className="mx-0" active={value === 'Month'}>
+                      {value}
+                    </CButton>
+                  ))}
+                </CButtonGroup>
+              </CCol>
+            </CRow>
+          </CCardHeader>
+          <CCardBody>
+            <CRow className="mb-3">
+              <CCol md="6">
+                <InputTokenChart />
+              </CCol>
+              <CCol md="6">
+                <OutputTokenChart />
+              </CCol>
+            </CRow>
+          </CCardBody>
+        </CCard>
       </CModalBody>
       <CModalFooter>
         <DetailFormActionButtons

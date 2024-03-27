@@ -26,20 +26,14 @@ import formModes from 'utils/common/formModes';
 import 'components/document-collection/ChatHistoryQnA.css';
 
 const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDocumentCollectionList }) => {
-  const [formMode, setFormMode] = useState(initialFormMode || 'read');
+  const formMode = initialFormMode || 'read';
   const [chatHistory, setChatHistory] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const { isCreateMode, isReadMode } = formModes(formMode);
   const [searchParams] = useSearchParams();
   const { addToast } = useToast();
 
-  const {
-    reset,
-    handleSubmit,
-    register,
-    control,
-    formState: { errors },
-  } = useForm({ mode: 'onChange' });
+  const { reset, handleSubmit, register } = useForm({ mode: 'onChange' });
 
   const chatHistoryAttributeFields = [
     {
