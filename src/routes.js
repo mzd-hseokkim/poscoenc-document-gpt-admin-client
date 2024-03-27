@@ -1,12 +1,15 @@
 import React from 'react';
 
-const BoardMainPage = React.lazy(() => import('./views/pages/board/BoardManagementPage'));
-const UserManagement = React.lazy(() => import('./views/pages/user/UserManagementPage'));
-const AdminManagementPage = React.lazy(() => import('./views/pages/admin/AdminManagementPage'));
-const RoleManagementPage = React.lazy(() => import('./views/pages/role/RoleManagementPage'));
-const MenuManagement = React.lazy(() => import('./views/pages/menu/MenuManagementPage'));
+const BoardMainPage = React.lazy(() => import('views/pages/board/BoardManagementPage'));
+const UserManagement = React.lazy(() => import('views/pages/user/UserManagementPage'));
+const AdminManagementPage = React.lazy(() => import('views/pages/admin/AdminManagementPage'));
+const RoleManagementPage = React.lazy(() => import('views/pages/role/RoleManagementPage'));
+const MenuManagement = React.lazy(() => import('views/pages/menu/MenuManagementPage'));
 const DocumentCollectionManagementPage = React.lazy(() =>
-  import('./views/pages/document-collection/DocumentCollectionManagementPage')
+  import('views/pages/document-collection/DocumentCollectionManagementPage')
+);
+const ChatHistoryManagementPage = React.lazy(() =>
+  import('views/pages/document-collection/DocumentChatHistoryManagementPage')
 );
 
 const routes = [
@@ -21,6 +24,12 @@ const routes = [
     exact: true,
     name: '문서 집합 관리',
     element: DocumentCollectionManagementPage,
+  },
+  {
+    path: '/document-collections-chat-history/management',
+    exact: true,
+    name: '채팅 이력 관리',
+    element: ChatHistoryManagementPage,
   },
 ];
 
