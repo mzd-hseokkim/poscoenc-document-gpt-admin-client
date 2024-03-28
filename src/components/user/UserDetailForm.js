@@ -110,38 +110,44 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
         setIsLoading(false);
       }
     },
-    [addToast, closeModal, reset]
+    [addToast, closeModal, isCreateMode, reset]
   );
 
   const [selectedCriteria, setSelectedCriteria] = useState('createdBy');
-  const fetchStatisticsData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const statisticsData = await StatisticsService.getMonthlyStatisticsData({
-        criteria: selectedCriteria,
-        criteriaKey: formData.id,
-        endData: new Date().toISOString().split('T')[0],
-      });
-      setStatisticsData({
-        inputTokenData: statisticsData.list.map((item) => ({ label: item.aggregationKey, value: item.sumInputTokens })),
-        outputTokenData: statisticsData.list.map((item) => ({
-          label: item.aggregationKey,
-          value: item.sumOutputTokens,
-        })),
-        bingSearchsData: statisticsData.list.map((item) => ({
-          label: item.aggregationKey,
-          value: item.sumBingSearchs,
-        })),
-        dallE3GenerationsData: statisticsData.list.map((item) => ({
-          label: item.aggregationKey,
-          value: item.sumDallE3Generations,
-        })),
-      });
-    } catch (error) {
-    } finally {
-      setIsLoading(false);
-    }
-  }, [selectedCriteria, formData.id]);
+  const fetchStatisticsData = useCallback(
+    async (userId) => {
+      setIsLoading(true);
+      try {
+        const responseData = await StatisticsService.getMonthlyStatisticsData({
+          criteria: selectedCriteria,
+          criteriaKey: userId,
+          endDate: new Date().toISOString().split('T')[0],
+        });
+
+        responseData.list.sort((a, b) => {
+          const [yearA, monthA] = a.aggregationKey.split('-').map(Number);
+          const [yearB, monthB] = b.aggregationKey.split('-').map(Number);
+
+          if (yearA !== yearB) {
+            return yearA - yearB;
+          } else {
+            return monthA - monthB;
+          }
+        });
+        setStatisticsData({
+          inputTokenData: responseData.list.map((item) => item.sumInputTokens),
+          outputTokenData: responseData.list.map((item) => item.sumOutputTokens),
+          bingSearchsData: responseData.list.map((item) => item.sumBingSearchs),
+          dallE3GenerationsData: responseData.list.map((item) => item.sumDallE3Generations),
+        });
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [selectedCriteria]
+  );
 
   useEffect(() => {
     setIsLoading(false);
@@ -149,7 +155,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
 
     if (!isCreateMode && userId) {
       void fetchUserDetail(userId);
-      void fetchStatisticsData();
+      void fetchStatisticsData(userId);
     }
   }, [fetchStatisticsData, fetchUserDetail, isCreateMode, searchParams, selectedId]);
 
@@ -300,25 +306,27 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
               </CCol>
             </CRow>
           </CCardHeader>
-          <CCardBody>
-            {/*StartFrom criteria 설정 문제 해결부터 시작. */}
-            <CRow md="3" className="mb-3">
-              <CCol md="6">
-                <InputTokenChart data={statisticsData.inputTokenData} />
-              </CCol>
-              <CCol md="6">
-                <OutputTokenChart data={statisticsData.outputTokenData} />
-              </CCol>
-            </CRow>
-            <CRow>
-              <CCol sm={6}>
-                <BingSearchsChart data={statisticsData.bingSearchsData} />
-              </CCol>
-              <CCol sm={6}>
-                <DallE3GenerationChart data={statisticsData.dallE3GenerationsData} />
-              </CCol>
-            </CRow>
-          </CCardBody>
+          {statisticsData.length !== 0 && (
+            <CCardBody>
+              {/*StartFrom criteria 설정 문제 해결부터 시작. */}
+              <CRow className="mb-3">
+                <CCol md="6">
+                  <InputTokenChart data={statisticsData.inputTokenData} />
+                </CCol>
+                <CCol md="6">
+                  <OutputTokenChart data={statisticsData.outputTokenData} />
+                </CCol>
+              </CRow>
+              <CRow>
+                <CCol sm={6}>
+                  <BingSearchsChart data={statisticsData.bingSearchsData} />
+                </CCol>
+                <CCol sm={6}>
+                  <DallE3GenerationChart data={statisticsData.dallE3GenerationsData} />
+                </CCol>
+              </CRow>
+            </CCardBody>
+          )}
         </CCard>
       </CModalBody>
       <CModalFooter>

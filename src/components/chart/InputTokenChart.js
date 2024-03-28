@@ -2,9 +2,11 @@ import React from 'react';
 
 import { CChart } from '@coreui/react-chartjs';
 import chartPastYearMonthsLabels from 'components/chart/chartPastYearMonthsLabels';
+import { padDataArrayWithZero } from 'components/chart/ChartStatisticsProcessor';
 import { getCoreUILineChartOptions } from 'components/chart/options/getCoreUILineChartOptions';
 
 export const InputTokenChart = (statisticsData) => {
+  const paddedArray = padDataArrayWithZero(statisticsData.data);
   return (
     <>
       {/*REMIND 커버 구현하기 <CElementCover />*/}
@@ -12,7 +14,7 @@ export const InputTokenChart = (statisticsData) => {
         style={{ height: '200px' }}
         type="line"
         data={{
-          labels: chartPastYearMonthsLabels(),
+          labels: chartPastYearMonthsLabels(), // datasets 의 길이와 일치하는 배열을 가져야합니다.
           datasets: [
             {
               label: 'Input Tokens',
@@ -20,7 +22,7 @@ export const InputTokenChart = (statisticsData) => {
               borderColor: 'rgba(151, 187, 205, 1)',
               pointBackgroundColor: 'rgba(151, 187, 205, 1)',
               pointBorderColor: '#fff',
-              data: statisticsData,
+              data: paddedArray,
             },
           ],
         }}

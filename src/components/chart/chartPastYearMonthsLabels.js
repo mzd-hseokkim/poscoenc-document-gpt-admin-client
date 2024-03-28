@@ -3,7 +3,7 @@ const monthsNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8�
 const chartPastYearMonthsLabels = () => {
   const generateMonths = () => {
     const today = new Date();
-    const currentMonth = today.getMonth(); // 월은 0부터 시작
+    const currentMonth = today.getMonth();
     const currentYear = today.getFullYear();
     const generatedMonths = [];
 

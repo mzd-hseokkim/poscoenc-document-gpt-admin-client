@@ -3,8 +3,10 @@ import React from 'react';
 import { CChart } from '@coreui/react-chartjs';
 import { getStyle } from '@coreui/utils';
 import chartPastYearMonthsLabels from 'components/chart/chartPastYearMonthsLabels';
+import { padDataArrayWithZero } from 'components/chart/ChartStatisticsProcessor';
 
 export const OutputTokenChart = (statisticsData) => {
+  const paddedArray = padDataArrayWithZero(statisticsData.data);
   return (
     <CChart
       type="line"
@@ -17,7 +19,7 @@ export const OutputTokenChart = (statisticsData) => {
             borderColor: 'rgba(220, 220, 220, 1)',
             pointBackgroundColor: 'rgba(220, 220, 220, 1)',
             pointBorderColor: '#fff',
-            data: statisticsData,
+            data: paddedArray,
           },
         ],
       }}
