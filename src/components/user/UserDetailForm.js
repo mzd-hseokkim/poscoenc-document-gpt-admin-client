@@ -4,7 +4,6 @@ import { cilCloudDownload } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import {
   CButton,
-  CButtonGroup,
   CCard,
   CCardBody,
   CCardHeader,
@@ -23,6 +22,7 @@ import { BingSearchsChart } from 'components/chart/BingSearchsChart';
 import { DallE3GenerationChart } from 'components/chart/DallE3GenerationChart';
 import { InputTokenChart } from 'components/chart/InputTokenChart';
 import { OutputTokenChart } from 'components/chart/OutputTokenChart';
+import { getFirstAndLastMonthLabels } from 'components/chart/util/chartPastYearMonthsLabels';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
@@ -58,6 +58,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
   } = useForm({ mode: 'onChange' });
 
   const deleted = watch('deleted');
+  const { firstLabel, lastLabel } = getFirstAndLastMonthLabels();
 
   const userInfoFields = [
     {
@@ -113,41 +114,37 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
     [addToast, closeModal, isCreateMode, reset]
   );
 
-  const [selectedCriteria, setSelectedCriteria] = useState('createdBy');
-  const fetchStatisticsData = useCallback(
-    async (userId) => {
-      setIsLoading(true);
-      try {
-        const responseData = await StatisticsService.getMonthlyStatisticsData({
-          criteria: selectedCriteria,
-          criteriaKey: userId,
-          endDate: new Date().toISOString().split('T')[0],
-        });
+  const fetchStatisticsData = useCallback(async (userId) => {
+    setIsLoading(true);
+    try {
+      const responseData = await StatisticsService.getMonthlyStatisticsData({
+        criteria: 'createdBy',
+        criteriaKey: userId,
+        endDate: new Date().toISOString().split('T')[0],
+      });
 
-        responseData.list.sort((a, b) => {
-          const [yearA, monthA] = a.aggregationKey.split('-').map(Number);
-          const [yearB, monthB] = b.aggregationKey.split('-').map(Number);
+      responseData.list.sort((a, b) => {
+        const [yearA, monthA] = a.aggregationKey.split('-').map(Number);
+        const [yearB, monthB] = b.aggregationKey.split('-').map(Number);
 
-          if (yearA !== yearB) {
-            return yearA - yearB;
-          } else {
-            return monthA - monthB;
-          }
-        });
-        setStatisticsData({
-          inputTokenData: responseData.list.map((item) => item.sumInputTokens),
-          outputTokenData: responseData.list.map((item) => item.sumOutputTokens),
-          bingSearchsData: responseData.list.map((item) => item.sumBingSearchs),
-          dallE3GenerationsData: responseData.list.map((item) => item.sumDallE3Generations),
-        });
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [selectedCriteria]
-  );
+        if (yearA !== yearB) {
+          return yearA - yearB;
+        } else {
+          return monthA - monthB;
+        }
+      });
+      setStatisticsData({
+        inputTokenData: responseData.list.map((item) => item.sumInputTokens),
+        outputTokenData: responseData.list.map((item) => item.sumOutputTokens),
+        bingSearchsData: responseData.list.map((item) => item.sumBingSearchs),
+        dallE3GenerationsData: responseData.list.map((item) => item.sumDallE3Generations),
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     setIsLoading(false);
@@ -252,7 +249,6 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
       </CCard>
     );
   };
-
   return (
     <>
       <FormLoadingCover isLoading={isLoading} />
@@ -280,35 +276,23 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
           <CCardHeader>
             <CRow>
               <CCol sm={5}>
-                <h4 id="statistics" className="card-title mb-2 mt-1">
-                  Statistics
+                <h4 id="traffic" className="card-title mb-0">
+                  사용 통계
                 </h4>
+                <div className="small text-medium-emphasis">
+                  {firstLabel} - {`${new Date().getFullYear()} / ${lastLabel}`}
+                </div>
               </CCol>
               <CCol sm={7} className="d-none d-md-block">
                 {/*REMIND 차트 엑셀 다운로드 구현 가능 */}
                 <CButton color="primary" className="float-end">
                   <CIcon icon={cilCloudDownload} />
                 </CButton>
-                {/*REMIND 차트 criteria 필터 버튼 기능 적용하기 */}
-                <CButtonGroup className="float-end me-3">
-                  {['createdBy', 'documentCollection'].map((value) => (
-                    <CButton
-                      color="outline-secondary"
-                      key={value}
-                      className="mx-0"
-                      active={value === selectedCriteria}
-                      onClick={() => setSelectedCriteria(value)} // 클릭 이벤트 핸들러
-                    >
-                      {value}
-                    </CButton>
-                  ))}
-                </CButtonGroup>
               </CCol>
             </CRow>
           </CCardHeader>
-          {statisticsData.length !== 0 && (
+          {statisticsData?.length !== 0 && (
             <CCardBody>
-              {/*StartFrom criteria 설정 문제 해결부터 시작. */}
               <CRow className="mb-3">
                 <CCol md="6">
                   <InputTokenChart data={statisticsData.inputTokenData} />

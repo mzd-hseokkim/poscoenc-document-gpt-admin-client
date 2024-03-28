@@ -2,10 +2,10 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { cilArrowThickToBottom, cilCloudDownload } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
+import { CChart } from '@coreui/react-chartjs';
 import {
   CBadge,
   CButton,
-  CButtonGroup,
   CCard,
   CCardBody,
   CCardHeader,
@@ -19,9 +19,10 @@ import {
   CModalFooter,
   CRow,
 } from '@coreui/react-pro';
+import { getStyle } from '@coreui/utils';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
-import { InputTokenChart } from 'components/chart/InputTokenChart';
-import { OutputTokenChart } from 'components/chart/OutputTokenChart';
+import { chartPastYearMonthsLabels, getFirstAndLastMonthLabels } from 'components/chart/util/chartPastYearMonthsLabels';
+import { mergeAndSumArrays, padDataArrayWithZero } from 'components/chart/util/ChartStatisticsProcessor';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
@@ -30,6 +31,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import DocumentCollectionFileService from 'services/document-collection/DocumentCollectionFileService';
 import DocumentCollectionService from 'services/document-collection/DocumentCollectionService';
+import StatisticsService from 'services/statistics/StatisticsService';
 import { userIdSelector } from 'states/jwtTokenState';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
@@ -41,7 +43,14 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
   const [collectionDetail, setCollectionDetail] = useState({});
   const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
+  const [statisticsData, setStatisticsData] = useState({
+    inputTokenData: [],
+    outputTokenData: [],
+    bingSearchsData: [],
+    dallE3GenerationsData: [],
+  });
   const [searchParams] = useSearchParams();
+  const { firstLabel, lastLabel } = getFirstAndLastMonthLabels();
 
   const { addToast } = useToast();
   const currentUserId = useRecoilValue(userIdSelector);
@@ -122,6 +131,37 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     [addToast, closeModal, reset]
   );
 
+  const fetchStatisticsData = useCallback(async (collectionId) => {
+    try {
+      const responseData = await StatisticsService.getMonthlyStatisticsData({
+        criteria: 'documentCollection',
+        criteriaKey: collectionId,
+        endDate: new Date().toISOString().split('T')[0],
+      });
+      console.log(responseData);
+      responseData.list.sort((a, b) => {
+        const [yearA, monthA] = a.aggregationKey.split('-').map(Number);
+        const [yearB, monthB] = b.aggregationKey.split('-').map(Number);
+
+        if (yearA !== yearB) {
+          return yearA - yearB;
+        } else {
+          return monthA - monthB;
+        }
+      });
+      setStatisticsData({
+        inputTokenData: responseData.list.map((item) => item.sumInputTokens),
+        outputTokenData: responseData.list.map((item) => item.sumOutputTokens),
+        bingSearchsData: responseData.list.map((item) => item.sumBingSearchs),
+        dallE3GenerationsData: responseData.list.map((item) => item.sumDallE3Generations),
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      //REMIND Loading cover
+    }
+  }, []);
+
   useEffect(() => {
     const collectionId = searchParams.get('id');
     if (!collectionId) {
@@ -129,7 +169,8 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     }
 
     void fetchCollectionDetail(collectionId);
-  }, [closeModal, fetchCollectionDetail, searchParams]);
+    void fetchStatisticsData(collectionId);
+  }, [closeModal, fetchCollectionDetail, fetchStatisticsData, searchParams]);
   const putModifiedCollection = async (data) => {
     try {
       const isModified = await DocumentCollectionService.putModifiedCollectionDetail(data);
@@ -253,32 +294,85 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
           <CCardHeader>
             <CRow>
               <CCol sm={5}>
-                <h4 id="statistics" className="card-title mb-2 mt-1">
-                  Statistics
+                <h4 id="traffic" className="card-title mb-0">
+                  사용 통계
                 </h4>
+                <div className="small text-medium-emphasis">
+                  {firstLabel} - {`${new Date().getFullYear()} / ${lastLabel}`}
+                </div>
               </CCol>
               <CCol sm={7} className="d-none d-md-block">
                 <CButton color="primary" className="float-end">
                   <CIcon icon={cilCloudDownload} />
                 </CButton>
-                <CButtonGroup className="float-end me-3">
-                  {['Day', 'Month'].map((value) => (
-                    <CButton color="outline-secondary" key={value} className="mx-0" active={value === 'Month'}>
-                      {value}
-                    </CButton>
-                  ))}
-                </CButtonGroup>
               </CCol>
             </CRow>
           </CCardHeader>
           <CCardBody>
-            <CRow className="mb-3">
-              <CCol md="6">
-                <InputTokenChart />
-              </CCol>
-              <CCol md="6">
-                <OutputTokenChart />
-              </CCol>
+            <CRow className="mb-3 justify-content-center">
+              <CChart
+                type="line"
+                style={{ width: 650 }}
+                data={{
+                  labels: chartPastYearMonthsLabels(),
+                  datasets: [
+                    {
+                      label: 'Total', // 범례
+                      backgroundColor: 'rgba(220, 220, 220, 0.2)',
+                      borderColor: '#007bff',
+                      pointBackgroundColor: 'rgba(220, 220, 220, 1)',
+                      pointBorderColor: '#fff',
+                      data: mergeAndSumArrays(
+                        padDataArrayWithZero(statisticsData.outputTokenData),
+                        padDataArrayWithZero(statisticsData.inputTokenData)
+                      ),
+                    },
+                    {
+                      label: 'Input Tokens', // 범례
+                      backgroundColor: 'rgba(151, 187, 205, 0.2)',
+                      borderColor: '#28a745',
+                      pointBackgroundColor: 'rgba(151, 187, 205, 1)',
+                      pointBorderColor: '#fff',
+                      data: padDataArrayWithZero(statisticsData.inputTokenData),
+                    },
+                    {
+                      label: 'Output Tokens', // 범례
+                      backgroundColor: 'rgba(220, 220, 220, 0.2)',
+                      borderColor: '#ffc107',
+                      pointBackgroundColor: 'rgba(220, 220, 220, 1)',
+                      pointBorderColor: '#fff',
+                      data: padDataArrayWithZero(statisticsData.outputTokenData),
+                    },
+                  ],
+                }}
+                options={{
+                  plugins: {
+                    legend: {
+                      labels: {
+                        color: getStyle('--cui-body-color'),
+                      },
+                    },
+                  },
+                  scales: {
+                    x: {
+                      grid: {
+                        color: getStyle('--cui-border-color-translucent'),
+                      },
+                      ticks: {
+                        color: getStyle('--cui-body-color'),
+                      },
+                    },
+                    y: {
+                      grid: {
+                        color: getStyle('--cui-border-color-translucent'),
+                      },
+                      ticks: {
+                        color: getStyle('--cui-body-color'),
+                      },
+                    },
+                  },
+                }}
+              />
             </CRow>
           </CCardBody>
         </CCard>
