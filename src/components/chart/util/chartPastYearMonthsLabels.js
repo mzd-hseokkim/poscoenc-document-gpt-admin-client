@@ -27,4 +27,11 @@ const chartPastYearMonthsLabels = () => {
   return generateMonths();
 };
 
-export default chartPastYearMonthsLabels;
+const getFirstAndLastMonthLabels = () => {
+  const monthsLabels = chartPastYearMonthsLabels();
+  const firstLabel = monthsLabels[0];
+  const lastLabel = monthsLabels[monthsLabels.length - 1];
+  return { firstLabel, lastLabel };
+};
+
+export { chartPastYearMonthsLabels, getFirstAndLastMonthLabels };
