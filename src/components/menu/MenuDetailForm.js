@@ -258,7 +258,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
   const handleDeleteRestoreClick = async (id) => {
     const shouldDelete = !formData.deleted;
     try {
-      await MenuService.deleteMenu(id, shouldDelete);
+      await MenuService.deleteMenus([id], shouldDelete);
     } catch (error) {
       addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }

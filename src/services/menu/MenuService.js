@@ -95,11 +95,6 @@ const deleteFavoriteMenu = async (id) => {
   return response.data;
 };
 
-const deleteMenu = async (id, deleted) => {
-  const response = await api.patch(`/admin/menus/${id}/deleted?deleted=${deleted}`);
-  return response.data;
-};
-
 const deleteMenus = async (ids, deleted) => {
   const response = await api.patch(`/admin/menus/deleted/${deleted}`, ids);
   return response.data;
@@ -117,7 +112,6 @@ const MenuService = {
   postFavoriteMenu,
   patchMenu,
   deleteFavoriteMenu,
-  deleteMenu,
   deleteMenus,
 };
 
