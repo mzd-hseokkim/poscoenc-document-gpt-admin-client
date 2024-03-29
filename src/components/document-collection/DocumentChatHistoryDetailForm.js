@@ -23,8 +23,6 @@ import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/common/formModes';
 
-import 'components/document-collection/ChatHistoryQnA.css';
-
 const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDocumentCollectionList }) => {
   const formMode = initialFormMode || 'read';
   const [chatHistory, setChatHistory] = useState({});
