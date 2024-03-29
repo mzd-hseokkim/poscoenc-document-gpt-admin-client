@@ -2,8 +2,8 @@ import React from 'react';
 
 import { CChart } from '@coreui/react-chartjs';
 import { getCoreUILineChartOptions } from 'components/chart/options/getCoreUILineChartOptions';
-import { chartPastYearMonthsLabels } from 'components/chart/util/chartPastYearMonthsLabels';
-import { padDataArrayWithZero } from 'components/chart/util/ChartStatisticsProcessor';
+import { chartPastYearMonthsLabels } from 'components/chart/utils/chartPastYearMonthsLabels';
+import { padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
 
 export const InputTokenChart = (statisticsData) => {
   const paddedArray = padDataArrayWithZero(statisticsData.data);

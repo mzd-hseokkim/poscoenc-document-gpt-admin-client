@@ -1,9 +1,9 @@
 import React from 'react';
 
 import { CChart } from '@coreui/react-chartjs';
-import { getStyle } from '@coreui/utils';
-import { chartPastYearMonthsLabels } from 'components/chart/util/chartPastYearMonthsLabels';
-import { padDataArrayWithZero } from 'components/chart/util/ChartStatisticsProcessor';
+import { getCoreUILineChartOptions } from 'components/chart/options/getCoreUILineChartOptions';
+import { chartPastYearMonthsLabels } from 'components/chart/utils/chartPastYearMonthsLabels';
+import { padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
 
 export const OutputTokenChart = (statisticsData) => {
   const paddedArray = padDataArrayWithZero(statisticsData.data);
@@ -23,33 +23,7 @@ export const OutputTokenChart = (statisticsData) => {
           },
         ],
       }}
-      options={{
-        plugins: {
-          legend: {
-            labels: {
-              color: getStyle('--cui-body-color'),
-            },
-          },
-        },
-        scales: {
-          x: {
-            grid: {
-              color: getStyle('--cui-border-color-translucent'),
-            },
-            ticks: {
-              color: getStyle('--cui-body-color'),
-            },
-          },
-          y: {
-            grid: {
-              color: getStyle('--cui-border-color-translucent'),
-            },
-            ticks: {
-              color: getStyle('--cui-body-color'),
-            },
-          },
-        },
-      }}
+      options={getCoreUILineChartOptions}
     />
   );
 };

@@ -103,21 +103,22 @@ const UserManagementPage = () => {
           <CCardBody>
             <CForm onSubmit={handleSubmit}>
               <CRow className="mb-3">
-                <CCol md={4}>
+                <CCol md={6}>
                   <CFormInput id="name" label="이름" value={formData.name} onChange={handleChange} />
                 </CCol>
-                <CCol md={4}>
+                <CCol md={6}>
                   <CFormInput id="email" label="이메일" value={formData.email} onChange={handleChange} />
-                </CCol>
-                <CCol md={4}>
-                  <CFormInput id="team" label="팀" value={formData.team} onChange={handleChange} />
                 </CCol>
               </CRow>
               <CRow className="mb-3">
-                <CCol md={4}>
+                <CCol md={6}>
+                  <CFormInput id="team" label="팀" value={formData.team} onChange={handleChange} />
+                </CCol>
+                <CCol md={6}>
                   <CFormInput id="memo" label="메모" value={formData.memo} onChange={handleChange} />
                 </CCol>
-                <CCol md={3}>
+                <CRow className="mb-3"></CRow>
+                <CCol md={6}>
                   <CFormSelect
                     id="deletionOption"
                     label="사용자 상태"

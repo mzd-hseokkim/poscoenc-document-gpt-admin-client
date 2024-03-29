@@ -21,8 +21,11 @@ import {
 } from '@coreui/react-pro';
 import { getStyle } from '@coreui/utils';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
-import { chartPastYearMonthsLabels, getFirstAndLastMonthLabels } from 'components/chart/util/chartPastYearMonthsLabels';
-import { mergeAndSumArrays, padDataArrayWithZero } from 'components/chart/util/ChartStatisticsProcessor';
+import {
+  chartPastYearMonthsLabels,
+  getFirstAndLastMonthLabels,
+} from 'components/chart/utils/chartPastYearMonthsLabels';
+import { mergeAndSumArrays, padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
@@ -356,6 +359,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                   scales: {
                     x: {
                       grid: {
+                        display: false,
                         color: getStyle('--cui-border-color-translucent'),
                       },
                       ticks: {
@@ -369,6 +373,11 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                       ticks: {
                         color: getStyle('--cui-body-color'),
                       },
+                    },
+                  },
+                  elements: {
+                    line: {
+                      tension: 0.2,
                     },
                   },
                 }}

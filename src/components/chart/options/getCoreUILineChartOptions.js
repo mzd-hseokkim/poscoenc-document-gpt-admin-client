@@ -11,6 +11,7 @@ export const getCoreUILineChartOptions = {
   scales: {
     x: {
       grid: {
+        display: false,
         color: getStyle('--cui-border-color-translucent'),
       },
       ticks: {

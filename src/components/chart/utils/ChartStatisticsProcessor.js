@@ -23,10 +23,10 @@ const mergeAndSumArrays = (array1, array2) => {
 const calculateGrowthRateWithIcon = (prevMonthValue, currentMonthValue) => {
   if (prevMonthValue === 0) {
     // 이전 달의 값이 0이면 100% 증가로 간주하고 아이콘을 붙이지 않습니다.
-    return `${currentMonthValue * 100}%`;
+    return `${100}% ↑`;
   } else {
     const growthRate = ((currentMonthValue - prevMonthValue) / prevMonthValue) * 100;
-    const formattedGrowthRate = `${growthRate.toFixed(2)}%`;
+    const formattedGrowthRate = `${growthRate}%`;
     let icon = ''; // 기본적으로 아이콘은 비어있음
 
     // 증감률에 따라 아이콘을 결정합니다.

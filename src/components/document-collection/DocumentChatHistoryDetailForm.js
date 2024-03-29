@@ -58,7 +58,7 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
     },
     {
       name: 'dallE3Generations',
-      label: 'Dall_E_3 답변 생성 횟수',
+      label: 'Dall_E_3 이미지 생성 횟수',
     },
   ];
 
@@ -103,7 +103,7 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
   const renderAuditFields = () => {
     return (
       <CCard className="g-3 mb-3">
-        <CCardHeader className="h5">Audit</CCardHeader>
+        <CCardHeader className="h5">변경 이력</CCardHeader>
         <CCardBody>
           <CRow>
             <CCol className="col-md mb-2">
@@ -135,7 +135,7 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
         <CForm onSubmit={handleSubmit(onSubmit())}>
           {renderAuditFields()}
           <CCard className="mb-3">
-            <CCardHeader className="h5">Attributes</CCardHeader>
+            <CCardHeader className="h5">세부 정보</CCardHeader>
             <CCardBody>
               <FormInputGrid
                 register={register}
@@ -157,7 +157,21 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
                 </CCardBody>
               </CCard>
               <CCard className="border-1">
-                <CCardHeader className="bold h4">답변</CCardHeader>
+                <CCardHeader>
+                  <CRow>
+                    <CCol sm={5}>
+                      <h4 id="answer" className="bold card-title mb-0">
+                        답변
+                      </h4>
+                    </CCol>
+                    <CCol sm={7} className="card-title mb-0 text-end align-content-center">
+                      <h6 id="modelName" className="mt-1 bold">
+                        모델 : {/*{chatHistory.modelName}*/}
+                        ChatGPT-4
+                      </h6>
+                    </CCol>
+                  </CRow>
+                </CCardHeader>
                 <CCardBody>
                   <ReactMarkdown remarkPlugins={[remarkGfm]} className="reactMarkdown">
                     {chatHistory.answer}

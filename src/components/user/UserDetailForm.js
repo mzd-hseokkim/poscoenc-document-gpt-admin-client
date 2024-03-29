@@ -20,9 +20,8 @@ import StatusBadge from 'components/badge/StatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import { BingSearchsChart } from 'components/chart/BingSearchsChart';
 import { DallE3GenerationChart } from 'components/chart/DallE3GenerationChart';
-import { InputTokenChart } from 'components/chart/InputTokenChart';
-import { OutputTokenChart } from 'components/chart/OutputTokenChart';
-import { getFirstAndLastMonthLabels } from 'components/chart/util/chartPastYearMonthsLabels';
+import { TokenUsageChart } from 'components/chart/TokenUsageChart';
+import { getFirstAndLastMonthLabels } from 'components/chart/utils/chartPastYearMonthsLabels';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
@@ -283,7 +282,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
                   {firstLabel} - {`${new Date().getFullYear()} / ${lastLabel}`}
                 </div>
               </CCol>
-              <CCol sm={7} className="d-none d-md-block">
+              <CCol sm={7} className="d-none d-md-block mt-2">
                 {/*REMIND 차트 엑셀 다운로드 구현 가능 */}
                 <CButton color="primary" className="float-end">
                   <CIcon icon={cilCloudDownload} />
@@ -293,19 +292,17 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
           </CCardHeader>
           {statisticsData?.length !== 0 && (
             <CCardBody>
-              <CRow className="mb-3">
-                <CCol md="6">
-                  <InputTokenChart data={statisticsData.inputTokenData} />
-                </CCol>
-                <CCol md="6">
-                  <OutputTokenChart data={statisticsData.outputTokenData} />
-                </CCol>
+              <CRow className="mb-3 justify-content-center">
+                <TokenUsageChart
+                  inputTokenData={statisticsData.inputTokenData}
+                  outputTokenData={statisticsData.outputTokenData}
+                />
               </CRow>
-              <CRow>
-                <CCol sm={6}>
+              <CRow className="justify-content-center">
+                <CCol sm={5}>
                   <BingSearchsChart data={statisticsData.bingSearchsData} />
                 </CCol>
-                <CCol sm={6}>
+                <CCol sm={5}>
                   <DallE3GenerationChart data={statisticsData.dallE3GenerationsData} />
                 </CCol>
               </CRow>
