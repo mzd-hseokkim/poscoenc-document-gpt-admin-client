@@ -1,12 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { cilArrowThickToBottom } from '@coreui/icons';
+import { cilArrowThickToBottom, cilCloudDownload } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
+import { CChart } from '@coreui/react-chartjs';
 import {
   CBadge,
   CButton,
   CCard,
   CCardBody,
+  CCardHeader,
+  CCol,
   CForm,
   CFormLabel,
   CFormTextarea,
@@ -14,8 +17,15 @@ import {
   CListGroupItem,
   CModalBody,
   CModalFooter,
+  CRow,
 } from '@coreui/react-pro';
+import { getStyle } from '@coreui/utils';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
+import {
+  chartPastYearMonthsLabels,
+  getFirstAndLastMonthLabels,
+} from 'components/chart/utils/chartPastYearMonthsLabels';
+import { mergeAndSumArrays, padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
@@ -24,6 +34,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import DocumentCollectionFileService from 'services/document-collection/DocumentCollectionFileService';
 import DocumentCollectionService from 'services/document-collection/DocumentCollectionService';
+import StatisticsService from 'services/statistics/StatisticsService';
 import { userIdSelector } from 'states/jwtTokenState';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
@@ -35,7 +46,14 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
   const [collectionDetail, setCollectionDetail] = useState({});
   const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
+  const [statisticsData, setStatisticsData] = useState({
+    inputTokenData: [],
+    outputTokenData: [],
+    bingSearchsData: [],
+    dallE3GenerationsData: [],
+  });
   const [searchParams] = useSearchParams();
+  const { firstLabel, lastLabel } = getFirstAndLastMonthLabels();
 
   const { addToast } = useToast();
   const currentUserId = useRecoilValue(userIdSelector);
@@ -116,6 +134,37 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     [addToast, closeModal, reset]
   );
 
+  const fetchStatisticsData = useCallback(async (collectionId) => {
+    try {
+      const responseData = await StatisticsService.getMonthlyStatisticsData({
+        criteria: 'documentCollection',
+        criteriaKey: collectionId,
+        endDate: new Date().toISOString().split('T')[0],
+      });
+      console.log(responseData);
+      responseData.list.sort((a, b) => {
+        const [yearA, monthA] = a.aggregationKey.split('-').map(Number);
+        const [yearB, monthB] = b.aggregationKey.split('-').map(Number);
+
+        if (yearA !== yearB) {
+          return yearA - yearB;
+        } else {
+          return monthA - monthB;
+        }
+      });
+      setStatisticsData({
+        inputTokenData: responseData.list.map((item) => item.sumInputTokens),
+        outputTokenData: responseData.list.map((item) => item.sumOutputTokens),
+        bingSearchsData: responseData.list.map((item) => item.sumBingSearchs),
+        dallE3GenerationsData: responseData.list.map((item) => item.sumDallE3Generations),
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      //REMIND Loading cover
+    }
+  }, []);
+
   useEffect(() => {
     const collectionId = searchParams.get('id');
     if (!collectionId) {
@@ -123,7 +172,8 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     }
 
     void fetchCollectionDetail(collectionId);
-  }, [closeModal, fetchCollectionDetail, searchParams]);
+    void fetchStatisticsData(collectionId);
+  }, [closeModal, fetchCollectionDetail, fetchStatisticsData, searchParams]);
   const putModifiedCollection = async (data) => {
     try {
       const isModified = await DocumentCollectionService.putModifiedCollectionDetail(data);
@@ -214,33 +264,127 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
               />
             </CCardBody>
           </CCard>
-          <CCard>
-            <CCardBody>
-              <CListGroup>
-                {/*REMIND detail 에서 file 만 따로 처리 할 수 있도록 리팩토링, reset 에 의해 나머지 데이터가 관리되고 있음*/}
-                {collectionDetail?.files?.map((file, index) => (
-                  <CListGroupItem key={index} className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <div className="d-flex align-items-end mb-1">
-                        <span style={{ marginRight: `10px` }}>{file.originalName}</span>
-                        <small>{formatFileSize(file.size)}</small>
-                        <small style={{ marginLeft: `10px` }}>
-                          <CBadge color="primary">{file.status}</CBadge>
-                        </small>
-                      </div>
+          {collectionDetail?.files?.length !== 0 && (
+            <CCard className="mb-3">
+              <CCardBody>
+                <CListGroup>
+                  {/*REMIND detail 에서 file 만 따로 처리 할 수 있도록 리팩토링, reset 에 의해 나머지 데이터가 관리되고 있음*/}
+                  {collectionDetail?.files?.map((file, index) => (
+                    <CListGroupItem key={index} className="d-flex justify-content-between align-items-start">
                       <div>
-                        <small className="text-muted">{`설명 : ${file.description || ''}`}</small>
+                        <div className="d-flex align-items-end mb-1">
+                          <span style={{ marginRight: `10px` }}>{file.originalName}</span>
+                          <small>{formatFileSize(file.size)}</small>
+                          <small style={{ marginLeft: `10px` }}>
+                            <CBadge color="primary">{file.status}</CBadge>
+                          </small>
+                        </div>
+                        <div>
+                          <small className="text-muted">{`설명 : ${file.description || ''}`}</small>
+                        </div>
                       </div>
-                    </div>
-                    <CButton onClick={() => handleDownload(file)}>
-                      <CIcon icon={cilArrowThickToBottom} size={'lg'} />
-                    </CButton>
-                  </CListGroupItem>
-                ))}
-              </CListGroup>
-            </CCardBody>
-          </CCard>
+                      <CButton className="mt-2" onClick={() => handleDownload(file)}>
+                        <CIcon icon={cilArrowThickToBottom} size={'lg'} />
+                      </CButton>
+                    </CListGroupItem>
+                  ))}
+                </CListGroup>
+              </CCardBody>
+            </CCard>
+          )}
         </CForm>
+        <CCard className="mb-3">
+          <CCardHeader>
+            <CRow>
+              <CCol sm={5}>
+                <h4 id="traffic" className="card-title mb-0">
+                  사용 통계
+                </h4>
+                <div className="small text-medium-emphasis">
+                  {firstLabel} - {`${new Date().getFullYear()} / ${lastLabel}`}
+                </div>
+              </CCol>
+              <CCol sm={7} className="d-none d-md-block">
+                <CButton color="primary" className="float-end">
+                  <CIcon icon={cilCloudDownload} />
+                </CButton>
+              </CCol>
+            </CRow>
+          </CCardHeader>
+          <CCardBody>
+            <CRow className="mb-3 justify-content-center">
+              <CChart
+                type="line"
+                style={{ width: 650 }}
+                data={{
+                  labels: chartPastYearMonthsLabels(),
+                  datasets: [
+                    {
+                      label: 'Total', // 범례
+                      backgroundColor: 'rgba(220, 220, 220, 0.2)',
+                      borderColor: '#007bff',
+                      pointBackgroundColor: 'rgba(220, 220, 220, 1)',
+                      pointBorderColor: '#fff',
+                      data: mergeAndSumArrays(
+                        padDataArrayWithZero(statisticsData.outputTokenData),
+                        padDataArrayWithZero(statisticsData.inputTokenData)
+                      ),
+                    },
+                    {
+                      label: 'Input Tokens', // 범례
+                      backgroundColor: 'rgba(151, 187, 205, 0.2)',
+                      borderColor: '#28a745',
+                      pointBackgroundColor: 'rgba(151, 187, 205, 1)',
+                      pointBorderColor: '#fff',
+                      data: padDataArrayWithZero(statisticsData.inputTokenData),
+                    },
+                    {
+                      label: 'Output Tokens', // 범례
+                      backgroundColor: 'rgba(220, 220, 220, 0.2)',
+                      borderColor: '#ffc107',
+                      pointBackgroundColor: 'rgba(220, 220, 220, 1)',
+                      pointBorderColor: '#fff',
+                      data: padDataArrayWithZero(statisticsData.outputTokenData),
+                    },
+                  ],
+                }}
+                options={{
+                  plugins: {
+                    legend: {
+                      labels: {
+                        color: getStyle('--cui-body-color'),
+                      },
+                    },
+                  },
+                  scales: {
+                    x: {
+                      grid: {
+                        display: false,
+                        color: getStyle('--cui-border-color-translucent'),
+                      },
+                      ticks: {
+                        color: getStyle('--cui-body-color'),
+                      },
+                    },
+                    y: {
+                      grid: {
+                        color: getStyle('--cui-border-color-translucent'),
+                      },
+                      ticks: {
+                        color: getStyle('--cui-body-color'),
+                      },
+                    },
+                  },
+                  elements: {
+                    line: {
+                      tension: 0.2,
+                    },
+                  },
+                }}
+              />
+            </CRow>
+          </CCardBody>
+        </CCard>
       </CModalBody>
       <CModalFooter>
         <DetailFormActionButtons

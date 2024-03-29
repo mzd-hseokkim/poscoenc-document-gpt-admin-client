@@ -1,8 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { cilCloudDownload } from '@coreui/icons';
+import CIcon from '@coreui/icons-react';
 import {
+  CButton,
   CCard,
   CCardBody,
+  CCardHeader,
   CCol,
   CForm,
   CFormInput,
@@ -14,11 +18,16 @@ import {
 } from '@coreui/react-pro';
 import StatusBadge from 'components/badge/StatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
+import { BingSearchsChart } from 'components/chart/BingSearchsChart';
+import { DallE3GenerationChart } from 'components/chart/DallE3GenerationChart';
+import { TokenUsageChart } from 'components/chart/TokenUsageChart';
+import { getFirstAndLastMonthLabels } from 'components/chart/utils/chartPastYearMonthsLabels';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
+import StatisticsService from 'services/statistics/StatisticsService';
 import UserService from 'services/UserService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
@@ -29,6 +38,12 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
   const [isLoading, setIsLoading] = useState(false);
   const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [formData, setFormData] = useState([]);
+  const [statisticsData, setStatisticsData] = useState({
+    inputTokenData: [],
+    outputTokenData: [],
+    bingSearchsData: [],
+    dallE3GenerationsData: [],
+  });
   const [searchParams] = useSearchParams();
 
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
@@ -42,6 +57,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
   } = useForm({ mode: 'onChange' });
 
   const deleted = watch('deleted');
+  const { firstLabel, lastLabel } = getFirstAndLastMonthLabels();
 
   const userInfoFields = [
     {
@@ -94,8 +110,40 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
         setIsLoading(false);
       }
     },
-    [addToast, closeModal, reset]
+    [addToast, closeModal, isCreateMode, reset]
   );
+
+  const fetchStatisticsData = useCallback(async (userId) => {
+    setIsLoading(true);
+    try {
+      const responseData = await StatisticsService.getMonthlyStatisticsData({
+        criteria: 'createdBy',
+        criteriaKey: userId,
+        endDate: new Date().toISOString().split('T')[0],
+      });
+
+      responseData.list.sort((a, b) => {
+        const [yearA, monthA] = a.aggregationKey.split('-').map(Number);
+        const [yearB, monthB] = b.aggregationKey.split('-').map(Number);
+
+        if (yearA !== yearB) {
+          return yearA - yearB;
+        } else {
+          return monthA - monthB;
+        }
+      });
+      setStatisticsData({
+        inputTokenData: responseData.list.map((item) => item.sumInputTokens),
+        outputTokenData: responseData.list.map((item) => item.sumOutputTokens),
+        bingSearchsData: responseData.list.map((item) => item.sumBingSearchs),
+        dallE3GenerationsData: responseData.list.map((item) => item.sumDallE3Generations),
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     setIsLoading(false);
@@ -103,8 +151,9 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
 
     if (!isCreateMode && userId) {
       void fetchUserDetail(userId);
+      void fetchStatisticsData(userId);
     }
-  }, [fetchUserDetail, isCreateMode, searchParams, selectedId]);
+  }, [fetchStatisticsData, fetchUserDetail, isCreateMode, searchParams, selectedId]);
 
   const postUser = async (data) => {
     try {
@@ -199,7 +248,6 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
       </CCard>
     );
   };
-
   return (
     <>
       <FormLoadingCover isLoading={isLoading} />
@@ -223,6 +271,44 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
             </CCardBody>
           </CCard>
         </CForm>
+        <CCard>
+          <CCardHeader>
+            <CRow>
+              <CCol sm={5}>
+                <h4 id="traffic" className="card-title mb-0">
+                  사용 통계
+                </h4>
+                <div className="small text-medium-emphasis">
+                  {firstLabel} - {`${new Date().getFullYear()} / ${lastLabel}`}
+                </div>
+              </CCol>
+              <CCol sm={7} className="d-none d-md-block mt-2">
+                {/*REMIND 차트 엑셀 다운로드 구현 가능 */}
+                <CButton color="primary" className="float-end">
+                  <CIcon icon={cilCloudDownload} />
+                </CButton>
+              </CCol>
+            </CRow>
+          </CCardHeader>
+          {statisticsData?.length !== 0 && (
+            <CCardBody>
+              <CRow className="mb-3 justify-content-center">
+                <TokenUsageChart
+                  inputTokenData={statisticsData.inputTokenData}
+                  outputTokenData={statisticsData.outputTokenData}
+                />
+              </CRow>
+              <CRow className="justify-content-center">
+                <CCol sm={5}>
+                  <BingSearchsChart data={statisticsData.bingSearchsData} />
+                </CCol>
+                <CCol sm={5}>
+                  <DallE3GenerationChart data={statisticsData.dallE3GenerationsData} />
+                </CCol>
+              </CRow>
+            </CCardBody>
+          )}
+        </CCard>
       </CModalBody>
       <CModalFooter>
         <DetailFormActionButtons

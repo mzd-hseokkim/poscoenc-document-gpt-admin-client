@@ -98,6 +98,15 @@ const MenuManagementPage = () => {
 
   const handleTimePickerCheck = (e) => {
     setIsSelectTime(e.target.checked);
+    //REMIND 다른 페이지에도 적용
+    if (
+      formData.fromModifiedAt == null ||
+      formData.toModifiedAt == null ||
+      formData.fromCreatedAt == null ||
+      formData.toCreatedAt == null
+    ) {
+      return;
+    }
     setFormData((prev) => ({
       ...prev,
       fromModifiedAt: format(formData.fromModifiedAt, "yyyy-MM-dd'T'00:00"),

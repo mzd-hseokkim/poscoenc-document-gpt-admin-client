@@ -119,7 +119,7 @@ const DocumentCollectionManagementPage = () => {
     e.preventDefault();
     await searchDocumentCollectionList();
   };
-  const toggleDocumentCollectionStatus = async (deletionOption) => {
+  const toggleDocumentCollectionDeleted = async (deletionOption) => {
     try {
       const isSuccess = await DocumentCollectionService.patchCollectionsDeletionOption(
         selectedRows.map((row) => row.id),
@@ -179,7 +179,7 @@ const DocumentCollectionManagementPage = () => {
           <CCardBody>
             <CForm onSubmit={handleSubmitSearchRequest}>
               <CRow className="mb-3">
-                <CCol md={4}>
+                <CCol md={6}>
                   <CFormInput
                     id="name"
                     label="문서 집합 이름"
@@ -187,15 +187,17 @@ const DocumentCollectionManagementPage = () => {
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
-                <CCol md={4}>
+                <CCol md={6}>
                   <CFormInput
                     id="displayName"
                     label="표시명"
                     value={searchFormData.displayName}
                     onChange={handleSearchFormChange}
-                  ></CFormInput>
+                  />
                 </CCol>
-                <CCol md={4} className="position-relative">
+              </CRow>
+              <CRow className="mb-3">
+                <CCol md={6} className="position-relative">
                   <CFormInput
                     id="createdByName"
                     label="게시자"
@@ -203,9 +205,7 @@ const DocumentCollectionManagementPage = () => {
                     value={searchFormData.createdByName}
                   />
                 </CCol>
-              </CRow>
-              <CRow className="mb-3">
-                <CCol md={4}>
+                <CCol md={6}>
                   <CFormSelect
                     id="deletionOption"
                     label="삭제된 문서 포함"
@@ -219,6 +219,8 @@ const DocumentCollectionManagementPage = () => {
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
+              </CRow>
+              <CRow className="mb-3">
                 <CCol md={6}>
                   <CDateRangePicker
                     key={`createdAt-${isPickTime}`}
@@ -254,13 +256,13 @@ const DocumentCollectionManagementPage = () => {
               <CCol className="d-grid gap-2 d-md-flex justify-content-md-start">
                 <CButton
                   disabled={selectedRows?.length === 0 || isDeletedRow(selectedRows)}
-                  onClick={() => toggleDocumentCollectionStatus(true)}
+                  onClick={() => toggleDocumentCollectionDeleted(true)}
                 >
                   {'삭제'}
                 </CButton>
                 <CButton
                   disabled={selectedRows?.length === 0 || !isDeletedRow(selectedRows)}
-                  onClick={() => toggleDocumentCollectionStatus(false)}
+                  onClick={() => toggleDocumentCollectionDeleted(false)}
                 >
                   {'복구'}
                 </CButton>
