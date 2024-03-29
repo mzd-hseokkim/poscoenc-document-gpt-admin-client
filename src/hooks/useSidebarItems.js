@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react-pro';
+import { CNavGroup, CNavGroupItems, CNavItem, CNavTitle } from '@coreui/react-pro';
 import { useToast } from 'context/ToastContext';
 import MenuService from 'services/menu/MenuService';
 import { iconMapper } from 'utils/common/iconMapper';
@@ -75,8 +75,19 @@ const useSidebarItems = () => {
           to: '/dashboard',
           icon: iconMapper({ iconName: 'cilSpeedometer', type: 'nav' }),
         },
-        { component: CNavTitle, name: '즐겨찾기' },
-        ...favoriteItems,
+        {
+          component: CNavItem,
+          name: '즐겨찾기',
+          icon: iconMapper({ iconName: 'cilStar', type: 'nav' }),
+          to: '/',
+          disabled: true,
+          bold: true,
+        },
+        {
+          component: CNavGroupItems,
+          active: 'false', //REMIND test active props
+          items: favoriteItems,
+        },
         { component: CNavTitle, name: '메뉴' },
         ...transformedMenuItems,
       ];
@@ -88,7 +99,8 @@ const useSidebarItems = () => {
   };
 
   useEffect(() => {
-    getMenuList();
+    void getMenuList();
+    //REMIND Sidebar dependency issue
   }, []);
 
   return { menuItems, refetchMenuList: getMenuList };

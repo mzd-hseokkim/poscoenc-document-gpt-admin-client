@@ -6,7 +6,7 @@ import { useToast } from 'context/ToastContext';
 import { setupInterceptors } from './Api';
 
 const SetupInterceptors = () => {
-  const navigate = useNavigation();
+  const { navigate } = useNavigation();
   const { addToast } = useToast();
 
   useEffect(() => {
