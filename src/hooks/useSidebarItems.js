@@ -76,14 +76,16 @@ const useSidebarItems = () => {
           icon: iconMapper({ iconName: 'cilSpeedometer', type: 'nav' }),
         },
         {
-          component: CNavTitle,
+          component: CNavItem,
           name: '즐겨찾기',
+          icon: iconMapper({ iconName: 'cilStar', type: 'nav' }),
+          to: '/',
+          disabled: true,
+          bold: true,
         },
         {
           component: CNavGroupItems,
-          name: '즐겨찾기',
-          active: 'false', //REMIND custom props boolean value issue
-          icon: iconMapper({ iconName: 'cilStar', type: 'nav' }),
+          active: 'false', //REMIND test active props
           items: favoriteItems,
         },
         { component: CNavTitle, name: '메뉴' },
@@ -98,6 +100,7 @@ const useSidebarItems = () => {
 
   useEffect(() => {
     void getMenuList();
+    //REMIND Sidebar dependency issue
   }, []);
 
   return { menuItems, refetchMenuList: getMenuList };

@@ -1,14 +1,14 @@
 import React from 'react';
 
 import { CBadge, CCol } from '@coreui/react-pro';
+import { useNavigation } from 'context/NavigationContext';
 import { useToast } from 'context/ToastContext';
 import PropTypes from 'prop-types';
-import { NavLink, useLocation } from 'react-router-dom';
-import routes from 'routes';
+import { NavLink } from 'react-router-dom';
 import MenuService from 'services/menu/MenuService';
 
 export const AppSidebarNav = ({ items, refetchMenuList }) => {
-  const location = useLocation();
+  const { activePage } = useNavigation();
   const { addToast } = useToast();
 
   const postFavoriteMenu = async (id) => {
@@ -26,7 +26,6 @@ export const AppSidebarNav = ({ items, refetchMenuList }) => {
       addToast({ message: '메뉴를 즐겨찾기에서 삭제하지 못했습니다.' });
     }
   };
-
   const navLink = (name, icon, badge) => {
     return (
       <>
@@ -40,20 +39,15 @@ export const AppSidebarNav = ({ items, refetchMenuList }) => {
       </>
     );
   };
-
-  const getRouteName = (pathname, routes) => {
-    const currentRoute = routes.find((route) => route.path === pathname);
-    return currentRoute ? currentRoute.name : false;
+  const getClassNameForNavItem = (itemPath, currentPath) => {
+    return itemPath === currentPath ? 'active' : undefined;
   };
+
   const navItem = (item, index, depth = 0) => {
     const { component, name, badge, icon, isFavorite, favoriteMenuId, id, ...rest } = item;
     const Component = component;
     const indentStyle = {
       paddingLeft: `${(depth + 1) * 16}px`,
-    };
-
-    const getClassNameForNavItem = (itemPath, currentPath) => {
-      return itemPath === currentPath ? 'active' : undefined;
     };
 
     return (
@@ -62,7 +56,7 @@ export const AppSidebarNav = ({ items, refetchMenuList }) => {
         key={index}
         {...rest}
         style={indentStyle}
-        className={getClassNameForNavItem(rest.to, location.pathname)}
+        className={getClassNameForNavItem(rest.to, activePage)}
       >
         {navLink(name, icon, badge)}
         <CCol className="d-grid justify-content-md-end">
@@ -96,9 +90,7 @@ export const AppSidebarNav = ({ items, refetchMenuList }) => {
   const navGroup = (item, index, depth = 0) => {
     const { component, name, icon, to, ...rest } = item;
     const Component = component;
-    const hasActiveItem = item.items?.some(
-      (subItem) => getRouteName(subItem.to, routes) === getRouteName(location.pathname, routes)
-    );
+
     const indentStyle = {
       paddingLeft: `${depth * 16}px`,
     };
@@ -109,8 +101,8 @@ export const AppSidebarNav = ({ items, refetchMenuList }) => {
         key={index}
         toggler={navLink(name, icon)}
         style={indentStyle}
-        visible={location.pathname.startsWith(to) ? 'true' : undefined} //REMIND custom props issue
-        className={hasActiveItem ? 'show' : undefined}
+        //REMIND fix unfolded bug
+        // visible={visible}
         {...rest}
       >
         {item.items?.map((subItem, subIndex) =>
