@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import {
   CCard,
@@ -62,40 +62,44 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
     },
   ];
 
+  const fetchChatHistoryDetail = useCallback(
+    async (chatId) => {
+      setIsLoading(true);
+      if (!chatId) {
+        return;
+      }
+      try {
+        const detail = await DocumentChatHistoryService.getDocumentChatHistory(chatId);
+        const formattedDetail = {
+          ...detail,
+          inputTokens: `${detail.inputTokens} 개`,
+          outputTokens: `${detail.outputTokens} 개`,
+          bingSearchs: `${detail.bingSearchs} 회`,
+          dallE3Generations: `${detail.dallE3Generations} 회`,
+          createdAt: detail.createdAt && formatToYMD(detail.createdAt),
+          modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
+        };
+        setChatHistory(formattedDetail);
+        reset(formattedDetail);
+      } catch (error) {
+        if (error.response?.status === 404) {
+          addToast({ message: `id={${chatId}} 해당 대화 이력을 찾을 수 없습니다.` });
+        } else {
+          console.log(error);
+        }
+        closeModal();
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [addToast, closeModal, reset]
+  );
+
   useEffect(() => {
     setIsLoading(false);
     const chatId = searchParams.get('id');
     void fetchChatHistoryDetail(chatId);
-  }, []);
-  const fetchChatHistoryDetail = async (chatId) => {
-    setIsLoading(true);
-    if (!chatId) {
-      return;
-    }
-    try {
-      const detail = await DocumentChatHistoryService.getDocumentChatHistory(chatId);
-      const formattedDetail = {
-        ...detail,
-        inputTokens: `${detail.inputTokens} 개`,
-        outputTokens: `${detail.outputTokens} 개`,
-        bingSearchs: `${detail.bingSearchs} 회`,
-        dallE3Generations: `${detail.dallE3Generations} 회`,
-        createdAt: detail.createdAt && formatToYMD(detail.createdAt),
-        modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
-      };
-      setChatHistory(formattedDetail);
-      reset(formattedDetail);
-    } catch (error) {
-      if (error.response?.status === 404) {
-        addToast({ message: `id={${chatId}} 해당 대화 이력을 찾을 수 없습니다.` });
-      } else {
-        console.log(error);
-      }
-      closeModal();
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [fetchChatHistoryDetail, searchParams]);
 
   const onSubmit = () => {
     //REMIND FormInputGrid 를 사용하기 위해 CForm 내부에 선언해줘야합니다. 다만 수정, 삭제 등의 로직이 없기 때문에 Submit 함수를 비워두었습니다.
