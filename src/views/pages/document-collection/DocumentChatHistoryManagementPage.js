@@ -201,7 +201,7 @@ const DocumentChatHistoryManagementPage = () => {
                 </CCol>
               </CRow>
               <CRow>
-                <CCol md={4}>
+                <CCol md={6}>
                   <CFormInput
                     id="documentCollectionId"
                     label="문서 집합 아이디"
@@ -209,7 +209,7 @@ const DocumentChatHistoryManagementPage = () => {
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
-                <CCol md={4}>
+                <CCol md={6}>
                   <CFormInput
                     id="documentCollectionDisplayName"
                     label="문서 집합 표시명"
@@ -219,7 +219,7 @@ const DocumentChatHistoryManagementPage = () => {
                 </CCol>
               </CRow>
               <CRow className="mb-3">
-                <CCol md={3} className="position-relative">
+                <CCol md={6} className="position-relative">
                   <CFormInput
                     id="createdByName"
                     label="질문한 사람"
@@ -229,7 +229,7 @@ const DocumentChatHistoryManagementPage = () => {
                 </CCol>
               </CRow>
               <CRow className="mb-3">
-                <CCol md={8}>
+                <CCol md={6}>
                   <CDateRangePicker
                     key={`createdAt-${searchFormData.isPickTime}`}
                     id="createdAt"

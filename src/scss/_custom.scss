@@ -1,1 +1,58 @@
 // Here you can add other styles
+// ChatHistory QnA style
+.code-block {
+  position: relative;
+
+  &-syntax-highlighter {
+    border-radius: 15px !important;
+  }
+
+  .code-copy-button {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    cursor: pointer;
+    color: lightgray;
+  }
+}
+
+.reactMarkdown {
+  p, ul, ol, pre {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  h1, h2, h3 {
+    line-height: 1.6;
+    margin-top: 1rem;
+    margin-bottom: 0.3rem;
+    font-size: 1.3rem;
+  }
+
+  pre {
+    line-height: 1.4;
+  }
+
+  img {
+    width: 100%;
+    height: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    margin-bottom: 20px;
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+  }
+}
+// ChatHistory QnA style
