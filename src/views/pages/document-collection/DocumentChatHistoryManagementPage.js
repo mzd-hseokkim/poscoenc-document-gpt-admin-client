@@ -9,7 +9,7 @@ import {
   CForm,
   CFormCheck,
   CFormInput,
-  CFormLabel,
+  CInputGroup,
   CRow,
   CSmartTable,
 } from '@coreui/react-pro';
@@ -186,7 +186,9 @@ const DocumentChatHistoryManagementPage = () => {
                 <CCol md={6}>
                   <CFormInput
                     id="answer"
-                    label="답변"
+                    floatingLabel="답변"
+                    placeholder=""
+                    floatingClassName="mb-0"
                     value={searchFormData.answer}
                     onChange={handleSearchFormChange}
                   />
@@ -194,17 +196,19 @@ const DocumentChatHistoryManagementPage = () => {
                 <CCol md={6}>
                   <CFormInput
                     id="question"
-                    label="질문"
+                    floatingLabel="질문"
+                    placeholder=""
                     value={searchFormData.question}
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
               </CRow>
-              <CRow>
+              <CRow className="mb-3">
                 <CCol md={6}>
                   <CFormInput
                     id="documentCollectionId"
-                    label="문서 집합 아이디"
+                    floatingLabel="문서 집합 아이디"
+                    placeholder=""
                     value={searchFormData.documentCollectionId}
                     onChange={handleSearchFormChange}
                   />
@@ -212,7 +216,8 @@ const DocumentChatHistoryManagementPage = () => {
                 <CCol md={6}>
                   <CFormInput
                     id="documentCollectionDisplayName"
-                    label="문서 집합 표시명"
+                    floatingLabel="문서 집합 표시명"
+                    placeholder=""
                     value={searchFormData.documentCollectionDisplayName}
                     onChange={handleSearchFormChange}
                   />
@@ -222,35 +227,43 @@ const DocumentChatHistoryManagementPage = () => {
                 <CCol md={6} className="position-relative">
                   <CFormInput
                     id="createdByName"
-                    label="질문한 사람"
+                    floatingLabel="질문한 사람"
+                    placeholder=""
                     onChange={handleSearchFormChange}
                     value={searchFormData.createdByName}
                   />
                 </CCol>
               </CRow>
               <CRow className="mb-3">
-                <CCol md={6}>
-                  <CDateRangePicker
-                    key={`createdAt-${searchFormData.isPickTime}`}
-                    id="createdAt"
-                    label="등록일"
-                    startDate={searchFormData.fromCreatedAt}
-                    endDate={searchFormData.toCreatedAt}
-                    onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
-                    onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
-                    timepicker={searchFormData.isPickTime}
-                  />
+                <CCol>
+                  <CInputGroup>
+                    <CButton className="col-2" color="white">
+                      등록일
+                    </CButton>
+                    <CDateRangePicker
+                      key={`createdAt-${searchFormData.isPickTime}`}
+                      id="createdAt"
+                      placeholder="등록일"
+                      className="col-10"
+                      startDate={searchFormData.fromCreatedAt}
+                      endDate={searchFormData.toCreatedAt}
+                      onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
+                      onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
+                      timepicker={searchFormData.isPickTime}
+                    />
+                  </CInputGroup>
                 </CCol>
-                <CCol md={3} className="mt-3">
-                  <CFormLabel />
-                  <CFormCheck
-                    id="timepicker"
-                    label="시간 검색 여부"
-                    checked={searchFormData.isPickTime}
-                    onChange={(e) => handleTimePickerCheck(e)}
-                  />
-                </CCol>
+                {/*  StartFROM 검색 폼 플로팅 라벨 정리부터 시작 */}
               </CRow>
+              <CCol md={2} className="justify-content-end">
+                <CFormCheck
+                  id="timepicker"
+                  label="시간 검색 여부"
+                  className="mt-2"
+                  checked={searchFormData.isPickTime}
+                  onChange={(e) => handleTimePickerCheck(e)}
+                />
+              </CCol>
 
               <CRow className="mb-3">
                 <CCol className="d-grid gap-2 d-md-flex justify-content-md-center">

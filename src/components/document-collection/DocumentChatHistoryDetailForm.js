@@ -17,6 +17,7 @@ import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
 import ReactMarkdown from 'react-markdown';
 import { useSearchParams } from 'react-router-dom';
+import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import DocumentChatHistoryService from 'services/document-collection/DocumentChatHistoryService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
@@ -166,16 +167,20 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
                         답변
                       </h4>
                     </CCol>
-                    <CCol sm={7} className="card-title mb-0 text-end align-content-center">
+                    <CCol sm={5} className="card-title mb-0 text-end align-content-center">
                       <h6 id="modelName" className="mt-1 bold">
-                        모델 : {/*{chatHistory.modelName}*/}
-                        ChatGPT-4
+                        모델 : {chatHistory.modelName}
+                      </h6>
+                    </CCol>
+                    <CCol sm={2} className="card-title mb-0 text-end align-content-center">
+                      <h6 id="thumb" className="mt-1">
+                        좋아요 : {chatHistory.thumb}
                       </h6>
                     </CCol>
                   </CRow>
                 </CCardHeader>
                 <CCardBody>
-                  <ReactMarkdown remarkPlugins={[remarkGfm]} className="reactMarkdown">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} className="reactMarkdown">
                     {chatHistory.answer}
                   </ReactMarkdown>
                 </CCardBody>
