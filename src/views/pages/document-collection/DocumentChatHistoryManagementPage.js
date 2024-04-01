@@ -17,7 +17,6 @@ import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import DocumentChatHistoryDetailForm from 'components/document-collection/DocumentChatHistoryDetailForm';
 import ModalContainer from 'components/modal/ModalContainer';
-import { useToast } from 'context/ToastContext';
 import { format } from 'date-fns';
 import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
@@ -53,7 +52,6 @@ const DocumentChatHistoryManagementPage = () => {
 
   const [searchFormData, setSearchFormData] = useState(initialSearchFormData);
   const isComponentMounted = useRef(true);
-  const { addToast } = useToast();
   const modal = useModal();
   const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } =
     usePagination(totalChatHistoryElements);
