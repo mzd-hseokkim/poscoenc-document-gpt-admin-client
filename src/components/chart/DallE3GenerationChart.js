@@ -3,8 +3,8 @@ import CIcon from '@coreui/icons-react';
 import { CChart } from '@coreui/react-chartjs';
 import { CWidgetStatsD } from '@coreui/react-pro';
 import { getNonGridLineChartOptions } from 'components/chart/options/getNonGridLineChartOptions';
-import { chartPastYearMonthsLabels } from 'components/chart/utils/chartPastYearMonthsLabels';
 import { calculateGrowthRateWithIcon, padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
+import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
 
 export const DallE3GenerationChart = (statisticsData) => {
   const paddedArray = padDataArrayWithZero(statisticsData.data);
@@ -18,7 +18,7 @@ export const DallE3GenerationChart = (statisticsData) => {
             className="position-absolute w-100 h-100"
             type="line"
             data={{
-              labels: chartPastYearMonthsLabels(),
+              labels: MonthLabelGenerator.pastYearMonthsChartLabels(),
               datasets: [
                 {
                   label: '응답 횟수',

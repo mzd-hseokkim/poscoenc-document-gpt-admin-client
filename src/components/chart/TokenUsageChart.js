@@ -2,8 +2,8 @@ import React from 'react';
 
 import { CChart } from '@coreui/react-chartjs';
 import { getStyle } from '@coreui/utils';
-import { chartPastYearMonthsLabels } from 'components/chart/utils/chartPastYearMonthsLabels';
 import { mergeAndSumArrays, padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
+import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
 
 export const TokenUsageChart = ({ inputTokenData, outputTokenData }) => {
   const paddedInputTokenData = padDataArrayWithZero(inputTokenData);
@@ -14,7 +14,7 @@ export const TokenUsageChart = ({ inputTokenData, outputTokenData }) => {
       type="line"
       style={{ width: 650 }}
       data={{
-        labels: chartPastYearMonthsLabels(),
+        labels: MonthLabelGenerator.pastYearMonthsChartLabels(),
         datasets: [
           {
             label: 'Total', // 범례

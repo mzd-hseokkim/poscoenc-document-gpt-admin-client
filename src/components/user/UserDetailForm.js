@@ -21,7 +21,6 @@ import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import { BingSearchsChart } from 'components/chart/BingSearchsChart';
 import { DallE3GenerationChart } from 'components/chart/DallE3GenerationChart';
 import { TokenUsageChart } from 'components/chart/TokenUsageChart';
-import { getFirstAndLastMonthLabels } from 'components/chart/utils/chartPastYearMonthsLabels';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
@@ -32,6 +31,7 @@ import UserService from 'services/UserService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/common/formModes';
+import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
 import { emailValidationPattern } from 'utils/common/validationUtils';
 
 const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList }) => {
@@ -45,6 +45,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
     dallE3GenerationsData: [],
   });
   const [searchParams] = useSearchParams();
+  const chartLabels = MonthLabelGenerator.pastYearMonthsChartLabels();
 
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
   const { addToast } = useToast();
@@ -57,7 +58,6 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
   } = useForm({ mode: 'onChange' });
 
   const deleted = watch('deleted');
-  const { firstLabel, lastLabel } = getFirstAndLastMonthLabels();
 
   const userInfoFields = [
     {
@@ -279,7 +279,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
                   사용 통계
                 </h4>
                 <div className="small text-medium-emphasis">
-                  {firstLabel} - {`${new Date().getFullYear()} / ${lastLabel}`}
+                  {chartLabels[0]} - {`${new Date().getFullYear()} / ${chartLabels[11]}`}
                 </div>
               </CCol>
               <CCol sm={7} className="d-none d-md-block mt-2">
