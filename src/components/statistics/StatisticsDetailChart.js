@@ -1,10 +1,14 @@
+import React from 'react';
+
 import { CChart } from '@coreui/react-chartjs';
 import { CCard, CCardBody, CCardHeader } from '@coreui/react-pro';
 import { getStyle } from '@coreui/utils';
+import FormLoadingCover from 'components/cover/FormLoadingCover';
 
 const StatisticsDetailChart = ({ chartData }) => {
   return (
     <>
+      <FormLoadingCover isLoading={false} />
       <CCard>
         <CCardHeader>
           <h2>기준 : {chartData.aggregationName}</h2>

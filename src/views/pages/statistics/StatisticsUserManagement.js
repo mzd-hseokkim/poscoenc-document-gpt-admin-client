@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { CButton, CCard, CCardBody, CCol, CForm, CFormSelect, CInputGroup, CRow, CSmartTable } from '@coreui/react-pro';
+import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
+import FormLoadingCover from 'components/cover/FormLoadingCover';
 import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import ModalContainer from 'components/modal/ModalContainer';
 import StatisticsDetailChart from 'components/statistics/StatisticsDetailChart';
@@ -16,6 +18,7 @@ const StatisticsUserManagement = () => {
   const [totalStatisticsDataElements, setTotalStatisticsDataElements] = useState(0);
   const [selectedRows, setSelectedRows] = useState([]);
   const [isSearchPerformed, setIsSearchPerformed] = useState(false);
+  const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
   const [statisticsDataList, setStatisticsDataList] = useState([]);
   const [clickedData, setClickedData] = useState({});
 
@@ -25,13 +28,13 @@ const StatisticsUserManagement = () => {
   const isComponentMounted = useRef(true);
 
   const pastYearMonths = MonthLabelGenerator.pastYearMonthsSelectBoxLabels();
-  const [selectedMonth, setSelectedMonth] = useState(pastYearMonths[11].value);
+  const lastIndex = pastYearMonths.length - 1;
+  const [selectedMonth, setSelectedMonth] = useState(pastYearMonths[lastIndex].value);
   const modal = useModal();
-  const handleMonthSelectBoxChange = (event) => {
-    setSelectedMonth(event.target.value);
-  };
 
   const searchUserUsageStatistics = async () => {
+    setSearchResultIsLoading(true);
+
     if (!isSearchPerformed) {
       setIsSearchPerformed(true);
     }
@@ -44,7 +47,7 @@ const StatisticsUserManagement = () => {
       console.log(error);
       addToast({ color: 'danger', message: `${error.response.data.message} with ${error.response.data.status}` });
     } finally {
-      //REMIND implement loading
+      setSearchResultIsLoading(false);
     }
   };
   const handleSubmitSearchRequest = async (e) => {
@@ -66,6 +69,9 @@ const StatisticsUserManagement = () => {
   const handleRowClick = (item) => {
     setClickedData(item);
     modal.openModal(item.id);
+  };
+  const handleMonthSelectBoxChange = (event) => {
+    setSelectedMonth(event.target.value);
   };
 
   const scopedColumns = {
@@ -103,6 +109,7 @@ const StatisticsUserManagement = () => {
 
   return (
     <>
+      <FormLoadingCover isLoading={searchResultIsLoading} />
       <CRow>
         <CCard className="row g-3">
           <CCardBody>
@@ -117,7 +124,7 @@ const StatisticsUserManagement = () => {
                       style={{ height: '58px' }}
                       floatingLabel=""
                       options={pastYearMonths}
-                      defaultValue={pastYearMonths[11].value}
+                      value={selectedMonth}
                       onChange={handleMonthSelectBoxChange}
                     />
                   </CInputGroup>
@@ -129,7 +136,7 @@ const StatisticsUserManagement = () => {
                   <CButton
                     color="primary"
                     value="Reset"
-                    // onClick={() => setSearchFormData(initialSearchFormData)}
+                    onClick={() => setSelectedMonth(pastYearMonths[lastIndex].value)}
                   >
                     초기화
                   </CButton>
@@ -142,7 +149,12 @@ const StatisticsUserManagement = () => {
       <CRow>
         <CCard className="row g-3">
           <CCardBody>
-            <CRow className="mb-3"></CRow>
+            <CRow className="mb-3">
+              <CCol md={4}>
+                {/*TODO Implement ExcelDownload*/}
+                <ExcelDownloadCButton />
+              </CCol>
+            </CRow>
             <CRow className="mb-3">
               <CSmartTable
                 columnSorter={columnSorterCustomProps}
@@ -157,7 +169,7 @@ const StatisticsUserManagement = () => {
                   <CSmartTableNoItemLabel
                     contentLength={statisticsDataList?.length}
                     isSearchPerformed={isSearchPerformed}
-                    defaultMessage="선택한 달의 토큰 사용량을 사용자 별로 검색합니다."
+                    defaultMessage="선택한 월의 토큰 사용량을 사용자 별로 검색합니다."
                   />
                 }
                 onItemsPerPageChange={handlePageSizeChange}

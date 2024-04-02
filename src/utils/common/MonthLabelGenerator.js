@@ -30,21 +30,28 @@ const pastYearMonthsChartLabels = () => {
 
 const pastYearMonthsSelectBoxLabels = () => {
   const months = getPastYearMonths();
-  return months.map(({ monthIndex, year }, index) => {
-    let label = monthsNames[monthIndex];
+  let previousYear = null;
+  const options = months.map(({ monthIndex, year }) => {
+    const label = monthsNames[monthIndex];
+    const value = `${year}${(monthIndex + 1).toString().padStart(2, '0')}`;
 
-    if (index === 0 || monthIndex === 0) {
-      label = `${year}년 ${label}`;
+    if (previousYear !== year) {
+      previousYear = year;
+      return [
+        { label: `${year}년`, value: `${year}-disabled`, disabled: true },
+        { label, value },
+      ];
     }
 
-    const value = `${year}${(monthIndex + 1).toString().padStart(2, '0')}`;
-    return { value, label };
+    return { label, value };
   });
+
+  return options.flat();
 };
 
 const MonthLabelGenerator = {
-  pastYearMonthsSelectBoxLabels,
   pastYearMonthsChartLabels,
+  pastYearMonthsSelectBoxLabels,
 };
 
 export default MonthLabelGenerator;

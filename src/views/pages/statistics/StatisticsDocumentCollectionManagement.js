@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { CButton, CCard, CCardBody, CCol, CForm, CFormSelect, CInputGroup, CRow, CSmartTable } from '@coreui/react-pro';
+import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import ModalContainer from 'components/modal/ModalContainer';
 import StatisticsDetailChart from 'components/statistics/StatisticsDetailChart';
@@ -25,7 +26,8 @@ const StatisticsDocumentCollectionManagement = () => {
   const isComponentMounted = useRef(true);
 
   const pastYearMonths = MonthLabelGenerator.pastYearMonthsSelectBoxLabels();
-  const [selectedMonth, setSelectedMonth] = useState(pastYearMonths[11].value);
+  const lastIndex = pastYearMonths.length - 1;
+  const [selectedMonth, setSelectedMonth] = useState(pastYearMonths[lastIndex].value);
   const modal = useModal();
 
   const handleMonthSelectBoxChange = (event) => {
@@ -118,7 +120,7 @@ const StatisticsDocumentCollectionManagement = () => {
                       style={{ height: '58px' }}
                       floatingLabel=""
                       options={pastYearMonths}
-                      defaultValue={pastYearMonths[11].value}
+                      value={selectedMonth}
                       onChange={handleMonthSelectBoxChange}
                     />
                   </CInputGroup>
@@ -130,7 +132,7 @@ const StatisticsDocumentCollectionManagement = () => {
                   <CButton
                     color="primary"
                     value="Reset"
-                    // onClick={() => setSearchFormData(initialSearchFormData)}
+                    onClick={() => setSelectedMonth(pastYearMonths[lastIndex].value)}
                   >
                     초기화
                   </CButton>
@@ -143,7 +145,12 @@ const StatisticsDocumentCollectionManagement = () => {
       <CRow>
         <CCard className="row g-3">
           <CCardBody>
-            <CRow className="mb-3"></CRow>
+            <CRow className="mb-3">
+              <CCol md={4}>
+                {/*TODO Implement ExcelDownload*/}
+                <ExcelDownloadCButton />
+              </CCol>
+            </CRow>
             <CRow className="mb-3">
               <CSmartTable
                 columnSorter={columnSorterCustomProps}
@@ -158,7 +165,7 @@ const StatisticsDocumentCollectionManagement = () => {
                   <CSmartTableNoItemLabel
                     contentLength={statisticsDataList?.length}
                     isSearchPerformed={isSearchPerformed}
-                    defaultMessage="선택한 달의 토큰 사용량을 문서 집합 별로 검색합니다."
+                    defaultMessage="선택한 월의 토큰 사용량을 문서 집합 별로 검색합니다."
                   />
                 }
                 onItemsPerPageChange={handlePageSizeChange}
