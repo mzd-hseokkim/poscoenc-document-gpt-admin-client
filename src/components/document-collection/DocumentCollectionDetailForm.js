@@ -21,10 +21,6 @@ import {
 } from '@coreui/react-pro';
 import { getStyle } from '@coreui/utils';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
-import {
-  chartPastYearMonthsLabels,
-  getFirstAndLastMonthLabels,
-} from 'components/chart/utils/chartPastYearMonthsLabels';
 import { mergeAndSumArrays, padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
@@ -40,6 +36,7 @@ import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import { formatFileSize } from 'utils/common/formatFileSize';
 import formModes from 'utils/common/formModes';
+import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
 import { itemNameValidationPattern } from 'utils/common/validationUtils';
 
 const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocumentCollectionList }) => {
@@ -53,11 +50,11 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     dallE3GenerationsData: [],
   });
   const [searchParams] = useSearchParams();
-  const { firstLabel, lastLabel } = getFirstAndLastMonthLabels();
 
   const { addToast } = useToast();
   const currentUserId = useRecoilValue(userIdSelector);
   const { isReadMode, isUpdateMode } = formModes(formMode);
+  const chartLabels = MonthLabelGenerator.pastYearMonthsChartLabels();
 
   const {
     register,
@@ -141,7 +138,6 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
         criteriaKey: collectionId,
         endDate: new Date().toISOString().split('T')[0],
       });
-      console.log(responseData);
       responseData.list.sort((a, b) => {
         const [yearA, monthA] = a.aggregationKey.split('-').map(Number);
         const [yearB, monthB] = b.aggregationKey.split('-').map(Number);
@@ -170,7 +166,6 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     if (!collectionId) {
       closeModal();
     }
-
     void fetchCollectionDetail(collectionId);
     void fetchStatisticsData(collectionId);
   }, [closeModal, fetchCollectionDetail, fetchStatisticsData, searchParams]);
@@ -301,7 +296,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                   사용 통계
                 </h4>
                 <div className="small text-medium-emphasis">
-                  {firstLabel} - {`${new Date().getFullYear()} / ${lastLabel}`}
+                  {chartLabels[0]} - {`${new Date().getFullYear()} / ${chartLabels[11]}`}
                 </div>
               </CCol>
               <CCol sm={7} className="d-none d-md-block">
@@ -317,7 +312,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                 type="line"
                 style={{ width: 650 }}
                 data={{
-                  labels: chartPastYearMonthsLabels(),
+                  labels: chartLabels,
                   datasets: [
                     {
                       label: 'Total', // 범례

@@ -2,8 +2,8 @@ import React from 'react';
 
 import { CChart } from '@coreui/react-chartjs';
 import { getCoreUILineChartOptions } from 'components/chart/options/getCoreUILineChartOptions';
-import { chartPastYearMonthsLabels } from 'components/chart/utils/chartPastYearMonthsLabels';
 import { padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
+import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
 
 export const InputTokenChart = (statisticsData) => {
   const paddedArray = padDataArrayWithZero(statisticsData.data);
@@ -14,7 +14,7 @@ export const InputTokenChart = (statisticsData) => {
         style={{ height: '200px' }}
         type="line"
         data={{
-          labels: chartPastYearMonthsLabels(), // datasets 의 길이와 일치하는 배열을 가져야합니다.
+          labels: MonthLabelGenerator.pastYearMonthsChartLabels(), // datasets 의 길이와 일치하는 배열을 가져야합니다.
           datasets: [
             {
               label: 'Input Tokens',
