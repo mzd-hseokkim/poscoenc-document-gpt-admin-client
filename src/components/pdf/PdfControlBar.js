@@ -24,7 +24,7 @@ const PdfControlBar = ({ scale, setScale, pageNumber, currentPage, setCurrentPag
 
   return (
     <>
-      <CRow className="d-flex">
+      <CRow md="12" className="d-flex">
         <CCol md={6} className="d-flex justify-content-start align-items-center">
           <CButton onClick={zoomIn} className="m-2">
             <CIcon icon={cilPlus} />

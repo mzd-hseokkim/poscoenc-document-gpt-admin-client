@@ -32,7 +32,7 @@ const PdfViewer = ({ file }) => {
   return (
     <>
       <div className="border-5">
-        <CHeader>
+        <CHeader className="d-flex">
           <PdfControlBar
             scale={scale}
             setScale={setScale}

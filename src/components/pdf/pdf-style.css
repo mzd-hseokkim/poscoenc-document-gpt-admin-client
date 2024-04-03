@@ -1,8 +1,4 @@
-.pagination-container {
-  display: flex;
-  align-items: center;
-  justify-content: start;
-}
+
 
 .pagination-btn {
   height: 38px;
