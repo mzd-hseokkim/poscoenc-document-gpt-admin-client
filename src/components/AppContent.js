@@ -1,28 +1,14 @@
 import React, { Suspense } from 'react';
 
-import { CContainer, CSpinner } from '@coreui/react-pro';
+import { CContainer } from '@coreui/react-pro';
+import AdminPageGlobalLoadingCover from 'components/cover/AdminPageGlobalLoadingCover';
 import { Route, Routes } from 'react-router-dom';
 import routes from 'routes';
 
-const spinnerDivStyle = {
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  height: '100vh',
-  position: 'relative',
-  transform: 'translateY(-20%)',
-};
-
-const spinnerStyle = { width: '4rem', height: '4rem', '--cui-spinner-border-width': '10px' };
-const LoadingFallback = () => (
-  <div style={spinnerDivStyle}>
-    <CSpinner color="primary" variant="border" style={spinnerStyle} />
-  </div>
-);
 const AppContent = () => {
   return (
     <CContainer lg>
-      <Suspense fallback={<LoadingFallback />}>
+      <Suspense fallback={<AdminPageGlobalLoadingCover />}>
         <Routes>
           {routes.map((route, idx) => {
             return (

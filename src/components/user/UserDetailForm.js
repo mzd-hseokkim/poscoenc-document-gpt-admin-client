@@ -16,7 +16,7 @@ import {
   CModalFooter,
   CRow,
 } from '@coreui/react-pro';
-import StatusBadge from 'components/badge/StatusBadge';
+import DeletionStatusBadge from 'components/badge/DeletionStatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import { BingSearchsChart } from 'components/chart/BingSearchsChart';
 import { DallE3GenerationChart } from 'components/chart/DallE3GenerationChart';
@@ -239,7 +239,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
             <CCol className="col-md mb-2">
               <CCol className="fw-bold">삭제 여부</CCol>
               <CCol>
-                <StatusBadge deleted={formData.deleted} />
+                <DeletionStatusBadge deleted={formData.deleted} />
               </CCol>
             </CCol>
           </CRow>

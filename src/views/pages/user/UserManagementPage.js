@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { CButton, CCard, CCardBody, CCol, CForm, CFormInput, CFormSelect, CRow, CSmartTable } from '@coreui/react-pro';
-import StatusBadge from 'components/badge/StatusBadge';
+import DeletionStatusBadge from 'components/badge/DeletionStatusBadge';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import ModalContainer from 'components/modal/ModalContainer';
@@ -191,7 +191,7 @@ const UserManagementPage = () => {
                   ),
                   deleted: (item) => (
                     <td>
-                      <StatusBadge deleted={item.deleted} />
+                      <DeletionStatusBadge deleted={item.deleted} />
                     </td>
                   ),
                 }}

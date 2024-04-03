@@ -12,7 +12,7 @@ import {
   CModalFooter,
   CRow,
 } from '@coreui/react-pro';
-import StatusBadge from 'components/badge/StatusBadge';
+import DeletionStatusBadge from 'components/badge/DeletionStatusBadge';
 import PostCommentsForm from 'components/board/PostCommentsForm';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
@@ -232,7 +232,7 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
             <CCol className="col-md mb-2">
               <CCol className="fw-bold">삭제 여부</CCol>
               <CCol>
-                <StatusBadge deleted={postDetail.deleted} />
+                <DeletionStatusBadge deleted={postDetail.deleted} />
               </CCol>
             </CCol>
           </CRow>

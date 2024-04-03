@@ -15,11 +15,11 @@ const getBadgeColor = (deleted) => {
   }
 };
 
-const StatusBadge = ({ deleted }) => {
+const DeletionStatusBadge = ({ deleted }) => {
   return (
     <CBadge className="justify-content-center" color={getBadgeColor(deleted)}>
       {translate(deleted)}
     </CBadge>
   );
 };
-export default StatusBadge;
+export default DeletionStatusBadge;

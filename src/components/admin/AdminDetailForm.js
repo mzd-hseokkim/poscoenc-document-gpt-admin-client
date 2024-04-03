@@ -12,7 +12,7 @@ import {
   CMultiSelect,
   CRow,
 } from '@coreui/react-pro';
-import StatusBadge from 'components/badge/StatusBadge';
+import DeletionStatusBadge from 'components/badge/DeletionStatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
@@ -269,7 +269,7 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
             <CCol className="col-md mb-2">
               <CCol className="fw-bold">삭제</CCol>
               <CCol>
-                <StatusBadge deleted={formData.deleted} />
+                <DeletionStatusBadge deleted={formData.deleted} />
               </CCol>
             </CCol>
           </CRow>

@@ -4,12 +4,12 @@ import { cilArrowThickToBottom, cilCloudDownload } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import { CChart } from '@coreui/react-chartjs';
 import {
-  CBadge,
   CButton,
   CCard,
   CCardBody,
   CCardHeader,
   CCol,
+  CCollapse,
   CForm,
   CFormLabel,
   CFormTextarea,
@@ -20,6 +20,7 @@ import {
   CRow,
 } from '@coreui/react-pro';
 import { getStyle } from '@coreui/utils';
+import DocumentFileStatusBadge from 'components/badge/DocumentFileStatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import {
   chartPastYearMonthsLabels,
@@ -28,8 +29,10 @@ import {
 import { mergeAndSumArrays, padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
+import PdfViewer from 'components/pdf/PdfViewer';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
+import { MdPictureAsPdf } from 'react-icons/md';
 import { useSearchParams } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import DocumentCollectionFileService from 'services/document-collection/DocumentCollectionFileService';
@@ -141,7 +144,6 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
         criteriaKey: collectionId,
         endDate: new Date().toISOString().split('T')[0],
       });
-      console.log(responseData);
       responseData.list.sort((a, b) => {
         const [yearA, monthA] = a.aggregationKey.split('-').map(Number);
         const [yearB, monthB] = b.aggregationKey.split('-').map(Number);
@@ -227,77 +229,24 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     refreshDocumentCollectionList();
   };
 
-  return (
-    <>
-      <FormLoadingCover isLoading={getDetailIsLoading} />
-      <CModalBody>
-        <CForm onSubmit={handleSubmit(onSubmit)}>
-          <CCard className="mb-3">
-            <CCardBody>
-              <FormInputGrid
-                register={register}
-                fields={getAuditFields(formMode)}
-                formData={collectionDetail}
-                isReadMode={isReadMode}
-              />
-            </CCardBody>
-          </CCard>
-          <CCard className="mb-3">
-            <CCardBody>
-              <FormInputGrid
-                register={register}
-                fields={collectionSpecificFields}
-                formData={collectionDetail}
-                isReadMode={isReadMode}
-                errors={errors}
-              />
-              <CFormLabel htmlFor="detail-form-description" className="col-form-label fw-bold">
-                설명
-              </CFormLabel>
-              <CFormTextarea
-                {...register('description')}
-                id="detail-form-description"
-                name="description"
-                placeholder={isReadMode ? '' : '문서 설명을 작성해주세요.'}
-                plainText={isReadMode}
-                readOnly={isReadMode}
-              />
-            </CCardBody>
-          </CCard>
-          {collectionDetail?.files?.length !== 0 && (
-            <CCard className="mb-3">
-              <CCardBody>
-                <CListGroup>
-                  {/*REMIND detail 에서 file 만 따로 처리 할 수 있도록 리팩토링, reset 에 의해 나머지 데이터가 관리되고 있음*/}
-                  {collectionDetail?.files?.map((file, index) => (
-                    <CListGroupItem key={index} className="d-flex justify-content-between align-items-start">
-                      <div>
-                        <div className="d-flex align-items-end mb-1">
-                          <span style={{ marginRight: `10px` }}>{file.originalName}</span>
-                          <small>{formatFileSize(file.size)}</small>
-                          <small style={{ marginLeft: `10px` }}>
-                            <CBadge color="primary">{file.status}</CBadge>
-                          </small>
-                        </div>
-                        <div>
-                          <small className="text-muted">{`설명 : ${file.description || ''}`}</small>
-                        </div>
-                      </div>
-                      <CButton className="mt-2" onClick={() => handleDownload(file)}>
-                        <CIcon icon={cilArrowThickToBottom} size={'lg'} />
-                      </CButton>
-                    </CListGroupItem>
-                  ))}
-                </CListGroup>
-              </CCardBody>
-            </CCard>
-          )}
-        </CForm>
+  // PDF--------------
+  const [visible, setVisible] = useState({});
+  const toggleVisible = (fileId) => {
+    setVisible((prevState) => ({
+      ...prevState,
+      [fileId]: !prevState[fileId],
+    }));
+  };
+
+  //--------------
+  const renderChart = () => {
+    return (
+      <>
         <CCard className="mb-3">
           <CCardHeader>
             <CRow>
               <CCol sm={5}>
-                <h4 id="traffic" className="card-title mb-0">
+                <h4 id="usage-statistics" className="card-title mb-0">
                   사용 통계
                 </h4>
                 <div className="small text-medium-emphasis">
@@ -385,6 +334,99 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
             </CRow>
           </CCardBody>
         </CCard>
+      </>
+    );
+  };
+
+  return (
+    <>
+      <FormLoadingCover isLoading={getDetailIsLoading} />
+      <CModalBody>
+        <CForm onSubmit={handleSubmit(onSubmit)}>
+          <CCard className="mb-3">
+            <CCardBody>
+              <FormInputGrid
+                register={register}
+                fields={getAuditFields(formMode)}
+                formData={collectionDetail}
+                isReadMode={isReadMode}
+              />
+            </CCardBody>
+          </CCard>
+          <CCard className="mb-3">
+            <CCardBody>
+              <FormInputGrid
+                register={register}
+                fields={collectionSpecificFields}
+                formData={collectionDetail}
+                isReadMode={isReadMode}
+                errors={errors}
+              />
+              <CFormLabel htmlFor="detail-form-description" className="col-form-label fw-bold">
+                설명
+              </CFormLabel>
+              <CFormTextarea
+                {...register('description')}
+                id="detail-form-description"
+                name="description"
+                placeholder={isReadMode ? '' : '문서 설명을 작성해주세요.'}
+                plainText={isReadMode}
+                readOnly={isReadMode}
+              />
+            </CCardBody>
+          </CCard>
+          {collectionDetail?.files?.length !== 0 && (
+            <CCard className="mb-3">
+              <CCardHeader>
+                <CCol sm={5}>
+                  <h4 id="document-files" className="card-title mb-0">
+                    문서 목록
+                  </h4>
+                  <small className="text-medium-emphasis">{`총 ${collectionDetail?.files?.length} 개 문서`}</small>
+                </CCol>
+              </CCardHeader>
+              <CCardBody>
+                <CListGroup>
+                  {/*REMIND detail 에서 file 만 따로 처리 할 수 있도록 리팩토링, reset 에 의해 나머지 데이터가 관리되고 있음*/}
+                  {collectionDetail?.files?.map((file, index) => (
+                    <CListGroupItem key={file.id} className="justify-content-between align-items-start">
+                      <CRow>
+                        <CCol md={9} className="mb-2">
+                          <div>
+                            <div className="d-flex align-items-end mb-1">
+                              <span style={{ marginRight: `10px` }}>{file.originalName}</span>
+                              <small>{formatFileSize(file.size)}</small>
+                              <small style={{ marginLeft: `10px` }}>
+                                <DocumentFileStatusBadge fileStatus={file.status} />
+                              </small>
+                            </div>
+                            <div>
+                              <small className="text-muted">{`상태 설명 : ${file.description || ''}`}</small>
+                            </div>
+                          </div>
+                        </CCol>
+                        <CCol md={3} className="align-content-center">
+                          <div className="float-end">
+                            <CButton className="me-2" onClick={() => toggleVisible(file.id)}>
+                              <MdPictureAsPdf size="20" title="PDF Reader" />
+                            </CButton>
+                            <CButton onClick={() => handleDownload(file)}>
+                              <CIcon icon={cilArrowThickToBottom} size={'lg'} />
+                            </CButton>
+                          </div>
+                        </CCol>
+                        <CCollapse visible={visible[file.id] || false}>
+                          <PdfViewer file={file}></PdfViewer>
+                        </CCollapse>
+                      </CRow>
+                    </CListGroupItem>
+                  ))}
+                </CListGroup>
+              </CCardBody>
+            </CCard>
+          )}
+        </CForm>
+        {renderChart()}
       </CModalBody>
       <CModalFooter>
         <DetailFormActionButtons
