@@ -1,16 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import {
-  CCard,
-  CCardBody,
-  CCardHeader,
-  CCol,
-  CForm,
-  CFormInput,
-  CModalBody,
-  CModalFooter,
-  CRow,
-} from '@coreui/react-pro';
+import { CBadge, CCard, CCardBody, CCardHeader, CCol, CForm, CModalBody, CModalFooter, CRow } from '@coreui/react-pro';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
@@ -108,18 +98,6 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
       <CCard className="g-3 mb-3">
         <CCardHeader className="h5">변경 이력</CCardHeader>
         <CCardBody>
-          <CRow>
-            <CCol className="col-md mb-2">
-              <CCol className="fw-bold">아이디</CCol>
-              <CFormInput
-                id="input-list-id"
-                name="id"
-                value={chatHistory.id || ''}
-                disabled={!isCreateMode}
-                plainText={!isCreateMode}
-              />
-            </CCol>
-          </CRow>
           <FormInputGrid
             register={register}
             fields={getAuditFields(formMode)}
@@ -161,21 +139,22 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
               </CCard>
               <CCard className="border-1">
                 <CCardHeader>
-                  <CRow>
-                    <CCol sm={5}>
-                      <h4 id="answer" className="bold card-title mb-0">
+                  <CRow className="align-content-center">
+                    <CCol sm={2}>
+                      <h4 id="answer" className="bold">
                         답변
                       </h4>
                     </CCol>
-                    <CCol sm={5} className="card-title mb-0 text-end align-content-center">
-                      <h6 id="modelName" className="mt-1 bold">
+                    <CCol sm={10} className="d-flex align-content-center justify-content-end">
+                      <CBadge color={'info'} id="modelName" className="m-2">
                         모델 : {chatHistory.modelName}
-                      </h6>
-                    </CCol>
-                    <CCol sm={2} className="card-title mb-0 text-end align-content-center">
-                      <h6 id="thumb" className="mt-1">
+                      </CBadge>
+                      <CBadge color={'primary'} id="pilotMode" className="m-2">
+                        파일럿 모드 : {chatHistory.pilotMode}
+                      </CBadge>
+                      <CBadge color={'dark'} id="thumb" className="m-2">
                         좋아요 : {chatHistory.thumb}
-                      </h6>
+                      </CBadge>
                     </CCol>
                   </CRow>
                 </CCardHeader>
