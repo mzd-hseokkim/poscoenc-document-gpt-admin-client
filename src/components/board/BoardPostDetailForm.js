@@ -12,7 +12,6 @@ import {
   CModalFooter,
   CRow,
 } from '@coreui/react-pro';
-import DeletionStatusBadge from 'components/badge/DeletionStatusBadge';
 import PostCommentsForm from 'components/board/PostCommentsForm';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
@@ -218,24 +217,6 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
     return (
       <CCard className="g-3 mb-3">
         <CCardBody>
-          <CRow>
-            <CCol className="col-md mb-2">
-              <CCol className="fw-bold">아이디</CCol>
-              <CFormInput
-                id="input-list-id"
-                name="id"
-                value={postDetail.id || ''}
-                disabled={!isCreateMode}
-                plainText={!isCreateMode}
-              />
-            </CCol>
-            <CCol className="col-md mb-2">
-              <CCol className="fw-bold">삭제 여부</CCol>
-              <CCol>
-                <DeletionStatusBadge deleted={postDetail.deleted} />
-              </CCol>
-            </CCol>
-          </CRow>
           <FormInputGrid fields={getAuditFields(formMode)} formData={postDetail} isReadMode={isReadMode} col={2} />
         </CCardBody>
       </CCard>

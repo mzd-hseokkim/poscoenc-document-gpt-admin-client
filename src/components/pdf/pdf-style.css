@@ -4,30 +4,30 @@
   height: 38px;
   width: 42px;
   padding: 5px 10px;
-  color: white; /* 텍스트 색상 */
-  border: none;
-  border-radius: 5px; /* 모서리 둥글게 */
-  cursor: pointer; /* 마우스 오버시 커서 변경 */
-  transition: background-color 0.3s; /* 호버 효과 */
-  align-items: center;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 
 .pdf-viewer-document {
-  max-width: 680px; /* Allows flexibility and responsiveness */
-  max-height: 935px; /* Adjusts height based on the viewport, ensuring it's not too tall */
-  overflow: auto; /* Keeps scrollbars for overflow content */
-  justify-content: center; /* Centers horizontally */
-  align-items: center; /* Centers vertically */
+  max-width: 680px;
+  max-height: 940px;
+  overflow: auto;
+  justify-content: center;
+  align-items: center;
+}
+
+.horizontal-doc {
+  min-height: 492px;
+}
+
+.vertical-doc {
+  min-height: 935px;
 }
 
 .pdf-page-loading-cover {
-  display: flex; /* Flexbox를 사용하여 내용을 중앙에 배치 */
-  justify-content: center; /* 수평 중앙 정렬 */
-  align-items: center; /* 수직 중앙 정렬 */
-  max-width: 100%; /* .pdf-viewer-container와 동일하게 설정 */
-  max-height: 90vh; /* 뷰포트에 대한 최대 높이 설정 */
-  width: 100%; /* 부모 컨테이너의 전체 너비를 사용 */
-  height: 100%; /* 부모 컨테이너의 전체 높이를 사용 */
-  background-color: rgba(255, 255, 255, 0.8); /* 필요에 따라 배경색과 투명도 조절 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

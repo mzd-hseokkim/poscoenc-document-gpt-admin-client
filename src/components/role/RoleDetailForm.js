@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { CCard, CCardBody, CCol, CForm, CFormInput, CModalBody, CModalFooter, CRow } from '@coreui/react-pro';
-import DeletionStatusBadge from 'components/badge/DeletionStatusBadge';
+import { CCard, CCardBody, CForm, CModalBody, CModalFooter } from '@coreui/react-pro';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
@@ -142,24 +141,6 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
     return (
       <CCard className="g-3 mb-3">
         <CCardBody>
-          <CRow>
-            <CCol className="col-md mb-2">
-              <CCol className="fw-bold">아이디</CCol>
-              <CFormInput
-                id="input-list-id"
-                name="id"
-                value={formData.id || ''}
-                disabled={!isCreateMode}
-                plainText={!isCreateMode}
-              />
-            </CCol>
-            <CCol className="col-md mb-2">
-              <CCol className="fw-bold">삭제</CCol>
-              <CCol>
-                <DeletionStatusBadge deleted={formData.deleted} />
-              </CCol>
-            </CCol>
-          </CRow>
           <FormInputGrid fields={getAuditFields(formMode)} formData={formData} isReadMode={isReadMode} col={2} />
         </CCardBody>
       </CCard>

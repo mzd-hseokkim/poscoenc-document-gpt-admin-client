@@ -8,9 +8,9 @@ const fileStatusArray = [
   { status: 'COMPLETED', color: 'success' },
   { status: 'FAILED', color: 'danger' },
 ];
-const DocumentFileStatusBadge = ({ fileStatus }) => {
-  const selectedColor = fileStatusArray.find((item) => item.status === fileStatus)?.color;
+const DocumentFileStatusBadge = ({ status }) => {
+  const selectedColor = fileStatusArray.find((item) => item.status === status)?.color;
 
-  return <CBadge color={selectedColor || 'primary'}>{fileStatus}</CBadge>;
+  return <CBadge color={selectedColor || 'primary'}>{status}</CBadge>;
 };
 export default DocumentFileStatusBadge;

@@ -1,5 +1,12 @@
 import { CCol, CFormInput, CFormLabel, CRow } from '@coreui/react-pro';
+import DeletionStatusBadge from 'components/badge/DeletionStatusBadge';
+import DocumentFileStatusBadge from 'components/badge/DocumentFileStatusBadge';
 
+const badgeComponents = {
+  DeletionStatusBadge,
+  DocumentFileStatusBadge,
+  // 다른 badge 컴포넌트들도 이 객체에 추가하세요.
+};
 const FormInputGrid = ({ fields, handleChange, isReadMode, formData, register, errors = {}, col = 1 }) => {
   const numberOfRows = Math.ceil(fields.length / col);
 
@@ -25,6 +32,32 @@ const FormInputGrid = ({ fields, handleChange, isReadMode, formData, register, e
 
         if (!isRendered) {
           return null;
+        }
+
+        if (field.badge) {
+          const BadgeComponent = badgeComponents[field.badge];
+          if (!BadgeComponent) {
+            console.error(`No badge component found for ${field.badge}`);
+            return null;
+          }
+
+          if (!formData[field.name]) {
+            return null;
+          }
+
+          const badgeProps = {};
+          badgeProps[field.name] = formData[field.name];
+
+          return (
+            <CCol key={field.name} className="mb-2">
+              <div>
+                <CFormLabel htmlFor={`input-list-${field.name}`} className="fw-bold">
+                  {field.label}
+                </CFormLabel>
+              </div>
+              <BadgeComponent {...badgeProps} />
+            </CCol>
+          );
         }
 
         const commonProps = {

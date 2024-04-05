@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { cilArrowThickToBottom, cilCloudDownload } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
-import { CChart } from '@coreui/react-chartjs';
 import {
   CButton,
   CCard,
@@ -19,14 +18,10 @@ import {
   CModalFooter,
   CRow,
 } from '@coreui/react-pro';
-import { getStyle } from '@coreui/utils';
 import DocumentFileStatusBadge from 'components/badge/DocumentFileStatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
-import {
-  chartPastYearMonthsLabels,
-  getFirstAndLastMonthLabels,
-} from 'components/chart/utils/chartPastYearMonthsLabels';
-import { mergeAndSumArrays, padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
+import { TokenUsageChart } from 'components/chart/TokenUsageChart';
+import { getFirstAndLastMonthLabels } from 'components/chart/utils/chartPastYearMonthsLabels';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
 import PdfViewer from 'components/pdf/PdfViewer';
@@ -71,7 +66,6 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
 
   const collectionSpecificFields = [
     {
-      md: 2,
       name: 'id',
       label: '아이디',
       isDisabled: isUpdateMode,
@@ -99,15 +93,12 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
       },
     },
     {
-      md: 2,
-      name: 'deleted',
-      label: '삭제 여부',
-    },
-    {
       name: 'status',
       label: '문서 상태',
+      badge: 'DocumentFileStatusBadge',
     },
   ];
+
   const fetchCollectionDetail = useCallback(
     async (collectionId) => {
       if (!collectionId) {
@@ -262,74 +253,9 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
           </CCardHeader>
           <CCardBody>
             <CRow className="mb-3 justify-content-center">
-              <CChart
-                type="line"
-                style={{ width: 650 }}
-                data={{
-                  labels: chartPastYearMonthsLabels(),
-                  datasets: [
-                    {
-                      label: 'Total', // 범례
-                      backgroundColor: 'rgba(220, 220, 220, 0.2)',
-                      borderColor: '#007bff',
-                      pointBackgroundColor: 'rgba(220, 220, 220, 1)',
-                      pointBorderColor: '#fff',
-                      data: mergeAndSumArrays(
-                        padDataArrayWithZero(statisticsData.outputTokenData),
-                        padDataArrayWithZero(statisticsData.inputTokenData)
-                      ),
-                    },
-                    {
-                      label: 'Input Tokens', // 범례
-                      backgroundColor: 'rgba(151, 187, 205, 0.2)',
-                      borderColor: '#28a745',
-                      pointBackgroundColor: 'rgba(151, 187, 205, 1)',
-                      pointBorderColor: '#fff',
-                      data: padDataArrayWithZero(statisticsData.inputTokenData),
-                    },
-                    {
-                      label: 'Output Tokens', // 범례
-                      backgroundColor: 'rgba(220, 220, 220, 0.2)',
-                      borderColor: '#ffc107',
-                      pointBackgroundColor: 'rgba(220, 220, 220, 1)',
-                      pointBorderColor: '#fff',
-                      data: padDataArrayWithZero(statisticsData.outputTokenData),
-                    },
-                  ],
-                }}
-                options={{
-                  plugins: {
-                    legend: {
-                      labels: {
-                        color: getStyle('--cui-body-color'),
-                      },
-                    },
-                  },
-                  scales: {
-                    x: {
-                      grid: {
-                        display: false,
-                        color: getStyle('--cui-border-color-translucent'),
-                      },
-                      ticks: {
-                        color: getStyle('--cui-body-color'),
-                      },
-                    },
-                    y: {
-                      grid: {
-                        color: getStyle('--cui-border-color-translucent'),
-                      },
-                      ticks: {
-                        color: getStyle('--cui-body-color'),
-                      },
-                    },
-                  },
-                  elements: {
-                    line: {
-                      tension: 0.2,
-                    },
-                  },
-                }}
+              <TokenUsageChart
+                outputTokenData={statisticsData.outputTokenData}
+                inputTokenData={statisticsData.inputTokenData}
               />
             </CRow>
           </CCardBody>
@@ -350,6 +276,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                 fields={getAuditFields(formMode)}
                 formData={collectionDetail}
                 isReadMode={isReadMode}
+                col={2}
               />
             </CCardBody>
           </CCard>
@@ -361,18 +288,27 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                 formData={collectionDetail}
                 isReadMode={isReadMode}
                 errors={errors}
+                col={2}
               />
-              <CFormLabel htmlFor="detail-form-description" className="col-form-label fw-bold">
-                설명
-              </CFormLabel>
-              <CFormTextarea
-                {...register('description')}
-                id="detail-form-description"
-                name="description"
-                placeholder={isReadMode ? '' : '문서 설명을 작성해주세요.'}
-                plainText={isReadMode}
-                readOnly={isReadMode}
-              />
+              {collectionDetail.description && (
+                <>
+                  <CFormLabel
+                    htmlFor="detail-form-description"
+                    className="col-form-label fw-bold"
+                    style={{ color: 'red' }}
+                  >
+                    에러 로그
+                  </CFormLabel>
+                  <CFormTextarea
+                    {...register('description')}
+                    id="detail-form-description"
+                    name="description"
+                    placeholder={isReadMode ? '' : '문서 설명을 작성해주세요.'}
+                    plainText={isReadMode}
+                    readOnly={isReadMode}
+                  />
+                </>
+              )}
             </CCardBody>
           </CCard>
           {collectionDetail?.files?.length !== 0 && (
@@ -382,7 +318,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                   <h4 id="document-files" className="card-title mb-0">
                     문서 목록
                   </h4>
-                  <small className="text-medium-emphasis">{`총 ${collectionDetail?.files?.length} 개 문서`}</small>
+                  <small className="text-medium-emphasis">{`총 ${collectionDetail?.files?.length || 0} 개 문서`}</small>
                 </CCol>
               </CCardHeader>
               <CCardBody>
@@ -391,19 +327,19 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                   {collectionDetail?.files?.map((file, index) => (
                     <CListGroupItem key={file.id} className="justify-content-between align-items-start">
                       <CRow>
-                        <CCol md={9} className="mb-2">
-                          <div>
-                            <div className="d-flex align-items-end mb-1">
-                              <span style={{ marginRight: `10px` }}>{file.originalName}</span>
-                              <small>{formatFileSize(file.size)}</small>
-                              <small style={{ marginLeft: `10px` }}>
-                                <DocumentFileStatusBadge fileStatus={file.status} />
-                              </small>
-                            </div>
-                            <div>
-                              <small className="text-muted">{`상태 설명 : ${file.description || ''}`}</small>
-                            </div>
-                          </div>
+                        <CCol md={9} className="align-content-center">
+                          <CCol className="d-flex">
+                            <span style={{ marginRight: `10px` }}>{file.originalName}</span>
+                            <small>{formatFileSize(file.size)}</small>
+                            <small style={{ marginLeft: `10px` }}>
+                              <DocumentFileStatusBadge status={file.status} />
+                            </small>
+                          </CCol>
+                          {file.description && (
+                            <CCol>
+                              <small className="text-muted">{`상태 설명 : ${file.description}`}</small>
+                            </CCol>
+                          )}
                         </CCol>
                         <CCol md={3} className="align-content-center">
                           <div className="float-end">
@@ -416,7 +352,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                           </div>
                         </CCol>
                         <CCollapse visible={visible[file.id] || false}>
-                          <PdfViewer file={file}></PdfViewer>
+                          <PdfViewer file={file} visible={visible[file.id] || false}></PdfViewer>
                         </CCollapse>
                       </CRow>
                     </CListGroupItem>
