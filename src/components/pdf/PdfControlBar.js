@@ -5,7 +5,7 @@ import CIcon from '@coreui/icons-react';
 import { CButton, CCol, CFormInput, CPopover } from '@coreui/react-pro';
 
 const PdfControlBar = ({ scale, setScale, numPages, currentPage, setCurrentPage }) => {
-  const [inputValue, setInputValue] = useState(currentPage || 1);
+  const [inputValue, setInputValue] = useState(currentPage || '1');
   const [popoverVisible, setPopoverVisible] = useState(false);
   const [popoverMessage, setPopoverMessage] = useState('');
 
@@ -16,7 +16,7 @@ const PdfControlBar = ({ scale, setScale, numPages, currentPage, setCurrentPage 
     if (popoverVisible) {
       timer = setTimeout(() => {
         setPopoverVisible(false);
-      }, 2200);
+      }, 2000);
     }
     return () => clearTimeout(timer);
   }, [currentPage, popoverVisible]);
@@ -46,6 +46,7 @@ const PdfControlBar = ({ scale, setScale, numPages, currentPage, setCurrentPage 
     } else {
       setCurrentPage(pageNumber);
     }
+    setInputValue(currentPage);
   };
 
   return (
