@@ -5,8 +5,8 @@ import CIcon from '@coreui/icons-react';
 import { CChart } from '@coreui/react-chartjs';
 import { CDropdown, CDropdownItem, CDropdownMenu, CDropdownToggle, CWidgetStatsD } from '@coreui/react-pro';
 import { getNonGridLineChartOptions } from 'components/chart/options/getNonGridLineChartOptions';
-import { chartPastYearMonthsLabels } from 'components/chart/utils/chartPastYearMonthsLabels';
 import { calculateGrowthRateWithIcon, padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
+import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
 
 export const BingSearchsChart = (statisticsData) => {
   const paddedArray = padDataArrayWithZero(statisticsData.data);
@@ -36,7 +36,7 @@ export const BingSearchsChart = (statisticsData) => {
             className="position-absolute w-100 h-100"
             type="line"
             data={{
-              labels: chartPastYearMonthsLabels(),
+              labels: MonthLabelGenerator.pastYearMonthsChartLabels(),
               datasets: [
                 {
                   label: '검색 횟수',

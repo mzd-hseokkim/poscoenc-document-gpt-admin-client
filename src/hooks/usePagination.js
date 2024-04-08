@@ -22,8 +22,8 @@ const usePagination = (totalItems) => {
     }));
   };
 
-  const handlePageSortChange = (sorterValue) => {
-    const newSort = `${sorterValue.column},${sorterValue.state}`;
+  const handlePageSortChange = ({ column, direction }) => {
+    const newSort = `${column},${direction}`;
     setPageableData((prev) => ({
       ...prev,
       sort: newSort,

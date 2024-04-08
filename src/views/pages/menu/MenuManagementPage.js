@@ -288,7 +288,11 @@ const MenuManagementPage = () => {
                 itemsPerPageSelect
                 loading={isLoading}
                 noItemsLabel={
-                  <CSmartTableNoItemLabel contentLength={menuList.length} isSearchPerformed={isSearchPerformed} />
+                  <CSmartTableNoItemLabel
+                    contentLength={menuList.length}
+                    isSearchPerformed={isSearchPerformed}
+                    defaultMessage="검색 조건에 맞는 메뉴를 검색합니다."
+                  />
                 }
                 onItemsPerPageChange={handlePageSizeChange}
                 onSelectedItemsChange={(items) => {

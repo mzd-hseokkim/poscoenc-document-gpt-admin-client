@@ -171,7 +171,11 @@ const UserManagementPage = () => {
                 itemsPerPageSelect
                 loading={isLoading}
                 noItemsLabel={
-                  <CSmartTableNoItemLabel contentLength={userList.length} isSearchPerformed={isSearchPerformed} />
+                  <CSmartTableNoItemLabel
+                    contentLength={userList.length}
+                    isSearchPerformed={isSearchPerformed}
+                    defaultMessage="검색 조건에 맞는 사용자를 검색합니다."
+                  />
                 }
                 onItemsPerPageChange={handlePageSizeChange}
                 onSelectedItemsChange={(items) => {

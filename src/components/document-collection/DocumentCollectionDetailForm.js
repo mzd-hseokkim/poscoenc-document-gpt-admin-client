@@ -20,6 +20,7 @@ import {
 } from '@coreui/react-pro';
 import DocumentFileStatusBadge from 'components/badge/DocumentFileStatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
+import { mergeAndSumArrays, padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
 import { TokenUsageChart } from 'components/chart/TokenUsageChart';
 import { getFirstAndLastMonthLabels } from 'components/chart/utils/chartPastYearMonthsLabels';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
@@ -38,6 +39,7 @@ import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import { formatFileSize } from 'utils/common/formatFileSize';
 import formModes from 'utils/common/formModes';
+import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
 import { itemNameValidationPattern } from 'utils/common/validationUtils';
 
 const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocumentCollectionList }) => {
@@ -51,11 +53,11 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     dallE3GenerationsData: [],
   });
   const [searchParams] = useSearchParams();
-  const { firstLabel, lastLabel } = getFirstAndLastMonthLabels();
 
   const { addToast } = useToast();
   const currentUserId = useRecoilValue(userIdSelector);
   const { isReadMode, isUpdateMode } = formModes(formMode);
+  const chartLabels = MonthLabelGenerator.pastYearMonthsChartLabels();
 
   const {
     register,
@@ -163,7 +165,6 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     if (!collectionId) {
       closeModal();
     }
-
     void fetchCollectionDetail(collectionId);
     void fetchStatisticsData(collectionId);
   }, [closeModal, fetchCollectionDetail, fetchStatisticsData, searchParams]);
