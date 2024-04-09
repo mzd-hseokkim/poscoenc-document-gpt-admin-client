@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { CButton, CCard, CCardBody, CCol, CForm, CFormSelect, CInputGroup, CRow, CSmartTable } from '@coreui/react-pro';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
@@ -20,26 +20,32 @@ const StatisticsDocumentCollectionManagement = () => {
   const [statisticsDataList, setStatisticsDataList] = useState([]);
   const [clickedData, setClickedData] = useState({});
 
-  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } =
-    usePagination(totalStatisticsDataElements);
+  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } = usePagination(
+    totalStatisticsDataElements,
+    'sumInputTokens,desc'
+  );
   const { addToast } = useToast();
   const isComponentMounted = useRef(true);
 
   const pastYearMonths = MonthLabelGenerator.pastYearMonthsSelectBoxLabels();
   const lastIndex = pastYearMonths.length - 1;
-  const [selectedMonth, setSelectedMonth] = useState(pastYearMonths[lastIndex].value);
+  const [selectedMonth, setSelectedMonth] = useState(pastYearMonths[lastIndex]);
+  const [stagedSelectedMonth, setStagedSelectedMonth] = useState(pastYearMonths[lastIndex]);
+
   const modal = useModal();
 
-  const handleMonthSelectBoxChange = (event) => {
-    setSelectedMonth(event.target.value);
+  const handleMonthSelectBoxChange = (e) => {
+    e.preventDefault();
+    const changedMonth = pastYearMonths.find((item) => item.value === e.target.value);
+    setStagedSelectedMonth(changedMonth);
   };
 
-  const searchDocumentCollectionUsageStatistics = async () => {
+  const searchDocumentCollectionUsageStatistics = useCallback(async () => {
     if (!isSearchPerformed) {
       setIsSearchPerformed(true);
     }
     try {
-      const response = await statisticsService.getDocumentCollectionUsageStatistics(selectedMonth, pageableData);
+      const response = await statisticsService.getDocumentCollectionUsageStatistics(selectedMonth.value, pageableData);
       setStatisticsDataList(response.content);
       setTotalStatisticsDataElements(response.totalElements);
     } catch (error) {
@@ -49,23 +55,20 @@ const StatisticsDocumentCollectionManagement = () => {
     } finally {
       //REMIND implement loading
     }
-  };
+  }, [addToast, isSearchPerformed, pageableData, selectedMonth.value]);
 
   const handleSubmitSearchRequest = async (e) => {
     e.preventDefault();
-    await searchDocumentCollectionUsageStatistics();
+    setSelectedMonth(stagedSelectedMonth);
   };
 
   useEffect(() => {
-    if (pageableData.sort === 'id,desc') {
-      handlePageSortChange({ column: 'sumInputTokens', direction: 'desc' });
-    }
     if (isComponentMounted.current) {
       isComponentMounted.current = false;
     } else {
       void searchDocumentCollectionUsageStatistics();
     }
-  }, []);
+  }, [searchDocumentCollectionUsageStatistics]);
 
   const handleRowClick = (item) => {
     setClickedData(item);
@@ -120,7 +123,7 @@ const StatisticsDocumentCollectionManagement = () => {
                       style={{ height: '58px' }}
                       floatingLabel=""
                       options={pastYearMonths}
-                      value={selectedMonth}
+                      value={stagedSelectedMonth.value}
                       onChange={handleMonthSelectBoxChange}
                     />
                   </CInputGroup>
@@ -132,7 +135,7 @@ const StatisticsDocumentCollectionManagement = () => {
                   <CButton
                     color="primary"
                     value="Reset"
-                    onClick={() => setSelectedMonth(pastYearMonths[lastIndex].value)}
+                    onClick={() => setStagedSelectedMonth(pastYearMonths[lastIndex])}
                   >
                     초기화
                   </CButton>
