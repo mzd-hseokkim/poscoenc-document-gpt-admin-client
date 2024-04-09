@@ -7,7 +7,7 @@ import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
-import RoleService from 'services/Role/RoleService';
+import RoleService from 'services/role/RoleService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/common/formModes';

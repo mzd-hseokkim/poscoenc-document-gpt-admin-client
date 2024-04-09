@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   CButton,
@@ -9,6 +9,7 @@ import {
   CForm,
   CFormCheck,
   CFormInput,
+  CFormLabel,
   CFormSelect,
   CRow,
   CSmartTable,
@@ -32,7 +33,7 @@ import {
 } from 'utils/common/dateUtils';
 import { adminColumnConfig } from 'views/pages/admin/adminColumnConfig';
 
-const createInitialFormData = () => ({
+const createInitialSearchFormData = () => ({
   email: '',
   name: '',
   role: '',
@@ -52,7 +53,9 @@ const AdminManagementPage = () => {
   const [checkedItems, setCheckedItems] = useState([]);
   const [formMode, setFormMode] = useState('');
   const [totalAdminElements, setTotalAdminElements] = useState(0);
-  const [formData, setFormData] = useState(createInitialFormData);
+  const [searchFormData, setSearchFormData] = useState({});
+  const [stagedSearchFormData, setStagedSearchFormData] = useState(createInitialSearchFormData);
+
   const [isSearchPerformed, setIsSearchPerformed] = useState(false);
   const [isPickTime, setIsPickTime] = useState(false);
 
@@ -63,21 +66,13 @@ const AdminManagementPage = () => {
   const { addToast } = useToast();
   const modal = useModal();
 
-  useEffect(() => {
-    if (isComponentMounted.current) {
-      isComponentMounted.current = false;
-    } else {
-      void fetchAdminList();
-    }
-  }, [pageableData]);
-
-  const fetchAdminList = async () => {
+  const fetchAdminList = useCallback(async () => {
     if (!isSearchPerformed) {
       setIsSearchPerformed(true);
     }
     try {
       setIsLoading(true);
-      const data = await AdminService.getAdmins(formData, pageableData);
+      const data = await AdminService.getAdmins(searchFormData, pageableData);
       setAdminList(data.content);
       setTotalAdminElements(data.totalElements);
     } catch (error) {
@@ -88,7 +83,15 @@ const AdminManagementPage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [addToast, searchFormData, isSearchPerformed, pageableData]);
+
+  useEffect(() => {
+    if (isComponentMounted.current) {
+      isComponentMounted.current = false;
+    } else {
+      void fetchAdminList();
+    }
+  }, [fetchAdminList]);
 
   const handleDateChange = ({ id, newDate, isStartDate = true }) => {
     const fieldMap = {
@@ -96,27 +99,36 @@ const AdminManagementPage = () => {
       modifiedAt: isStartDate ? 'fromModifiedAt' : 'toModifiedAt',
       lastLoggedInAt: isStartDate ? 'fromLoggedInAt' : 'toLoggedInAt',
     };
-
     const fieldToUpdate = fieldMap[id];
-    if (fieldToUpdate) {
-      const formattedDate = isStartDate ? formatToIsoStartDate(newDate) : formatToIsoEndDate(newDate);
-      setFormData((prev) => ({ ...prev, [fieldToUpdate]: formattedDate }));
-    }
+    if (!fieldToUpdate) return;
+
+    const newFormattedDate = newDate
+      ? //REMIND 날짜만 보낼 경우 00시로 고정되어서 23시로 변경
+        isPickTime
+        ? formatToIsoEndDate(newDate)
+        : format(new Date(newDate), "yyyy-MM-dd'T'23:59")
+      : null;
+
+    const formattedDate = isStartDate ? formatToIsoStartDate(newDate) : newFormattedDate;
+    setStagedSearchFormData((prev) => ({ ...prev, [fieldToUpdate]: formattedDate }));
   };
 
   const handleTimePickerCheck = (e) => {
     setIsPickTime(e.target.checked);
-    setFormData((prev) => ({
+
+    setStagedSearchFormData((prev) => ({
       ...prev,
-      fromCreatedAt: format(formData.fromCreatedAt, "yyyy-MM-dd'T'00:00"),
-      toCreatedAt: format(formData.toCreatedAt, "yyyy-MM-dd'T'23:59"),
-      fromModifiedAt: format(formData.fromModifiedAt, "yyyy-MM-dd'T'00:00"),
-      toModifiedAt: format(formData.toModifiedAt, "yyyy-MM-dd'T'23:59"),
+      //REMIND 검색 여부 체크 해제 시 기존의 설정된 시간 값들을 초기화해주기 위함
+      fromCreatedAt: format(stagedSearchFormData.fromCreatedAt, "yyyy-MM-dd'T'00:00"),
+      toCreatedAt: format(stagedSearchFormData.toCreatedAt, "yyyy-MM-dd'T'23:59"),
+      fromModifiedAt: format(stagedSearchFormData.fromModifiedAt, "yyyy-MM-dd'T'00:00"),
+      toModifiedAt: format(stagedSearchFormData.toModifiedAt, "yyyy-MM-dd'T'23:59"),
+      fromLoggedInAt: format(stagedSearchFormData.fromLoggedInAt, "yyyy-MM-dd'T'00:00"),
+      toLoggedInAt: format(stagedSearchFormData.toLoggedInAt, "yyyy-MM-dd'T'23:59"),
     }));
   };
-
-  const handleChange = ({ target: { id, value } }) => {
-    setFormData((prev) => ({ ...prev, [id]: value }));
+  const handleSearchFormChange = ({ target: { id, value } }) => {
+    setStagedSearchFormData((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleRowClick = (id) => {
@@ -126,13 +138,12 @@ const AdminManagementPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    void fetchAdminList();
+    setSearchFormData(stagedSearchFormData);
   };
-
-  const handleReset = () => {
-    setFormData(createInitialFormData);
+  const handleSearchFormReset = () => {
+    setStagedSearchFormData(createInitialSearchFormData);
+    setIsPickTime(false);
   };
-
   const handleCreateClick = () => {
     setFormMode('create');
     modal.openModal();
@@ -143,14 +154,14 @@ const AdminManagementPage = () => {
     if (checkedItems.length === 1) {
       try {
         await AdminService.deleteAdmin(ids, shouldDelete);
-        fetchAdminList();
+        void fetchAdminList();
       } catch (error) {
         addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
       }
     } else {
       try {
         await AdminService.deleteAdmins(ids, shouldDelete);
-        fetchAdminList();
+        void fetchAdminList();
       } catch (error) {
         addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
       }
@@ -166,13 +177,18 @@ const AdminManagementPage = () => {
             <CForm onSubmit={handleSubmit}>
               <CRow className="mb-3">
                 <CCol md={4}>
-                  <CFormInput id="email" label="이메일" value={formData.email} onChange={handleChange} />
+                  <CFormInput
+                    id="email"
+                    label="이메일"
+                    value={stagedSearchFormData.email}
+                    onChange={handleSearchFormChange}
+                  />
                 </CCol>
                 <CCol md={4}>
-                  <CFormInput id="name" label="이름" value={formData.name} onChange={handleChange} />
+                  <CFormInput id="name" label="이름" value={searchFormData.name} onChange={handleSearchFormChange} />
                 </CCol>
                 <CCol md={4}>
-                  <CFormInput id="role" label="권한" value={formData.role} onChange={handleChange} />
+                  <CFormInput id="role" label="권한" value={searchFormData.role} onChange={handleSearchFormChange} />
                 </CCol>
               </CRow>
               <CRow className="mb-3">
@@ -181,8 +197,8 @@ const AdminManagementPage = () => {
                     key={`createdAt-${isPickTime}`}
                     id="createdAt"
                     label="등록일"
-                    startDate={formData.fromCreatedAt}
-                    endDate={formData.toCreatedAt}
+                    startDate={stagedSearchFormData.fromCreatedAt}
+                    endDate={stagedSearchFormData.toCreatedAt}
                     onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
                     onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
                     timepicker={isPickTime}
@@ -193,8 +209,8 @@ const AdminManagementPage = () => {
                     key={`modifiedAt-${isPickTime}`}
                     id="modifiedAt"
                     label="수정일"
-                    startDate={formData.fromModifiedAt}
-                    endDate={formData.toModifiedAt}
+                    startDate={stagedSearchFormData.fromModifiedAt}
+                    endDate={stagedSearchFormData.toModifiedAt}
                     onStartDateChange={(newDate) => handleDateChange({ id: 'modifiedAt', newDate })}
                     onEndDateChange={(newDate) => handleDateChange({ id: 'modifiedAt', newDate, isStartDate: false })}
                     timepicker={isPickTime}
@@ -205,8 +221,8 @@ const AdminManagementPage = () => {
                     key={`lastLoggedInAt-${isPickTime}`}
                     id="lastLoggedInAt"
                     label="최근 로그인"
-                    startDate={formData.fromLoggedInAt}
-                    endDate={formData.toLoggedInAt}
+                    startDate={stagedSearchFormData.fromLoggedInAt}
+                    endDate={stagedSearchFormData.toLoggedInAt}
                     onStartDateChange={(newDate) => handleDateChange({ id: 'lastLoggedInAt', newDate })}
                     onEndDateChange={(newDate) =>
                       handleDateChange({ id: 'lastLoggedInAt', newDate, isStartDate: false })
@@ -231,8 +247,8 @@ const AdminManagementPage = () => {
                       { label: '삭제됨', value: 'Yes' },
                       { label: '삭제되지 않음', value: 'NO' },
                     ]}
-                    value={formData.deletionOption}
-                    onChange={handleChange}
+                    value={stagedSearchFormData.deletionOption}
+                    onChange={handleSearchFormChange}
                   />
                 </CCol>
                 <CCol md={3}>
@@ -244,15 +260,15 @@ const AdminManagementPage = () => {
                       { label: '아니오', value: false },
                       { label: '예', value: true },
                     ]}
-                    value={formData.findEmptyLogin}
-                    onChange={handleChange}
+                    value={stagedSearchFormData.findEmptyLogin}
+                    onChange={handleSearchFormChange}
                   />
                 </CCol>
               </CRow>
               <CRow className="mb-3">
                 <CCol className="d-grid gap-2 d-md-flex justify-content-md-center">
                   <CButton type="submit">검색</CButton>
-                  <CButton onClick={handleReset}>초기화</CButton>
+                  <CButton onClick={handleSearchFormReset}>초기화</CButton>
                 </CCol>
               </CRow>
             </CForm>
@@ -269,9 +285,12 @@ const AdminManagementPage = () => {
                 <CButton onClick={() => handleDeleteRestoreClick(false)}>복구</CButton>
                 <ExcelDownloadCButton
                   downloadFunction={AdminService.getDownloadAdminList}
-                  searchFormData={formData}
+                  searchFormData={searchFormData}
                   hasSearchResults={adminList.length !== 0}
                 />
+              </CCol>
+              <CCol className="d-flex justify-content-end">
+                <CFormLabel>총 {totalAdminElements} 개의 검색 결과</CFormLabel>
               </CCol>
             </CRow>
             <CRow className="mb-3">

@@ -20,9 +20,7 @@ import {
 } from '@coreui/react-pro';
 import DocumentFileStatusBadge from 'components/badge/DocumentFileStatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
-import { mergeAndSumArrays, padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
 import { TokenUsageChart } from 'components/chart/TokenUsageChart';
-import { getFirstAndLastMonthLabels } from 'components/chart/utils/chartPastYearMonthsLabels';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
 import PdfViewer from 'components/pdf/PdfViewer';
@@ -242,7 +240,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                   사용 통계
                 </h4>
                 <div className="small text-medium-emphasis">
-                  {firstLabel} - {`${new Date().getFullYear()} / ${lastLabel}`}
+                  {chartLabels[0]} - {`${new Date().getFullYear()} / ${chartLabels[11]}`}
                 </div>
               </CCol>
               <CCol sm={7} className="d-none d-md-block">
@@ -325,7 +323,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
               <CCardBody>
                 <CListGroup>
                   {/*REMIND detail 에서 file 만 따로 처리 할 수 있도록 리팩토링, reset 에 의해 나머지 데이터가 관리되고 있음*/}
-                  {collectionDetail?.files?.map((file, index) => (
+                  {collectionDetail?.files?.map((file) => (
                     <>
                       <CListGroupItem key={file.id} className="justify-content-between align-items-start">
                         <CRow>
@@ -382,5 +380,4 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     </>
   );
 };
-
 export default DocumentCollectionDetailForm;
