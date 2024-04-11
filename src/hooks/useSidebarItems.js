@@ -81,7 +81,7 @@ const useSidebarItems = () => {
           icon: iconMapper({ iconName: 'cilStar', type: 'nav' }),
           to: '/',
           disabled: true,
-          bold: true,
+          bold: true.toString(),
         },
         {
           component: CNavGroupItems,

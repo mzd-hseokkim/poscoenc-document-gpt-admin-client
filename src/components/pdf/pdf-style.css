@@ -1,0 +1,25 @@
+
+
+.pagination-btn {
+  height: 38px;
+  width: 42px;
+  padding: 5px 10px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+
+.pdf-viewer-document {
+  max-width: 680px;
+  max-height: 940px;
+  overflow: auto;
+  justify-content: center;
+  align-items: center;
+}
+
+.pdf-page-loading-cover {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

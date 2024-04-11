@@ -9,14 +9,12 @@ import {
   CCardHeader,
   CCol,
   CForm,
-  CFormInput,
   CFormLabel,
   CFormTextarea,
   CModalBody,
   CModalFooter,
   CRow,
 } from '@coreui/react-pro';
-import StatusBadge from 'components/badge/StatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import { BingSearchsChart } from 'components/chart/BingSearchsChart';
 import { DallE3GenerationChart } from 'components/chart/DallE3GenerationChart';
@@ -225,24 +223,6 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
     return (
       <CCard className="g-3 mb-3">
         <CCardBody>
-          <CRow>
-            <CCol className="col-md mb-2">
-              <CCol className="fw-bold">아이디</CCol>
-              <CFormInput
-                id="input-list-id"
-                name="id"
-                value={formData.id || ''}
-                disabled={!isCreateMode}
-                plainText={!isCreateMode}
-              />
-            </CCol>
-            <CCol className="col-md mb-2">
-              <CCol className="fw-bold">삭제 여부</CCol>
-              <CCol>
-                <StatusBadge deleted={formData.deleted} />
-              </CCol>
-            </CCol>
-          </CRow>
           <FormInputGrid fields={getAuditFields(formMode)} formData={formData} isReadMode={isReadMode} col={2} />
         </CCardBody>
       </CCard>

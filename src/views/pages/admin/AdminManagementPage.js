@@ -14,7 +14,7 @@ import {
   CSmartTable,
 } from '@coreui/react-pro';
 import AdminDetailForm from 'components/admin/AdminDetailForm';
-import StatusBadge from 'components/badge/StatusBadge';
+import DeletionStatusBadge from 'components/badge/DeletionStatusBadge';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import ModalContainer from 'components/modal/ModalContainer';
@@ -311,7 +311,7 @@ const AdminManagementPage = () => {
                   lastLoggedInAt: (item) => <td>{formatToYMD(item.lastLoggedInAt)}</td>,
                   deleted: (item) => (
                     <td>
-                      <StatusBadge deleted={item.deleted} />
+                      <DeletionStatusBadge deleted={item.deleted} />
                     </td>
                   ),
                 }}

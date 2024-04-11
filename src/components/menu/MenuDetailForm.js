@@ -6,7 +6,6 @@ import {
   CCol,
   CForm,
   CFormCheck,
-  CFormInput,
   CFormLabel,
   CFormSelect,
   CModalBody,
@@ -14,7 +13,6 @@ import {
   CMultiSelect,
   CRow,
 } from '@coreui/react-pro';
-import StatusBadge from 'components/badge/StatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import FormInputGrid from 'components/input/FormInputGrid';
@@ -220,8 +218,8 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
   const patchMenu = async (data) => {
     try {
       await MenuService.patchMenu(data);
-      closeModal();
       fetchMenuList();
+      void fetchMenuDetail(menuId);
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -262,8 +260,8 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
     } catch (error) {
       addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
-    closeModal();
     fetchMenuList();
+    void fetchMenuDetail(menuId);
   };
   const renderAllowChildrenCheck = () => (
     <CRow className="mb-3">
@@ -347,24 +345,6 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
     return (
       <CCard className="g-3 mb-3">
         <CCardBody>
-          <CRow>
-            <CCol className="col-md mb-2">
-              <CCol className="fw-bold">아이디</CCol>
-              <CFormInput
-                id="input-list-id"
-                name="id"
-                value={formData.id || ''}
-                disabled={!isCreateMode}
-                plainText={!isCreateMode}
-              />
-            </CCol>
-            <CCol className="col-md mb-2">
-              <CCol className="fw-bold">삭제</CCol>
-              <CCol>
-                <StatusBadge deleted={formData.deleted} />
-              </CCol>
-            </CCol>
-          </CRow>
           <FormInputGrid fields={getAuditFields(formMode)} formData={formData} isReadMode={isReadMode} col={2} />
         </CCardBody>
       </CCard>

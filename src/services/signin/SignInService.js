@@ -5,4 +5,7 @@ const signIn = async (payload) => {
   return response.data;
 };
 
-export default { signIn };
+const SignInService = {
+  signIn,
+};
+export default SignInService;

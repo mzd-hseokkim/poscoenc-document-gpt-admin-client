@@ -13,7 +13,7 @@ import {
   CRow,
   CSmartTable,
 } from '@coreui/react-pro';
-import StatusBadge from 'components/badge/StatusBadge';
+import DeletionStatusBadge from 'components/badge/DeletionStatusBadge';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import MenuDetailForm from 'components/menu/MenuDetailForm';
@@ -314,7 +314,7 @@ const MenuManagementPage = () => {
                   icon: (item) => <td>{iconMapper({ iconName: item.icon })}</td>,
                   deleted: (item) => (
                     <td>
-                      <StatusBadge deleted={item.deleted} />
+                      <DeletionStatusBadge deleted={item.deleted} />
                     </td>
                   ),
                 }}

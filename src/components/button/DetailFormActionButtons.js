@@ -39,7 +39,9 @@ const DetailFormActionButtons = ({
           </>
         )}
         {!isCreateMode && (
-          <CButton onClick={() => handleDeleteRestore?.(dataId)}>{isDataDeleted ? '복구' : '삭제'}</CButton>
+          <CButton color={isDataDeleted ? 'success' : 'danger'} onClick={() => handleDeleteRestore?.(dataId)}>
+            {isDataDeleted ? '복구' : '삭제'}
+          </CButton>
         )}
       </CCol>
     </CRow>

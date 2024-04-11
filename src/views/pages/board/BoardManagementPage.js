@@ -15,7 +15,7 @@ import {
   CRow,
   CSmartTable,
 } from '@coreui/react-pro';
-import StatusBadge from 'components/badge/StatusBadge';
+import DeletionStatusBadge from 'components/badge/DeletionStatusBadge';
 import BoardPostDetailForm from 'components/board/BoardPostDetailForm';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
@@ -109,7 +109,7 @@ const BoardManagementPage = () => {
     createdAt: (item) => <td>{formatToYMD(item.createdAt)}</td>,
     deleted: (item) => (
       <td>
-        <StatusBadge deleted={item.deleted} />
+        <DeletionStatusBadge deleted={item.deleted} />
       </td>
     ),
   };
