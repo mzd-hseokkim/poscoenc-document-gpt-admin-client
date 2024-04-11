@@ -179,11 +179,13 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
           feedbackInvalid={errors.title?.message}
         />
       </CCol>
-      <CCol xs={2} className="text-end">
-        <small>
-          <CFormLabel className="text-muted">조회수 {postDetail?.viewCount}</CFormLabel>
-        </small>
-      </CCol>
+      {!isCreateMode && (
+        <CCol xs={2} className="text-end">
+          <small>
+            <CFormLabel className="text-muted">조회수 {postDetail?.viewCount}</CFormLabel>
+          </small>
+        </CCol>
+      )}
     </CRow>
   );
 

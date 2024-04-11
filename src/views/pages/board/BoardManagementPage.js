@@ -74,7 +74,6 @@ const BoardManagementPage = () => {
 
   const handleCreateClick = () => {
     setPostFormMode('create');
-    //REMIND add link
     modal.openModal();
   };
 
@@ -357,7 +356,7 @@ const BoardManagementPage = () => {
               <BoardPostDetailForm
                 closeModal={modal.closeModal}
                 initialFormMode={postFormMode}
-                refreshPosts={searchPostList}
+                refreshPosts={() => setSearchFormData(stagedSearchFormData)}
               />
             </ModalContainer>
           </CCardBody>

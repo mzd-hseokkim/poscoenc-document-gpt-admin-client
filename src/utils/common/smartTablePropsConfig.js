@@ -5,5 +5,5 @@ export const tableCustomProps = {
 
 export const columnSorterCustomProps = {
   external: true,
-  resetable: false,
+  resetable: true,
 };
