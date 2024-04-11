@@ -16,6 +16,7 @@ import {
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import DocumentChatHistoryDetailForm from 'components/document-collection/DocumentChatHistoryDetailForm';
+import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import ModalContainer from 'components/modal/ModalContainer';
 import { format } from 'date-fns';
 import useModal from 'hooks/useModal';
@@ -33,10 +34,10 @@ import { documentChatHistoryColumnConfig } from 'views/pages/document-collection
 
 const DocumentChatHistoryManagementPage = () => {
   const [chatHistoryList, setChatHistoryList] = useState([]);
+  const [isSearchPerformed, setIsSearchPerformed] = useState(false);
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [detailFormMode, setDetailFormMode] = useState('');
-  const [noItemsLabel, setNoItemsLabel] = useState('');
   const [totalChatHistoryElements, setTotalChatHistoryElements] = useState(0);
 
   const initialSearchFormData = {
@@ -58,6 +59,9 @@ const DocumentChatHistoryManagementPage = () => {
 
   const searchChatHistoryList = async () => {
     setSearchResultIsLoading(true);
+    if (!isSearchPerformed) {
+      setIsSearchPerformed(true);
+    }
     try {
       const searchResult = await DocumentChatHistoryService.getSearchedDocumentChatHistory(
         searchFormData,
@@ -66,10 +70,6 @@ const DocumentChatHistoryManagementPage = () => {
       if (searchResult) {
         setChatHistoryList(searchResult.content);
         setTotalChatHistoryElements(searchResult.totalElements);
-      }
-
-      if (searchResult?.content?.length === 0 && noItemsLabel === '') {
-        setNoItemsLabel('검색 결과가 없습니다.');
       }
     } catch (error) {
       console.log(error);
@@ -296,7 +296,13 @@ const DocumentChatHistoryManagementPage = () => {
                 itemsPerPageLabel="페이지당 대화 이력 개수"
                 itemsPerPageSelect
                 loading={searchResultIsLoading}
-                noItemsLabel={noItemsLabel}
+                noItemsLabel={
+                  <CSmartTableNoItemLabel
+                    contentLength={chatHistoryList?.length}
+                    isSearchPerformed={isSearchPerformed}
+                    defaultMessage="검색 조건에 맞는 한 쌍의 질문-답변을 검색합니다."
+                  />
+                }
                 onItemsPerPageChange={handlePageSizeChange}
                 onSelectedItemsChange={setSelectedRows}
                 onSorterChange={handlePageSortChange}

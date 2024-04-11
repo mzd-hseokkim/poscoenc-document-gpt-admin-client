@@ -332,7 +332,11 @@ const BoardManagementPage = () => {
               itemsPerPageSelect
               loading={searchResultIsLoading}
               noItemsLabel={
-                <CSmartTableNoItemLabel contentLength={postList.length} isSearchPerformed={isSearchPerformed} />
+                <CSmartTableNoItemLabel
+                  contentLength={postList.length}
+                  isSearchPerformed={isSearchPerformed}
+                  defaultMessage="검색 조건에 맞는 게시글을 검색합니다."
+                />
               }
               onItemsPerPageChange={handlePageSizeChange}
               onSelectedItemsChange={setSelectedRows}

@@ -220,7 +220,6 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     refreshDocumentCollectionList();
   };
 
-  // PDF--------------
   const [visible, setVisible] = useState({});
   const toggleVisible = (fileId) => {
     setVisible((prevState) => ({
@@ -229,7 +228,6 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     }));
   };
 
-  //--------------
   const renderChart = () => {
     return (
       <>

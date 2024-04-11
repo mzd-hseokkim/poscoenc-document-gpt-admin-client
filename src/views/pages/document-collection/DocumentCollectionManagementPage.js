@@ -36,7 +36,7 @@ import { documentCollectionColumnConfig } from 'views/pages/document-collection/
 const DocumentCollectionManagementPage = () => {
   const [documentCollectionList, setDocumentCollectionList] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
-  const [detailFormMode, setDetailFormMode] = useState('');
+  const [detailFormMode, setDetailFormMode] = useState('read');
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
   const [totalCollectionElements, setTotalCollectionElements] = useState(0);
   const [isSearchPerformed, setIsSearchPerformed] = useState(false);
@@ -286,6 +286,7 @@ const DocumentCollectionManagementPage = () => {
                   <CSmartTableNoItemLabel
                     contentLength={documentCollectionList.length}
                     isSearchPerformed={isSearchPerformed}
+                    defaultMessage="검색 조건에 맞는 문서 집합을 검색합니다."
                   />
                 }
                 onItemsPerPageChange={handlePageSizeChange}
