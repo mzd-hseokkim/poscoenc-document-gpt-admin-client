@@ -6,8 +6,9 @@ import {
   CCardBody,
   CCardHeader,
   CCol,
+  CCollapse,
   CForm,
-  CFormCheck,
+  CFormSelect,
   CFormTextarea,
   CInputGroup,
   CRow,
@@ -18,7 +19,7 @@ import BoardCommentService from 'services/board/BoardCommentService';
 const PostCommentsForm = ({ postId }) => {
   const [commentText, setCommentText] = useState('');
   const [postComments, setPostComments] = useState([]);
-  const [showDeletedComments, setShowDeletedComments] = useState(true);
+  const [filterOption, setFilterOption] = useState('모두 표시');
   const [isComposing, setIsComposing] = useState(false);
   const [postCommentIsLoading, setPostCommentIsLoading] = useState(false);
 
@@ -29,6 +30,7 @@ const PostCommentsForm = ({ postId }) => {
     try {
       const comments = await BoardCommentService.getPostComments(postId);
       setPostComments(comments);
+      setVisible(comments.length > 0);
     } catch (error) {
       addToast({ message: '댓글을 불러오지 못했습니다. 관리자에게 문의하세요.' });
     }
@@ -78,6 +80,10 @@ const PostCommentsForm = ({ postId }) => {
       }
     }
   };
+  const [visible, setVisible] = useState(false);
+  const toggleVisible = () => {
+    setVisible((prev) => !prev);
+  };
 
   useEffect(() => {
     void fetchPostComments();
@@ -89,44 +95,70 @@ const PostCommentsForm = ({ postId }) => {
     } // REMIND 현재는 본인이 답글 달 때만 아래로 스크롤, 추후 새로운 댓글이 달렸을 때 아래로 스크롤 하는걸 고려
   }, [postCommentIsLoading]);
 
+  useEffect(() => {
+    if (visible) {
+      setTimeout(() => {
+        endOfCommentsRef.current?.scrollIntoView({ behavior: 'smooth' });
+        //REMIND Collapse 가 열리고 이동하는데 걸려야 하는 최소 지연 시간
+      }, 320);
+    }
+  }, [visible]);
+
+  const handleFilterChange = (event) => {
+    setFilterOption(event.target.value);
+  };
+
   const renderCommentList = () => (
     <CRow>
-      {postComments?.map((comment, index) => renderCommentItem(comment, index))}
+      {postComments
+        ?.filter((comment) => {
+          if (filterOption === 'No') return !comment.deleted;
+          if (filterOption === 'Yes') return comment.deleted;
+          return true;
+        })
+        .map((comment, index) => renderCommentItem(comment, index))}{' '}
       <div ref={endOfCommentsRef} />
     </CRow>
   );
 
   const renderCommentItem = (comment, key) => {
-    if (!showDeletedComments && comment.deleted) {
-      return null;
-    }
+    const commentCardStyles = {
+      marginBottom: '1rem',
+      backgroundColor: comment.deleted ? '#f8f9fa' : 'transparent', // 연한 회색 배경
+    };
+
+    const commentTextStyles = {
+      textDecoration: comment.deleted ? 'line-through' : 'none',
+      color: comment.deleted ? '#6c757d' : 'initial', // 회색 텍스트
+      opacity: comment.deleted ? 0.5 : 1,
+    };
 
     return (
       <CCol xs={12} key={key}>
-        <CCard
-          className={`comment-item mt-2 ${comment.deleted ? 'deleted-comment' : ''}`}
-          style={{ marginBottom: '1rem' }}
-        >
+        <CCard className={`comment-item mt-2 ${comment.deleted ? 'deleted-comment' : ''}`} style={commentCardStyles}>
           <CCardHeader>{renderCommentAuthorAndActions(comment)}</CCardHeader>
-          <CCardBody>{renderCommentContent(comment)}</CCardBody>
+          <CCardBody>
+            <CRow>
+              <CCol>
+                <p style={commentTextStyles}>{comment.content}</p>
+              </CCol>
+            </CRow>
+          </CCardBody>
         </CCard>
       </CCol>
     );
   };
 
-  const renderCommentContent = (comment) => (
-    <CRow>
-      <CCol>
-        <p style={{ textDecoration: comment.deleted ? 'line-through' : 'none' }}>{comment.content}</p>
-      </CCol>
-    </CRow>
-  );
-
   const renderCommentAuthorAndActions = (comment) => (
     <CRow>
       <CCol className="d-flex justify-content-between">
         <strong>{comment.createdByName}</strong>
-        <CButton color="primary" size="sm" onClick={() => toggleCommentStatus(comment.id, !comment.deleted)}>
+        <CButton
+          className="in"
+          color={comment.deleted ? 'success' : 'danger'}
+          size="sm"
+          onClick={() => toggleCommentStatus(comment.id, !comment.deleted)}
+        >
           {comment.deleted ? '복구' : '삭제'}
         </CButton>
       </CCol>
@@ -153,18 +185,24 @@ const PostCommentsForm = ({ postId }) => {
   return (
     <CForm onSubmit={handleSubmitComment} className="comments-section">
       <CCard className="mt-3 mb-3">
-        <CCardHeader className="d-flex justify-content-between align-items-center">
-          <div>
+        <CCardHeader className="d-flex justify-content-between align-items-center border-bottom-0">
+          <div onClick={toggleVisible} style={{ cursor: 'pointer' }}>
             댓글 <small className="text-muted">{`${postComments.length} 개`}</small>
           </div>
-          <CFormCheck
-            id="showDeletedComments"
-            label="삭제된 댓글 표시"
-            checked={showDeletedComments}
-            onChange={(e) => setShowDeletedComments(e.target.checked)}
-          />
+          <CFormSelect
+            style={{ width: '175px' }}
+            //startfrom value 설정해주는것부터 시작
+            options={[
+              { label: '모두 표시', value: 'ALL' },
+              { label: '삭제된 댓글 무시', value: 'No' },
+              { label: '삭제된 댓글만 표시', value: 'Yes' },
+            ]}
+            onChange={handleFilterChange}
+          ></CFormSelect>
         </CCardHeader>
-        <CCardBody style={{ height: '300px', overflowY: 'auto' }}>{renderCommentList()}</CCardBody>
+        <CCollapse visible={visible}>
+          <CCardBody style={{ maxHeight: '300px', overflowY: 'auto' }}>{renderCommentList()}</CCardBody>
+        </CCollapse>
       </CCard>
       {renderCommentInput()}
     </CForm>
