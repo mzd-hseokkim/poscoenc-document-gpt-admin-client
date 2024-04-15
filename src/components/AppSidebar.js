@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { CSidebar, CSidebarBrand, CSidebarNav, CSidebarToggler } from '@coreui/react-pro';
-import SideBarFullLogo from 'assets/images/pocEnglishFullLogo.png';
-import SideBarLogo from 'assets/images/poscoenclogo.jpg';
+import SideBarLogo from 'assets/images/marle-logo.png';
+import SideBarFullLogo from 'assets/images/marle_cms_w.png';
 import useSidebarItems from 'hooks/useSidebarItems';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -25,18 +25,13 @@ const AppSidebar = () => {
         dispatch({ type: 'set', sidebarShow: visible });
       }}
     >
-      <CSidebarBrand className="d-none d-md-flex bg-white" to="/">
-        <img
-          className="sidebar-brand-full "
-          src={SideBarFullLogo}
-          alt="POSCO E&C Full Logo"
-          style={{ width: '175px', height: '64px' }}
-        />
+      <CSidebarBrand className="d-none d-md-flex" to="/">
+        <img className="sidebar-brand-full " src={SideBarFullLogo} alt="Marl-E CMS Logo" />
         <img
           className="sidebar-brand-narrow"
           src={SideBarLogo}
           alt="POSOC E&C Logo"
-          style={{ width: '64px', height: '64px' }}
+          style={{ width: '32px', height: '32px' }}
         />
       </CSidebarBrand>
       <CSidebarNav>
