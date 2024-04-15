@@ -237,7 +237,8 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
             </CCardBody>
           </CCard>
         </CForm>
-        {isReadMode && <PostCommentsForm postId={postDetail.id} />}
+        {/*REMIND 전체 댓글을 가져오는게 아니라 댓글의 갯수만 가져오고 댓글 데이터는 따로 요청하는걸로 수정 요청*/}
+        {isReadMode && <PostCommentsForm totalCount={postDetail?.comments?.length} />}
       </CModalBody>
       <CModalFooter>
         <DetailFormActionButtons

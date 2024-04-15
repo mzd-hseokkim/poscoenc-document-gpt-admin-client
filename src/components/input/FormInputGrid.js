@@ -84,7 +84,7 @@ const FormInputGrid = ({ fields, handleChange, isReadMode, formData, register, e
                 feedbackInvalid={errors[field.name]?.message}
               />
             ) : (
-              <CFormInput {...commonProps} onChange={handleChange} value={field.value || formData[field.name]} />
+              <CFormInput {...commonProps} onChange={handleChange} defaultValue={field.value || formData[field.name]} />
             )}
           </CCol>
         );

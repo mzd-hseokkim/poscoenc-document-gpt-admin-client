@@ -14,27 +14,34 @@ import {
   CRow,
 } from '@coreui/react-pro';
 import { useToast } from 'context/ToastContext';
+import { useSearchParams } from 'react-router-dom';
 import BoardCommentService from 'services/board/BoardCommentService';
 
-const PostCommentsForm = ({ postId }) => {
+const PostCommentsForm = ({ totalCount }) => {
   const [commentText, setCommentText] = useState('');
   const [postComments, setPostComments] = useState([]);
   const [filterOption, setFilterOption] = useState('모두 표시');
   const [isComposing, setIsComposing] = useState(false);
   const [postCommentIsLoading, setPostCommentIsLoading] = useState(false);
-
+  const [visible, setVisible] = useState(false);
+  const [searchParams] = useSearchParams();
   const { addToast } = useToast();
   const endOfCommentsRef = useRef(null);
 
   const fetchPostComments = useCallback(async () => {
+    if (!searchParams.get('id')) return;
+
+    setPostCommentIsLoading(true);
     try {
-      const comments = await BoardCommentService.getPostComments(postId);
-      setPostComments(comments);
+      const comments = await BoardCommentService.getPostComments(searchParams.get('id'));
       setVisible(comments.length > 0);
+      setPostComments(comments);
     } catch (error) {
       addToast({ message: '댓글을 불러오지 못했습니다. 관리자에게 문의하세요.' });
+    } finally {
+      setPostCommentIsLoading(false);
     }
-  }, [addToast, postId]);
+  }, [addToast, searchParams]);
 
   const handleCommentChange = (event) => {
     setCommentText(event.target.value);
@@ -45,8 +52,9 @@ const PostCommentsForm = ({ postId }) => {
   const handleSubmitComment = async (e) => {
     e.preventDefault();
     setPostCommentIsLoading(true);
+
     try {
-      await BoardCommentService.postComment(postId, commentText);
+      await BoardCommentService.postComment(searchParams.get('id'), commentText);
       setCommentText('');
       await fetchPostComments();
     } catch (error) {
@@ -80,29 +88,22 @@ const PostCommentsForm = ({ postId }) => {
       }
     }
   };
-  const [visible, setVisible] = useState(false);
   const toggleVisible = () => {
     setVisible((prev) => !prev);
   };
 
   useEffect(() => {
     void fetchPostComments();
-  }, [fetchPostComments, postId]);
+  }, [fetchPostComments, postCommentIsLoading, searchParams]);
 
   useEffect(() => {
-    if (!postCommentIsLoading) {
-      endOfCommentsRef.current?.scrollIntoView({ behavior: 'smooth' });
-    } // REMIND 현재는 본인이 답글 달 때만 아래로 스크롤, 추후 새로운 댓글이 달렸을 때 아래로 스크롤 하는걸 고려
-  }, [postCommentIsLoading]);
-
-  useEffect(() => {
-    if (visible) {
+    if (!postCommentIsLoading && visible) {
       setTimeout(() => {
         endOfCommentsRef.current?.scrollIntoView({ behavior: 'smooth' });
         //REMIND Collapse 가 열리고 이동하는데 걸려야 하는 최소 지연 시간
       }, 320);
     }
-  }, [visible]);
+  }, [postCommentIsLoading, visible]);
 
   const handleFilterChange = (event) => {
     setFilterOption(event.target.value);
@@ -124,7 +125,7 @@ const PostCommentsForm = ({ postId }) => {
   const renderCommentItem = (comment, key) => {
     const commentCardStyles = {
       marginBottom: '1rem',
-      backgroundColor: comment.deleted ? '#f8f9fa' : 'transparent', // 연한 회색 배경
+      backgroundColor: comment.deleted ? '#f8f9fa' : 'transparent',
     };
 
     const commentTextStyles = {
@@ -187,7 +188,7 @@ const PostCommentsForm = ({ postId }) => {
       <CCard className="mt-3 mb-3">
         <CCardHeader className="d-flex justify-content-between align-items-center border-bottom-0">
           <div onClick={toggleVisible} style={{ cursor: 'pointer' }}>
-            댓글 <small className="text-muted">{`${postComments.length} 개`}</small>
+            댓글 <small className="text-muted">{`${totalCount} 개`}</small>
           </div>
           <CFormSelect
             style={{ width: '175px' }}

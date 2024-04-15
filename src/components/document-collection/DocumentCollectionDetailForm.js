@@ -271,7 +271,6 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
           <CCard className="mb-3">
             <CCardBody>
               <FormInputGrid
-                register={register}
                 fields={getAuditFields(formMode)}
                 formData={collectionDetail}
                 isReadMode={isReadMode}
@@ -324,39 +323,37 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                 <CListGroup>
                   {/*REMIND detail 에서 file 만 따로 처리 할 수 있도록 리팩토링, reset 에 의해 나머지 데이터가 관리되고 있음*/}
                   {collectionDetail?.files?.map((file) => (
-                    <>
-                      <CListGroupItem key={file.id} className="justify-content-between align-items-start">
-                        <CRow>
-                          <CCol md={9} className="align-content-center">
-                            <CCol className="d-flex">
-                              <span style={{ marginRight: `10px` }}>{file.originalName}</span>
-                              <small>{formatFileSize(file.size)}</small>
-                              <small style={{ marginLeft: `10px` }}>
-                                <DocumentFileStatusBadge status={file.status} />
-                              </small>
+                    <CListGroupItem key={file.id} className="justify-content-between align-items-start">
+                      <CRow>
+                        <CCol md={9} className="align-content-center">
+                          <CCol className="d-flex">
+                            <span style={{ marginRight: `10px` }}>{file.originalName}</span>
+                            <small>{formatFileSize(file.size)}</small>
+                            <small style={{ marginLeft: `10px` }}>
+                              <DocumentFileStatusBadge status={file.status} />
+                            </small>
+                          </CCol>
+                          {file.description && (
+                            <CCol>
+                              <small className="text-muted">{`상태 설명 : ${file.description}`}</small>
                             </CCol>
-                            {file.description && (
-                              <CCol>
-                                <small className="text-muted">{`상태 설명 : ${file.description}`}</small>
-                              </CCol>
-                            )}
-                          </CCol>
-                          <CCol md={3} className="align-content-center">
-                            <div className="float-end">
-                              <CButton className="me-2" onClick={() => toggleVisible(file.id)}>
-                                <MdPictureAsPdf size="20" title="PDF Reader" />
-                              </CButton>
-                              <CButton onClick={() => handleDownload(file)}>
-                                <CIcon icon={cilArrowThickToBottom} size={'lg'} />
-                              </CButton>
-                            </div>
-                          </CCol>
-                          <CCollapse visible={visible[file.id] || false}>
-                            <PdfViewer file={file} visible={visible[file.id] || false}></PdfViewer>
-                          </CCollapse>
-                        </CRow>
-                      </CListGroupItem>
-                    </>
+                          )}
+                        </CCol>
+                        <CCol md={3} className="align-content-center">
+                          <div className="float-end">
+                            <CButton className="me-2" onClick={() => toggleVisible(file.id)}>
+                              <MdPictureAsPdf size="20" title="PDF Reader" />
+                            </CButton>
+                            <CButton onClick={() => handleDownload(file)}>
+                              <CIcon icon={cilArrowThickToBottom} size={'lg'} />
+                            </CButton>
+                          </div>
+                        </CCol>
+                        <CCollapse visible={visible[file.id] || false}>
+                          <PdfViewer file={file} visible={visible[file.id] || false}></PdfViewer>
+                        </CCollapse>
+                      </CRow>
+                    </CListGroupItem>
                   ))}
                 </CListGroup>
               </CCardBody>

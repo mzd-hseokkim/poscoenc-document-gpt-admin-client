@@ -26,6 +26,7 @@ import usePagination from 'hooks/usePagination';
 import MenuService from 'services/menu/MenuService';
 import { formatToIsoEndDate, formatToIsoStartDate, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
 import { iconMapper } from 'utils/common/iconMapper';
+import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { menuColumnConfig } from 'views/pages/menu/menuColumnConfig';
 
 const createInitialSearchFormData = () => ({
@@ -172,6 +173,24 @@ const MenuManagementPage = () => {
     setCheckedItems([]);
   };
 
+  const scopedColumns = {
+    name: (item) => (
+      <td
+        style={{ cursor: 'pointer' }}
+        onClick={() => {
+          handleRowClick(item.id);
+        }}
+      >
+        {item.name}
+      </td>
+    ),
+    icon: (item) => <td>{iconMapper({ iconName: item.icon })}</td>,
+    deleted: (item) => (
+      <td>
+        <DeletionStatusBadge deleted={item.deleted} />
+      </td>
+    ),
+  };
   return (
     <>
       <CRow>
@@ -294,10 +313,7 @@ const MenuManagementPage = () => {
             <CRow className="mb-3">
               <CSmartTable
                 columns={menuColumnConfig}
-                columnSorter={{
-                  external: true,
-                  resetable: false,
-                }}
+                columnSorter={columnSorterCustomProps}
                 items={menuList}
                 itemsPerPage={pageableData.size}
                 itemsPerPageLabel="페이지당 메뉴 개수"
@@ -311,34 +327,12 @@ const MenuManagementPage = () => {
                   />
                 }
                 onItemsPerPageChange={handlePageSizeChange}
-                onSelectedItemsChange={(items) => {
-                  setCheckedItems(items);
-                }}
-                onSorterChange={(sorterValue) => handlePageSortChange(sorterValue)}
+                onSelectedItemsChange={setCheckedItems}
+                onSorterChange={handlePageSortChange}
                 paginationProps={smartPaginationProps}
-                scopedColumns={{
-                  name: (item) => (
-                    <td
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => {
-                        handleRowClick(item.id);
-                      }}
-                    >
-                      {item.name}
-                    </td>
-                  ),
-                  icon: (item) => <td>{iconMapper({ iconName: item.icon })}</td>,
-                  deleted: (item) => (
-                    <td>
-                      <DeletionStatusBadge deleted={item.deleted} />
-                    </td>
-                  ),
-                }}
+                scopedColumns={scopedColumns}
                 selected={checkedItems}
-                tableProps={{
-                  responsive: true,
-                  hover: true,
-                }}
+                tableProps={tableCustomProps}
               />
             </CRow>
           </CCardBody>
