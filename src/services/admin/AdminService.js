@@ -29,6 +29,7 @@ const getAdmins = async (params, pageable) => {
 };
 
 const getAdmin = async (id) => {
+  if (!id) return;
   const response = await api.get(`/admin/admin-users/${id}`);
   return response.data;
 };

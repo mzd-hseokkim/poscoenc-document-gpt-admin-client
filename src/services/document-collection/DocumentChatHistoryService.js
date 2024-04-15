@@ -22,6 +22,7 @@ const getSearchedDocumentChatHistory = async (params, pageable) => {
 };
 
 const getDocumentChatHistory = async (id) => {
+  if (!id) return;
   const response = await api.get(`/admin/document-collections-chat-history/${id}`);
   return response.data;
 };

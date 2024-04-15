@@ -158,7 +158,6 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
     try {
       await UserService.postUser(data);
       closeModal();
-      closeModal();
       fetchUserList();
     } catch (error) {
       const status = error.response?.status;
@@ -173,9 +172,12 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
 
   const patchUser = async (data) => {
     try {
-      await UserService.putUser(selectedId, data);
-      closeModal();
-      fetchUserList();
+      const response = await UserService.putUser(selectedId, data);
+      if (response) {
+        fetchUserList();
+        setFormMode('read');
+        addToast({ color: 'success', message: '사용자 정보 수정이 완료되었습니다.' });
+      }
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {

@@ -45,6 +45,7 @@ const getDownloadSearchedUserList = async (params) => {
 };
 
 const getUser = async (id) => {
+  if (!id) return;
   const response = await api.get(`/admin/user-accounts/${id}`);
   return response.data;
 };
