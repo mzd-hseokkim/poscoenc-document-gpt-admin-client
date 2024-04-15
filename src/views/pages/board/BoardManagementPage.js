@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { cilCommentBubble, cilPaperclip } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
@@ -11,6 +11,7 @@ import {
   CForm,
   CFormCheck,
   CFormInput,
+  CFormLabel,
   CFormSelect,
   CRow,
   CSmartTable,
@@ -35,6 +36,18 @@ import {
 import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { postColumnConfig } from 'views/pages/board/postColumnConfig';
 
+const createInitialSearchFormData = () => ({
+  title: '',
+  content: '',
+  createdByName: '',
+  hasFilesOption: '',
+  fromCreatedAt: getOneYearAgoDate(),
+  toCreatedAt: getCurrentDate(),
+  fromModifiedAt: getOneYearAgoDate(),
+  toModifiedAt: getCurrentDate(),
+  deletionOption: 'ALL',
+});
+
 const BoardManagementPage = () => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [postList, setPostList] = useState([]);
@@ -44,33 +57,15 @@ const BoardManagementPage = () => {
   const [isSearchPerformed, setIsSearchPerformed] = useState(false);
   const [isPickTime, setIsPickTime] = useState(false);
 
-  //REMIND searchForm audit 정보 통합해보기.
-  const initialSearchFormData = {
-    title: '',
-    content: '',
-    createdByName: '',
-    hasFilesOption: '',
-    fromCreatedAt: getOneYearAgoDate(),
-    toCreatedAt: getCurrentDate(),
-    fromModifiedAt: getOneYearAgoDate(),
-    toModifiedAt: getCurrentDate(),
-    deletionOption: 'ALL',
-  };
-  const [searchFormData, setSearchFormData] = useState(initialSearchFormData);
+  const [searchFormData, setSearchFormData] = useState({});
+  const [stagedSearchFormData, setStagedSearchFormData] = useState(createInitialSearchFormData);
+
   const isComponentMounted = useRef(true);
 
   const modal = useModal();
   const { addToast } = useToast();
   const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } =
     usePagination(totalPostElements);
-
-  useEffect(() => {
-    if (isComponentMounted.current) {
-      isComponentMounted.current = false;
-    } else {
-      void searchPostList();
-    }
-  }, [pageableData]);
 
   const handleRowClick = (itemId) => {
     setPostFormMode('read');
@@ -79,7 +74,6 @@ const BoardManagementPage = () => {
 
   const handleCreateClick = () => {
     setPostFormMode('create');
-    //REMIND add link
     modal.openModal();
   };
 
@@ -117,7 +111,7 @@ const BoardManagementPage = () => {
     return selectedRows.some((row) => row.deleted === true);
   };
 
-  const searchPostList = async () => {
+  const searchPostList = useCallback(async () => {
     setSearchResultIsLoading(true);
     if (!isSearchPerformed) {
       setIsSearchPerformed(true);
@@ -131,13 +125,27 @@ const BoardManagementPage = () => {
     } finally {
       setSearchResultIsLoading(false);
     }
-  };
+  }, [addToast, isSearchPerformed, pageableData, searchFormData]);
+
+  useEffect(() => {
+    if (isComponentMounted.current) {
+      isComponentMounted.current = false;
+    } else {
+      void searchPostList();
+    }
+  }, [pageableData, searchPostList]);
+
   const handleSubmitSearchRequest = async (e) => {
     e.preventDefault();
-    await searchPostList();
+    setSearchFormData(stagedSearchFormData);
+  };
+
+  const handleSearchFormReset = () => {
+    setStagedSearchFormData(createInitialSearchFormData);
+    setIsPickTime(false);
   };
   const handleSearchFormChange = ({ target: { id, value } }) => {
-    setSearchFormData((prev) => ({ ...prev, [id]: value }));
+    setStagedSearchFormData((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleDateChange = ({ id, newDate, isStartDate = true }) => {
@@ -149,18 +157,18 @@ const BoardManagementPage = () => {
     const fieldToUpdate = fieldMap[id];
     if (fieldToUpdate) {
       const formattedDate = isStartDate ? formatToIsoStartDate(newDate) : formatToIsoEndDate(newDate);
-      setSearchFormData((prev) => ({ ...prev, [fieldToUpdate]: formattedDate }));
+      setStagedSearchFormData((prev) => ({ ...prev, [fieldToUpdate]: formattedDate }));
     }
   };
 
   const handleTimePickerCheck = (e) => {
     setIsPickTime(e.target.checked);
-    setSearchFormData((prev) => ({
+    setStagedSearchFormData((prev) => ({
       ...prev,
-      fromCreatedAt: format(searchFormData.fromCreatedAt, "yyyy-MM-dd'T'00:00"),
-      toCreatedAt: format(searchFormData.toCreatedAt, "yyyy-MM-dd'T'23:59"),
-      fromModifiedAt: format(searchFormData.fromModifiedAt, "yyyy-MM-dd'T'00:00"),
-      toModifiedAt: format(searchFormData.toModifiedAt, "yyyy-MM-dd'T'23:59"),
+      fromCreatedAt: format(stagedSearchFormData.fromCreatedAt, "yyyy-MM-dd'T'00:00"),
+      toCreatedAt: format(stagedSearchFormData.toCreatedAt, "yyyy-MM-dd'T'23:59"),
+      fromModifiedAt: format(stagedSearchFormData.fromModifiedAt, "yyyy-MM-dd'T'00:00"),
+      toModifiedAt: format(stagedSearchFormData.toModifiedAt, "yyyy-MM-dd'T'23:59"),
     }));
   };
 
@@ -195,53 +203,59 @@ const BoardManagementPage = () => {
           <CCardBody>
             <CForm onSubmit={handleSubmitSearchRequest}>
               <CRow className="mb-3">
-                <CCol md={4} className="position-relative">
+                <CCol md={6} className="position-relative">
                   <CFormInput
                     type="text"
                     id="title"
-                    label="제목"
+                    floatingLabel="제목"
+                    placeholder=""
                     onChange={handleSearchFormChange}
-                    value={searchFormData.title}
+                    value={stagedSearchFormData.title}
                   />
                 </CCol>
-                <CCol md={4} className="position-relative">
+                <CCol md={6} className="position-relative">
                   <CFormInput
                     id="createdByName"
-                    label="작성자"
+                    floatingLabel="작성자"
+                    placeholder=""
                     onChange={handleSearchFormChange}
-                    value={searchFormData.createdByName}
+                    value={stagedSearchFormData.createdByName}
                   />
                 </CCol>
-                <CCol md={4} className="position-relative">
+              </CRow>
+              <CRow className="mb-3">
+                <CCol md={6} className="position-relative">
+                  <CFormInput
+                    id="content"
+                    floatingLabel="내용"
+                    placeholder=""
+                    onChange={handleSearchFormChange}
+                    value={stagedSearchFormData.content}
+                  />
+                </CCol>
+              </CRow>
+              <CRow className="mb-3">
+                <CCol md={6}>
                   <CFormSelect
                     id="deletionOption"
-                    label="게시글 상태"
+                    //REMIND CoreUI Bug floating 안됨
+                    floatingLabel="게시글 상태"
                     name="deletionOption"
-                    value={searchFormData.deletionOption}
+                    value={stagedSearchFormData.deletionOption}
                     options={[
                       { label: '모든 게시글', value: '' },
                       { label: '삭제됨', value: 'Yes' },
                       { label: '삭제되지 않음', value: 'NO' },
                     ]}
                     onChange={handleSearchFormChange}
-                  />
+                  ></CFormSelect>
                 </CCol>
-              </CRow>
-              <CRow className="mb-3">
-                <CCol md={8} className="position-relative">
-                  <CFormInput
-                    id="content"
-                    label="내용"
-                    onChange={handleSearchFormChange}
-                    value={searchFormData.content}
-                  />
-                </CCol>
-                <CCol md={4} className="position-relative">
+                <CCol md={6} className="position-relative">
                   <CFormSelect
                     id="hasFilesOption"
-                    label="첨부파일 없는 게시물 포함"
+                    floatingLabel="첨부파일 없는 게시물 포함"
                     name="hasFilesOption"
-                    value={searchFormData.hasFilesOption}
+                    value={stagedSearchFormData.hasFilesOption}
                     options={[
                       { label: '모든 게시글', value: '' },
                       { label: '예', value: true },
@@ -257,8 +271,8 @@ const BoardManagementPage = () => {
                     key={`createdAt-${isPickTime}`}
                     id="createdAt"
                     label="등록일"
-                    startDate={searchFormData.fromCreatedAt}
-                    endDate={searchFormData.toCreatedAt}
+                    startDate={stagedSearchFormData.fromCreatedAt}
+                    endDate={stagedSearchFormData.toCreatedAt}
                     onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
                     onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
                     timepicker={isPickTime}
@@ -269,8 +283,8 @@ const BoardManagementPage = () => {
                     key={`modifiedAt-${isPickTime}`}
                     id="modifiedAt"
                     label="수정일"
-                    startDate={searchFormData.fromModifiedAt}
-                    endDate={searchFormData.toModifiedAt}
+                    startDate={stagedSearchFormData.fromModifiedAt}
+                    endDate={stagedSearchFormData.toModifiedAt}
                     onStartDateChange={(newDate) => handleDateChange({ id: 'modifiedAt', newDate })}
                     onEndDateChange={(newDate) => handleDateChange({ id: 'modifiedAt', newDate, isStartDate: false })}
                     timepicker={isPickTime}
@@ -283,13 +297,7 @@ const BoardManagementPage = () => {
               <CRow className="mb-3">
                 <CCol className="d-grid gap-2 d-md-flex justify-content-md-center">
                   <CButton type="submit">검색</CButton>
-                  <CButton
-                    onClick={() => {
-                      setSearchFormData(initialSearchFormData);
-                    }}
-                    color="primary"
-                    value="Reset"
-                  >
+                  <CButton onClick={handleSearchFormReset} color="primary" value="Reset">
                     초기화
                   </CButton>
                 </CCol>
@@ -303,24 +311,27 @@ const BoardManagementPage = () => {
           <CCardBody>
             <CRow className="mb-3">
               <CCol className="d-grid gap-2 d-md-flex justify-content-md-start">
-                <CButton onClick={handleCreateClick}>{'작성'}</CButton>
+                <CButton onClick={handleCreateClick}>작성</CButton>
                 <CButton
                   disabled={selectedRows?.length === 0 || isDeletedRow(selectedRows)}
                   onClick={() => togglePostStatus(true)}
                 >
-                  {'삭제'}
+                  삭제
                 </CButton>
                 <CButton
                   disabled={selectedRows?.length === 0 || !isDeletedRow(selectedRows)}
                   onClick={() => togglePostStatus(false)}
                 >
-                  {'복구'}
+                  복구
                 </CButton>
                 <ExcelDownloadCButton
                   downloadFunction={BoardService.getDownloadSearchedPostList}
                   searchFormData={searchFormData}
                   hasSearchResults={postList.length !== 0}
                 />
+              </CCol>
+              <CCol className="d-flex justify-content-end">
+                <CFormLabel>총 {totalPostElements} 개의 검색 결과</CFormLabel>
               </CCol>
             </CRow>
             <CSmartTable
@@ -351,7 +362,7 @@ const BoardManagementPage = () => {
               <BoardPostDetailForm
                 closeModal={modal.closeModal}
                 initialFormMode={postFormMode}
-                refreshPosts={searchPostList}
+                refreshPosts={() => setSearchFormData(stagedSearchFormData)}
               />
             </ModalContainer>
           </CCardBody>

@@ -20,7 +20,7 @@ import { useToast } from 'context/ToastContext';
 import { Controller, useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
 import AdminService from 'services/admin/AdminService';
-import RoleService from 'services/Role/RoleService';
+import RoleService from 'services/role/RoleService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/common/formModes';

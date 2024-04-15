@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   CButton,
@@ -9,6 +9,7 @@ import {
   CForm,
   CFormCheck,
   CFormInput,
+  CFormLabel,
   CFormSelect,
   CRow,
   CSmartTable,
@@ -25,9 +26,10 @@ import usePagination from 'hooks/usePagination';
 import MenuService from 'services/menu/MenuService';
 import { formatToIsoEndDate, formatToIsoStartDate, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
 import { iconMapper } from 'utils/common/iconMapper';
+import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { menuColumnConfig } from 'views/pages/menu/menuColumnConfig';
 
-const createInitialFormData = () => ({
+const createInitialSearchFormData = () => ({
   name: '',
   urlPath: '',
   menuOrder: '',
@@ -45,9 +47,12 @@ const MenuManagementPage = () => {
   const [formMode, setFormMode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [totalMenuElements, setTotalMenuElements] = useState(0);
-  const [formData, setFormData] = useState(createInitialFormData);
+
+  const [searchFormData, setSearchFormData] = useState({});
+  const [stagedSearchFormData, setStagedSearchFormData] = useState(createInitialSearchFormData);
+
   const [isSearchPerformed, setIsSearchPerformed] = useState(false);
-  const [isSelectTime, setIsSelectTime] = useState(false);
+  const [isPickTime, setIsPickTime] = useState(false);
 
   const isComponentMounted = useRef(true);
 
@@ -56,21 +61,17 @@ const MenuManagementPage = () => {
   const { addToast } = useToast();
   const modal = useModal();
 
-  useEffect(() => {
-    if (isComponentMounted.current) {
-      isComponentMounted.current = false;
-    } else {
-      void fetchMenuList();
-    }
-  }, [pageableData]);
+  const isDeletedRow = (selectedRows) => {
+    return selectedRows.some((row) => row.deleted === true);
+  };
 
-  const fetchMenuList = async () => {
+  const fetchMenuList = useCallback(async () => {
     if (!isSearchPerformed) {
       setIsSearchPerformed(true);
     }
     try {
       setIsLoading(true);
-      const data = await MenuService.getMenus(formData, pageableData);
+      const data = await MenuService.getMenus(searchFormData, pageableData);
       setMenuList(data.content);
       setTotalMenuElements(data.totalElements);
     } catch (error) {
@@ -81,7 +82,15 @@ const MenuManagementPage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [addToast, searchFormData, isSearchPerformed, pageableData]);
+
+  useEffect(() => {
+    if (isComponentMounted.current) {
+      isComponentMounted.current = false;
+    } else {
+      void fetchMenuList();
+    }
+  }, [fetchMenuList, pageableData]);
 
   const handleDateChange = (id, newDate, isStartDate = true) => {
     const fieldMap = {
@@ -90,34 +99,32 @@ const MenuManagementPage = () => {
     };
 
     const fieldToUpdate = fieldMap[id];
-    if (fieldToUpdate) {
-      const formattedDate = isStartDate ? formatToIsoStartDate(newDate) : formatToIsoEndDate(newDate);
-      setFormData((prev) => ({ ...prev, [fieldToUpdate]: formattedDate }));
-    }
+    if (!fieldToUpdate) return;
+
+    const newFormattedDate = newDate
+      ? //REMIND 날짜만 보낼 경우 00시로 고정되어서 23시로 변경
+        isPickTime
+        ? formatToIsoEndDate(newDate)
+        : format(new Date(newDate), "yyyy-MM-dd'T'23:59")
+      : null;
+
+    const formattedDate = isStartDate ? formatToIsoStartDate(newDate) : newFormattedDate;
+    setStagedSearchFormData((prev) => ({ ...prev, [fieldToUpdate]: formattedDate }));
   };
 
   const handleTimePickerCheck = (e) => {
-    setIsSelectTime(e.target.checked);
-    //REMIND 다른 페이지에도 적용
-    if (
-      formData.fromModifiedAt == null ||
-      formData.toModifiedAt == null ||
-      formData.fromCreatedAt == null ||
-      formData.toCreatedAt == null
-    ) {
-      return;
-    }
-    setFormData((prev) => ({
+    setIsPickTime(e.target.checked);
+    setStagedSearchFormData((prev) => ({
       ...prev,
-      fromModifiedAt: format(formData.fromModifiedAt, "yyyy-MM-dd'T'00:00"),
-      toModifiedAt: format(formData.toModifiedAt, "yyyy-MM-dd'T'23:59"),
-      fromCreatedAt: format(formData.fromCreatedAt, "yyyy-MM-dd'T'00:00"),
-      toCreatedAt: format(formData.toCreatedAt, "yyyy-MM-dd'T'23:59"),
+      fromModifiedAt: format(stagedSearchFormData.fromModifiedAt, "yyyy-MM-dd'T'00:00"),
+      toModifiedAt: format(stagedSearchFormData.toModifiedAt, "yyyy-MM-dd'T'23:59"),
+      fromCreatedAt: format(stagedSearchFormData.fromCreatedAt, "yyyy-MM-dd'T'00:00"),
+      toCreatedAt: format(stagedSearchFormData.toCreatedAt, "yyyy-MM-dd'T'23:59"),
     }));
   };
 
   const handleChange = ({ target: { id, value } }) => {
-    setFormData((prev) => ({ ...prev, [id]: value }));
+    setStagedSearchFormData((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleRowClick = (id) => {
@@ -127,11 +134,12 @@ const MenuManagementPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    void fetchMenuList();
+    setSearchFormData(stagedSearchFormData);
   };
 
   const handleReset = () => {
-    setFormData(createInitialFormData);
+    setStagedSearchFormData(createInitialSearchFormData);
+    setIsPickTime(false);
   };
 
   const handleCreateClick = () => {
@@ -165,6 +173,24 @@ const MenuManagementPage = () => {
     setCheckedItems([]);
   };
 
+  const scopedColumns = {
+    name: (item) => (
+      <td
+        style={{ cursor: 'pointer' }}
+        onClick={() => {
+          handleRowClick(item.id);
+        }}
+      >
+        {item.name}
+      </td>
+    ),
+    icon: (item) => <td>{iconMapper({ iconName: item.icon })}</td>,
+    deleted: (item) => (
+      <td>
+        <DeletionStatusBadge deleted={item.deleted} />
+      </td>
+    ),
+  };
   return (
     <>
       <CRow>
@@ -173,7 +199,7 @@ const MenuManagementPage = () => {
             <CForm onSubmit={handleSubmit}>
               <CRow className="mb-3">
                 <CCol md={4}>
-                  <CFormInput id="name" label="이름" value={formData.name} onChange={handleChange} />
+                  <CFormInput id="name" label="이름" value={stagedSearchFormData.name} onChange={handleChange} />
                 </CCol>
                 <CCol md={4}>
                   <CFormInput
@@ -181,7 +207,7 @@ const MenuManagementPage = () => {
                     id="menuOrder"
                     label="메뉴 순서"
                     min={0}
-                    value={formData.menuOrder}
+                    value={stagedSearchFormData.menuOrder}
                     onChange={handleChange}
                   />
                 </CCol>
@@ -191,14 +217,14 @@ const MenuManagementPage = () => {
                     id="parentId"
                     label="상위 메뉴 ID"
                     min={0}
-                    value={formData.parentId}
+                    value={stagedSearchFormData.parentId}
                     onChange={handleChange}
                   />
                 </CCol>
               </CRow>
               <CRow className="mb-3">
                 <CCol md={8}>
-                  <CFormInput id="urlPath" label="경로" value={formData.urlPath} onChange={handleChange} />
+                  <CFormInput id="urlPath" label="경로" value={stagedSearchFormData.urlPath} onChange={handleChange} />
                 </CCol>
                 <CCol md={4}>
                   <CFormSelect
@@ -210,7 +236,7 @@ const MenuManagementPage = () => {
                       { label: '예', value: 'YES' },
                       { label: '아니오', value: 'NO' },
                     ]}
-                    value={formData.deletionOption}
+                    value={stagedSearchFormData.deletionOption}
                     onChange={handleChange}
                   />
                 </CCol>
@@ -218,34 +244,30 @@ const MenuManagementPage = () => {
               <CRow className="mb-3">
                 <CCol md={5}>
                   <CDateRangePicker
-                    key={`createdAt-${isSelectTime}`}
+                    key={`createdAt-${isPickTime}`}
                     id="createdAt"
                     label="등록일"
-                    startDate={formData.fromCreatedAt}
-                    endDate={formData.toCreatedAt}
+                    startDate={stagedSearchFormData.fromCreatedAt}
+                    endDate={stagedSearchFormData.toCreatedAt}
                     onStartDateChange={(newDate) => handleDateChange('createdAt', newDate, true)}
                     onEndDateChange={(newDate) => handleDateChange('createdAt', newDate, false)}
-                    timepicker={isSelectTime}
+                    timepicker={isPickTime}
                   />
                 </CCol>
                 <CCol md={5}>
                   <CDateRangePicker
-                    key={`modifiedAt-${isSelectTime}`}
+                    key={`modifiedAt-${isPickTime}`}
                     id="modifiedAt"
                     label="수정일"
-                    startDate={formData.fromModifiedAt}
-                    endDate={formData.toModifiedAt}
+                    startDate={stagedSearchFormData.fromModifiedAt}
+                    endDate={stagedSearchFormData.toModifiedAt}
                     onStartDateChange={(newDate) => handleDateChange('modifiedAt', newDate, true)}
                     onEndDateChange={(newDate) => handleDateChange('modifiedAt', newDate, false)}
-                    timepicker={isSelectTime}
+                    timepicker={isPickTime}
                   />
                 </CCol>
                 <CCol md={2} className="mt-5">
-                  <CFormCheck
-                    label="시간 검색 여부"
-                    checked={isSelectTime}
-                    onChange={(e) => handleTimePickerCheck(e)}
-                  />
+                  <CFormCheck label="시간 검색 여부" checked={isPickTime} onChange={(e) => handleTimePickerCheck(e)} />
                 </CCol>
               </CRow>
               <CRow className="mb-3">
@@ -266,22 +288,32 @@ const MenuManagementPage = () => {
             <CRow className="mb-3">
               <CCol className="d-grid gap-2 d-md-flex justify-content-md-start">
                 <CButton onClick={handleCreateClick}>메뉴 추가</CButton>
-                <CButton onClick={() => handleDeleteRestoreClick(true)}>삭제</CButton>
-                <CButton onClick={() => handleDeleteRestoreClick(false)}>복구</CButton>
+                <CButton
+                  disabled={checkedItems?.length === 0 || !isDeletedRow(checkedItems)}
+                  onClick={() => handleDeleteRestoreClick(true)}
+                >
+                  삭제
+                </CButton>
+                <CButton
+                  disabled={checkedItems?.length === 0 || !isDeletedRow(checkedItems)}
+                  onClick={() => handleDeleteRestoreClick(false)}
+                >
+                  복구
+                </CButton>
                 <ExcelDownloadCButton
                   downloadFunction={MenuService.getDownloadSearchedMenuList}
-                  searchFormData={formData}
+                  searchFormData={searchFormData}
                   hasSearchResults={menuList.length !== 0}
                 />
+              </CCol>
+              <CCol className="d-flex justify-content-end">
+                <CFormLabel>총 {totalMenuElements} 개의 검색 결과</CFormLabel>
               </CCol>
             </CRow>
             <CRow className="mb-3">
               <CSmartTable
                 columns={menuColumnConfig}
-                columnSorter={{
-                  external: true,
-                  resetable: false,
-                }}
+                columnSorter={columnSorterCustomProps}
                 items={menuList}
                 itemsPerPage={pageableData.size}
                 itemsPerPageLabel="페이지당 메뉴 개수"
@@ -295,34 +327,12 @@ const MenuManagementPage = () => {
                   />
                 }
                 onItemsPerPageChange={handlePageSizeChange}
-                onSelectedItemsChange={(items) => {
-                  setCheckedItems(items);
-                }}
-                onSorterChange={(sorterValue) => handlePageSortChange(sorterValue)}
+                onSelectedItemsChange={setCheckedItems}
+                onSorterChange={handlePageSortChange}
                 paginationProps={smartPaginationProps}
-                scopedColumns={{
-                  name: (item) => (
-                    <td
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => {
-                        handleRowClick(item.id);
-                      }}
-                    >
-                      {item.name}
-                    </td>
-                  ),
-                  icon: (item) => <td>{iconMapper({ iconName: item.icon })}</td>,
-                  deleted: (item) => (
-                    <td>
-                      <DeletionStatusBadge deleted={item.deleted} />
-                    </td>
-                  ),
-                }}
+                scopedColumns={scopedColumns}
                 selected={checkedItems}
-                tableProps={{
-                  responsive: true,
-                  hover: true,
-                }}
+                tableProps={tableCustomProps}
               />
             </CRow>
           </CCardBody>

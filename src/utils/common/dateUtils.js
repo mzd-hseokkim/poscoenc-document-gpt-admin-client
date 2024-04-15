@@ -1,4 +1,4 @@
-import { format } from 'date-fns';
+import { format, isToday } from 'date-fns';
 
 export const getCurrentDate = () => {
   return format(new Date(), "yyyy-MM-dd'T'23:59");
@@ -12,6 +12,11 @@ export const formatToYMD = (newDate) => {
   if (!newDate) {
     return null;
   }
+  const date = new Date(newDate);
+  if (isToday(date)) {
+    return format(date, 'HH : mm');
+  }
+
   return format(new Date(newDate), 'yyyy/MM/dd');
 };
 

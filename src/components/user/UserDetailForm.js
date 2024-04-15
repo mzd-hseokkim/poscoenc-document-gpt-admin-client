@@ -145,6 +145,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
 
   useEffect(() => {
     setIsLoading(false);
+
     const userId = searchParams.get('id');
 
     if (!isCreateMode && userId) {
@@ -251,44 +252,46 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
             </CCardBody>
           </CCard>
         </CForm>
-        <CCard>
-          <CCardHeader>
-            <CRow>
-              <CCol sm={5}>
-                <h4 id="traffic" className="card-title mb-0">
-                  사용 통계
-                </h4>
-                <div className="small text-medium-emphasis">
-                  {chartLabels[0]} - {`${new Date().getFullYear()} / ${chartLabels[11]}`}
-                </div>
-              </CCol>
-              <CCol sm={7} className="d-none d-md-block mt-2">
-                {/*REMIND 차트 엑셀 다운로드 구현 가능 */}
-                <CButton color="primary" className="float-end">
-                  <CIcon icon={cilCloudDownload} />
-                </CButton>
-              </CCol>
-            </CRow>
-          </CCardHeader>
-          {statisticsData?.length !== 0 && (
-            <CCardBody>
-              <CRow className="mb-3 justify-content-center">
-                <TokenUsageChart
-                  inputTokenData={statisticsData.inputTokenData}
-                  outputTokenData={statisticsData.outputTokenData}
-                />
-              </CRow>
-              <CRow className="justify-content-center">
+        {!isCreateMode && (
+          <CCard>
+            <CCardHeader>
+              <CRow>
                 <CCol sm={5}>
-                  <BingSearchsChart data={statisticsData.bingSearchsData} />
+                  <h4 id="traffic" className="card-title mb-0">
+                    사용 통계
+                  </h4>
+                  <div className="small text-medium-emphasis">
+                    {chartLabels[0]} - {`${new Date().getFullYear()} / ${chartLabels[11]}`}
+                  </div>
                 </CCol>
-                <CCol sm={5}>
-                  <DallE3GenerationChart data={statisticsData.dallE3GenerationsData} />
+                <CCol sm={7} className="d-none d-md-block mt-2">
+                  {/*REMIND 차트 엑셀 다운로드 구현 가능 */}
+                  <CButton color="primary" className="float-end">
+                    <CIcon icon={cilCloudDownload} />
+                  </CButton>
                 </CCol>
               </CRow>
-            </CCardBody>
-          )}
-        </CCard>
+            </CCardHeader>
+            {statisticsData?.length !== 0 && (
+              <CCardBody>
+                <CRow className="mb-3 justify-content-center">
+                  <TokenUsageChart
+                    inputTokenData={statisticsData.inputTokenData}
+                    outputTokenData={statisticsData.outputTokenData}
+                  />
+                </CRow>
+                <CRow className="justify-content-center">
+                  <CCol sm={5}>
+                    <BingSearchsChart data={statisticsData.bingSearchsData} />
+                  </CCol>
+                  <CCol sm={5}>
+                    <DallE3GenerationChart data={statisticsData.dallE3GenerationsData} />
+                  </CCol>
+                </CRow>
+              </CCardBody>
+            )}
+          </CCard>
+        )}
       </CModalBody>
       <CModalFooter>
         <DetailFormActionButtons

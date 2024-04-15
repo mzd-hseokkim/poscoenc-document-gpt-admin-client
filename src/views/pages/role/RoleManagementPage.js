@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { CButton, CCard, CCardBody, CCol, CRow, CSmartTable } from '@coreui/react-pro';
+import { CButton, CCard, CCardBody, CCol, CFormLabel, CRow, CSmartTable } from '@coreui/react-pro';
 import DeletionStatusBadge from 'components/badge/DeletionStatusBadge';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
@@ -10,12 +10,12 @@ import { useToast } from 'context/ToastContext';
 import useModal from 'hooks/useModal';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilValue, useResetRecoilState } from 'recoil';
-import RoleService from 'services/Role/RoleService';
+import RoleService from 'services/role/RoleService';
 import { jwtTokenState, userRoleSelector } from 'states/jwtTokenState';
 import { formatToYMD } from 'utils/common/dateUtils';
 import { roleColumnConfig } from 'views/pages/role/roleColumnConfig';
 
-const AdminManagementPage = () => {
+const RoleManagementPage = () => {
   const [roleList, setRoleList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [checkedItems, setCheckedItems] = useState([]);
@@ -28,11 +28,7 @@ const AdminManagementPage = () => {
   const navigate = useNavigate();
   const resetJwtToken = useResetRecoilState(jwtTokenState);
 
-  useEffect(() => {
-    void fetchRoleList();
-  }, []);
-
-  const fetchRoleList = async () => {
+  const fetchRoleList = useCallback(async () => {
     if (!isSearchPerformed) {
       setIsSearchPerformed(true);
     }
@@ -48,8 +44,11 @@ const AdminManagementPage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [addToast, isSearchPerformed]);
 
+  useEffect(() => {
+    void fetchRoleList();
+  }, [fetchRoleList]);
   const handleSignOut = () => {
     navigate('/sign-in');
     resetJwtToken();
@@ -68,32 +67,19 @@ const AdminManagementPage = () => {
 
   const handleDeleteRestoreClick = async (shouldDelete) => {
     const ids = checkedItems.map((item) => item.id);
-    if (checkedItems.length === 1) {
-      try {
-        const response = await RoleService.deleteRole(ids, shouldDelete);
-        if (shouldDelete && userRole.includes(response.role)) {
-          handleSignOut();
-        } else {
-          void fetchRoleList();
-        }
-      } catch (error) {
-        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
+    try {
+      const response = await RoleService.deleteRoles(ids, shouldDelete);
+      const roleNames = roleList
+        .filter((roleItem) => response.includes(roleItem.id))
+        .map((filteredRoleItem) => filteredRoleItem.role);
+      const isIncludeUserRole = roleNames.some((roleName) => userRole?.includes(roleName));
+      if (shouldDelete && isIncludeUserRole) {
+        handleSignOut();
+      } else {
+        void fetchRoleList();
       }
-    } else {
-      try {
-        const response = await RoleService.deleteRoles(ids, shouldDelete);
-        const roleNames = roleList
-          .filter((roleItem) => response.includes(roleItem.id))
-          .map((filteredRoleItem) => filteredRoleItem.role);
-        const isIncludeUserRole = roleNames.some((roleName) => userRole?.includes(roleName));
-        if (shouldDelete && isIncludeUserRole) {
-          handleSignOut();
-        } else {
-          void fetchRoleList();
-        }
-      } catch (error) {
-        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
-      }
+    } catch (error) {
+      addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
     setCheckedItems([]);
   };
@@ -112,6 +98,10 @@ const AdminManagementPage = () => {
                   downloadFunction={RoleService.getDownloadRoleList}
                   searchFormData={roleList.length !== 0}
                 />
+              </CCol>
+              <CCol className="d-flex justify-content-end">
+                {/*REMIND 권한 개수가 많지 않아 Set 로 반환중*/}
+                <CFormLabel>총 {roleList.length} 개의 검색 결과</CFormLabel>
               </CCol>
             </CRow>
             <CRow className="mb-3">
@@ -156,7 +146,6 @@ const AdminManagementPage = () => {
           </CCardBody>
         </CCard>
       </CRow>
-
       <ModalContainer visible={modal.isOpen} title="권한 정보" size="lg" onClose={modal.closeModal}>
         <RoleDetailForm initialFormMode={formMode} closeModal={modal.closeModal} fetchRoleList={fetchRoleList} />
       </ModalContainer>
@@ -164,4 +153,4 @@ const AdminManagementPage = () => {
   );
 };
 
-export default AdminManagementPage;
+export default RoleManagementPage;

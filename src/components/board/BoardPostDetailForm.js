@@ -29,7 +29,6 @@ import formModes from 'utils/common/formModes';
 const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
   const [postDetail, setPostDetail] = useState({});
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
-  //REMIND use setFormMode when implements posting service
   const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [searchParams] = useSearchParams();
 
@@ -75,7 +74,7 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
     },
     [addToast, closeModal, reset]
   );
-  //REMIND 게시글 작성 후 모달 닫을 때 formMode read 로 설정해주기
+
   useEffect(() => {
     const postId = searchParams.get('id');
 
@@ -123,7 +122,7 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
       if (isModified) {
         await setFormMode('read');
         refreshPosts();
-        await fetchPostDetails();
+        await fetchPostDetails(searchParams.get('id'));
       }
     } catch (error) {
       const status = error.response?.status;
@@ -145,14 +144,14 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
     } catch (error) {
       addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
-    await fetchPostDetails();
+    await fetchPostDetails(searchParams.get('id'));
     refreshPosts();
   };
 
   const handleCancelClick = async () => {
     if (isUpdateMode) {
       setFormMode('read');
-      await fetchPostDetails();
+      await fetchPostDetails(searchParams.get('id'));
     } else if (isCreateMode) {
       closeModal();
     }
@@ -179,11 +178,13 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
           feedbackInvalid={errors.title?.message}
         />
       </CCol>
-      <CCol xs={2} className="text-end">
-        <small>
-          <CFormLabel className="text-muted">조회수 {postDetail?.viewCount}</CFormLabel>
-        </small>
-      </CCol>
+      {!isCreateMode && (
+        <CCol xs={2} className="text-end">
+          <small>
+            <CFormLabel className="text-muted">조회수 {postDetail?.viewCount}</CFormLabel>
+          </small>
+        </CCol>
+      )}
     </CRow>
   );
 
@@ -236,7 +237,8 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
             </CCardBody>
           </CCard>
         </CForm>
-        {isReadMode && <PostCommentsForm postId={postDetail.id} />}
+        {/*REMIND 전체 댓글을 가져오는게 아니라 댓글의 갯수만 가져오고 댓글 데이터는 따로 요청하는걸로 수정 요청*/}
+        {isReadMode && <PostCommentsForm totalCount={postDetail?.comments?.length} />}
       </CModalBody>
       <CModalFooter>
         <DetailFormActionButtons

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   CButton,
@@ -9,6 +9,7 @@ import {
   CForm,
   CFormCheck,
   CFormInput,
+  CFormLabel,
   CInputGroup,
   CRow,
   CSmartTable,
@@ -32,6 +33,16 @@ import {
 import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { documentChatHistoryColumnConfig } from 'views/pages/document-collection/documentChatHistoryColumnConfig';
 
+const createInitialSearchFormData = () => ({
+  answer: '',
+  question: '',
+  documentCollectionId: '',
+  documentCollectionDisplayName: '',
+  fromCreatedAt: getOneYearAgoDate(),
+  toCreatedAt: getCurrentDate(),
+  createdByName: '',
+});
+
 const DocumentChatHistoryManagementPage = () => {
   const [chatHistoryList, setChatHistoryList] = useState([]);
   const [isSearchPerformed, setIsSearchPerformed] = useState(false);
@@ -40,24 +51,16 @@ const DocumentChatHistoryManagementPage = () => {
   const [detailFormMode, setDetailFormMode] = useState('');
   const [totalChatHistoryElements, setTotalChatHistoryElements] = useState(0);
 
-  const initialSearchFormData = {
-    answer: '',
-    question: '',
-    documentCollectionId: '',
-    documentCollectionDisplayName: '',
-    fromCreatedAt: getOneYearAgoDate(),
-    toCreatedAt: getCurrentDate(),
-    createdByName: '',
-    isPickTime: false,
-  };
+  const [searchFormData, setSearchFormData] = useState({});
+  const [stagedSearchFormData, setStagedSearchFormData] = useState(createInitialSearchFormData);
+  const [isPickTime, setIsPickTime] = useState(false);
 
-  const [searchFormData, setSearchFormData] = useState(initialSearchFormData);
   const isComponentMounted = useRef(true);
   const modal = useModal();
   const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } =
     usePagination(totalChatHistoryElements);
 
-  const searchChatHistoryList = async () => {
+  const searchChatHistoryList = useCallback(async () => {
     setSearchResultIsLoading(true);
     if (!isSearchPerformed) {
       setIsSearchPerformed(true);
@@ -76,7 +79,7 @@ const DocumentChatHistoryManagementPage = () => {
     } finally {
       setSearchResultIsLoading(false);
     }
-  };
+  }, [isSearchPerformed, pageableData, searchFormData]);
 
   useEffect(() => {
     if (isComponentMounted.current) {
@@ -84,7 +87,7 @@ const DocumentChatHistoryManagementPage = () => {
     } else {
       void searchChatHistoryList();
     }
-  }, [pageableData]);
+  }, [searchChatHistoryList]);
 
   const handleRowClick = (itemId) => {
     setDetailFormMode('read');
@@ -92,35 +95,45 @@ const DocumentChatHistoryManagementPage = () => {
   };
   const handleSubmitSearchRequest = async (e) => {
     e.preventDefault();
-    await searchChatHistoryList();
+    setSearchFormData(stagedSearchFormData);
   };
+  const handleSearchFormReset = () => {
+    setStagedSearchFormData(createInitialSearchFormData);
+    setIsPickTime(false);
+  };
+
   const handleSearchFormChange = ({ target: { id, value } }) => {
-    setSearchFormData((prev) => ({ ...prev, [id]: value }));
+    setStagedSearchFormData((prev) => ({ ...prev, [id]: value }));
   };
+
   const handleDateChange = ({ id, newDate, isStartDate = true }) => {
+    //REMIND 시간날 때 함수 리팩토링, 모듈화
     const fieldMap = {
       createdAt: isStartDate ? 'fromCreatedAt' : 'toCreatedAt',
     };
+
     const fieldToUpdate = fieldMap[id];
-    if (fieldToUpdate) {
-      const formattedDate = isStartDate ? formatToIsoStartDate(newDate) : formatToIsoEndDate(newDate);
-      setSearchFormData((prev) => ({ ...prev, [fieldToUpdate]: formattedDate }));
-    }
+
+    if (!fieldToUpdate) return;
+
+    const newFormattedDate = newDate
+      ? //REMIND 날짜만 보낼 경우 00시로 고정되어서 23시로 변경
+        isPickTime
+        ? formatToIsoEndDate(newDate)
+        : format(new Date(newDate), "yyyy-MM-dd'T'23:59")
+      : null;
+
+    const formattedDate = isStartDate ? formatToIsoStartDate(newDate) : newFormattedDate;
+    setStagedSearchFormData((prev) => ({ ...prev, [fieldToUpdate]: formattedDate }));
   };
 
   const handleTimePickerCheck = (e) => {
-    const isChecked = e.target.checked;
-
-    setSearchFormData((prev) => {
-      const updatedForm = { ...prev, isPickTime: isChecked };
-
-      if (prev.fromCreatedAt != null && prev.toCreatedAt != null) {
-        updatedForm.fromCreatedAt = format(prev.fromCreatedAt, "yyyy-MM-dd'T'00:00");
-        updatedForm.toCreatedAt = format(prev.toCreatedAt, "yyyy-MM-dd'T'23:59");
-      }
-
-      return updatedForm;
-    });
+    setIsPickTime(e.target.checked);
+    setStagedSearchFormData((prev) => ({
+      ...prev,
+      fromCreatedAt: format(prev.fromCreatedAt, "yyyy-MM-dd'T'00:00"),
+      toCreatedAt: format(prev.toCreatedAt, "yyyy-MM-dd'T'23:59"),
+    }));
   };
 
   const scopedColumns = {
@@ -187,7 +200,7 @@ const DocumentChatHistoryManagementPage = () => {
                     floatingLabel="답변"
                     placeholder=""
                     floatingClassName="mb-0"
-                    value={searchFormData.answer}
+                    value={stagedSearchFormData.answer}
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
@@ -196,7 +209,7 @@ const DocumentChatHistoryManagementPage = () => {
                     id="question"
                     floatingLabel="질문"
                     placeholder=""
-                    value={searchFormData.question}
+                    value={stagedSearchFormData.question}
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
@@ -207,7 +220,7 @@ const DocumentChatHistoryManagementPage = () => {
                     id="documentCollectionId"
                     floatingLabel="문서 집합 아이디"
                     placeholder=""
-                    value={searchFormData.documentCollectionId}
+                    value={stagedSearchFormData.documentCollectionId}
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
@@ -216,7 +229,7 @@ const DocumentChatHistoryManagementPage = () => {
                     id="documentCollectionDisplayName"
                     floatingLabel="문서 집합 표시명"
                     placeholder=""
-                    value={searchFormData.documentCollectionDisplayName}
+                    value={stagedSearchFormData.documentCollectionDisplayName}
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
@@ -228,7 +241,7 @@ const DocumentChatHistoryManagementPage = () => {
                     floatingLabel="질문한 사람"
                     placeholder=""
                     onChange={handleSearchFormChange}
-                    value={searchFormData.createdByName}
+                    value={stagedSearchFormData.createdByName}
                   />
                 </CCol>
               </CRow>
@@ -239,26 +252,24 @@ const DocumentChatHistoryManagementPage = () => {
                       등록일
                     </CButton>
                     <CDateRangePicker
-                      key={`createdAt-${searchFormData.isPickTime}`}
+                      key={`createdAt-${isPickTime}`}
                       id="createdAt"
-                      placeholder="등록일"
                       className="col-10"
-                      startDate={searchFormData.fromCreatedAt}
-                      endDate={searchFormData.toCreatedAt}
+                      startDate={stagedSearchFormData.fromCreatedAt}
+                      endDate={stagedSearchFormData.toCreatedAt}
                       onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
                       onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
-                      timepicker={searchFormData.isPickTime}
+                      timepicker={isPickTime}
                     />
                   </CInputGroup>
                 </CCol>
-                {/*  StartFROM 검색 폼 플로팅 라벨 정리부터 시작 */}
               </CRow>
               <CCol md={2} className="justify-content-end">
                 <CFormCheck
                   id="timepicker"
                   label="시간 검색 여부"
                   className="mt-2"
-                  checked={searchFormData.isPickTime}
+                  checked={isPickTime}
                   onChange={(e) => handleTimePickerCheck(e)}
                 />
               </CCol>
@@ -266,7 +277,7 @@ const DocumentChatHistoryManagementPage = () => {
               <CRow className="mb-3">
                 <CCol className="d-grid gap-2 d-md-flex justify-content-md-center">
                   <CButton type="submit">검색</CButton>
-                  <CButton color="primary" value="Reset" onClick={() => setSearchFormData(initialSearchFormData)}>
+                  <CButton color="primary" value="Reset" onClick={handleSearchFormReset}>
                     초기화
                   </CButton>
                 </CCol>
@@ -285,6 +296,9 @@ const DocumentChatHistoryManagementPage = () => {
                   searchFormData={searchFormData}
                   hasSearchResults={chatHistoryList.length !== 0}
                 />
+              </CCol>
+              <CCol className="d-flex justify-content-end">
+                <CFormLabel>총 {totalChatHistoryElements} 개의 검색 결과</CFormLabel>
               </CCol>
             </CRow>
             <CRow className="mb-3">

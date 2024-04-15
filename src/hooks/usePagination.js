@@ -1,10 +1,10 @@
 import { useState } from 'react';
 
-const usePagination = (totalItems) => {
+const usePagination = (totalItems, defaultSort) => {
   const [pageableData, setPageableData] = useState({
     page: 0,
     size: 10,
-    sort: 'id,desc',
+    sort: defaultSort || 'id,desc',
   });
 
   const handlePageChange = (newPage) => {
@@ -22,8 +22,8 @@ const usePagination = (totalItems) => {
     }));
   };
 
-  const handlePageSortChange = ({ column, direction }) => {
-    const newSort = `${column},${direction}`;
+  const handlePageSortChange = ({ column, state }) => {
+    const newSort = state === 0 ? 'id,desc' : `${column},${state}`;
     setPageableData((prev) => ({
       ...prev,
       sort: newSort,

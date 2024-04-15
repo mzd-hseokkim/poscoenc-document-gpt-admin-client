@@ -20,7 +20,7 @@ import { useToast } from 'context/ToastContext';
 import { Controller, useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
 import MenuService from 'services/menu/MenuService';
-import RoleService from 'services/Role/RoleService';
+import RoleService from 'services/role/RoleService';
 import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/common/formModes';
@@ -118,11 +118,13 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
     async (allowedRoles = []) => {
       try {
         const rolesData = await RoleService.getRoles();
-        const newRoles = rolesData.map((role) => ({
-          value: role.id,
-          text: role.role,
-          selected: allowedRoles?.length > 0 ? allowedRoles.includes(role.id) : false,
-        }));
+        const newRoles = rolesData
+          .filter((role) => (isReadMode ? allowedRoles.includes(role.id) : true))
+          .map((role) => ({
+            value: role.id,
+            text: role.role,
+            selected: allowedRoles?.length > 0 ? allowedRoles.includes(role.id) : false,
+          }));
         setRoles(newRoles);
       } catch (error) {
         const status = error.response?.status;
@@ -131,7 +133,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
         }
       }
     },
-    [addToast]
+    [addToast, isReadMode]
   );
 
   const getParentMenu = useCallback(async () => {
@@ -303,10 +305,12 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
               id="detail-form-allowedRoles"
               {...field}
               placeholder="권한을 선택하세요."
+              selectAll={!isReadMode}
               selectAllLabel="모두 선택"
               options={roles}
               virtualScroller
               disabled={isReadMode}
+              selectionType={isReadMode ? 'text' : 'tags'}
               invalid={!!errors.allowedRoles}
               feedbackInvalid={errors.allowedRoles?.message}
             />
@@ -340,7 +344,6 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
       </CCol>
     </CRow>
   );
-
   const renderAuditFields = () => {
     return (
       <CCard className="g-3 mb-3">

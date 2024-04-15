@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { CButton, CCard, CCardBody, CCol, CForm, CFormSelect, CInputGroup, CRow, CSmartTable } from '@coreui/react-pro';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
@@ -22,24 +22,28 @@ const StatisticsUserManagement = () => {
   const [statisticsDataList, setStatisticsDataList] = useState([]);
   const [clickedData, setClickedData] = useState({});
 
-  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } =
-    usePagination(totalStatisticsDataElements);
+  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } = usePagination(
+    totalStatisticsDataElements,
+    'sumInputTokens,desc'
+  );
   const { addToast } = useToast();
   const isComponentMounted = useRef(true);
 
   const pastYearMonths = MonthLabelGenerator.pastYearMonthsSelectBoxLabels();
   const lastIndex = pastYearMonths.length - 1;
-  const [selectedMonth, setSelectedMonth] = useState(pastYearMonths[lastIndex].value);
+  const [selectedMonth, setSelectedMonth] = useState({ label: '', value: '' });
+  const [stagedSelectedMonth, setStagedSelectedMonth] = useState(pastYearMonths[lastIndex]);
   const modal = useModal();
 
-  const searchUserUsageStatistics = async () => {
+  const searchUserUsageStatistics = useCallback(async () => {
     setSearchResultIsLoading(true);
 
     if (!isSearchPerformed) {
       setIsSearchPerformed(true);
     }
+
     try {
-      const response = await statisticsService.getUserUsageStatistics(selectedMonth, pageableData);
+      const response = await statisticsService.getUserUsageStatistics(selectedMonth.value, pageableData);
       setStatisticsDataList(response.content);
       setTotalStatisticsDataElements(response.totalElements);
     } catch (error) {
@@ -49,29 +53,30 @@ const StatisticsUserManagement = () => {
     } finally {
       setSearchResultIsLoading(false);
     }
-  };
+  }, [addToast, isSearchPerformed, pageableData, selectedMonth.value]);
+
   const handleSubmitSearchRequest = async (e) => {
     e.preventDefault();
-    await searchUserUsageStatistics();
+    setSelectedMonth(stagedSelectedMonth);
   };
 
   useEffect(() => {
-    if (pageableData.sort === 'id,desc') {
-      handlePageSortChange({ column: 'sumInputTokens', direction: 'desc' });
-    }
     if (isComponentMounted.current) {
       isComponentMounted.current = false;
     } else {
       void searchUserUsageStatistics();
     }
-  }, []);
+  }, [searchUserUsageStatistics]);
 
   const handleRowClick = (item) => {
     setClickedData(item);
     modal.openModal(item.id);
   };
-  const handleMonthSelectBoxChange = (event) => {
-    setSelectedMonth(event.target.value);
+
+  const handleMonthSelectBoxChange = (e) => {
+    e.preventDefault();
+    const changedMonth = pastYearMonths.find((item) => item.value === e.target.value);
+    setStagedSelectedMonth(changedMonth);
   };
 
   const scopedColumns = {
@@ -125,7 +130,7 @@ const StatisticsUserManagement = () => {
                       style={{ height: '58px' }}
                       floatingLabel=""
                       options={pastYearMonths}
-                      value={selectedMonth}
+                      value={stagedSelectedMonth.value}
                       onChange={handleMonthSelectBoxChange}
                     />
                   </CInputGroup>
@@ -137,7 +142,7 @@ const StatisticsUserManagement = () => {
                   <CButton
                     color="primary"
                     value="Reset"
-                    onClick={() => setSelectedMonth(pastYearMonths[lastIndex].value)}
+                    onClick={() => setStagedSelectedMonth(pastYearMonths[lastIndex])}
                   >
                     초기화
                   </CButton>
