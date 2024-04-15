@@ -133,7 +133,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
         }
       }
     },
-    [addToast]
+    [addToast, isReadMode]
   );
 
   const getParentMenu = useCallback(async () => {
