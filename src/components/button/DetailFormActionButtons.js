@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { CButton, CCol, CRow } from '@coreui/react-pro';
+import { CButton, CCol } from '@coreui/react-pro';
 
 const DetailFormActionButtons = ({
   dataId,
@@ -25,26 +25,32 @@ const DetailFormActionButtons = ({
 
     return isUserData && isCreatedByCurrentUser;
   };
+  const colorButtonTextStyle = {
+    '--cui-btn-color': 'white',
+    '--cui-btn-hover-color': 'white',
+  };
 
   return (
-    <CRow>
-      <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-        {shouldShowModifyButton() && <CButton onClick={handleUpdateClick}>수정</CButton>}
-        {(isUpdateMode || isCreateMode) && (
-          <>
-            <CButton type="submit" onClick={onSubmit}>
-              저장
-            </CButton>
-            <CButton onClick={handleCancel}>취소</CButton>
-          </>
-        )}
-        {!isCreateMode && (
-          <CButton color={isDataDeleted ? 'success' : 'danger'} onClick={() => handleDeleteRestore?.(dataId)}>
-            {isDataDeleted ? '복구' : '삭제'}
+    <CCol className="d-grid gap-2 d-md-flex">
+      {shouldShowModifyButton() && <CButton onClick={handleUpdateClick}>수정</CButton>}
+      {(isUpdateMode || isCreateMode) && (
+        <>
+          <CButton type="submit" onClick={onSubmit}>
+            저장
           </CButton>
-        )}
-      </CCol>
-    </CRow>
+          <CButton onClick={handleCancel}>취소</CButton>
+        </>
+      )}
+      {isReadMode && (
+        <CButton
+          style={colorButtonTextStyle}
+          color={isDataDeleted ? 'success' : 'danger'}
+          onClick={() => handleDeleteRestore?.(dataId)}
+        >
+          {isDataDeleted ? '복구' : '삭제'}
+        </CButton>
+      )}
+    </CCol>
   );
 };
 
