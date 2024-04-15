@@ -123,6 +123,7 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
         await setFormMode('read');
         refreshPosts();
         await fetchPostDetails(searchParams.get('id'));
+        addToast({ color: 'success', message: '게시글 수정이 완료되었습니다.' });
       }
     } catch (error) {
       const status = error.response?.status;

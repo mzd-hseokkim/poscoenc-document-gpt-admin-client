@@ -29,7 +29,7 @@ const StatisticsDocumentCollectionManagement = () => {
 
   const pastYearMonths = MonthLabelGenerator.pastYearMonthsSelectBoxLabels();
   const lastIndex = pastYearMonths.length - 1;
-  const [selectedMonth, setSelectedMonth] = useState(pastYearMonths[lastIndex]);
+  const [selectedMonth, setSelectedMonth] = useState({ label: '', value: '' });
   const [stagedSelectedMonth, setStagedSelectedMonth] = useState(pastYearMonths[lastIndex]);
 
   const modal = useModal();

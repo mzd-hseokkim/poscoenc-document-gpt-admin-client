@@ -7,6 +7,8 @@ const getRoles = async () => {
 };
 
 const getRole = async (id) => {
+  if (!id) return;
+
   const response = await api.get(`/admin/roles/${id}`);
   return response.data;
 };

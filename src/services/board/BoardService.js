@@ -2,6 +2,7 @@ import api from 'api/Api';
 import { formatToYMD, getCurrentDate } from 'utils/common/dateUtils';
 
 const getPostDetail = async (postId) => {
+  if (!postId) return;
   const response = await api.get(`/admin/boards/${postId}`);
   return response.data;
 };

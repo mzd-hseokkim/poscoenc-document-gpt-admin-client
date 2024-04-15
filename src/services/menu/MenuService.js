@@ -33,6 +33,7 @@ const getParentMenus = async (id) => {
 
 const getMenuDetail = async (id) => {
   //REMIND 없는 아이디 요청 시 500 에러 발생.
+  if (!id) return;
   const response = await api.get(`/admin/menus/${id}`);
   return response.data;
 };
