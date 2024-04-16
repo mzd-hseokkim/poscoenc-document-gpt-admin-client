@@ -14,12 +14,6 @@ export const adminColumnConfig = [
     label: '이름',
     _style: { width: '18%' },
   },
-  // FIXME 권한 반환 수정 후 추가
-  // {
-  //   key: 'role',
-  //   label: '권한',
-  //   _style: { width: '12%' },
-  // },
   {
     key: 'lastLoggedInAt',
     label: '최근 로그인',

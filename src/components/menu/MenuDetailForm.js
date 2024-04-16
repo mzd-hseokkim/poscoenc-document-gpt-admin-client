@@ -115,29 +115,19 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
     }
   }, [allowChildren, setValue]);
 
-  const [defaultSelectedRoles, setDefaultSelectedRoles] = useState([{ id: '', role: '', deleted: false }]);
-
   const getRoles = useCallback(
     async (allowedRoles = []) => {
       try {
         const rolesData = await RoleService.getRoles();
         const newRoles = rolesData
-          // .filter((role) => (isReadMode ? allowedRoles.includes(role.id) : true))
+          .filter((role) => (isReadMode ? allowedRoles.includes(role.id) : true))
           .map((role) => ({
             value: role.id,
             text: role.role,
             selected: allowedRoles?.length > 0 ? allowedRoles.includes(role.id) : false,
           }));
 
-        //FIXME 업데이트모드일때 어떻게처리할껀지
-        if (isReadMode) {
-          setRoles(newRoles.filter((role) => allowedRoles.includes(role.value)));
-        } else {
-          setRoles(newRoles);
-        }
-
-        if (isUpdateMode) {
-        }
+        setRoles(newRoles);
       } catch (error) {
         const status = error.response?.status;
         if (status === 400) {
@@ -268,7 +258,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
   const handleCancelClick = async () => {
     if (isUpdateMode) {
       setFormMode('read');
-      await fetchMenuDetail();
+      await fetchMenuDetail(searchParams.get('id'));
     } else if (isCreateMode) {
       closeModal();
     }

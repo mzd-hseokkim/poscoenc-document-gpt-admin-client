@@ -149,25 +149,13 @@ const MenuManagementPage = () => {
 
   const handleDeleteRestoreClick = async (shouldDelete) => {
     const ids = checkedItems.map((item) => item.id);
-    if (checkedItems.length === 1) {
-      try {
-        await MenuService.deleteMenu(ids, shouldDelete);
-        fetchMenuList();
-      } catch (error) {
-        const status = error.response?.status;
-        if (status === 400) {
-          addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
-        }
-      }
-    } else {
-      try {
-        await MenuService.deleteMenus(ids, shouldDelete);
-        fetchMenuList();
-      } catch (error) {
-        const status = error.response?.status;
-        if (status === 400) {
-          addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
-        }
+    try {
+      await MenuService.deleteMenus(ids, shouldDelete);
+      fetchMenuList();
+    } catch (error) {
+      const status = error.response?.status;
+      if (status === 400) {
+        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
       }
     }
     setCheckedItems([]);
@@ -289,7 +277,7 @@ const MenuManagementPage = () => {
               <CCol className="d-grid gap-2 d-md-flex justify-content-md-start">
                 <CButton onClick={handleCreateClick}>메뉴 추가</CButton>
                 <CButton
-                  disabled={checkedItems?.length === 0 || !isDeletedRow(checkedItems)}
+                  disabled={checkedItems?.length === 0 || isDeletedRow(checkedItems)}
                   onClick={() => handleDeleteRestoreClick(true)}
                 >
                   삭제
@@ -330,6 +318,7 @@ const MenuManagementPage = () => {
                 onSelectedItemsChange={setCheckedItems}
                 onSorterChange={handlePageSortChange}
                 paginationProps={smartPaginationProps}
+                selectable
                 scopedColumns={scopedColumns}
                 selected={checkedItems}
                 tableProps={tableCustomProps}

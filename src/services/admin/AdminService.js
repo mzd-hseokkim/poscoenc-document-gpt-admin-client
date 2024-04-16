@@ -67,11 +67,6 @@ const putAdmin = async (id, payload) => {
   return response.data;
 };
 
-const deleteAdmin = async (id, deleted) => {
-  const response = await api.patch(`/admin/admin-users/${id}/deleted?deleted=${deleted}`);
-  return response.data;
-};
-
 const deleteAdmins = async (ids, deleted) => {
   const response = await api.patch(`/admin/admin-users/deleted/${deleted}`, ids);
   return response.data;
@@ -83,7 +78,6 @@ const AdminService = {
   getAdmins,
   getDownloadAdminList,
   putAdmin,
-  deleteAdmin,
   deleteAdmins,
 };
 

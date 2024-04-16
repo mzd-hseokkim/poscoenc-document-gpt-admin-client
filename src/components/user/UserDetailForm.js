@@ -32,7 +32,7 @@ import formModes from 'utils/common/formModes';
 import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
 import { emailValidationPattern } from 'utils/common/validationUtils';
 
-const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList }) => {
+const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [formData, setFormData] = useState([]);
@@ -152,7 +152,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
       void fetchUserDetail(userId);
       void fetchStatisticsData(userId);
     }
-  }, [fetchStatisticsData, fetchUserDetail, isCreateMode, searchParams, selectedId]);
+  }, [fetchStatisticsData, fetchUserDetail, isCreateMode, searchParams]);
 
   const postUser = async (data) => {
     try {
@@ -172,7 +172,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
 
   const patchUser = async (data) => {
     try {
-      const response = await UserService.putUser(selectedId, data);
+      const response = await UserService.putUser(searchParams.get('id'), data);
       if (response) {
         fetchUserList();
         setFormMode('read');
@@ -204,7 +204,6 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
     } catch (error) {
       addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
-    closeModal();
     fetchUserList();
   };
 
@@ -297,7 +296,7 @@ const UserDetailForm = ({ selectedId, initialFormMode, closeModal, fetchUserList
       </CModalBody>
       <CModalFooter>
         <DetailFormActionButtons
-          dataId={selectedId}
+          dataId={searchParams.get('id')}
           formModes={formModes(formMode)}
           handleCancel={handleCancelClick}
           handleDeleteRestore={handleDeleteRestoreClick}

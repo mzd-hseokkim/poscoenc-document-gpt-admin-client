@@ -31,6 +31,7 @@ import {
   getCurrentDate,
   getOneYearAgoDate,
 } from 'utils/common/dateUtils';
+import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { adminColumnConfig } from 'views/pages/admin/adminColumnConfig';
 
 const createInitialSearchFormData = () => ({
@@ -65,6 +66,10 @@ const AdminManagementPage = () => {
     usePagination(totalAdminElements);
   const { addToast } = useToast();
   const modal = useModal();
+
+  const isDeletedRow = (selectedRows) => {
+    return selectedRows.some((row) => row.deleted === true);
+  };
 
   const fetchAdminList = useCallback(async () => {
     if (!isSearchPerformed) {
@@ -146,27 +151,38 @@ const AdminManagementPage = () => {
   };
   const handleCreateClick = () => {
     setFormMode('create');
+
     modal.openModal();
   };
 
   const handleDeleteRestoreClick = async (shouldDelete) => {
     const ids = checkedItems.map((item) => item.id);
-    if (checkedItems.length === 1) {
-      try {
-        await AdminService.deleteAdmin(ids, shouldDelete);
-        void fetchAdminList();
-      } catch (error) {
-        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
-      }
-    } else {
-      try {
-        await AdminService.deleteAdmins(ids, shouldDelete);
-        void fetchAdminList();
-      } catch (error) {
-        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
-      }
+    try {
+      await AdminService.deleteAdmins(ids, shouldDelete);
+      void fetchAdminList();
+    } catch (error) {
+      addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
     setCheckedItems([]);
+  };
+
+  const scopedColumns = {
+    email: (item) => (
+      <td
+        style={{ cursor: 'pointer' }}
+        onClick={() => {
+          handleRowClick(item.id);
+        }}
+      >
+        {item.email}
+      </td>
+    ),
+    lastLoggedInAt: (item) => <td>{formatToYMD(item.lastLoggedInAt)}</td>,
+    deleted: (item) => (
+      <td>
+        <DeletionStatusBadge deleted={item.deleted} />
+      </td>
+    ),
   };
 
   return (
@@ -281,8 +297,18 @@ const AdminManagementPage = () => {
             <CRow className="mb-3">
               <CCol className="d-grid gap-2 d-md-flex justify-content-md-start">
                 <CButton onClick={handleCreateClick}>관리자 추가</CButton>
-                <CButton onClick={() => handleDeleteRestoreClick(true)}>삭제</CButton>
-                <CButton onClick={() => handleDeleteRestoreClick(false)}>복구</CButton>
+                <CButton
+                  disabled={checkedItems?.length === 0 || isDeletedRow(checkedItems)}
+                  onClick={() => handleDeleteRestoreClick(true)}
+                >
+                  삭제
+                </CButton>
+                <CButton
+                  disabled={checkedItems?.length === 0 || !isDeletedRow(checkedItems)}
+                  onClick={() => handleDeleteRestoreClick(false)}
+                >
+                  복구
+                </CButton>
                 <ExcelDownloadCButton
                   downloadFunction={AdminService.getDownloadAdminList}
                   searchFormData={searchFormData}
@@ -295,16 +321,13 @@ const AdminManagementPage = () => {
             </CRow>
             <CRow className="mb-3">
               <CSmartTable
-                columnSorter={{
-                  external: true,
-                  resetable: false,
-                }}
-                onSorterChange={(sorterValue) => handlePageSortChange(sorterValue)}
-                paginationProps={smartPaginationProps}
-                itemsPerPageSelect
+                columnSorter={columnSorterCustomProps}
+                columns={adminColumnConfig}
+                items={adminList}
                 itemsPerPage={pageableData.size}
-                onItemsPerPageChange={handlePageSizeChange}
                 itemsPerPageLabel="페이지당 관리자 개수"
+                itemsPerPageSelect
+                loading={isLoading}
                 noItemsLabel={
                   <CSmartTableNoItemLabel
                     contentLength={adminList.length}
@@ -312,36 +335,14 @@ const AdminManagementPage = () => {
                     defaultMessage="검색 조건에 맞는 관리자를 검색합니다."
                   />
                 }
-                loading={isLoading}
-                items={adminList}
-                columns={adminColumnConfig}
+                onItemsPerPageChange={handlePageSizeChange}
+                onSelectedItemsChange={setCheckedItems}
+                onSorterChange={handlePageSortChange}
+                paginationProps={smartPaginationProps}
                 selectable
-                scopedColumns={{
-                  email: (item) => (
-                    <td
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => {
-                        handleRowClick(item.id);
-                      }}
-                    >
-                      {item.email}
-                    </td>
-                  ),
-                  lastLoggedInAt: (item) => <td>{formatToYMD(item.lastLoggedInAt)}</td>,
-                  deleted: (item) => (
-                    <td>
-                      <DeletionStatusBadge deleted={item.deleted} />
-                    </td>
-                  ),
-                }}
-                onSelectedItemsChange={(items) => {
-                  setCheckedItems(items);
-                }}
-                tableProps={{
-                  responsive: true,
-                  hover: true,
-                }}
                 selected={checkedItems}
+                scopedColumns={scopedColumns}
+                tableProps={tableCustomProps}
               />
             </CRow>
           </CCardBody>
