@@ -219,7 +219,6 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
     } catch (error) {
       addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
-    closeModal();
     fetchAdminList();
   };
 

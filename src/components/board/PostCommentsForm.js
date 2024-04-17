@@ -13,6 +13,7 @@ import {
   CInputGroup,
   CRow,
 } from '@coreui/react-pro';
+import { colorButtonTextStyle } from 'components/button/colorButtonTextStyle';
 import { useToast } from 'context/ToastContext';
 import { useSearchParams } from 'react-router-dom';
 import BoardCommentService from 'services/board/BoardCommentService';
@@ -94,7 +95,7 @@ const PostCommentsForm = ({ totalCount }) => {
 
   useEffect(() => {
     void fetchPostComments();
-  }, [fetchPostComments, postCommentIsLoading, searchParams]);
+  }, [fetchPostComments]);
 
   useEffect(() => {
     if (!postCommentIsLoading && visible) {
@@ -155,6 +156,7 @@ const PostCommentsForm = ({ totalCount }) => {
       <CCol className="d-flex justify-content-between">
         <strong>{comment.createdByName}</strong>
         <CButton
+          style={colorButtonTextStyle}
           className="in"
           color={comment.deleted ? 'success' : 'danger'}
           size="sm"
@@ -192,7 +194,6 @@ const PostCommentsForm = ({ totalCount }) => {
           </div>
           <CFormSelect
             style={{ width: '175px' }}
-            //startfrom value 설정해주는것부터 시작
             options={[
               { label: '모두 표시', value: 'ALL' },
               { label: '삭제된 댓글 무시', value: 'No' },
