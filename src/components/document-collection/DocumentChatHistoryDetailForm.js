@@ -18,7 +18,7 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
   const formMode = initialFormMode || 'read';
   const [chatHistory, setChatHistory] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const { isCreateMode, isReadMode } = formModes(formMode);
+  const { isReadMode } = formModes(formMode);
   const [searchParams] = useSearchParams();
   const { addToast } = useToast();
 
