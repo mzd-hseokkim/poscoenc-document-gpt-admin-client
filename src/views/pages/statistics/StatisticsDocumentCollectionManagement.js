@@ -11,7 +11,7 @@ import usePagination from 'hooks/usePagination';
 import statisticsService from 'services/statistics/StatisticsService';
 import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
 import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
-import { statisticsUserColumnConfig } from 'views/pages/statistics/statisticsUserColumnConfig';
+import { StatisticsDocumentCollectionColumnConfig } from 'views/pages/statistics/statisticsDocumentCollectionColumnConfig';
 
 const StatisticsDocumentCollectionManagement = () => {
   const [totalStatisticsDataElements, setTotalStatisticsDataElements] = useState(0);
@@ -29,7 +29,7 @@ const StatisticsDocumentCollectionManagement = () => {
 
   const pastYearMonths = MonthLabelGenerator.pastYearMonthsSelectBoxLabels();
   const lastIndex = pastYearMonths.length - 1;
-  const [selectedMonth, setSelectedMonth] = useState(pastYearMonths[lastIndex]);
+  const [selectedMonth, setSelectedMonth] = useState({ label: '', value: '' });
   const [stagedSelectedMonth, setStagedSelectedMonth] = useState(pastYearMonths[lastIndex]);
 
   const modal = useModal();
@@ -157,7 +157,7 @@ const StatisticsDocumentCollectionManagement = () => {
             <CRow className="mb-3">
               <CSmartTable
                 columnSorter={columnSorterCustomProps}
-                columns={statisticsUserColumnConfig}
+                columns={StatisticsDocumentCollectionColumnConfig}
                 items={statisticsDataList}
                 itemsPerPage={pageableData.size}
                 itemsPerPageLabel="페이지당 문서 집합 개수"

@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { cilArrowThickToBottom, cilCloudDownload } from '@coreui/icons';
+import { cilArrowThickToTop, cilCloudDownload, cilSave } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import {
+  CAvatar,
   CButton,
   CCard,
   CCardBody,
@@ -16,6 +17,7 @@ import {
   CListGroupItem,
   CModalBody,
   CModalFooter,
+  CMultiSelect,
   CRow,
 } from '@coreui/react-pro';
 import DocumentFileStatusBadge from 'components/badge/DocumentFileStatusBadge';
@@ -44,12 +46,14 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
   const [collectionDetail, setCollectionDetail] = useState({});
   const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
+  const [pdfVisible, setPdfVisible] = useState({});
   const [statisticsData, setStatisticsData] = useState({
     inputTokenData: [],
     outputTokenData: [],
     bingSearchsData: [],
     dallE3GenerationsData: [],
   });
+  const [sharedUsers, setSharedUsers] = useState([]);
   const [searchParams] = useSearchParams();
 
   const { addToast } = useToast();
@@ -114,6 +118,16 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
           modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
         };
         reset(formattedDetail);
+
+        const formattedSharedUsers = detail.accessAssociations.map((association) => {
+          return {
+            selected: true,
+            disabled: true,
+            value: association.targetId,
+            text: association.targetName,
+          };
+        });
+        setSharedUsers(formattedSharedUsers);
       } catch (error) {
         if (error.response?.status === 404) {
           addToast({ message: `id={${collectionId}} 해당 문서 집합을 찾을 수 없습니다.` });
@@ -127,7 +141,6 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     },
     [addToast, closeModal, reset]
   );
-
   const fetchStatisticsData = useCallback(async (collectionId) => {
     try {
       const responseData = await StatisticsService.getMonthlyStatisticsData({
@@ -163,6 +176,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     if (!collectionId) {
       closeModal();
     }
+
     void fetchCollectionDetail(collectionId);
     void fetchStatisticsData(collectionId);
   }, [closeModal, fetchCollectionDetail, fetchStatisticsData, searchParams]);
@@ -219,16 +233,13 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     refreshDocumentCollectionList();
   };
 
-  // PDF--------------
-  const [visible, setVisible] = useState({});
   const toggleVisible = (fileId) => {
-    setVisible((prevState) => ({
+    setPdfVisible((prevState) => ({
       ...prevState,
       [fileId]: !prevState[fileId],
     }));
   };
 
-  //--------------
   const renderChart = () => {
     return (
       <>
@@ -271,7 +282,6 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
           <CCard className="mb-3">
             <CCardBody>
               <FormInputGrid
-                register={register}
                 fields={getAuditFields(formMode)}
                 formData={collectionDetail}
                 isReadMode={isReadMode}
@@ -308,6 +318,26 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                   />
                 </>
               )}
+              <CFormLabel className="fw-bold" htmlFor={'documentcollectionaccessassociation'}>
+                공유받은 사용자 목록
+              </CFormLabel>
+              <CMultiSelect
+                options={sharedUsers}
+                virtualScroller
+                selectAll={false}
+                cleaner={false}
+                placeholder={'비공개 문서입니다.'}
+                searchNoResultsLabel={'공유된 사용자가 없습니다.'}
+                optionsStyle={'text'}
+                optionsTemplate={(option) => (
+                  <div className="d-flex align-items-center">
+                    <CAvatar className="me-3" color={'secondary'}>
+                      Soon
+                    </CAvatar>
+                    {option.text}
+                  </div>
+                )}
+              />
             </CCardBody>
           </CCard>
           {collectionDetail?.files?.length !== 0 && (
@@ -324,39 +354,41 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                 <CListGroup>
                   {/*REMIND detail 에서 file 만 따로 처리 할 수 있도록 리팩토링, reset 에 의해 나머지 데이터가 관리되고 있음*/}
                   {collectionDetail?.files?.map((file) => (
-                    <>
-                      <CListGroupItem key={file.id} className="justify-content-between align-items-start">
-                        <CRow>
-                          <CCol md={9} className="align-content-center">
-                            <CCol className="d-flex">
-                              <span style={{ marginRight: `10px` }}>{file.originalName}</span>
-                              <small>{formatFileSize(file.size)}</small>
-                              <small style={{ marginLeft: `10px` }}>
-                                <DocumentFileStatusBadge status={file.status} />
-                              </small>
+                    <CListGroupItem key={file.id} className="justify-content-between align-items-start">
+                      <CRow>
+                        <CCol md={9} className="align-content-center">
+                          <CCol className="d-flex">
+                            <span style={{ marginRight: `10px` }}>{file.originalName}</span>
+                            <small>{formatFileSize(file.size)}</small>
+                            <small style={{ marginLeft: `10px` }}>
+                              <DocumentFileStatusBadge status={file.status} />
+                            </small>
+                          </CCol>
+                          {file.description && (
+                            <CCol>
+                              <small className="text-muted">{`상태 설명 : ${file.description}`}</small>
                             </CCol>
-                            {file.description && (
-                              <CCol>
-                                <small className="text-muted">{`상태 설명 : ${file.description}`}</small>
-                              </CCol>
-                            )}
-                          </CCol>
-                          <CCol md={3} className="align-content-center">
-                            <div className="float-end">
-                              <CButton className="me-2" onClick={() => toggleVisible(file.id)}>
+                          )}
+                        </CCol>
+                        <CCol md={3} className="align-content-center">
+                          <div className="float-end">
+                            <CButton className="me-2" onClick={() => toggleVisible(file.id)}>
+                              {!pdfVisible[file.id] ? (
                                 <MdPictureAsPdf size="20" title="PDF Reader" />
-                              </CButton>
-                              <CButton onClick={() => handleDownload(file)}>
-                                <CIcon icon={cilArrowThickToBottom} size={'lg'} />
-                              </CButton>
-                            </div>
-                          </CCol>
-                          <CCollapse visible={visible[file.id] || false}>
-                            <PdfViewer file={file} visible={visible[file.id] || false}></PdfViewer>
-                          </CCollapse>
-                        </CRow>
-                      </CListGroupItem>
-                    </>
+                              ) : (
+                                <CIcon icon={cilArrowThickToTop} size={'lg'} />
+                              )}
+                            </CButton>
+                            <CButton onClick={() => handleDownload(file)}>
+                              <CIcon icon={cilSave} size={'custom'} width={20} height={20} />
+                            </CButton>
+                          </div>
+                        </CCol>
+                        <CCollapse visible={pdfVisible[file.id] || false}>
+                          <PdfViewer file={file} visible={pdfVisible[file.id] || false}></PdfViewer>
+                        </CCollapse>
+                      </CRow>
+                    </CListGroupItem>
                   ))}
                 </CListGroup>
               </CCardBody>

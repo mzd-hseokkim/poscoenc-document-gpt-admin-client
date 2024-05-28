@@ -19,6 +19,7 @@ const getSearchedCollectionList = async (params, pageable) => {
 };
 
 const getCollectionDetail = async (documentCollectionId) => {
+  if (!documentCollectionId) return;
   const response = await api.get(`/admin/document-collections/${documentCollectionId}`);
   return response?.data;
 };

@@ -56,6 +56,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
 
   const menuId = watch('id');
   const allowChildren = watch('allowChildren');
+  const allowedRoles = watch('allowedRoles');
 
   const menuBasicFields = [
     {
@@ -118,11 +119,14 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
     async (allowedRoles = []) => {
       try {
         const rolesData = await RoleService.getRoles();
-        const newRoles = rolesData.map((role) => ({
-          value: role.id,
-          text: role.role,
-          selected: allowedRoles?.length > 0 ? allowedRoles.includes(role.id) : false,
-        }));
+        const newRoles = rolesData
+          .filter((role) => (isReadMode ? allowedRoles.includes(role.id) : true))
+          .map((role) => ({
+            value: role.id,
+            text: role.role,
+            selected: allowedRoles?.length > 0 ? allowedRoles.includes(role.id) : false,
+          }));
+
         setRoles(newRoles);
       } catch (error) {
         const status = error.response?.status;
@@ -131,7 +135,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
         }
       }
     },
-    [addToast]
+    [addToast, isReadMode]
   );
 
   const getParentMenu = useCallback(async () => {
@@ -213,13 +217,25 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
     }
   };
 
-  //REMIND 3/11 병합되면 충돌 해결, 현재 발생하는 이슈는 validation에 의한 거절 후 role 값이 null 이되는 문제 발생, 내버젼에서만발생하니 알아볼것.
-  //REMIND 이게 아마 form validation 이 걸리지 않고 그냥 서버에서 validation 처리되고 응답으로 에러를 반환받아서 role 값에 에러가 생가는 듯 함. merge 되고나서 확인 해 볼것.
   const patchMenu = async (data) => {
+    let formattedData = {};
+    if (Array.isArray(data.allowedRoles)) {
+      const validRoles = data.allowedRoles.filter((role) => role !== undefined);
+      if (validRoles.length === 0) {
+        formattedData = {
+          ...data,
+          allowedRoles: allowedRoles.map((role) => role.id),
+        };
+      }
+    }
     try {
-      await MenuService.patchMenu(data);
-      fetchMenuList();
-      void fetchMenuDetail(menuId);
+      const response = await MenuService.patchMenu(formattedData);
+      if (response) {
+        fetchMenuList();
+        void fetchMenuDetail(menuId);
+        setFormMode('read');
+        addToast({ color: 'success', message: '메뉴 수정이 완료되었습니다.' });
+      }
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -242,7 +258,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
   const handleCancelClick = async () => {
     if (isUpdateMode) {
       setFormMode('read');
-      await fetchMenuDetail();
+      await fetchMenuDetail(searchParams.get('id'));
     } else if (isCreateMode) {
       closeModal();
     }
@@ -303,10 +319,12 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
               id="detail-form-allowedRoles"
               {...field}
               placeholder="권한을 선택하세요."
+              selectAll={!isReadMode}
               selectAllLabel="모두 선택"
               options={roles}
               virtualScroller
               disabled={isReadMode}
+              selectionType={isReadMode ? 'text' : 'tags'}
               invalid={!!errors.allowedRoles}
               feedbackInvalid={errors.allowedRoles?.message}
             />
@@ -340,7 +358,6 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
       </CCol>
     </CRow>
   );
-
   const renderAuditFields = () => {
     return (
       <CCard className="g-3 mb-3">

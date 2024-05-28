@@ -26,6 +26,7 @@ import usePagination from 'hooks/usePagination';
 import MenuService from 'services/menu/MenuService';
 import { formatToIsoEndDate, formatToIsoStartDate, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
 import { iconMapper } from 'utils/common/iconMapper';
+import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { menuColumnConfig } from 'views/pages/menu/menuColumnConfig';
 
 const createInitialSearchFormData = () => ({
@@ -148,30 +149,36 @@ const MenuManagementPage = () => {
 
   const handleDeleteRestoreClick = async (shouldDelete) => {
     const ids = checkedItems.map((item) => item.id);
-    if (checkedItems.length === 1) {
-      try {
-        await MenuService.deleteMenu(ids, shouldDelete);
-        fetchMenuList();
-      } catch (error) {
-        const status = error.response?.status;
-        if (status === 400) {
-          addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
-        }
-      }
-    } else {
-      try {
-        await MenuService.deleteMenus(ids, shouldDelete);
-        fetchMenuList();
-      } catch (error) {
-        const status = error.response?.status;
-        if (status === 400) {
-          addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
-        }
+    try {
+      await MenuService.deleteMenus(ids, shouldDelete);
+      fetchMenuList();
+    } catch (error) {
+      const status = error.response?.status;
+      if (status === 400) {
+        addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
       }
     }
     setCheckedItems([]);
   };
 
+  const scopedColumns = {
+    name: (item) => (
+      <td
+        style={{ cursor: 'pointer' }}
+        onClick={() => {
+          handleRowClick(item.id);
+        }}
+      >
+        {item.name}
+      </td>
+    ),
+    icon: (item) => <td>{iconMapper({ iconName: item.icon })}</td>,
+    deleted: (item) => (
+      <td>
+        <DeletionStatusBadge deleted={item.deleted} />
+      </td>
+    ),
+  };
   return (
     <>
       <CRow>
@@ -270,7 +277,7 @@ const MenuManagementPage = () => {
               <CCol className="d-grid gap-2 d-md-flex justify-content-md-start">
                 <CButton onClick={handleCreateClick}>메뉴 추가</CButton>
                 <CButton
-                  disabled={checkedItems?.length === 0 || !isDeletedRow(checkedItems)}
+                  disabled={checkedItems?.length === 0 || isDeletedRow(checkedItems)}
                   onClick={() => handleDeleteRestoreClick(true)}
                 >
                   삭제
@@ -294,10 +301,7 @@ const MenuManagementPage = () => {
             <CRow className="mb-3">
               <CSmartTable
                 columns={menuColumnConfig}
-                columnSorter={{
-                  external: true,
-                  resetable: false,
-                }}
+                columnSorter={columnSorterCustomProps}
                 items={menuList}
                 itemsPerPage={pageableData.size}
                 itemsPerPageLabel="페이지당 메뉴 개수"
@@ -311,34 +315,13 @@ const MenuManagementPage = () => {
                   />
                 }
                 onItemsPerPageChange={handlePageSizeChange}
-                onSelectedItemsChange={(items) => {
-                  setCheckedItems(items);
-                }}
-                onSorterChange={(sorterValue) => handlePageSortChange(sorterValue)}
+                onSelectedItemsChange={setCheckedItems}
+                onSorterChange={handlePageSortChange}
                 paginationProps={smartPaginationProps}
-                scopedColumns={{
-                  name: (item) => (
-                    <td
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => {
-                        handleRowClick(item.id);
-                      }}
-                    >
-                      {item.name}
-                    </td>
-                  ),
-                  icon: (item) => <td>{iconMapper({ iconName: item.icon })}</td>,
-                  deleted: (item) => (
-                    <td>
-                      <DeletionStatusBadge deleted={item.deleted} />
-                    </td>
-                  ),
-                }}
+                selectable
+                scopedColumns={scopedColumns}
                 selected={checkedItems}
-                tableProps={{
-                  responsive: true,
-                  hover: true,
-                }}
+                tableProps={tableCustomProps}
               />
             </CRow>
           </CCardBody>

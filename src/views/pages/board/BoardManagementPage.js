@@ -203,27 +203,43 @@ const BoardManagementPage = () => {
           <CCardBody>
             <CForm onSubmit={handleSubmitSearchRequest}>
               <CRow className="mb-3">
-                <CCol md={4} className="position-relative">
+                <CCol md={6} className="position-relative">
                   <CFormInput
                     type="text"
                     id="title"
-                    label="제목"
+                    floatingLabel="제목"
+                    placeholder=""
                     onChange={handleSearchFormChange}
                     value={stagedSearchFormData.title}
                   />
                 </CCol>
-                <CCol md={4} className="position-relative">
+                <CCol md={6} className="position-relative">
                   <CFormInput
                     id="createdByName"
-                    label="작성자"
+                    floatingLabel="작성자"
+                    placeholder=""
                     onChange={handleSearchFormChange}
                     value={stagedSearchFormData.createdByName}
                   />
                 </CCol>
-                <CCol md={4} className="position-relative">
+              </CRow>
+              <CRow className="mb-3">
+                <CCol md={6} className="position-relative">
+                  <CFormInput
+                    id="content"
+                    floatingLabel="내용"
+                    placeholder=""
+                    onChange={handleSearchFormChange}
+                    value={stagedSearchFormData.content}
+                  />
+                </CCol>
+              </CRow>
+              <CRow className="mb-3">
+                <CCol md={6}>
                   <CFormSelect
                     id="deletionOption"
-                    label="게시글 상태"
+                    //REMIND CoreUI Bug floating 안됨
+                    floatingLabel="게시글 상태"
                     name="deletionOption"
                     value={stagedSearchFormData.deletionOption}
                     options={[
@@ -232,22 +248,12 @@ const BoardManagementPage = () => {
                       { label: '삭제되지 않음', value: 'NO' },
                     ]}
                     onChange={handleSearchFormChange}
-                  />
+                  ></CFormSelect>
                 </CCol>
-              </CRow>
-              <CRow className="mb-3">
-                <CCol md={8} className="position-relative">
-                  <CFormInput
-                    id="content"
-                    label="내용"
-                    onChange={handleSearchFormChange}
-                    value={stagedSearchFormData.content}
-                  />
-                </CCol>
-                <CCol md={4} className="position-relative">
+                <CCol md={6} className="position-relative">
                   <CFormSelect
                     id="hasFilesOption"
-                    label="첨부파일 없는 게시물 포함"
+                    floatingLabel="첨부파일 없는 게시물 포함"
                     name="hasFilesOption"
                     value={stagedSearchFormData.hasFilesOption}
                     options={[

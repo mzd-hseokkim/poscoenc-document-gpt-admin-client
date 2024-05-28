@@ -173,14 +173,14 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
     try {
       const result = await AdminService.putAdmin(watchAdminId, data);
       if (result) {
-        closeModal();
         fetchAdminList();
         setFormMode('read');
+        addToast({ color: 'success', message: '관리자 정보 수정이 완료되었습니다.' });
       }
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
-        addToast({ message: '메뉴를 수정할 수 없습니다.' });
+        addToast({ message: '관리자 정보를 수정할 수 없습니다.' });
       }
       if (status === 409) {
         addToast({ message: '이미 존재하는 값입니다. 입력값을 다시 확인해주세요.' });
@@ -220,7 +220,6 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
     } catch (error) {
       addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
-    closeModal();
     fetchAdminList();
   };
 

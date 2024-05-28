@@ -125,6 +125,7 @@ const StatisticsUserManagement = () => {
                     <CButton color="white" disabled>
                       기준 월
                     </CButton>
+                    {/*REMIND 멀티셀렉트로 변경하기. */}
                     <CFormSelect
                       style={{ height: '58px' }}
                       floatingLabel=""

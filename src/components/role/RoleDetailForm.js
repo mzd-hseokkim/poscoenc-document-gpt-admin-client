@@ -12,7 +12,7 @@ import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/common/formModes';
 
-const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList }) => {
+const RoleDetailForm = ({ initialFormMode, closeModal, fetchRoleList }) => {
   const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [formData, setFormData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -133,7 +133,6 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
     } catch (error) {
       addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
-    closeModal();
     fetchRoleList();
   };
 
@@ -162,7 +161,7 @@ const RoleDetailForm = ({ selectedId, initialFormMode, closeModal, fetchRoleList
       </CModalBody>
       <CModalFooter>
         <DetailFormActionButtons
-          dataId={selectedId}
+          dataId={searchParams.get('id')}
           formModes={formModes(formMode)}
           handleCancel={handleCancelClick}
           handleDeleteRestore={handleDeleteRestoreClick}

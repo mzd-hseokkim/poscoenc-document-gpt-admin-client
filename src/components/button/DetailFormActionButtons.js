@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { CButton, CCol, CRow } from '@coreui/react-pro';
+import { colorButtonTextStyle } from 'components/button/colorButtonTextStyle';
+import DeleteAlertModal from 'components/modal/DeleteAlertModal';
 
 const DetailFormActionButtons = ({
   dataId,
@@ -17,7 +19,7 @@ const DetailFormActionButtons = ({
   const isCreateMode = formModes?.isCreateMode;
 
   const isUserData = isCreatedByCurrentUser !== undefined;
-
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const shouldShowModifyButton = () => {
     if (!isReadMode) return false;
 
@@ -26,25 +28,43 @@ const DetailFormActionButtons = ({
     return isUserData && isCreatedByCurrentUser;
   };
 
+  const handleDelete = (e) => {
+    e.preventDefault();
+    handleDeleteRestore?.(dataId);
+    setDeleteModalVisible(false);
+  };
+
   return (
-    <CRow>
-      <CCol className="d-grid gap-2 d-md-flex justify-content-md-end">
-        {shouldShowModifyButton() && <CButton onClick={handleUpdateClick}>수정</CButton>}
-        {(isUpdateMode || isCreateMode) && (
-          <>
-            <CButton type="submit" onClick={onSubmit}>
-              저장
+    <>
+      <CRow>
+        <CCol className="d-grid gap-2 d-md-flex">
+          {shouldShowModifyButton() && <CButton onClick={handleUpdateClick}>수정</CButton>}
+          {(isUpdateMode || isCreateMode) && (
+            <>
+              <CButton type="submit" onClick={onSubmit}>
+                저장
+              </CButton>
+              <CButton onClick={handleCancel}>취소</CButton>
+            </>
+          )}
+          {isReadMode && (
+            <CButton
+              style={colorButtonTextStyle}
+              color={isDataDeleted ? 'success' : 'danger'}
+              onClick={() => setDeleteModalVisible(true)}
+            >
+              {isDataDeleted ? '복구' : '삭제'}
             </CButton>
-            <CButton onClick={handleCancel}>취소</CButton>
-          </>
-        )}
-        {!isCreateMode && (
-          <CButton color={isDataDeleted ? 'success' : 'danger'} onClick={() => handleDeleteRestore?.(dataId)}>
-            {isDataDeleted ? '복구' : '삭제'}
-          </CButton>
-        )}
-      </CCol>
-    </CRow>
+          )}
+        </CCol>
+      </CRow>
+      <DeleteAlertModal
+        isDataDeleted={isDataDeleted}
+        visible={deleteModalVisible}
+        setVisible={setDeleteModalVisible}
+        deleteMethod={handleDelete}
+      />
+    </>
   );
 };
 
