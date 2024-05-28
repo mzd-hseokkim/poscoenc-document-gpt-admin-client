@@ -41,10 +41,12 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
     control,
     watch,
     formState: { errors },
-  } = useForm({ mode: 'onChange' });
+  } = useForm({ mode: 'onBlur' });
 
-  const deleted = watch('deleted');
-  const adminId = watch('id');
+  const watchDeleted = watch('deleted');
+  const watchAdminId = watch('id');
+
+  const adminIdParam = searchParams.get('id');
 
   const adminInfoFields = [
     {
@@ -141,13 +143,12 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
   );
   useEffect(() => {
     setIsLoading(false);
-    const adminId = searchParams.get('id');
-    if (!isCreateMode && adminId) {
-      void fetchAdminDetail(adminId);
+    if (!isCreateMode && adminIdParam) {
+      void fetchAdminDetail(adminIdParam);
     } else {
       void getRoles();
     }
-  }, [fetchAdminDetail, getRoles, isCreateMode, searchParams]);
+  }, [fetchAdminDetail, getRoles, isCreateMode, searchParams, adminIdParam]);
 
   const createAdmin = async (data) => {
     try {
@@ -170,7 +171,7 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
 
   const updateAdmin = async (data) => {
     try {
-      const result = await AdminService.putAdmin(adminId, data);
+      const result = await AdminService.putAdmin(watchAdminId, data);
       if (result) {
         closeModal();
         fetchAdminList();
@@ -201,7 +202,7 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
   const handleCancelClick = async () => {
     if (isUpdateMode) {
       setFormMode('read');
-      await fetchAdminDetail();
+      await fetchAdminDetail(adminIdParam);
     } else if (isCreateMode) {
       closeModal();
     }
@@ -213,9 +214,9 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
   };
 
   const handleDeleteRestoreClick = async (id) => {
-    const shouldDelete = !deleted;
+    const shouldDelete = !watchDeleted;
     try {
-      await AdminService.deleteAdmin(id, shouldDelete);
+      await AdminService.deleteAdmins(id, shouldDelete);
     } catch (error) {
       addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
@@ -295,12 +296,12 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
       </CModalBody>
       <CModalFooter>
         <DetailFormActionButtons
-          dataId={adminId}
+          dataId={watchAdminId}
           formModes={formModes(formMode)}
           handleCancel={handleCancelClick}
           handleDeleteRestore={handleDeleteRestoreClick}
           handleUpdateClick={handleUpdateClick}
-          isDataDeleted={deleted}
+          isDataDeleted={watchDeleted}
           onSubmit={handleSubmit(onSubmit)}
         />
       </CModalFooter>
