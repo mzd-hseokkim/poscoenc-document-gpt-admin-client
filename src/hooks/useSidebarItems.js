@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { CNavGroup, CNavGroupItems, CNavItem, CNavTitle } from '@coreui/react-pro';
 import { useToast } from 'context/ToastContext';
@@ -10,7 +10,7 @@ const useSidebarItems = () => {
 
   const { addToast } = useToast();
 
-  const getMenuList = async () => {
+  const getMenuList = useCallback(async () => {
     try {
       const menuList = await MenuService.getAuthorizedMenus();
       const favoriteMenuList = await MenuService.getFavoriteMenus();
@@ -96,12 +96,12 @@ const useSidebarItems = () => {
     } catch (error) {
       addToast({ message: '메뉴를 가져오지 못했습니다.' });
     }
-  };
+  }, [addToast]);
 
   useEffect(() => {
     void getMenuList();
     //REMIND Sidebar dependency issue
-  }, []);
+  }, [getMenuList]);
 
   return { menuItems, refetchMenuList: getMenuList };
 };
