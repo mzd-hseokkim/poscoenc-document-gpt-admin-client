@@ -15,14 +15,13 @@ import {
 import PostCommentsForm from 'components/board/PostCommentsForm';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import FormInputGrid from 'components/input/FormInputGrid';
+import { AuditFields } from 'components/form/AuditFields';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import BoardService from 'services/board/BoardService';
 import { userIdSelector } from 'states/jwtTokenState';
-import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/common/formModes';
 
@@ -215,22 +214,12 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
     </CRow>
   );
 
-  const renderAuditFields = () => {
-    return (
-      <CCard className="g-3 mb-3">
-        <CCardBody>
-          <FormInputGrid fields={getAuditFields(formMode)} formData={postDetail} isReadMode={isReadMode} col={2} />
-        </CCardBody>
-      </CCard>
-    );
-  };
-
   return (
     <>
       <FormLoadingCover isLoading={getDetailIsLoading} />
       <CModalBody>
         <CForm onSubmit={handleSubmit(onSubmit)}>
-          {!isCreateMode && renderAuditFields()}
+          {!isCreateMode && <AuditFields formMode={formMode} formData={postDetail} isReadMode={isReadMode} />}
           <CCard className="border-3">
             <CCardBody>
               {renderPostTitleInput()}

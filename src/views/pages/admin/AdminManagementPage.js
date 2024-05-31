@@ -125,7 +125,7 @@ const AdminManagementPage = () => {
 
     setStagedSearchFormData((prev) => ({
       ...prev,
-      //REMIND 검색 여부 체크 해제 시 기존의 설정된 시간 값들을 초기화해주기 위함
+      //검색 여부 체크 해제 시 기존의 설정된 시간 값들을 초기화
       fromCreatedAt: format(stagedSearchFormData.fromCreatedAt, "yyyy-MM-dd'T'00:00"),
       toCreatedAt: format(stagedSearchFormData.toCreatedAt, "yyyy-MM-dd'T'23:59"),
       fromModifiedAt: format(stagedSearchFormData.fromModifiedAt, "yyyy-MM-dd'T'00:00"),

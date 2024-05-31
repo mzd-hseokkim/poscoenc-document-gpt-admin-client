@@ -15,13 +15,13 @@ import {
 } from '@coreui/react-pro';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
+import { AuditFields } from 'components/form/AuditFields';
 import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { Controller, useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
 import MenuService from 'services/menu/MenuService';
 import RoleService from 'services/role/RoleService';
-import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/common/formModes';
 import { itemNameValidationPattern } from 'utils/common/validationUtils';
@@ -358,22 +358,13 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
       </CCol>
     </CRow>
   );
-  const renderAuditFields = () => {
-    return (
-      <CCard className="g-3 mb-3">
-        <CCardBody>
-          <FormInputGrid fields={getAuditFields(formMode)} formData={formData} isReadMode={isReadMode} col={2} />
-        </CCardBody>
-      </CCard>
-    );
-  };
 
   return (
     <>
       <FormLoadingCover isLoading={isLoading} />
       <CModalBody>
         <CForm onSubmit={handleSubmit(onSubmit)}>
-          {!isCreateMode && renderAuditFields()}
+          {!isCreateMode && <AuditFields formMode={formMode} formData={formData} isReadMode={isReadMode} />}
           <CCard className="g-3 mb-3">
             <CCardBody>
               <FormInputGrid fields={menuBasicFields} isReadMode={isReadMode} register={register} errors={errors} />

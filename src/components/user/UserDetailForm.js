@@ -20,13 +20,13 @@ import { BingSearchsChart } from 'components/chart/BingSearchsChart';
 import { DallE3GenerationChart } from 'components/chart/DallE3GenerationChart';
 import { TokenUsageChart } from 'components/chart/TokenUsageChart';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
+import { AuditFields } from 'components/form/AuditFields';
 import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
 import StatisticsService from 'services/statistics/StatisticsService';
 import UserService from 'services/UserService';
-import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/common/formModes';
 import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
@@ -221,21 +221,12 @@ const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {
     setFormMode('update');
   };
 
-  const renderAuditFields = () => {
-    return (
-      <CCard className="g-3 mb-3">
-        <CCardBody>
-          <FormInputGrid fields={getAuditFields(formMode)} formData={formData} isReadMode={isReadMode} col={2} />
-        </CCardBody>
-      </CCard>
-    );
-  };
   return (
     <>
       <FormLoadingCover isLoading={isLoading} />
       <CModalBody>
         <CForm onSubmit={handleSubmit(onSubmit)}>
-          {!isCreateMode && renderAuditFields()}
+          {!isCreateMode && <AuditFields formMode={formMode} formData={formData} isReadMode={isReadMode} />}
           <CCard className="g-3 mb-3">
             <CCardBody>
               <FormInputGrid fields={userInfoFields} isReadMode={isReadMode} register={register} errors={errors} />

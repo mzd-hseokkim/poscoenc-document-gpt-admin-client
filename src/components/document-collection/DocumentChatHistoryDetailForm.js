@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { CBadge, CCard, CCardBody, CCardHeader, CCol, CForm, CModalBody, CModalFooter, CRow } from '@coreui/react-pro';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
+import { AuditFields } from 'components/form/AuditFields';
 import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
@@ -10,7 +11,6 @@ import { useSearchParams } from 'react-router-dom';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import DocumentChatHistoryService from 'services/document-collection/DocumentChatHistoryService';
-import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/common/formModes';
 
@@ -93,28 +93,13 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
   const onSubmit = () => {
     //REMIND FormInputGrid 를 사용하기 위해 CForm 내부에 선언해줘야합니다. 다만 수정, 삭제 등의 로직이 없기 때문에 Submit 함수를 비워두었습니다.
   };
-  const renderAuditFields = () => {
-    return (
-      <CCard className="g-3 mb-3">
-        <CCardHeader className="h5">변경 이력</CCardHeader>
-        <CCardBody>
-          <FormInputGrid
-            register={register}
-            fields={getAuditFields(formMode)}
-            formData={chatHistory}
-            isReadMode={isReadMode}
-            col={2}
-          />
-        </CCardBody>
-      </CCard>
-    );
-  };
+
   return (
     <>
       <FormLoadingCover isLoading={isLoading} />
       <CModalBody>
         <CForm onSubmit={handleSubmit(onSubmit())}>
-          {renderAuditFields()}
+          <AuditFields formMode={formMode} formData={chatHistory} isReadMode={isReadMode} />
           <CCard className="mb-3">
             <CCardHeader className="h5">세부 정보</CCardHeader>
             <CCardBody>

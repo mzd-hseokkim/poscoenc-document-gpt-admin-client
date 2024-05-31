@@ -41,6 +41,7 @@ const FormInputGrid = ({ fields, handleChange, isReadMode, formData, register, e
             return null;
           }
 
+          //삭제 되었을 경우에만 표시
           if (!formData[field.name]) {
             return null;
           }
