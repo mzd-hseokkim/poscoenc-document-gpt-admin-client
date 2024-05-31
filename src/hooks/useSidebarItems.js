@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { CNavGroup, CNavGroupItems, CNavItem, CNavTitle } from '@coreui/react-pro';
 import { useToast } from 'context/ToastContext';
@@ -10,7 +10,7 @@ const useSidebarItems = () => {
 
   const { addToast } = useToast();
 
-  const getMenuList = useCallback(async () => {
+  const getMenuList = async () => {
     try {
       const menuList = await MenuService.getAuthorizedMenus();
       const favoriteMenuList = await MenuService.getFavoriteMenus();
@@ -96,12 +96,11 @@ const useSidebarItems = () => {
     } catch (error) {
       addToast({ message: '메뉴를 가져오지 못했습니다.' });
     }
-  }, [addToast]);
+  };
 
   useEffect(() => {
     void getMenuList();
-    //REMIND Sidebar dependency issue
-  }, [getMenuList]);
+  }, []); // 의존성 추가시 무한 렌더링 이슈발생, 빈 배열 유지
 
   return { menuItems, refetchMenuList: getMenuList };
 };

@@ -32,4 +32,4 @@ export const documentChatHistoryColumnConfig = [
     _style: { width: '14%' },
   },
 ];
-//REMIND 100% 미만이어야 re-rendering 시에 컬럼 이둥이 없습니다.
+//REMIND 100% 미만이어야 re-rendering 시에 컬럼 이동이 없습니다.

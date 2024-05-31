@@ -99,17 +99,19 @@ const AdminManagementPage = () => {
   }, [fetchAdminList]);
 
   const handleDateChange = ({ id, newDate, isStartDate = true }) => {
+    //REMIND 시간날 때 함수 리팩토링, 모듈화
     const fieldMap = {
       createdAt: isStartDate ? 'fromCreatedAt' : 'toCreatedAt',
       modifiedAt: isStartDate ? 'fromModifiedAt' : 'toModifiedAt',
       lastLoggedInAt: isStartDate ? 'fromLoggedInAt' : 'toLoggedInAt',
     };
     const fieldToUpdate = fieldMap[id];
-    if (!fieldToUpdate) return;
+    if (!fieldToUpdate) {
+      return;
+    }
 
     const newFormattedDate = newDate
-      ? //REMIND 날짜만 보낼 경우 00시로 고정되어서 23시로 변경
-        isPickTime
+      ? isPickTime
         ? formatToIsoEndDate(newDate)
         : format(new Date(newDate), "yyyy-MM-dd'T'23:59")
       : null;

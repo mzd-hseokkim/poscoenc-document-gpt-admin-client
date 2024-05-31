@@ -100,7 +100,6 @@ const RoleManagementPage = () => {
                 />
               </CCol>
               <CCol className="d-flex justify-content-end">
-                {/*REMIND 권한 개수가 많지 않아 Set 로 반환중*/}
                 <CFormLabel>총 {roleList.length} 개의 검색 결과</CFormLabel>
               </CCol>
             </CRow>
