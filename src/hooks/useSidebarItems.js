@@ -85,7 +85,6 @@ const useSidebarItems = () => {
         },
         {
           component: CNavGroupItems,
-          active: 'false', //REMIND test active props
           items: favoriteItems,
         },
         { component: CNavTitle, name: '메뉴' },
