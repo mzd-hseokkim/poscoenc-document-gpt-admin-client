@@ -65,9 +65,10 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
       placeholder: '이름을 입력하세요.',
       rules: {
         required: '이름은 필수 입력 항목입니다.',
+        //REMIND 앱 사이드바 크기 변경으로 인한 글자 수 제한 14자로 증가, 백엔드 수정 요청
         maxLength: {
-          value: 12,
-          message: '메뉴 이름은 최대 12자 입니다.',
+          value: 14,
+          message: '메뉴 이름은 최대 14자 입니다.',
         },
         pattern: {
           value: itemNameValidationPattern,

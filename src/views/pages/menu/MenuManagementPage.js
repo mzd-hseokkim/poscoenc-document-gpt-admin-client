@@ -188,34 +188,48 @@ const MenuManagementPage = () => {
             <CForm onSubmit={handleSubmit}>
               <CRow className="mb-3">
                 <CCol md={4}>
-                  <CFormInput id="name" label="이름" value={stagedSearchFormData.name} onChange={handleChange} />
-                </CCol>
-                <CCol md={4}>
                   <CFormInput
-                    type="number"
-                    id="menuOrder"
-                    label="메뉴 순서"
-                    min={0}
-                    value={stagedSearchFormData.menuOrder}
+                    id="name"
+                    placeholder=""
+                    floatingLabel="이름"
                     onChange={handleChange}
+                    value={stagedSearchFormData.name}
                   />
                 </CCol>
                 <CCol md={4}>
                   <CFormInput
+                    min={0}
+                    type="number"
+                    id="menuOrder"
+                    placeholder=""
+                    floatingLabel="메뉴 순서"
+                    onChange={handleChange}
+                    value={stagedSearchFormData.menuOrder}
+                  />
+                </CCol>
+                <CCol md={4}>
+                  <CFormInput
+                    min={0}
                     type="number"
                     id="parentId"
-                    label="상위 메뉴 ID"
-                    min={0}
-                    value={stagedSearchFormData.parentId}
+                    placeholder=""
                     onChange={handleChange}
+                    floatingLabel="상위 메뉴 ID"
+                    value={stagedSearchFormData.parentId}
                   />
                 </CCol>
               </CRow>
-              <CRow className="mb-3">
+              <CRow className="mb-3 align-items-center">
                 <CCol md={8}>
-                  <CFormInput id="urlPath" label="경로" value={stagedSearchFormData.urlPath} onChange={handleChange} />
+                  <CFormInput
+                    id="urlPath"
+                    placeholder=""
+                    floatingLabel="경로 (Url)"
+                    onChange={handleChange}
+                    value={stagedSearchFormData.urlPath}
+                  />
                 </CCol>
-                <CCol md={4}>
+                <CCol md={4} style={{ paddingBottom: '10px' }}>
                   <CFormSelect
                     id="deletionOption"
                     label="삭제된 메뉴 검색"
