@@ -6,6 +6,7 @@ import { AuditFields } from 'components/form/AuditFields';
 import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
+import { PiThumbsDownFill, PiThumbsUpFill } from 'react-icons/pi';
 import ReactMarkdown from 'react-markdown';
 import { useSearchParams } from 'react-router-dom';
 import rehypeRaw from 'rehype-raw';
@@ -135,11 +136,21 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
                         모델 : {chatHistory.modelName}
                       </CBadge>
                       <CBadge color={'primary'} id="pilotMode" className="m-2">
-                        파일럿 모드 : {chatHistory.pilotMode}
+                        파일럿 모드 : {chatHistory.pilotMode === 'C' ? 'Co-pilot' : 'Auto-pilot'}
                       </CBadge>
-                      <CBadge color={'dark'} id="thumb" className="m-2">
-                        좋아요 : {chatHistory.thumb}
-                      </CBadge>
+                      {chatHistory.thumb ? (
+                        chatHistory.thumb === 1 ? (
+                          <CBadge id="thumb" className="m-2" style={{ backgroundColor: '#4d67c9' }}>
+                            Like : <PiThumbsUpFill />
+                          </CBadge>
+                        ) : (
+                          <CBadge id="thumb" className="m-2" style={{ backgroundColor: '#c12a2a' }}>
+                            Bad : <PiThumbsDownFill />
+                          </CBadge>
+                        )
+                      ) : (
+                        <></>
+                      )}
                     </CCol>
                   </CRow>
                 </CCardHeader>

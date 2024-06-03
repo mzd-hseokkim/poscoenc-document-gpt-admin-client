@@ -49,7 +49,6 @@ export const AppSidebarNav = ({ items, refetchMenuList }) => {
     const indentStyle = {
       paddingLeft: `${(depth + 1) * 16}px`,
     };
-
     return (
       <Component
         {...(rest.to && !rest.items && { component: NavLink })}
@@ -59,7 +58,7 @@ export const AppSidebarNav = ({ items, refetchMenuList }) => {
         className={getClassNameForNavItem(rest.to, activePage)}
       >
         {navLink(name, icon, badge)}
-        <CCol className="d-grid justify-content-md-end">
+        <CCol className="favorite-star d-grid justify-content-md-end">
           {isFavorite !== undefined &&
             (isFavorite ? (
               <div
@@ -90,21 +89,12 @@ export const AppSidebarNav = ({ items, refetchMenuList }) => {
   const navGroup = (item, index, depth = 0) => {
     const { component, name, icon, to, ...rest } = item;
     const Component = component;
-
     const indentStyle = {
       paddingLeft: `${depth * 16}px`,
     };
 
     return (
-      <Component
-        idx={String(index)}
-        key={index}
-        toggler={navLink(name, icon)}
-        style={indentStyle}
-        //REMIND fix unfolded bug
-        // visible={visible}
-        {...rest}
-      >
+      <Component idx={String(index)} key={index} toggler={navLink(name, icon)} style={indentStyle} {...rest}>
         {item.items?.map((subItem, subIndex) =>
           subItem.items ? navGroup(subItem, subIndex, depth + 4) : navItem(subItem, subIndex, depth + 4)
         )}
