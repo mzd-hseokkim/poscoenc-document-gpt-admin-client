@@ -11,6 +11,10 @@ export const ProtectRoutes = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
   useEffect(() => {
+    if (unprotectedPaths.includes(location.pathname)) {
+      return;
+    }
+
     if (!token) {
       navigate('/sign-in', { replace: true });
       return;
@@ -36,3 +40,6 @@ export const ProtectRoutes = () => {
 
   return <Outlet />;
 };
+
+//REMIND 추후 Dashboard 기획 후 수정
+export const unprotectedPaths = ['/dashboard'];
