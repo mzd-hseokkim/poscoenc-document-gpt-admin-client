@@ -197,16 +197,29 @@ const AdminManagementPage = () => {
                 <CCol md={4}>
                   <CFormInput
                     id="email"
-                    label="이메일"
+                    floatingLabel="이메일"
+                    placeholder=""
                     value={stagedSearchFormData.email}
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
                 <CCol md={4}>
-                  <CFormInput id="name" label="이름" value={searchFormData.name} onChange={handleSearchFormChange} />
+                  <CFormInput
+                    id="name"
+                    floatingLabel="이름"
+                    placeholder=""
+                    value={searchFormData.name}
+                    onChange={handleSearchFormChange}
+                  />
                 </CCol>
                 <CCol md={4}>
-                  <CFormInput id="role" label="권한" value={searchFormData.role} onChange={handleSearchFormChange} />
+                  <CFormInput
+                    id="role"
+                    floatingLabel="권한"
+                    placeholder=""
+                    value={searchFormData.role}
+                    onChange={handleSearchFormChange}
+                  />
                 </CCol>
               </CRow>
               <CRow className="mb-3">
