@@ -28,6 +28,10 @@ const RoleManagementPage = () => {
   const navigate = useNavigate();
   const resetJwtToken = useResetRecoilState(jwtTokenState);
 
+  const isDeletedRow = (selectedRows) => {
+    return selectedRows.some((row) => row.deleted === true);
+  };
+
   const fetchRoleList = useCallback(async () => {
     if (!isSearchPerformed) {
       setIsSearchPerformed(true);
@@ -92,8 +96,18 @@ const RoleManagementPage = () => {
             <CRow className="mb-3">
               <CCol className="d-grid gap-2 d-md-flex justify-content-md-start">
                 <CButton onClick={handleCreateClick}>권한 추가</CButton>
-                <CButton onClick={() => handleDeleteRestoreClick(true)}>삭제</CButton>
-                <CButton onClick={() => handleDeleteRestoreClick(false)}>복구</CButton>
+                <CButton
+                  disabled={checkedItems?.length === 0 || isDeletedRow(checkedItems)}
+                  onClick={() => handleDeleteRestoreClick(true)}
+                >
+                  삭제
+                </CButton>
+                <CButton
+                  disabled={checkedItems?.length === 0 || !isDeletedRow(checkedItems)}
+                  onClick={() => handleDeleteRestoreClick(false)}
+                >
+                  복구
+                </CButton>
                 <ExcelDownloadCButton
                   downloadFunction={RoleService.getDownloadRoleList}
                   searchFormData={roleList.length !== 0}

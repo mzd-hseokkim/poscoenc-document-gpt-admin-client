@@ -48,6 +48,10 @@ const UserManagementPage = () => {
   const { addToast } = useToast();
   const modal = useModal();
 
+  const isDeletedRow = (selectedRows) => {
+    return selectedRows.some((row) => row.deleted === true);
+  };
+
   const fetchUserList = useCallback(async () => {
     if (!isSearchPerformed) {
       setIsSearchPerformed(true);
@@ -116,18 +120,42 @@ const UserManagementPage = () => {
             <CForm onSubmit={handleSubmit}>
               <CRow className="mb-3">
                 <CCol md={6}>
-                  <CFormInput id="name" label="이름" value={stagedSearchFormData.name} onChange={handleChange} />
+                  <CFormInput
+                    id="name"
+                    floatingLabel="이름"
+                    placeholder=""
+                    value={stagedSearchFormData.name}
+                    onChange={handleChange}
+                  />
                 </CCol>
                 <CCol md={6}>
-                  <CFormInput id="email" label="이메일" value={stagedSearchFormData.email} onChange={handleChange} />
+                  <CFormInput
+                    id="email"
+                    floatingLabel="이메일"
+                    placeholder=""
+                    value={stagedSearchFormData.email}
+                    onChange={handleChange}
+                  />
                 </CCol>
               </CRow>
               <CRow className="mb-3">
                 <CCol md={6}>
-                  <CFormInput id="team" label="팀" value={stagedSearchFormData.team} onChange={handleChange} />
+                  <CFormInput
+                    id="team"
+                    floatingLabel="팀"
+                    placeholder=""
+                    value={stagedSearchFormData.team}
+                    onChange={handleChange}
+                  />
                 </CCol>
                 <CCol md={6}>
-                  <CFormInput id="memo" label="메모" value={stagedSearchFormData.memo} onChange={handleChange} />
+                  <CFormInput
+                    id="memo"
+                    floatingLabel="메모"
+                    placeholder=""
+                    value={stagedSearchFormData.memo}
+                    onChange={handleChange}
+                  />
                 </CCol>
                 <CRow className="mb-3"></CRow>
                 <CCol md={6}>
@@ -161,8 +189,18 @@ const UserManagementPage = () => {
             <CRow className="mb-3">
               <CCol className="d-grid gap-2 d-md-flex justify-content-md-start">
                 <CButton onClick={handleCreateClick}>사용자 추가</CButton>
-                <CButton onClick={() => handleDeleteRestoreClick(true)}>삭제</CButton>
-                <CButton onClick={() => handleDeleteRestoreClick(false)}>복구</CButton>
+                <CButton
+                  disabled={checkedItems?.length === 0 || isDeletedRow(checkedItems)}
+                  onClick={() => handleDeleteRestoreClick(true)}
+                >
+                  삭제
+                </CButton>
+                <CButton
+                  disabled={checkedItems?.length === 0 || !isDeletedRow(checkedItems)}
+                  onClick={() => handleDeleteRestoreClick(false)}
+                >
+                  복구
+                </CButton>
                 <ExcelDownloadCButton
                   downloadFunction={UserService.getDownloadSearchedUserList}
                   searchFormData={searchFormData}
