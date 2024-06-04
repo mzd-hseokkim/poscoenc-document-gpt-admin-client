@@ -113,39 +113,42 @@ const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {
     [addToast, closeModal, isCreateMode, reset]
   );
 
-  const fetchStatisticsData = useCallback(async (userId) => {
-    setIsLoading(true);
-    try {
-      const responseData = await StatisticsService.getMonthlyStatisticsData({
-        criteria: 'createdBy',
-        criteriaKey: userId,
-        endDate: new Date().toISOString().split('T')[0],
-      });
-      responseData.list.sort((a, b) => {
-        const [yearA, monthA] = a.aggregationKey.split('-').map(Number);
-        const [yearB, monthB] = b.aggregationKey.split('-').map(Number);
+  const fetchStatisticsData = useCallback(
+    async (userId) => {
+      setIsLoading(true);
+      try {
+        const responseData = await StatisticsService.getMonthlyStatisticsData({
+          criteria: 'createdBy',
+          criteriaKey: userId,
+          endDate: new Date().toISOString().split('T')[0],
+        });
+        responseData.list.sort((a, b) => {
+          const [yearA, monthA] = a.aggregationKey.split('-').map(Number);
+          const [yearB, monthB] = b.aggregationKey.split('-').map(Number);
 
-        if (yearA !== yearB) {
-          return yearA - yearB;
-        } else {
-          return monthA - monthB;
-        }
-      });
+          if (yearA !== yearB) {
+            return yearA - yearB;
+          } else {
+            return monthA - monthB;
+          }
+        });
 
-      const paddedData = padDataArrayWithZero(responseData?.list, currentMonth);
-      setStatisticsData({
-        inputTokenData: paddedData.map((item) => item.sumInputTokens),
-        outputTokenData: paddedData.map((item) => item.sumOutputTokens),
-        bingSearchsData: paddedData.map((item) => item.sumBingSearchs),
-        dallE3GenerationsData: paddedData.map((item) => item.sumDallE3Generations),
-      });
-    } catch (error) {
-      console.log(error);
-      addToast('차트를 불러오는데 실패했습니다.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+        const paddedData = padDataArrayWithZero(responseData?.list, currentMonth);
+        setStatisticsData({
+          inputTokenData: paddedData.map((item) => item.sumInputTokens),
+          outputTokenData: paddedData.map((item) => item.sumOutputTokens),
+          bingSearchsData: paddedData.map((item) => item.sumBingSearchs),
+          dallE3GenerationsData: paddedData.map((item) => item.sumDallE3Generations),
+        });
+      } catch (error) {
+        console.log(error);
+        addToast('차트를 불러오는데 실패했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [addToast, currentMonth]
+  );
 
   useEffect(() => {
     setIsLoading(false);

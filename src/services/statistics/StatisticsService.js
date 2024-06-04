@@ -15,14 +15,14 @@ const getUserUsageStatistics = async (yyyyMM, pageable) => {
     params: { yyyyMM, page: pageable.page, size: pageable.size, sort: pageable.sort },
   });
 
-  return response.data;
+  return response?.data;
 };
 
 const getDocumentCollectionUsageStatistics = async (yyyyMM, pageable) => {
   const response = await api.get('/admin/statistics/document-collection', {
     params: { yyyyMM, page: pageable.page, size: pageable.size, sort: pageable.sort },
   });
-  return response.data;
+  return response?.data;
 };
 
 const StatisticsService = {
