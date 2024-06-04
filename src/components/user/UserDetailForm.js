@@ -19,6 +19,7 @@ import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import { BingSearchsChart } from 'components/chart/BingSearchsChart';
 import { DallE3GenerationChart } from 'components/chart/DallE3GenerationChart';
 import { TokenUsageChart } from 'components/chart/TokenUsageChart';
+import { padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import { AuditFields } from 'components/form/AuditFields';
 import FormInputGrid from 'components/input/FormInputGrid';
@@ -33,6 +34,7 @@ import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
 import { emailValidationPattern } from 'utils/common/validationUtils';
 
 const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {
+  const currentMonth = new Date().getMonth() + 1;
   const [isLoading, setIsLoading] = useState(false);
   const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [formData, setFormData] = useState([]);
@@ -119,7 +121,6 @@ const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {
         criteriaKey: userId,
         endDate: new Date().toISOString().split('T')[0],
       });
-
       responseData.list.sort((a, b) => {
         const [yearA, monthA] = a.aggregationKey.split('-').map(Number);
         const [yearB, monthB] = b.aggregationKey.split('-').map(Number);
@@ -130,14 +131,17 @@ const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {
           return monthA - monthB;
         }
       });
+
+      const paddedData = padDataArrayWithZero(responseData?.list, currentMonth);
       setStatisticsData({
-        inputTokenData: responseData.list.map((item) => item.sumInputTokens),
-        outputTokenData: responseData.list.map((item) => item.sumOutputTokens),
-        bingSearchsData: responseData.list.map((item) => item.sumBingSearchs),
-        dallE3GenerationsData: responseData.list.map((item) => item.sumDallE3Generations),
+        inputTokenData: paddedData.map((item) => item.sumInputTokens),
+        outputTokenData: paddedData.map((item) => item.sumOutputTokens),
+        bingSearchsData: paddedData.map((item) => item.sumBingSearchs),
+        dallE3GenerationsData: paddedData.map((item) => item.sumDallE3Generations),
       });
     } catch (error) {
       console.log(error);
+      addToast('차트를 불러오는데 실패했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -274,10 +278,10 @@ const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {
                 </CRow>
                 <CRow className="justify-content-center">
                   <CCol sm={5}>
-                    <BingSearchsChart data={statisticsData.bingSearchsData} />
+                    <BingSearchsChart statisticsData={statisticsData.bingSearchsData} />
                   </CCol>
                   <CCol sm={5}>
-                    <DallE3GenerationChart data={statisticsData.dallE3GenerationsData} />
+                    <DallE3GenerationChart statisticsData={statisticsData.dallE3GenerationsData} />
                   </CCol>
                 </CRow>
               </CCardBody>

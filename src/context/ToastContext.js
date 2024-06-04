@@ -8,12 +8,10 @@ export const ToastProvider = ({ children }) => {
   const [toast, setToast] = useState(null);
 
   /**
-   * Adds a toast notification.
    *
-   * @param {Object} options - Options for the toast.
-   * @param {string} options.message - The message to display in the toast.
-   * @param {string} [options.color='danger'] - The color of the toast. Defaults to 'danger'.
-   * @param {boolean} [autoHide=true] - Whether the toast should automatically hide. Defaults to true.
+   * @param message - The message to display in the toast.
+   * @param color - The color of the toast. Defaults to 'danger'.
+   * @param autoHide - Whether the toast should automatically hide. Defaults to true.
    */
   const addToast = ({ message, color = 'danger' }, autoHide = true) => {
     setToast({ message, color, key: Date.now(), autoHide });

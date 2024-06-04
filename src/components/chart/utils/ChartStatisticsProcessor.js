@@ -1,5 +1,21 @@
-const padDataArrayWithZero = (data) => {
-  return data.length < 12 ? new Array(12 - data.length).fill(0).concat(data) : data;
+const padDataArrayWithZero = (data, currentMonth) => {
+  const result = new Array(12).fill({
+    aggregationCount: 0,
+    aggregationKey: '',
+    aggregationName: null,
+    sumBingSearchs: 0,
+    sumDallE3Generations: 0,
+    sumInputTokens: 0,
+    sumOutputTokens: 0,
+  });
+
+  data.forEach((item) => {
+    const month = parseInt(item.aggregationKey.split('-')[1], 10);
+    const index = (month - currentMonth + 12) % 12;
+    result[11 - ((12 - index) % 12)] = item;
+  });
+
+  return result;
 };
 
 const mergeAndSumArrays = (array1, array2) => {
@@ -12,7 +28,7 @@ const mergeAndSumArrays = (array1, array2) => {
 
 const calculateGrowthRateWithIcon = (prevMonthValue, currentMonthValue) => {
   if (prevMonthValue === 0) {
-    return `${100}% ↑`;
+    return currentMonthValue ? `${100}% ↑` : '-%';
   } else {
     const growthRate = ((currentMonthValue - prevMonthValue) / prevMonthValue) * 100;
     const formattedGrowthRate = `${growthRate}%`;
