@@ -64,6 +64,7 @@ export const TokenUsageChart = ({ inputTokenData, outputTokenData }) => {
             ticks: {
               color: getStyle('--cui-body-color'),
             },
+            min: 0,
           },
         },
         elements: {
