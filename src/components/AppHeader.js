@@ -7,14 +7,12 @@ import {
   CContainer,
   CFormCheck,
   CHeader,
-  CHeaderBrand,
   CHeaderDivider,
   CHeaderNav,
   CHeaderToggler,
   CNavItem,
   CNavLink,
 } from '@coreui/react-pro';
-import { logo } from 'assets/brand/logo';
 import { useDispatch, useSelector } from 'react-redux';
 import { NavLink } from 'react-router-dom';
 
@@ -42,9 +40,10 @@ const AppHeader = () => {
         <CHeaderToggler className="ps-1" onClick={() => dispatch({ type: 'set', sidebarShow: !sidebarShow })}>
           <CIcon icon={cilMenu} size="lg" />
         </CHeaderToggler>
-        <CHeaderBrand className="mx-auto d-md-none" to="/">
-          <CIcon icon={logo} height={48} alt="Logo" />
-        </CHeaderBrand>
+        {/*REMIND 비율 문제 발생시 복구 후 수정 */}
+        {/*<CHeaderBrand className="mx-auto d-md-none" to="/">*/}
+        {/*  <CIcon icon={logo} height={48} alt="Logo" />*/}
+        {/*</CHeaderBrand>*/}
         <CHeaderNav className="d-none d-md-flex me-auto">
           <CNavItem>
             <CNavLink to="/dashboard" component={NavLink}>

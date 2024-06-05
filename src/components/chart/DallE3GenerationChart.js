@@ -3,12 +3,10 @@ import CIcon from '@coreui/icons-react';
 import { CChart } from '@coreui/react-chartjs';
 import { CWidgetStatsD } from '@coreui/react-pro';
 import { getNonGridLineChartOptions } from 'components/chart/options/getNonGridLineChartOptions';
-import { calculateGrowthRateWithIcon, padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
+import { calculateGrowthRateWithIcon } from 'components/chart/utils/ChartStatisticsProcessor';
 import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
 
-export const DallE3GenerationChart = (statisticsData) => {
-  const paddedArray = padDataArrayWithZero(statisticsData.data);
-
+export const DallE3GenerationChart = ({ statisticsData }) => {
   return (
     <CWidgetStatsD
       className="mb-4"
@@ -26,7 +24,7 @@ export const DallE3GenerationChart = (statisticsData) => {
                   borderColor: 'rgba(255,255,255,.55)',
                   pointHoverBackgroundColor: '#fff',
                   borderWidth: 2,
-                  data: paddedArray,
+                  data: statisticsData,
                   fill: true,
                 },
               ],
@@ -37,10 +35,10 @@ export const DallE3GenerationChart = (statisticsData) => {
       }}
       icon={<CIcon icon={cilWallpaper} height={52} className="my-4 text-white" />}
       values={[
-        { title: 'DallE 3 생성 횟수', value: `${paddedArray[11]} 회` },
+        { title: 'DallE 3 생성 횟수', value: `${statisticsData[11]} 회` },
         {
           title: '전월 대비',
-          value: calculateGrowthRateWithIcon(paddedArray[10], paddedArray[11]),
+          value: calculateGrowthRateWithIcon(statisticsData[10], statisticsData[11]),
         },
       ]}
       style={{

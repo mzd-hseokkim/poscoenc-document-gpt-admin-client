@@ -2,13 +2,10 @@ import React from 'react';
 
 import { CChart } from '@coreui/react-chartjs';
 import { getStyle } from '@coreui/utils';
-import { mergeAndSumArrays, padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
+import { mergeAndSumArrays } from 'components/chart/utils/ChartStatisticsProcessor';
 import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
 
 export const TokenUsageChart = ({ inputTokenData, outputTokenData }) => {
-  const paddedInputTokenData = padDataArrayWithZero(inputTokenData);
-  const paddedOutputTokenData = padDataArrayWithZero(outputTokenData);
-
   return (
     <CChart
       type="line"
@@ -22,7 +19,7 @@ export const TokenUsageChart = ({ inputTokenData, outputTokenData }) => {
             borderColor: '#007bff',
             pointBackgroundColor: 'rgba(220, 220, 220, 1)',
             pointBorderColor: '#fff',
-            data: mergeAndSumArrays(paddedInputTokenData, paddedOutputTokenData),
+            data: mergeAndSumArrays(inputTokenData, outputTokenData),
           },
           {
             label: 'Input Tokens', // 범례
@@ -30,7 +27,7 @@ export const TokenUsageChart = ({ inputTokenData, outputTokenData }) => {
             borderColor: '#28a745',
             pointBackgroundColor: 'rgba(151, 187, 205, 1)',
             pointBorderColor: '#fff',
-            data: paddedInputTokenData,
+            data: inputTokenData,
           },
           {
             label: 'Output Tokens', // 범례
@@ -38,7 +35,7 @@ export const TokenUsageChart = ({ inputTokenData, outputTokenData }) => {
             borderColor: '#ffc107',
             pointBackgroundColor: 'rgba(220, 220, 220, 1)',
             pointBorderColor: '#fff',
-            data: paddedOutputTokenData,
+            data: outputTokenData,
           },
         ],
       }}
@@ -67,6 +64,7 @@ export const TokenUsageChart = ({ inputTokenData, outputTokenData }) => {
             ticks: {
               color: getStyle('--cui-body-color'),
             },
+            min: 0,
           },
         },
         elements: {

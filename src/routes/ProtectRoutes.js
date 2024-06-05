@@ -10,38 +10,36 @@ export const ProtectRoutes = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { addToast } = useToast();
-
   useEffect(() => {
+    if (unprotectedPaths.includes(location.pathname)) {
+      return;
+    }
+
     if (!token) {
       navigate('/sign-in', { replace: true });
       return;
     }
     if (token && location.pathname !== '/') {
-      getUriPermission();
+      try {
+        void MenuService.postUri({ uri: uriUtil(location.pathname) });
+      } catch (error) {
+        const status = error.response?.status;
+        if (status === 401) {
+          navigate('/sign-in', { replace: true });
+          localStorage.removeItem('token');
+          addToast({ message: '세션이 만료되었습니다. 다시 로그인 해주세요.' });
+        } else if (status === 403) {
+          navigate('/', { replace: true });
+          addToast('접근 권한이 없습니다');
+        } else if (status === 404) {
+          navigate('/404', { replace: true });
+        }
+      }
     }
-  }, [token, location.pathname]);
-
-  const getUriPermission = async () => {
-    try {
-      await MenuService.postUri({ uri: uriUtil(location.pathname) });
-    } catch (error) {
-      handleErrors(error);
-    }
-  };
-
-  const handleErrors = (error) => {
-    const status = error.response?.status;
-    if (status === 401) {
-      navigate('/sign-in', { replace: true });
-      localStorage.removeItem('token');
-      addToast({ message: '세션이 만료되었습니다. 다시 로그인 해주세요.' });
-    } else if (status === 403) {
-      navigate('/', { replace: true });
-      addToast('접근 권한이 없습니다');
-    } else if (status === 404) {
-      navigate('/404', { replace: true });
-    }
-  };
+  }, [token, location.pathname, navigate, addToast]);
 
   return <Outlet />;
 };
+
+//REMIND 추후 Dashboard 기획 후 수정
+export const unprotectedPaths = ['/dashboard'];

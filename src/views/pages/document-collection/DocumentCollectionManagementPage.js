@@ -105,11 +105,12 @@ const DocumentCollectionManagementPage = () => {
     };
     const fieldToUpdate = fieldMap[id];
 
-    if (!fieldToUpdate) return;
+    if (!fieldToUpdate) {
+      return;
+    }
 
     const newFormattedDate = newDate
-      ? //REMIND 날짜만 보낼 경우 00시로 고정되어서 23시로 변경
-        isPickTime
+      ? isPickTime
         ? formatToIsoEndDate(newDate)
         : format(new Date(newDate), "yyyy-MM-dd'T'23:59")
       : null;
@@ -199,7 +200,8 @@ const DocumentCollectionManagementPage = () => {
                 <CCol md={6}>
                   <CFormInput
                     id="name"
-                    label="문서 집합 이름"
+                    floatingLabel="문서 집합 이름"
+                    placeholder=""
                     value={stagedSearchFormData.name}
                     onChange={handleSearchFormChange}
                   />
@@ -207,22 +209,24 @@ const DocumentCollectionManagementPage = () => {
                 <CCol md={6}>
                   <CFormInput
                     id="displayName"
-                    label="표시명"
+                    floatingLabel="표시명"
+                    placeholder=""
                     value={stagedSearchFormData.displayName}
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
               </CRow>
-              <CRow className="mb-3">
+              <CRow className="mb-3 align-items-center">
                 <CCol md={6} className="position-relative">
                   <CFormInput
                     id="createdByName"
-                    label="게시자"
+                    floatingLabel="게시자"
+                    placeholder=""
                     onChange={handleSearchFormChange}
                     value={stagedSearchFormData.createdByName}
                   />
                 </CCol>
-                <CCol md={6}>
+                <CCol md={6} style={{ paddingBottom: '10px' }}>
                   <CFormSelect
                     id="deletionOption"
                     label="삭제된 문서 포함"

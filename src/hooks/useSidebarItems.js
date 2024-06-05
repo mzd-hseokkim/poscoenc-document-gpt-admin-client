@@ -85,7 +85,6 @@ const useSidebarItems = () => {
         },
         {
           component: CNavGroupItems,
-          active: 'false', //REMIND test active props
           items: favoriteItems,
         },
         { component: CNavTitle, name: '메뉴' },
@@ -94,14 +93,13 @@ const useSidebarItems = () => {
 
       setMenuItems(sidebarItems);
     } catch (error) {
-      addToast({ message: '메뉴를 가져오지 못했습니다.' });
+      addToast({ message: '메뉴를 가져오지 못했습니다.' }, false);
     }
   };
 
   useEffect(() => {
     void getMenuList();
-    //REMIND Sidebar dependency issue
-  }, []);
+  }, []); // 의존성 추가시 무한 렌더링 이슈발생, 빈 배열 유지
 
   return { menuItems, refetchMenuList: getMenuList };
 };

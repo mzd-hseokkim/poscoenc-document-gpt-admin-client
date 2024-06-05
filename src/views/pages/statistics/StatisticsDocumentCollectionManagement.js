@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { CButton, CCard, CCardBody, CCol, CForm, CFormSelect, CInputGroup, CRow, CSmartTable } from '@coreui/react-pro';
+import { CButton, CCard, CCardBody, CCol, CDatePicker, CForm, CRow, CSmartTable } from '@coreui/react-pro';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import ModalContainer from 'components/modal/ModalContainer';
@@ -115,18 +115,19 @@ const StatisticsDocumentCollectionManagement = () => {
             <CForm onSubmit={handleSubmitSearchRequest}>
               <CRow className="mb-3">
                 <CCol>
-                  <CInputGroup>
-                    <CButton color="white" disabled>
-                      기준 월
-                    </CButton>
-                    <CFormSelect
-                      style={{ height: '58px' }}
-                      floatingLabel=""
-                      options={pastYearMonths}
-                      value={stagedSelectedMonth.value}
-                      onChange={handleMonthSelectBoxChange}
-                    />
-                  </CInputGroup>
+                  {/*<CInputGroup>*/}
+                  {/*  <CButton color="white" disabled>*/}
+                  {/*    기준 월*/}
+                  {/*  </CButton>*/}
+                  {/*  <CFormSelect*/}
+                  {/*    style={{ height: '58px' }}*/}
+                  {/*    floatingLabel=""*/}
+                  {/*    options={pastYearMonths}*/}
+                  {/*    value={stagedSelectedMonth.value}*/}
+                  {/*    onChange={handleMonthSelectBoxChange}*/}
+                  {/*  />*/}
+                  {/*</CInputGroup>*/}
+                  <CDatePicker placeholder="월 선택" label="Month Picker" locale="ko" />
                 </CCol>
               </CRow>
               <CRow className="mb-3">

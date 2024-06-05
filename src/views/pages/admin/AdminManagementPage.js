@@ -99,17 +99,19 @@ const AdminManagementPage = () => {
   }, [fetchAdminList]);
 
   const handleDateChange = ({ id, newDate, isStartDate = true }) => {
+    //REMIND 시간날 때 함수 리팩토링, 모듈화
     const fieldMap = {
       createdAt: isStartDate ? 'fromCreatedAt' : 'toCreatedAt',
       modifiedAt: isStartDate ? 'fromModifiedAt' : 'toModifiedAt',
       lastLoggedInAt: isStartDate ? 'fromLoggedInAt' : 'toLoggedInAt',
     };
     const fieldToUpdate = fieldMap[id];
-    if (!fieldToUpdate) return;
+    if (!fieldToUpdate) {
+      return;
+    }
 
     const newFormattedDate = newDate
-      ? //REMIND 날짜만 보낼 경우 00시로 고정되어서 23시로 변경
-        isPickTime
+      ? isPickTime
         ? formatToIsoEndDate(newDate)
         : format(new Date(newDate), "yyyy-MM-dd'T'23:59")
       : null;
@@ -123,7 +125,7 @@ const AdminManagementPage = () => {
 
     setStagedSearchFormData((prev) => ({
       ...prev,
-      //REMIND 검색 여부 체크 해제 시 기존의 설정된 시간 값들을 초기화해주기 위함
+      //검색 여부 체크 해제 시 기존의 설정된 시간 값들을 초기화
       fromCreatedAt: format(stagedSearchFormData.fromCreatedAt, "yyyy-MM-dd'T'00:00"),
       toCreatedAt: format(stagedSearchFormData.toCreatedAt, "yyyy-MM-dd'T'23:59"),
       fromModifiedAt: format(stagedSearchFormData.fromModifiedAt, "yyyy-MM-dd'T'00:00"),
@@ -195,16 +197,29 @@ const AdminManagementPage = () => {
                 <CCol md={4}>
                   <CFormInput
                     id="email"
-                    label="이메일"
+                    floatingLabel="이메일"
+                    placeholder=""
                     value={stagedSearchFormData.email}
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
                 <CCol md={4}>
-                  <CFormInput id="name" label="이름" value={searchFormData.name} onChange={handleSearchFormChange} />
+                  <CFormInput
+                    id="name"
+                    floatingLabel="이름"
+                    placeholder=""
+                    value={searchFormData.name}
+                    onChange={handleSearchFormChange}
+                  />
                 </CCol>
                 <CCol md={4}>
-                  <CFormInput id="role" label="권한" value={searchFormData.role} onChange={handleSearchFormChange} />
+                  <CFormInput
+                    id="role"
+                    floatingLabel="권한"
+                    placeholder=""
+                    value={searchFormData.role}
+                    onChange={handleSearchFormChange}
+                  />
                 </CCol>
               </CRow>
               <CRow className="mb-3">

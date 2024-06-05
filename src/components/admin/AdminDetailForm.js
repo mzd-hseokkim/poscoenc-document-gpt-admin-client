@@ -5,23 +5,21 @@ import {
   CCardBody,
   CCol,
   CForm,
-  CFormInput,
   CFormLabel,
   CModalBody,
   CModalFooter,
   CMultiSelect,
   CRow,
 } from '@coreui/react-pro';
-import DeletionStatusBadge from 'components/badge/DeletionStatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
+import { AuditFields } from 'components/form/AuditFields';
 import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { Controller, useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
 import AdminService from 'services/admin/AdminService';
 import RoleService from 'services/role/RoleService';
-import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/common/formModes';
 import { emailValidationPattern, passwordValidationPattern } from 'utils/common/validationUtils';
@@ -41,10 +39,12 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
     control,
     watch,
     formState: { errors },
-  } = useForm({ mode: 'onChange' });
+  } = useForm({ mode: 'onBlur' });
 
-  const deleted = watch('deleted');
-  const adminId = watch('id');
+  const watchDeleted = watch('deleted');
+  const watchAdminId = watch('id');
+
+  const adminIdParam = searchParams.get('id');
 
   const adminInfoFields = [
     {
@@ -141,13 +141,12 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
   );
   useEffect(() => {
     setIsLoading(false);
-    const adminId = searchParams.get('id');
-    if (!isCreateMode && adminId) {
-      void fetchAdminDetail(adminId);
+    if (!isCreateMode && adminIdParam) {
+      void fetchAdminDetail(adminIdParam);
     } else {
       void getRoles();
     }
-  }, [fetchAdminDetail, getRoles, isCreateMode, searchParams]);
+  }, [fetchAdminDetail, getRoles, isCreateMode, searchParams, adminIdParam]);
 
   const createAdmin = async (data) => {
     try {
@@ -170,7 +169,7 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
 
   const updateAdmin = async (data) => {
     try {
-      const result = await AdminService.putAdmin(adminId, data);
+      const result = await AdminService.putAdmin(watchAdminId, data);
       if (result) {
         fetchAdminList();
         setFormMode('read');
@@ -201,7 +200,7 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
   const handleCancelClick = async () => {
     if (isUpdateMode) {
       setFormMode('read');
-      await fetchAdminDetail();
+      await fetchAdminDetail(adminIdParam);
     } else if (isCreateMode) {
       closeModal();
     }
@@ -213,9 +212,9 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
   };
 
   const handleDeleteRestoreClick = async (id) => {
-    const shouldDelete = !deleted;
+    const shouldDelete = !watchDeleted;
     try {
-      await AdminService.deleteAdmin(id, shouldDelete);
+      await AdminService.deleteAdmins(id, shouldDelete);
     } catch (error) {
       addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
@@ -250,40 +249,12 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
     </CRow>
   );
 
-  const renderAuditFields = () => {
-    return (
-      <CCard className="g-3 mb-3">
-        <CCardBody>
-          <CRow>
-            <CCol className="col-md mb-2">
-              <CCol className="fw-bold">아이디</CCol>
-              <CFormInput
-                id="input-list-id"
-                name="id"
-                value={formData.id || ''}
-                disabled={!isCreateMode}
-                plainText={!isCreateMode}
-              />
-            </CCol>
-            <CCol className="col-md mb-2">
-              <CCol className="fw-bold">삭제</CCol>
-              <CCol>
-                <DeletionStatusBadge deleted={formData.deleted} />
-              </CCol>
-            </CCol>
-          </CRow>
-          <FormInputGrid fields={getAuditFields(formMode)} formData={formData} isReadMode={isReadMode} col={2} />
-        </CCardBody>
-      </CCard>
-    );
-  };
-
   return (
     <>
       <FormLoadingCover isLoading={isLoading}></FormLoadingCover>
       <CModalBody>
         <CForm onSubmit={handleSubmit(onSubmit)}>
-          {!isCreateMode && renderAuditFields()}
+          {!isCreateMode && <AuditFields formMode={formMode} formData={formData} isReadMode={isReadMode} />}
           <CCard className="g-2 mb-3">
             <CCardBody>
               <FormInputGrid fields={adminInfoFields} isReadMode={isReadMode} register={register} errors={errors} />
@@ -294,12 +265,12 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
       </CModalBody>
       <CModalFooter>
         <DetailFormActionButtons
-          dataId={adminId}
+          dataId={watchAdminId}
           formModes={formModes(formMode)}
           handleCancel={handleCancelClick}
           handleDeleteRestore={handleDeleteRestoreClick}
           handleUpdateClick={handleUpdateClick}
-          isDataDeleted={deleted}
+          isDataDeleted={watchDeleted}
           onSubmit={handleSubmit(onSubmit)}
         />
       </CModalFooter>

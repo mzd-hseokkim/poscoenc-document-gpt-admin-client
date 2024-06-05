@@ -1,7 +1,7 @@
 {
-  "name": "@coreui/coreui-pro-react-admin-template",
-  "version": "4.7.0",
-  "description": "CoreUI PRO React Admin Template",
+  "name": "@mzd/marl-e-cms-admin",
+  "version": "0.0.8",
+  "description": "MegaZone-Digital Marl-E CMS Admin System",
   "homepage": ".",
   "bugs": {
     "url": "https://github.com/coreui/coreui-pro-react-admin-template/issues"

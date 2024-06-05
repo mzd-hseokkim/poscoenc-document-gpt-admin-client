@@ -238,8 +238,7 @@ const BoardManagementPage = () => {
                 <CCol md={6}>
                   <CFormSelect
                     id="deletionOption"
-                    //REMIND CoreUI Bug floating 안됨
-                    floatingLabel="게시글 상태"
+                    label="게시글 상태"
                     name="deletionOption"
                     value={stagedSearchFormData.deletionOption}
                     options={[
@@ -253,7 +252,7 @@ const BoardManagementPage = () => {
                 <CCol md={6} className="position-relative">
                   <CFormSelect
                     id="hasFilesOption"
-                    floatingLabel="첨부파일 없는 게시물 포함"
+                    label="첨부파일 없는 게시물 포함 여부"
                     name="hasFilesOption"
                     value={stagedSearchFormData.hasFilesOption}
                     options={[

@@ -7,8 +7,14 @@ const ToastContext = createContext();
 export const ToastProvider = ({ children }) => {
   const [toast, setToast] = useState(null);
 
-  const addToast = ({ message, color = 'danger' }) => {
-    setToast({ message, color, key: Date.now() });
+  /**
+   *
+   * @param message - The message to display in the toast.
+   * @param color - The color of the toast. Defaults to 'danger'.
+   * @param autoHide - Whether the toast should automatically hide. Defaults to true.
+   */
+  const addToast = ({ message, color = 'danger' }, autoHide = true) => {
+    setToast({ message, color, key: Date.now(), autoHide });
   };
 
   return (
@@ -18,7 +24,7 @@ export const ToastProvider = ({ children }) => {
         placement="bottom-end"
         push={
           toast && (
-            <CToast autohide visible={true} color={toast.color} className="d-flex">
+            <CToast autohide={toast.autoHide} visible={true} color={toast.color} className="d-flex">
               <CToastBody className="text-white">{toast.message}</CToastBody>
               <CToastClose className="me-2 m-auto" white />
             </CToast>

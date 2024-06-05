@@ -22,6 +22,7 @@ export const getNonGridLineChartOptions = () => ({
     },
     y: {
       display: false,
+      min: 0,
     },
   },
 });

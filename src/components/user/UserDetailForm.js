@@ -19,20 +19,22 @@ import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import { BingSearchsChart } from 'components/chart/BingSearchsChart';
 import { DallE3GenerationChart } from 'components/chart/DallE3GenerationChart';
 import { TokenUsageChart } from 'components/chart/TokenUsageChart';
+import { padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
+import { AuditFields } from 'components/form/AuditFields';
 import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
 import StatisticsService from 'services/statistics/StatisticsService';
 import UserService from 'services/UserService';
-import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/common/formModes';
 import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
 import { emailValidationPattern } from 'utils/common/validationUtils';
 
 const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {
+  const currentMonth = new Date().getMonth() + 1;
   const [isLoading, setIsLoading] = useState(false);
   const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [formData, setFormData] = useState([]);
@@ -111,37 +113,42 @@ const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {
     [addToast, closeModal, isCreateMode, reset]
   );
 
-  const fetchStatisticsData = useCallback(async (userId) => {
-    setIsLoading(true);
-    try {
-      const responseData = await StatisticsService.getMonthlyStatisticsData({
-        criteria: 'createdBy',
-        criteriaKey: userId,
-        endDate: new Date().toISOString().split('T')[0],
-      });
+  const fetchStatisticsData = useCallback(
+    async (userId) => {
+      setIsLoading(true);
+      try {
+        const responseData = await StatisticsService.getMonthlyStatisticsData({
+          criteria: 'createdBy',
+          criteriaKey: userId,
+          endDate: new Date().toISOString().split('T')[0],
+        });
+        responseData.list.sort((a, b) => {
+          const [yearA, monthA] = a.aggregationKey.split('-').map(Number);
+          const [yearB, monthB] = b.aggregationKey.split('-').map(Number);
 
-      responseData.list.sort((a, b) => {
-        const [yearA, monthA] = a.aggregationKey.split('-').map(Number);
-        const [yearB, monthB] = b.aggregationKey.split('-').map(Number);
+          if (yearA !== yearB) {
+            return yearA - yearB;
+          } else {
+            return monthA - monthB;
+          }
+        });
 
-        if (yearA !== yearB) {
-          return yearA - yearB;
-        } else {
-          return monthA - monthB;
-        }
-      });
-      setStatisticsData({
-        inputTokenData: responseData.list.map((item) => item.sumInputTokens),
-        outputTokenData: responseData.list.map((item) => item.sumOutputTokens),
-        bingSearchsData: responseData.list.map((item) => item.sumBingSearchs),
-        dallE3GenerationsData: responseData.list.map((item) => item.sumDallE3Generations),
-      });
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+        const paddedData = padDataArrayWithZero(responseData?.list, currentMonth);
+        setStatisticsData({
+          inputTokenData: paddedData.map((item) => item.sumInputTokens),
+          outputTokenData: paddedData.map((item) => item.sumOutputTokens),
+          bingSearchsData: paddedData.map((item) => item.sumBingSearchs),
+          dallE3GenerationsData: paddedData.map((item) => item.sumDallE3Generations),
+        });
+      } catch (error) {
+        console.log(error);
+        addToast('차트를 불러오는데 실패했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [addToast, currentMonth]
+  );
 
   useEffect(() => {
     setIsLoading(false);
@@ -221,21 +228,12 @@ const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {
     setFormMode('update');
   };
 
-  const renderAuditFields = () => {
-    return (
-      <CCard className="g-3 mb-3">
-        <CCardBody>
-          <FormInputGrid fields={getAuditFields(formMode)} formData={formData} isReadMode={isReadMode} col={2} />
-        </CCardBody>
-      </CCard>
-    );
-  };
   return (
     <>
       <FormLoadingCover isLoading={isLoading} />
       <CModalBody>
         <CForm onSubmit={handleSubmit(onSubmit)}>
-          {!isCreateMode && renderAuditFields()}
+          {!isCreateMode && <AuditFields formMode={formMode} formData={formData} isReadMode={isReadMode} />}
           <CCard className="g-3 mb-3">
             <CCardBody>
               <FormInputGrid fields={userInfoFields} isReadMode={isReadMode} register={register} errors={errors} />
@@ -283,10 +281,10 @@ const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {
                 </CRow>
                 <CRow className="justify-content-center">
                   <CCol sm={5}>
-                    <BingSearchsChart data={statisticsData.bingSearchsData} />
+                    <BingSearchsChart statisticsData={statisticsData.bingSearchsData} />
                   </CCol>
                   <CCol sm={5}>
-                    <DallE3GenerationChart data={statisticsData.dallE3GenerationsData} />
+                    <DallE3GenerationChart statisticsData={statisticsData.dallE3GenerationsData} />
                   </CCol>
                 </CRow>
               </CCardBody>

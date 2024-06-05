@@ -24,6 +24,7 @@ import DocumentFileStatusBadge from 'components/badge/DocumentFileStatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import { TokenUsageChart } from 'components/chart/TokenUsageChart';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
+import { AuditFields } from 'components/form/AuditFields';
 import FormInputGrid from 'components/input/FormInputGrid';
 import PdfViewer from 'components/pdf/PdfViewer';
 import { useToast } from 'context/ToastContext';
@@ -35,7 +36,6 @@ import DocumentCollectionFileService from 'services/document-collection/Document
 import DocumentCollectionService from 'services/document-collection/DocumentCollectionService';
 import StatisticsService from 'services/statistics/StatisticsService';
 import { userIdSelector } from 'states/jwtTokenState';
-import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import { formatFileSize } from 'utils/common/formatFileSize';
 import formModes from 'utils/common/formModes';
@@ -58,7 +58,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
 
   const { addToast } = useToast();
   const currentUserId = useRecoilValue(userIdSelector);
-  const { isReadMode, isUpdateMode } = formModes(formMode);
+  const { isReadMode } = formModes(formMode);
   const chartLabels = MonthLabelGenerator.pastYearMonthsChartLabels();
 
   const {
@@ -69,11 +69,6 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
   } = useForm({ mode: 'onChange' });
 
   const collectionSpecificFields = [
-    {
-      name: 'id',
-      label: '아이디',
-      isDisabled: isUpdateMode,
-    },
     {
       name: 'name',
       label: '문서 집합 이름',
@@ -279,16 +274,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
       <FormLoadingCover isLoading={getDetailIsLoading} />
       <CModalBody>
         <CForm onSubmit={handleSubmit(onSubmit)}>
-          <CCard className="mb-3">
-            <CCardBody>
-              <FormInputGrid
-                fields={getAuditFields(formMode)}
-                formData={collectionDetail}
-                isReadMode={isReadMode}
-                col={2}
-              />
-            </CCardBody>
-          </CCard>
+          <AuditFields formMode={formMode} formData={collectionDetail} isReadMode={isReadMode} />
           <CCard className="mb-3">
             <CCardBody>
               <FormInputGrid
@@ -309,15 +295,15 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                     에러 로그
                   </CFormLabel>
                   <CFormTextarea
-                    {...register('description')}
                     id="detail-form-description"
                     name="description"
-                    placeholder={isReadMode ? '' : '문서 설명을 작성해주세요.'}
-                    plainText={isReadMode}
-                    readOnly={isReadMode}
+                    value={collectionDetail.description}
+                    plainText
+                    readOnly
                   />
                 </>
               )}
+              {/*TODO 공유 기능 구현*/}
               <CFormLabel className="fw-bold" htmlFor={'documentcollectionaccessassociation'}>
                 공유받은 사용자 목록
               </CFormLabel>

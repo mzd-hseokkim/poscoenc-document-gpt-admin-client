@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { cilChevronBottom, cilChevronTop } from '@coreui/icons';
+import CIcon from '@coreui/icons-react';
 import {
   CButton,
   CCard,
@@ -30,7 +32,9 @@ const PostCommentsForm = ({ totalCount }) => {
   const endOfCommentsRef = useRef(null);
 
   const fetchPostComments = useCallback(async () => {
-    if (!searchParams.get('id')) return;
+    if (!searchParams.get('id')) {
+      return;
+    }
 
     setPostCommentIsLoading(true);
     try {
@@ -89,9 +93,6 @@ const PostCommentsForm = ({ totalCount }) => {
       }
     }
   };
-  const toggleVisible = () => {
-    setVisible((prev) => !prev);
-  };
 
   useEffect(() => {
     void fetchPostComments();
@@ -114,8 +115,12 @@ const PostCommentsForm = ({ totalCount }) => {
     <CRow>
       {postComments
         ?.filter((comment) => {
-          if (filterOption === 'No') return !comment.deleted;
-          if (filterOption === 'Yes') return comment.deleted;
+          if (filterOption === 'No') {
+            return !comment.deleted;
+          }
+          if (filterOption === 'Yes') {
+            return comment.deleted;
+          }
           return true;
         })
         .map((comment, index) => renderCommentItem(comment, index))}{' '}
@@ -189,8 +194,14 @@ const PostCommentsForm = ({ totalCount }) => {
     <CForm onSubmit={handleSubmitComment} className="comments-section">
       <CCard className="mt-3 mb-3">
         <CCardHeader className="d-flex justify-content-between align-items-center border-bottom-0">
-          <div onClick={toggleVisible} style={{ cursor: 'pointer' }}>
-            댓글 <small className="text-muted">{`${totalCount} 개`}</small>
+          <div className="d-flex align-items-center">
+            댓글 <small className="text-muted text white-space-pre">{` ${totalCount} 개`}</small>
+            <CIcon
+              onClick={() => setVisible((prev) => !prev)}
+              style={{ cursor: 'pointer' }}
+              icon={!visible ? cilChevronBottom : cilChevronTop}
+              className="ms-2"
+            />
           </div>
           <CFormSelect
             style={{ width: '175px' }}

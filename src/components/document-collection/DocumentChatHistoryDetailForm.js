@@ -2,15 +2,16 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { CBadge, CCard, CCardBody, CCardHeader, CCol, CForm, CModalBody, CModalFooter, CRow } from '@coreui/react-pro';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
+import { AuditFields } from 'components/form/AuditFields';
 import FormInputGrid from 'components/input/FormInputGrid';
 import { useToast } from 'context/ToastContext';
 import { useForm } from 'react-hook-form';
+import { PiThumbsDownFill, PiThumbsUpFill } from 'react-icons/pi';
 import ReactMarkdown from 'react-markdown';
 import { useSearchParams } from 'react-router-dom';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import DocumentChatHistoryService from 'services/document-collection/DocumentChatHistoryService';
-import { getAuditFields } from 'utils/common/auditFieldUtils';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/common/formModes';
 
@@ -18,7 +19,7 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
   const formMode = initialFormMode || 'read';
   const [chatHistory, setChatHistory] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const { isCreateMode, isReadMode } = formModes(formMode);
+  const { isReadMode } = formModes(formMode);
   const [searchParams] = useSearchParams();
   const { addToast } = useToast();
 
@@ -93,28 +94,13 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
   const onSubmit = () => {
     //REMIND FormInputGrid 를 사용하기 위해 CForm 내부에 선언해줘야합니다. 다만 수정, 삭제 등의 로직이 없기 때문에 Submit 함수를 비워두었습니다.
   };
-  const renderAuditFields = () => {
-    return (
-      <CCard className="g-3 mb-3">
-        <CCardHeader className="h5">변경 이력</CCardHeader>
-        <CCardBody>
-          <FormInputGrid
-            register={register}
-            fields={getAuditFields(formMode)}
-            formData={chatHistory}
-            isReadMode={isReadMode}
-            col={2}
-          />
-        </CCardBody>
-      </CCard>
-    );
-  };
+
   return (
     <>
       <FormLoadingCover isLoading={isLoading} />
       <CModalBody>
         <CForm onSubmit={handleSubmit(onSubmit())}>
-          {renderAuditFields()}
+          <AuditFields formMode={formMode} formData={chatHistory} isReadMode={isReadMode} />
           <CCard className="mb-3">
             <CCardHeader className="h5">세부 정보</CCardHeader>
             <CCardBody>
@@ -150,11 +136,21 @@ const DocumentChatHistoryDetailForm = ({ initialFormMode, closeModal, refreshDoc
                         모델 : {chatHistory.modelName}
                       </CBadge>
                       <CBadge color={'primary'} id="pilotMode" className="m-2">
-                        파일럿 모드 : {chatHistory.pilotMode}
+                        파일럿 모드 : {chatHistory.pilotMode === 'C' ? 'Co-pilot' : 'Auto-pilot'}
                       </CBadge>
-                      <CBadge color={'dark'} id="thumb" className="m-2">
-                        좋아요 : {chatHistory.thumb}
-                      </CBadge>
+                      {chatHistory.thumb ? (
+                        chatHistory.thumb === 1 ? (
+                          <CBadge id="thumb" className="m-2" style={{ backgroundColor: '#4d67c9' }}>
+                            Like : <PiThumbsUpFill />
+                          </CBadge>
+                        ) : (
+                          <CBadge id="thumb" className="m-2" style={{ backgroundColor: '#c12a2a' }}>
+                            Bad : <PiThumbsDownFill />
+                          </CBadge>
+                        )
+                      ) : (
+                        <></>
+                      )}
                     </CCol>
                   </CRow>
                 </CCardHeader>

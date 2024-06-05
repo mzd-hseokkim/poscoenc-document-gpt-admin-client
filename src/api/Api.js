@@ -54,7 +54,7 @@ export const setupInterceptors = ({ navigate, addToast }) => {
             break;
         }
       } else if (error.request) {
-        addToast({ message: '서버에서 응답이 없습니다. 잠시 후 다시 시도해 주세요.' });
+        addToast({ message: '서버에서 응답이 없습니다. 잠시 후 다시 시도해 주세요.' }, false);
         console.error(error.request);
       } else {
         addToast({ message: '알 수 없는 오류가 발생하였습니다. 잠시 후 다시 시도해 주세요.' });

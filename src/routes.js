@@ -1,5 +1,6 @@
 import React from 'react';
 
+const DashBoard = React.lazy(() => import('views/pages/dashboard/DashboardPage'));
 const BoardManagement = React.lazy(() => import('views/pages/board/BoardManagementPage'));
 const UserManagement = React.lazy(() => import('views/pages/user/UserManagementPage'));
 const AdminManagement = React.lazy(() => import('views/pages/admin/AdminManagementPage'));
@@ -18,6 +19,7 @@ const StatisticsDocumentCollectionManagement = React.lazy(() =>
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
+  { path: '/dashboard', exact: true, name: '대시 보드', element: DashBoard },
   { path: '/menus/management', exact: true, name: '메뉴 관리', element: MenuManagement },
   { path: '/boards/management', exact: true, name: '게시판', element: BoardManagement },
   { path: '/admin-users/management', exact: true, name: '관리자 관리', element: AdminManagement },
