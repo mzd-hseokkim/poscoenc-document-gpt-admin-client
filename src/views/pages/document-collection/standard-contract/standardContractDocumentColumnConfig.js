@@ -18,7 +18,6 @@ export const standardContractDocumentColumnConfig = [
     key: 'createdByName',
     label: '게시자',
     _style: { width: '10%' },
-    sorter: false,
   },
   {
     key: 'createdAt',
