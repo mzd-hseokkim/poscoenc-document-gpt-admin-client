@@ -10,7 +10,10 @@ const DocumentCollectionManagement = React.lazy(() =>
   import('views/pages/document-collection/DocumentCollectionManagementPage')
 );
 const ChatHistoryManagementPage = React.lazy(() =>
-  import('views/pages/document-collection/DocumentChatHistoryManagementPage')
+  import('views/pages/document-collection/chat-history/DocumentChatHistoryManagementPage')
+);
+const StandardContractDocumentPage = React.lazy(() =>
+  import('views/pages/document-collection/standard-contract/StandardContractDocumentManagementPage')
 );
 const StatisticsUserManagement = React.lazy(() => import('views/pages/statistics/StatisticsUserManagement'));
 const StatisticsDocumentCollectionManagement = React.lazy(() =>
@@ -36,6 +39,12 @@ const routes = [
     exact: true,
     name: '채팅 이력 관리',
     element: ChatHistoryManagementPage,
+  },
+  {
+    path: '/standard-contract/management',
+    exact: true,
+    name: '표준 계약서 관리',
+    element: StandardContractDocumentPage,
   },
   { path: '/statistics/user/management', exact: true, name: '월별 토큰 사용량 U', element: StatisticsUserManagement },
   {
