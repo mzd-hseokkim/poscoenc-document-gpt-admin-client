@@ -15,7 +15,6 @@ import {
   CInputGroup,
   CRow,
 } from '@coreui/react-pro';
-import { colorButtonTextStyle } from 'components/button/colorButtonTextStyle';
 import { useToast } from 'context/ToastContext';
 import { useSearchParams } from 'react-router-dom';
 import BoardCommentService from 'services/board/BoardCommentService';
@@ -161,8 +160,7 @@ const PostCommentsForm = ({ totalCount }) => {
       <CCol className="d-flex justify-content-between">
         <strong>{comment.createdByName}</strong>
         <CButton
-          style={colorButtonTextStyle}
-          className="in"
+          className="in color-button-text-white"
           color={comment.deleted ? 'success' : 'danger'}
           size="sm"
           onClick={() => toggleCommentStatus(comment.id, !comment.deleted)}
