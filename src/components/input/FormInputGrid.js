@@ -52,7 +52,10 @@ const FormInputGrid = ({ fields, handleChange, isReadMode, formData, register, e
           return (
             <CCol key={field.name} className="mb-2">
               <div>
-                <CFormLabel htmlFor={`input-list-${field.name}`} className="fw-bold">
+                <CFormLabel
+                  htmlFor={`input-list-${field.name}`}
+                  className="fw-bold border border-start-0 border-top-0 border-end-0 border-opacity-50 border-bottom-2 border-info"
+                >
                   {field.label}
                 </CFormLabel>
               </div>
@@ -74,7 +77,14 @@ const FormInputGrid = ({ fields, handleChange, isReadMode, formData, register, e
 
         return (
           <CCol key={field.name} className="mb-2">
-            <CFormLabel htmlFor={`input-list-${field.name}`} className="fw-bold">
+            <CFormLabel
+              htmlFor={`input-list-${field.name}`}
+              className="fw-bold
+              border
+              border-start-0 border-top-0 border-end-0
+              border-opacity-50
+              border-bottom-2 border-info"
+            >
               {field.label}
             </CFormLabel>
             {register ? (

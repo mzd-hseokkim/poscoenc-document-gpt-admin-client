@@ -19,6 +19,14 @@ const getStandardContractDocumentList = async (params, pageable) => {
   return response?.data ?? [];
 };
 
+const getStandardContractDocumentDetail = async (contractId) => {
+  if (!contractId) {
+    return;
+  }
+  const response = await api.get(`/admin/standard-contract-document/${contractId}`);
+  return response?.data;
+};
+
 const patchStandardContractDocumentDeletionOption = async (standardContractDocumentIds, deletionOption) => {
   const response = await api.patch(
     `/admin/standard-contract-document/deleted/${deletionOption}`,
@@ -51,10 +59,35 @@ const getDownloadSearchedStandardContractDocumentList = async (params) => {
   window.URL.revokeObjectURL(downloadUrl);
 };
 
+const putModifiedDocumentDetail = async (modifiedDocument) => {
+  const response = await api.put(`/admin/standard-contract-document/${modifiedDocument.id}`, modifiedDocument);
+  return (response.status = 200);
+};
+
+const getDownloadContractDocument = async (standardContractDocument) => {
+  const response = await api.get(`/admin/standard-contract-document/download/${standardContractDocument.id}`, {
+    responseType: 'blob',
+  });
+
+  const downloadUrl = window.URL.createObjectURL(new Blob([response.data]));
+
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.setAttribute('download', standardContractDocument.originalFilename);
+  document.body.appendChild(link);
+  link.click();
+
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(downloadUrl);
+};
+
 const StandardContractService = {
   getStandardContractDocumentList,
   patchStandardContractDocumentDeletionOption,
   getDownloadSearchedStandardContractDocumentList,
+  getStandardContractDocumentDetail,
+  putModifiedDocumentDetail,
+  getDownloadContractDocument,
 };
 
 export default StandardContractService;

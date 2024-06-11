@@ -17,7 +17,9 @@ import {
 import DeletionStatusBadge from 'components/badge/DeletionStatusBadge';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
+import { StandardContractDocumentDetailForm } from 'components/document-collection/StandardContractDocumentDetailForm';
 import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
+import ModalContainer from 'components/modal/ModalContainer';
 import { useToast } from 'context/ToastContext';
 import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
@@ -30,7 +32,7 @@ import { standardContractDocumentColumnConfig } from 'views/pages/document-colle
 const createInitialSearchFormData = () => ({
   originalFilename: '', // 파일명
   displayName: '', // 표시명
-  // description: '', 오류 관련
+  // description: '', 문서 설명
   // filePath: '', S3 서버의 경로가 될 것
   createdByName: '', // 게시자
   fromCreatedAt: getOneYearAgoDate(),
@@ -295,6 +297,13 @@ const StandardContractDocumentManagementPage = () => {
           </CCardBody>
         </CCard>
       </CRow>
+      <ModalContainer visible={modal.isOpen} title={'표준 계약서 상세'} onClose={modal.closeModal} size="lg">
+        <StandardContractDocumentDetailForm
+          closeModal={modal.closeModal}
+          initialFormMode={detailFormMode}
+          refreshStandardContractDocumentList={searchStandardContractDocument}
+        />
+      </ModalContainer>
     </>
   );
 };

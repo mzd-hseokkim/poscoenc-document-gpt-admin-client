@@ -202,7 +202,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
 
   const handleModificationCancelClick = async () => {
     setFormMode('read');
-    await fetchCollectionDetail();
+    await fetchCollectionDetail(searchParams.get('id'));
   };
   const onSubmit = async (data) => {
     await putModifiedCollection(data);
@@ -231,7 +231,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     refreshDocumentCollectionList();
   };
 
-  const toggleVisible = (fileId) => {
+  const togglePdfVisible = (fileId) => {
     setPdfVisible((prevState) => ({
       ...prevState,
       [fileId]: !prevState[fileId],
@@ -292,7 +292,13 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                 <>
                   <CFormLabel
                     htmlFor="detail-form-description"
-                    className="col-form-label fw-bold"
+                    className="fw-bold
+                              border
+                              border-start-0 border-top-0 border-end-0
+                              border-opacity-50
+                              border-bottom-2 border-info
+                              
+                              "
                     style={{ color: 'red' }}
                   >
                     에러 로그
@@ -361,7 +367,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                         </CCol>
                         <CCol md={3} className="align-content-center">
                           <div className="float-end">
-                            <CButton className="me-2" onClick={() => toggleVisible(file.id)}>
+                            <CButton className="me-2" onClick={() => togglePdfVisible(file.id)}>
                               {!pdfVisible[file.id] ? (
                                 <MdPictureAsPdf size="20" title="PDF Reader" />
                               ) : (
@@ -374,7 +380,10 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                           </div>
                         </CCol>
                         <CCollapse visible={pdfVisible[file.id] || false}>
-                          <PdfViewer file={file} visible={pdfVisible[file.id] || false}></PdfViewer>
+                          <PdfViewer
+                            fileUrl={`admin/document-collection-files/download/${file.id}`}
+                            visible={pdfVisible[file.id] || false}
+                          ></PdfViewer>
                         </CCollapse>
                       </CRow>
                     </CListGroupItem>
