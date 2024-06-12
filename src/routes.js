@@ -19,7 +19,7 @@ const StatisticsUserManagement = React.lazy(() => import('views/pages/statistics
 const StatisticsDocumentCollectionManagement = React.lazy(() =>
   import('views/pages/statistics/StatisticsDocumentCollectionManagement')
 );
-
+//STARTFROM 라우터 만드는거부터 시작
 const routes = [
   { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', exact: true, name: '대시 보드', element: DashBoard },
