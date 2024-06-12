@@ -81,17 +81,17 @@ const DashboardPage = () => {
   ];
 
   const dailyTokenUsagesExample = [
-    { title: 'Monday', value1: 34, value2: 78 },
-    { title: 'Tuesday', value1: 56, value2: 94 },
-    { title: 'Wednesday', value1: 12, value2: 67 },
-    { title: 'Thursday', value1: 43, value2: 91 },
-    { title: 'Friday', value1: 22, value2: 73 },
-    { title: 'Saturday', value1: 53, value2: 82 },
-    { title: 'Sunday', value1: 9, value2: 69 },
+    { title: 'Monday', InputTokens: 34, OutputTokens: 78 },
+    { title: 'Tuesday', InputTokens: 56, OutputTokens: 94 },
+    { title: 'Wednesday', InputTokens: 12, OutputTokens: 67 },
+    { title: 'Thursday', InputTokens: 43, OutputTokens: 91 },
+    { title: 'Friday', InputTokens: 22, OutputTokens: 73 },
+    { title: 'Saturday', InputTokens: 53, OutputTokens: 82 },
+    { title: 'Sunday', InputTokens: 9, OutputTokens: 69 },
   ];
   const dailyTokenUsagesExampleLabels = dailyTokenUsagesExample.map((item) => item.title);
-  const dailyTokenUsagesExampleData1 = dailyTokenUsagesExample.map((item) => item.value1);
-  const dailyTokenUsagesExampleData2 = dailyTokenUsagesExample.map((item) => item.value2);
+  const dailyTokenUsagesExampleInputToken = dailyTokenUsagesExample.map((item) => item.InputTokens);
+  const dailyTokenUsagesExampleOutputToken = dailyTokenUsagesExample.map((item) => item.OutputTokens);
 
   const DailyTokenUsagesExampleBarChart = () => {
     return (
@@ -101,14 +101,14 @@ const DashboardPage = () => {
           labels: dailyTokenUsagesExampleLabels,
           datasets: [
             {
-              label: 'Value 1',
+              label: 'Input Tokens',
               backgroundColor: '#007bff', // Blue color for Value 1
-              data: dailyTokenUsagesExampleData1,
+              data: dailyTokenUsagesExampleInputToken,
             },
             {
-              label: 'Value 2',
+              label: 'Output Tokens',
               backgroundColor: '#dc3545', // Red color for Value 2
-              data: dailyTokenUsagesExampleData2,
+              data: dailyTokenUsagesExampleOutputToken,
             },
           ],
         }}
