@@ -93,7 +93,8 @@ const useSidebarItems = () => {
 
       setMenuItems(sidebarItems);
     } catch (error) {
-      addToast({ message: '메뉴를 가져오지 못했습니다.' }, false);
+      console.log(error);
+      addToast({ message: `메뉴를 가져오지 못했습니다. + ${error.status}` }, false);
     }
   };
 
