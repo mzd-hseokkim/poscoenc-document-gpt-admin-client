@@ -58,6 +58,34 @@
 
 // ChatHistory QnA style E
 
+// Common S
 .white-space-pre {
   white-space: pre;
 }
+
+.color-button-text-white {
+  --cui-btn-color: white;
+  --cui-btn-hover-color: white;
+  --cui-btn-active-color: white;
+}
+
+// Common E
+
+// Global Loading Cover S
+.global-loading-cover-position {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  position: relative;
+  transform: translateY(-20%);
+
+  .global-loading-cover {
+    width: 4rem;
+    height: 4rem;
+    --cui-spinner-border-width: 10px;
+  }
+}
+
+// Global Loading Cover E
+

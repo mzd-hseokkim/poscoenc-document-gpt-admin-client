@@ -31,7 +31,7 @@ import {
   getOneYearAgoDate,
 } from 'utils/common/dateUtils';
 import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
-import { documentChatHistoryColumnConfig } from 'views/pages/document-collection/documentChatHistoryColumnConfig';
+import { documentChatHistoryColumnConfig } from 'views/pages/document-collection/chat-history/documentChatHistoryColumnConfig';
 
 const createInitialSearchFormData = () => ({
   answer: '',

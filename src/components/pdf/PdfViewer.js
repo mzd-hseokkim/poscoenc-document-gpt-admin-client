@@ -12,7 +12,7 @@ import 'components/pdf/pdf-style.css';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.js', import.meta.url).toString();
 const SERVER_ENDPOINT = process.env.REACT_APP_SERVER_ENDPOINT;
-const PdfViewer = ({ file, visible }) => {
+const PdfViewer = ({ fileUrl, visible }) => {
   const [numPages, setNumPages] = useState(1);
   const [scale, setScale] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
@@ -55,7 +55,9 @@ const PdfViewer = ({ file, visible }) => {
       }
     }
   }, [currentPage, visible]);
-  if (!visible) return;
+  if (!visible) {
+    return;
+  }
 
   return (
     <>
@@ -73,7 +75,8 @@ const PdfViewer = ({ file, visible }) => {
           <CRow className="justify-content-center">
             <Document
               className="pdf-viewer-document"
-              file={`${SERVER_ENDPOINT}/admin/document-collection-files/download/${file.id}`}
+              // file={`${SERVER_ENDPOINT}/admin/document-collection-files/download/${fileId}`}
+              file={`${SERVER_ENDPOINT}/${fileUrl}`}
               onLoadSuccess={onDocumentLoadSuccess}
               loading={
                 <div style={{ minHeight: '100px', minWidth: '100px' }} className="pdf-page-loading-cover">

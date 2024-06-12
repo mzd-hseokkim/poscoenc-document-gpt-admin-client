@@ -1,18 +1,18 @@
-export const documentCollectionColumnConfig = [
+export const standardContractDocumentColumnConfig = [
   {
     key: 'id',
     label: '아이디',
-    _style: { width: '10%' },
+    _style: { width: '12%' },
   },
   {
-    key: 'name',
-    label: '문서 집합 이름',
-    _style: { width: '23%' },
+    key: 'originalFilename',
+    label: '파일명',
+    _style: { width: '33%' },
   },
   {
     key: 'displayName',
     label: '표시명',
-    _style: { width: '30%' },
+    _style: { width: '15%' },
   },
   {
     key: 'createdByName',
@@ -22,11 +22,11 @@ export const documentCollectionColumnConfig = [
   {
     key: 'createdAt',
     label: '게시일',
-    _style: { width: '10%' },
+    _style: { width: '15%' },
   },
   {
     key: 'deleted',
     label: '삭제여부',
-    _style: { width: '12%' },
+    _style: { width: '15%' },
   },
 ];

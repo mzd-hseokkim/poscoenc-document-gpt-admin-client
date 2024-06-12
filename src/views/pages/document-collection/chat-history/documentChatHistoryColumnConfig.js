@@ -23,8 +23,6 @@ export const documentChatHistoryColumnConfig = [
     key: 'createdByName',
     label: '사용자',
     _style: { width: '9%' },
-    //REMIND 데이터를 createdByName 으로 정렬 할 수 없어서 받아온 결과를 가지고 정렬하거나 못하게 해야 합니다.
-    sorter: false,
   },
   {
     key: 'createdAt',
