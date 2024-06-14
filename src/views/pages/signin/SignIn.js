@@ -61,7 +61,8 @@ const SignIn = () => {
       const response = await SignInService.signIn(data);
       const { token } = response;
       localStorage.setItem('token', token);
-      navigate('/');
+      //REMIND 로그인 후 랜딩 페이지 기획 후 수정
+      navigate('/dashboard');
     } catch (error) {
       const status = error.response?.status;
       if (status === 401) {
