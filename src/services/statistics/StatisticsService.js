@@ -1,7 +1,7 @@
 import api from 'api/Api';
 
 const getMonthlyStatisticsData = async (params) => {
-  const response = await api.get('/admin/statistics/month', {
+  const response = await api.get('/admin/token-statistics/month', {
     params: {
       criteria: params.criteria,
       criteriaKey: params.criteriaKey,
@@ -11,7 +11,7 @@ const getMonthlyStatisticsData = async (params) => {
   return response.data;
 };
 const getUserUsageStatistics = async (yyyyMM, pageable) => {
-  const response = await api.get('/admin/statistics/created-by', {
+  const response = await api.get('/admin/token-statistics/created-by', {
     params: { yyyyMM, page: pageable.page, size: pageable.size, sort: pageable.sort },
   });
 
@@ -19,7 +19,7 @@ const getUserUsageStatistics = async (yyyyMM, pageable) => {
 };
 
 const getDocumentCollectionUsageStatistics = async (yyyyMM, pageable) => {
-  const response = await api.get('/admin/statistics/document-collection', {
+  const response = await api.get('/admin/token-statistics/document-collection', {
     params: { yyyyMM, page: pageable.page, size: pageable.size, sort: pageable.sort },
   });
   return response?.data;
