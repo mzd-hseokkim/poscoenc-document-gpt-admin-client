@@ -21,6 +21,7 @@ import {
   cilChevronRight,
   cilCloudDownload,
   cilDescription,
+  cilExternalLink,
   cilOptions,
   cilPeople,
   cilScreenDesktop,
@@ -31,6 +32,7 @@ import CIcon from '@coreui/icons-react';
 import { CChart, CChartLine } from '@coreui/react-chartjs';
 import {
   CAvatar,
+  CBadge,
   CButton,
   CButtonGroup,
   CCard,
@@ -60,12 +62,17 @@ import {
 import { getStyle, hexToRgba } from '@coreui/utils';
 import { mergeAndSumArrays } from 'components/chart/utils/ChartStatisticsProcessor';
 import { useToast } from 'context/ToastContext';
+import { PiThumbsUpFill } from 'react-icons/pi';
+import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
 import DashBoardService from 'services/dashboard/DashBoardService';
 import { formatToIsoEndDate, formatToIsoStartDate, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
 
 const DashboardPage = () => {
   const { addToast } = useToast();
-  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [hoveredLikedChatIndex, setHoveredLikedChatIndex] = useState(null);
+  const [showChatAnswer, setShowChatAnswer] = useState(false);
 
   const [totalDocumentCount, setTotalDocumentCount] = useState(0);
   const [recentlyAddedDocument, setRecentlyAddedDocument] = useState([]);
@@ -514,14 +521,18 @@ const DashboardPage = () => {
       avatar: { src: '/images/logos/marle-logo.png', status: 'danger' },
       question: `안녕?`,
       // country: { flag: 'cilFlagAlt', name: 'USA' },
-      askedAt: '2024-06-12 10:00 AM',
+      modelName: 'GPT-4 Omni',
+      pilotMode: 'A',
+      createdAt: '2024-06-12 10:00 AM',
     },
     {
       // avatar: { src: 'path/to/avatar2.jpg', status: 'warning' },
       avatar: { src: '/images/logos/marle-logo.png', status: 'danger' },
       question: `이 계약서의 계약 기간과 계약금액, 배상금에 대한 내용들을 알려줘.`,
       // country: { flag: 'cilFlagAlt', name: 'Canada' },
-      askedAt: '2024-06-11 09:00 AM',
+      modelName: 'Claude-3-Opus',
+      pilotMode: 'C',
+      createdAt: '2024-06-11 09:00 AM',
     },
     // 더 많은 데이터 추가 가능
   ];
@@ -530,9 +541,27 @@ const DashboardPage = () => {
       message: '안녕하세요 무엇을 도와드릴까요?',
     },
     {
-      message: ' 계약 기간으로는 ........................................',
+      message:
+        '### 핵심 답변 한 줄 요약\n해당 계약서는 한국파파존스㈜와 메가존 주식회사 간에 통합 메시지 서비스 제공에 관한 계약서로, 서비스 제공, 사용료 정산, 계약 기간, 서비스 제공 중단 및 변경, 비용 및 대금 결제, 담보조건, 계약 해지, 손해배상, 비밀유지, 면책, 계약의 해석, 관할법원 등에 대한 내용이 포함되어 있습니다.\n\n---\n\n### 상세 답변\n\n해당 계약서는 한국파파존스㈜와 메가존 주식회사 간에 통합 메시지 서비스 제공에 관한 계약서입니다. 이를 상세히 설명하면, \n1. 계약의 목적은 [동]에 대해 [행]이 통합 메시지 서비스를 제공하고, [행]에 대해 [동]이 서비스에 대한 사용료를 정산함에 따른 쌍방의 권리와 의무를 명시하고, 이를 성실히 이행함으로써 상호 이익을 증진하는데 그 목적이 있다.\n2. 계약의 기간은 쌍방의 서비스 개시일로부터 1 년간으로 한다. 서비스의 종료는 [동]이 서비스 종료 20 영업일 전에 [행]에 서면 통보함으로써 종료된다.\n3. [행]이 제공하는 “통합 메시지 서비스”는 [동]이 지정한 “고객”에게 [동]이 제공하는 정보(“통합 메시지”의 내용)를 [행]의 시스템을 통해 “고객”에게 전달하는 것에 한한다.\n4. [행]은 본 계약과 관련하여 발생되는 [동]의 채무를 담보하기 위하여 담보제공을 요청할 수 있으며, [동]은 보증보험증권 또는 현금예치 등의 담보를 제공해야 한다.\n5. 계약 당사자는 다음 각 호에 해당하는 경우에는 본 계약 불이행에 대하여 계약 당사자간 책임을 지지 않는다. 천재지변, 폭동, 전쟁, 소요사태 또는 이에 준하는 사유로 불가항력적으로 발생된 경우, 정부(지방자치단체, 감독기관 포함)의 규제로 인하여 불가항력적으로 발생된 경우, 계약당사자간에 서면으로 합의한 경우, 각 당사자의 귀책이 아님을 증명한 경우 등이 해당됩니다.\n\n---\n\n### 추가 정보\n\n해당 계약서에 대한 연관 정보가 다음과 같이 검색되었습니다.\n1. 계약서에는 통합 메시지 서비스를 제공하는 [행]과 이를 이용하는 [동]의 권리와 의무가 상세히 기술되어 있습니다.\n2. 계약 기간은 1년이며, 계약 해지를 원할 경우 20 영업일 전에 서면으로 통보해야 합니다.\n3. [행]은 [동]의 채무를 담보하기 위해 담보제공을 요청할 수 있으며, 이에 [동]은 보증보험증권 또는 현금예치 등의 담보를 제공해야 합니다.\n\n---\n\n### 출처\n\n- 계약의 목적 : 1조 (2 page)\n- 계약의 기간 : 3조 (2 page)\n- 서비스의 범위 : 5조 (3 page)\n- 담보조건 : 8조 (3 page)\n- 면책 : 16조 (5 page)\n\n---\n\n### 추가 질문\n- 계약 기간이 종료된 후에는 어떻게 되나요?\n- 담보제공을 요청받았을 때, [동]이 응하지 않으면 어떻게 되나요?\n- 계약 당사자가 불이행했을 때의 책임은 어떻게 되나요?\n\n---\n\n',
     },
   ];
+
+  const customPopoverStyle = {
+    '--cui-popover-max-width': '500px',
+    '--cui-popover-max-height': '1000px',
+    '--cui-popover-border-color': 'var(--cui-primary)',
+    '--cui-popover-header-bg': 'var(--cui-primary)',
+    '--cui-popover-header-color': 'var(--cui-white)',
+  };
+
+  const handleLikedChatAnswerVisible = (index) => {
+    if (!hoveredLikedChatIndex) {
+      setShowChatAnswer(false);
+      return;
+    }
+
+    setShowChatAnswer();
+  };
 
   return (
     <div className="d-flex flex-column flex-grow-1 overflow-auto" style={{ width: '100%' }}>
@@ -1103,7 +1132,7 @@ const DashboardPage = () => {
               >
                 <CTable align="middle" className="mb-0 border" hover responsive={'xl'} style={{ height: '430px' }}>
                   <CTableHead color="light">
-                    <CTableRow style={{ height: '43px' }}>
+                    <CTableRow>
                       <CTableHeaderCell className="text-center">
                         <CIcon icon={cilDescription} />
                       </CTableHeaderCell>
@@ -1192,7 +1221,7 @@ const DashboardPage = () => {
               >
                 <CTable align="middle" className="mb-0 border me-2" hover responsive={'xl'} style={{ height: '430px' }}>
                   <CTableHead color="light">
-                    <CTableRow style={{ height: '43px' }}>
+                    <CTableRow>
                       <CTableHeaderCell className="text-center">
                         <CIcon icon={cilDescription} />
                       </CTableHeaderCell>
@@ -1266,7 +1295,10 @@ const DashboardPage = () => {
         <CCol sm={6}>
           {/* 채팅 통계 정보 S*/}
           <CCard className="m-3">
-            <CCardHeader>최근 좋아요 표시된 답변</CCardHeader>
+            <CCardHeader className="d-flex align-items-center justify-content-between">
+              최근 좋아요 표시된 답변
+              <small className="text-medium-emphasis"> 질문 클릭 시 해당 답변을 볼 수 있습니다.</small>
+            </CCardHeader>
             <CCardBody className="d-flex justify-content-center">
               <CSmartTable
                 items={ChatExample}
@@ -1275,32 +1307,25 @@ const DashboardPage = () => {
                   {
                     key: 'avatar',
                     label: <CIcon icon={cilPeople} />,
-                    _style: { width: '33%' },
+                    _style: { width: '10%' },
                     _props: { className: 'text-center' },
                     filter: false,
                     sorter: false,
-                    //_cellComponent: ({ item }) => <CAvatar size="md" src={item.avatar.src} status={item.avatar.status} />,
                   },
-                  { key: 'question', label: '질문', _props: { className: 'text-nowrap' }, _style: { width: '33%' } },
+                  { key: 'question', label: '질문', _props: { className: 'text-nowrap' }, _style: { width: '40%' } },
 
-                  // {
-                  //   key: 'avatar',
-                  //   label: '질문자',
-                  //   _style: { width: '10%' },
-                  //   _props: { className: 'text-center' },
-                  //   filter: false,
-                  //   sorter: false,
-                  //   // _cellComponent: ({ item }) => <CIcon size="xl" icon={item.country.flag} title={item.country.name} />,
-                  // },
-                  { key: 'askedAt', label: 'AskedAt', _style: { width: '34%' } },
+                  { key: 'createdAt', label: 'CreatedAt', _style: { width: '34%' } },
+                  {
+                    key: 'externalLink',
+                    label: '관리페이지',
+                    _style: { width: '16%' },
+                    filter: false,
+                    sorter: false,
+                  },
                 ]}
                 tableProps={{
-                  // hover: true,
-                  // striped: true,
-                  // responsive: true,
-                  // align: 'middle',
+                  align: 'middle',
                   className: 'mb-0 border me-5',
-                  style: { width: '90%' },
                   hover: true,
                   responsive: true,
                 }}
@@ -1309,63 +1334,86 @@ const DashboardPage = () => {
                 }}
                 scopedColumns={{
                   avatar: (item) => (
-                    <td>
+                    <td className="text-center">
                       <CAvatar size="md" src={item.avatar.src} status={item.avatar.status} />
                     </td>
                   ),
                   question: (item, index) => (
-                    <td
-                      onClick={() => {
-                        setHoveredIndex(index);
-                      }}
-                      style={{ cursor: 'pointer' }}
+                    <CPopover
+                      title={
+                        <>
+                          <CRow className="">
+                            <CCol sm={4} className="d-flex align-items-end">
+                              <h6 id="answer">답변</h6>
+                            </CCol>
+                            <CCol sm={8} className="d-flex align-content-center justify-content-end">
+                              <CBadge color={'info'} id="modelName" className="m-2 text-center align-content-center">
+                                {item.modelName}
+                              </CBadge>
+                              <CBadge color={'primary'} id="pilotMode" className="m-2">
+                                {item.pilotMode === 'C' ? 'Co-pilot' : 'Auto-pilot'}
+                              </CBadge>
+                              <CBadge id="thumb" className="m-2" style={{ backgroundColor: '#4d67c9' }}>
+                                <PiThumbsUpFill />
+                              </CBadge>
+                            </CCol>
+                          </CRow>
+                        </>
+                      }
+                      content={
+                        <>
+                          <CCard>
+                            <CCollapse visible={hoveredLikedChatIndex === index}>
+                              <CCardBody style={{ maxHeight: '600px', overflowX: 'scroll' }}>
+                                <ReactMarkdown
+                                  remarkPlugins={[remarkGfm]}
+                                  rehypePlugins={[rehypeRaw]}
+                                  className="reactMarkdown"
+                                >
+                                  {AnswerExample?.[hoveredLikedChatIndex]?.message}
+                                </ReactMarkdown>
+                              </CCardBody>
+                            </CCollapse>
+                          </CCard>
+                        </>
+                      }
+                      placement="bottom"
+                      trigger={'focus'}
+                      style={customPopoverStyle}
                     >
-                      <div style={{ overflow: 'auto' }}>{item.question}</div>
-                    </td>
-                  ),
-                  askedAt: (item, index) => (
-                    <>
                       <td
                         onClick={() => {
-                          setHoveredIndex(index);
+                          setHoveredLikedChatIndex(index);
                         }}
                         style={{ cursor: 'pointer' }}
                       >
-                        <div className="small text-medium-emphasis">CreatedAt</div>
-                        <div className="fw-semibold text-nowrap">{item.activity}</div>
-                      </td>
-                      {hoveredIndex === index && (
-                        <div
-                          style={{
-                            position: 'absolute',
-                            display: 'flex',
-                            width: '4rem',
-                            height: 'max-content',
-                            borderWidth: '2px',
-                            borderColor: 'gray',
-                            borderTopRightRadius: '5px',
-                            borderBottomRightRadius: '5px',
-                            textAlign: 'center',
-                            alignContent: 'center',
-                          }}
-                        >
-                          {' >>>>>'}
+                        <div tabIndex={0} style={{ overflowY: 'hidden' }}>
+                          {item.question}
                         </div>
-                      )}
+                      </td>
+                    </CPopover>
+                  ),
+                  createdAt: (item) => (
+                    <>
+                      <td className="text-center">
+                        <div className="text-medium-emphasis text-nowrap">{item.createdAt}</div>
+                      </td>
                     </>
+                  ),
+                  externalLink: (item) => (
+                    <td className="text-center">
+                      <CIcon
+                        style={{ cursor: 'pointer' }}
+                        icon={cilExternalLink}
+                        //STARTFROM 링크 이동부터 구현 onClick={()=>{navigate('/a')}}
+                      />
+                    </td>
                   ),
                 }}
                 onRowClick={(item, index) => {
-                  setHoveredIndex(index);
+                  setHoveredLikedChatIndex(index);
                 }}
               />
-
-              <CCard style={{ width: '45%' }}>
-                <CCardHeader> 답변 </CCardHeader>
-                <CCardBody>
-                  <div>{AnswerExample?.[hoveredIndex]?.message}</div>
-                </CCardBody>
-              </CCard>
             </CCardBody>
           </CCard>
           {/* 채팅 통계 정보 E*/}
