@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   cib500px5,
@@ -13,20 +13,19 @@ import {
   cibGoogle,
   cibLinkedin,
   cibTwitter,
-  cifBr,
-  cifEs,
-  cifFr,
-  cifIn,
-  cifPl,
-  cifUs,
   cilArrowBottom,
+  cilArrowThickFromLeft,
+  cilArrowThickFromRight,
   cilArrowTop,
+  cilChevronLeft,
+  cilChevronRight,
   cilCloudDownload,
   cilDescription,
   cilOptions,
   cilPeople,
+  cilScreenDesktop,
+  cilSitemap,
   cilUser,
-  cilUserFemale,
 } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import { CChart, CChartLine } from '@coreui/react-chartjs';
@@ -39,11 +38,14 @@ import {
   CCardFooter,
   CCardHeader,
   CCol,
+  CCollapse,
   CDropdown,
   CDropdownItem,
   CDropdownMenu,
   CDropdownToggle,
+  CPopover,
   CProgress,
+  CProgressBar,
   CRow,
   CSmartTable,
   CTable,
@@ -53,13 +55,30 @@ import {
   CTableHeaderCell,
   CTableRow,
   CWidgetStatsA,
+  CWidgetStatsB,
 } from '@coreui/react-pro';
 import { getStyle, hexToRgba } from '@coreui/utils';
 import { mergeAndSumArrays } from 'components/chart/utils/ChartStatisticsProcessor';
+import { useToast } from 'context/ToastContext';
+import DashBoardService from 'services/dashboard/DashBoardService';
+import { formatToIsoEndDate, formatToIsoStartDate, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
 
 const DashboardPage = () => {
+  const { addToast } = useToast();
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
+  const [totalDocumentCount, setTotalDocumentCount] = useState(0);
+  const [recentlyAddedDocument, setRecentlyAddedDocument] = useState([]);
+  const [hotDocumentEntries, setHotDocumentEntries] = useState([]);
+  const [totalStandardContractDocumentCount, setTotalStandardContractDocumentCount] = useState(0);
+  const [recentlyAddedStandardContract, setRecentlyAddedStandardContract] = useState([]);
+
+  const [standardContractDocumentTableVisible, setStandardContractDocumentTableVisible] = useState(false);
+  const [newContractDocumentTableVisible, setNewContractDocumentTableVisible] = useState(false);
+
+  const [IsDocumentStatsticsLoading, setIsDocumentStatsticsLoading] = useState(false);
+  const [isStandardContractLoading, setIsStandardContractLoading] = useState(false);
+  //REMIND 문서 공유 횟수..? 추가 고려
   const hotDocTopFive = [
     { title: 'Marl-E CMS in POSCO Corp.', value: '29,703 ', color: 'success' },
     { title: 'Marl-E CMS in MZC.', value: '24,093 ', color: 'info' },
@@ -67,15 +86,61 @@ const DashboardPage = () => {
     { title: 'Marl-E CMS 개발 인력 재검토', value: '22,123 ', color: 'danger' },
     { title: 'Marl-E CMS SI 파견 검토', value: '22,222 ', color: 'primary' },
   ];
+  useEffect(() => {
+    const documentStatistics = async () => {
+      setIsDocumentStatsticsLoading(true);
+      try {
+        const response = await DashBoardService.getDocumentCollectionStatistics(
+          formatToIsoStartDate(getOneYearAgoDate()),
+          formatToIsoEndDate(getCurrentDate())
+        );
+        setTotalDocumentCount(response.totalCount);
+        setRecentlyAddedDocument(response.recentlyAdded);
+        setHotDocumentEntries(response.topEntries);
+      } catch (error) {
+        console.log(error);
+        addToast({ message: '문서 집합에 대한 통계 정보를 가져오지 못했습니다' });
+      } finally {
+        setIsDocumentStatsticsLoading(false);
+      }
+    };
 
+    void documentStatistics();
+  }, [addToast]);
+
+  useEffect(() => {
+    const standardContractStatistics = async () => {
+      setIsStandardContractLoading(true);
+      try {
+        const response = await DashBoardService.getStandardContractDocumentStatistics(
+          formatToIsoStartDate(getOneYearAgoDate()),
+          formatToIsoEndDate(getCurrentDate())
+        );
+        setTotalStandardContractDocumentCount(response.totalCount);
+        setRecentlyAddedStandardContract(response.recentlyAdded);
+      } catch (error) {
+        console.log(error);
+        addToast({ message: ' 표준 계약서에 대한 통계 정보를 가져오지 못했습니다.' });
+      } finally {
+        setIsStandardContractLoading(false);
+      }
+      void standardContractStatistics();
+    };
+  }, [addToast]);
+  //STARTFROM 통계 api 연동하고, 더 할거 없으면 batch 공부나, 프롬프트 관리페이지 만들기
   const tokenUsagesData = [
-    { title: 'Tatal Token Usage', value: '102,799 tokens', percent: 100, color: 'success' },
-    { title: 'Input Tokens', value: '24,093 tokens', percent: ((24093 / 102799) * 100).toFixed(0), color: 'info' },
-    { title: 'Output Tokens', value: '78,706 tokens', percent: ((78706 / 102799) * 100).toFixed(0), color: 'warning' },
+    { title: 'Total', value: '102,799 ', percent: 100, color: 'success' },
+    { title: 'Input Tokens', value: '24,093 ', percent: parseInt(((24093 / 102799) * 100).toFixed(0)), color: 'info' },
     {
-      title: 'Maximum Token Usage',
-      value: '190.000 tokens',
-      percent: ((102799 / 190000) * 100).toFixed(1),
+      title: 'Output Tokens',
+      value: '78,706 ',
+      percent: parseInt(((78706 / 102799) * 100).toFixed(0)),
+      color: 'warning',
+    },
+    {
+      title: 'Remaining',
+      value: '190,000 ',
+      percent: parseInt(((1 - 102799 / 190000) * 100).toFixed(1)),
       color: 'danger',
     },
   ];
@@ -94,6 +159,7 @@ const DashboardPage = () => {
   const dailyTokenUsagesExampleOutputToken = dailyTokenUsagesExample.map((item) => item.OutputTokens);
 
   const DailyTokenUsagesExampleBarChart = () => {
+    //REMIND 매일 차트 라벨 변경해서, 가장 마지막 요일이 오늘이 되도록
     return (
       <CChart
         type="bar"
@@ -144,8 +210,8 @@ const DashboardPage = () => {
   };
 
   const popularPilotModeExample = [
-    { title: 'Auto', icon: cilUser, value: 53 },
-    { title: 'Co', icon: cilUserFemale, value: 47 },
+    { title: 'Auto', icon: cilScreenDesktop, value: 53 },
+    { title: 'Co', icon: cilUser, value: 47 },
   ];
 
   const popularModelExample = [
@@ -165,7 +231,7 @@ const DashboardPage = () => {
         new: true,
         registered: 'Jan 1, 2021',
       },
-      country: { name: 'USA', flag: cifUs },
+      team: '영업 1팀 ',
       usage: {
         value: 550,
         period: 'Jun 11, 2021 - Jul 10, 2021',
@@ -181,7 +247,7 @@ const DashboardPage = () => {
         new: false,
         registered: 'Jan 1, 2021',
       },
-      country: { name: 'Brazil', flag: cifBr },
+      team: '영업 2팀',
       usage: {
         value: 229,
         period: 'Jun 11, 2021 - Jul 10, 2021',
@@ -193,7 +259,7 @@ const DashboardPage = () => {
     {
       avatar: { src: '/images/avatars/1.jpg', status: 'warning' },
       user: { name: 'Quintin Ed', new: true, registered: 'Jan 1, 2021' },
-      country: { name: 'India', flag: cifIn },
+      team: '영업 1팀',
       usage: {
         value: 174,
         period: 'Jun 11, 2021 - Jul 10, 2021',
@@ -205,7 +271,7 @@ const DashboardPage = () => {
     {
       avatar: { src: '/images/avatars/1.jpg', status: 'secondary' },
       user: { name: 'Enéas Kwadwo', new: true, registered: 'Jan 1, 2021' },
-      country: { name: 'France', flag: cifFr },
+      team: '영업 2팀',
       usage: {
         value: 108,
         period: 'Jun 11, 2021 - Jul 10, 2021',
@@ -221,7 +287,7 @@ const DashboardPage = () => {
         new: true,
         registered: 'Jan 1, 2021',
       },
-      country: { name: 'Spain', flag: cifEs },
+      team: '영업 4팀',
       usage: {
         value: 77,
         period: 'Jun 11, 2021 - Jul 10, 2021',
@@ -237,7 +303,7 @@ const DashboardPage = () => {
         new: true,
         registered: 'Jan 1, 2021',
       },
-      country: { name: 'Poland', flag: cifPl },
+      team: ' 영업 4팀',
       usage: {
         value: 43,
         period: 'Jun 11, 2021 - Jul 10, 2021',
@@ -268,7 +334,7 @@ const DashboardPage = () => {
     {
       avatar: { src: '/images/logos/marle-logo.png', status: 'danger' },
       displayName: {
-        name: '계약 문서 2',
+        name: '계약 문서 2 하지만 이름이 너무나도 길어서 안보여야만하는데 어디까지 늘어날 생각이니 너는...3줄까지 내려간다면 나도 어쩔수 없이 계속해서 늘려야만 해. 그냥 계속 늘어날 생각이구나 너는하지만 이름이 너무나도 길어서 안보여야만하는데 어디까지 늘어날 생각이니 너는...3줄까지 내려간다면 나도 어쩔수 없이 계속해서 늘려야만 해. 그냥 계속 늘어날 생각이구나 너는하지만 이름이 너무나도 길어서 안보여야만하는데 어디까지 늘어날 생각이니 너는...3줄까지 내려간다면 나도 어쩔수 없이 계속해서 늘려야만 해. 그냥 계속 늘어날 생각이구나 너는하지만 이름이 너무나도 길어서 안보여야만하는데 어디까지 늘어날 생각이니 너는...3줄까지 내려간다면 나도 어쩔수 없이 계속해서 늘려야만 해. 그냥 계속 늘어날 생각이구나 너는하지만 이름이 너무나도 길어서 안보여야만하는데 어디까지 늘어날 생각이니 너는...3줄까지 내려간다면 나도 어쩔수 없이 계속해서 늘려야만 해. 그냥 계속 늘어날 생각이구나 너는하지만 이름이 너무나도 길어서 안보여야만하는데 어디까지 늘어날 생각이니 너는...3줄까지 내려간다면 나도 어쩔수 없이 계속해서 늘려야만 해. 그냥 계속 늘어날 생각이구나 너는',
         new: false,
         registered: 'Jan 1, 2021',
       },
@@ -339,6 +405,15 @@ const DashboardPage = () => {
       activity: 'Last week',
     },
   ];
+
+  const handleOpenNewContractDocumentTable = () => {
+    if (standardContractDocumentTableVisible) {
+      return;
+    }
+
+    setNewContractDocumentTableVisible(!newContractDocumentTableVisible);
+  };
+
   const standardContractsExample = [
     {
       avatar: { src: '/images/logos/marle-logo.png', status: 'success' },
@@ -425,6 +500,14 @@ const DashboardPage = () => {
     },
   ];
 
+  const handleOpenStandardContractTable = () => {
+    if (newContractDocumentTableVisible) {
+      return;
+    }
+
+    setStandardContractDocumentTableVisible(!standardContractDocumentTableVisible);
+  };
+
   const ChatExample = [
     {
       // avatar: { src: 'path/to/avatar1.jpg', status: 'success' },
@@ -455,100 +538,104 @@ const DashboardPage = () => {
     <div className="d-flex flex-column flex-grow-1 overflow-auto" style={{ width: '100%' }}>
       <CRow className="p-3">
         <CCol sm={4}>
-          <CWidgetStatsA
-            color="primary"
-            value={
-              <>
-                9,000{'개'}
-                <span className="fs-6 fw-normal">
-                  (40.9% <CIcon icon={cilArrowTop} /> , 월간)
-                </span>
-              </>
-            }
-            title="등록된 계약서"
-            action={
-              <CDropdown alignment="end">
-                <CDropdownToggle color="transparent" caret={false} className="p-0">
-                  <CIcon icon={cilOptions} className="text-white" />
-                </CDropdownToggle>
-                <CDropdownMenu>
-                  <CDropdownItem>Action</CDropdownItem>
-                  <CDropdownItem>Another action</CDropdownItem>
-                  <CDropdownItem>Something else here...</CDropdownItem>
-                  <CDropdownItem disabled>Disabled action</CDropdownItem>
-                </CDropdownMenu>
-              </CDropdown>
-            }
-            chart={
-              <CChartLine
-                className="mt-3 mx-3"
-                style={{ height: '70px' }}
-                data={{
-                  labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-                  datasets: [
-                    {
-                      label: 'My First dataset',
-                      backgroundColor: 'transparent',
-                      borderColor: 'rgba(255,255,255,.55)',
-                      pointBackgroundColor: '#5856d6',
-                      data: [65, 59, 84, 84, 51, 55, 40],
-                    },
-                  ],
-                }}
-                options={{
-                  plugins: {
-                    legend: {
-                      display: false,
-                    },
-                  },
-                  maintainAspectRatio: false,
-                  scales: {
-                    x: {
-                      border: {
-                        display: false,
+          <div id="totalDocumentCountDiv">
+            <CWidgetStatsA
+              color="primary"
+              value={
+                <>
+                  {totalDocumentCount}
+                  {'개'}
+                  <span className="fs-6 fw-normal">
+                    (40.9% <CIcon icon={cilArrowTop} /> , 월간)
+                  </span>
+                </>
+              }
+              title="등록된 계약서"
+              action={
+                <CDropdown alignment="end">
+                  <CDropdownToggle color="transparent" caret={false} className="p-0">
+                    <CIcon icon={cilOptions} className="text-white" />
+                  </CDropdownToggle>
+                  <CDropdownMenu>
+                    <CDropdownItem>Action</CDropdownItem>
+                    <CDropdownItem>Another action</CDropdownItem>
+                    <CDropdownItem>Something else here...</CDropdownItem>
+                    <CDropdownItem disabled>Disabled action</CDropdownItem>
+                  </CDropdownMenu>
+                </CDropdown>
+              }
+              chart={
+                <CChartLine
+                  className="mt-3 mx-3"
+                  style={{ height: '70px' }}
+                  data={{
+                    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                    datasets: [
+                      {
+                        label: 'My First dataset',
+                        backgroundColor: 'transparent',
+                        borderColor: 'rgba(255,255,255,.55)',
+                        pointBackgroundColor: '#5856d6',
+                        data: [65, 59, 84, 84, 51, 55, 40],
                       },
-                      grid: {
-                        display: false,
-                        drawBorder: false,
-                      },
-                      ticks: {
+                    ],
+                  }}
+                  options={{
+                    plugins: {
+                      legend: {
                         display: false,
                       },
                     },
-                    y: {
-                      min: 30,
-                      max: 89,
-                      display: false,
-                      grid: {
-                        display: false,
+                    maintainAspectRatio: false,
+                    scales: {
+                      x: {
+                        border: {
+                          display: false,
+                        },
+                        grid: {
+                          display: false,
+                          drawBorder: false,
+                        },
+                        ticks: {
+                          display: false,
+                        },
                       },
-                      ticks: {
+                      y: {
+                        min: 30,
+                        max: 89,
                         display: false,
+                        grid: {
+                          display: false,
+                        },
+                        ticks: {
+                          display: false,
+                        },
                       },
                     },
-                  },
-                  elements: {
-                    line: {
-                      borderWidth: 1,
-                      tension: 0.4,
+                    elements: {
+                      line: {
+                        borderWidth: 1,
+                        tension: 0.4,
+                      },
+                      point: {
+                        radius: 4,
+                        hitRadius: 10,
+                        hoverRadius: 4,
+                      },
                     },
-                    point: {
-                      radius: 4,
-                      hitRadius: 10,
-                      hoverRadius: 4,
-                    },
-                  },
-                }}
-              />
-            }
-          />
+                  }}
+                />
+              }
+            />
+          </div>
         </CCol>
         <CCol sm={4}>
           <CWidgetStatsA
             color="info"
             value={
               <>
-                1,000{'개'}
+                {totalStandardContractDocumentCount}
+                {'개'}
                 <span className="fs-6 fw-normal">
                   (40.9% <CIcon icon={cilArrowBottom} />, 월간)
                 </span>
@@ -712,8 +799,8 @@ const DashboardPage = () => {
             <CCardBody>
               <CRow>
                 <CCol sm={5}>
-                  <h4 id="HotDoc" className="card-title mb-0">
-                    🔥Hot🔥 Doc TOP 5
+                  <h4 id="HotCon" className="card-title mb-0">
+                    🔥Hot🔥 Con TOP 5
                   </h4>
                   <div className="small text-medium-emphasis">January - July 2021</div>
                 </CCol>
@@ -859,9 +946,8 @@ const DashboardPage = () => {
             </CCardBody>
             <CCardFooter>
               <CRow className="d-inline-block justify-content-center mb-1">
-                <h5 className="d-inline">핫독 순위</h5>
+                <h5 className="d-inline">핫콘 순위</h5>
                 <small className="text-medium-emphasis d-inline">
-                  {' '}
                   클릭 시 해당 문서의 상세 정보 창으로 이동합니다.
                 </small>
               </CRow>
@@ -869,7 +955,9 @@ const DashboardPage = () => {
                 {hotDocTopFive.map((item, index) => (
                   <CCol className="mb-sm-2 mb-0 d-flex flex-column" key={index}>
                     <strong>{index + 1}위</strong>
-                    <div className="text-medium-emphasis mb-3">{item.title}</div>
+                    <CPopover content={item.title} placement="bottom" trigger="hover">
+                      <div className="text-medium-emphasis mb-3 text-truncate">{item.title}</div>
+                    </CPopover>
                     <div className="mt-auto mb-0">
                       <strong>{item.value} 개</strong>
                     </div>
@@ -988,13 +1076,409 @@ const DashboardPage = () => {
                   <CCol className="mb-sm-2 mb-0" key={index}>
                     <div className="text-medium-emphasis">{item.title}</div>
                     <strong>
-                      {item.value} ({item.percent}%)
+                      {item.value}
+                      <br />({item.percent}%)
                     </strong>
                     <CProgress thin className="mt-2" color={`${item.color}-gradient`} value={item.percent} />
                   </CCol>
                 ))}
               </CRow>
             </CCardFooter>
+          </CCard>
+        </CCol>
+      </CRow>
+
+      <CRow>
+        <CCol sm={6}>
+          <CCard className="m-3">
+            <CCardHeader> NEW Cons!🌽 & New Standard 🌽tract Docs</CCardHeader>
+            <CCardBody className="table-wrapper">
+              <div
+                className={`table-container ${standardContractDocumentTableVisible ? 'table-expanded-right' : ''}`}
+                style={{
+                  zIndex: standardContractDocumentTableVisible ? 2 : 1,
+                  opacity: newContractDocumentTableVisible ? 0.15 : 1,
+                  marginRight: standardContractDocumentTableVisible ? '-300px' : '0',
+                }}
+              >
+                <CTable align="middle" className="mb-0 border" hover responsive={'xl'} style={{ height: '430px' }}>
+                  <CTableHead color="light">
+                    <CTableRow style={{ height: '43px' }}>
+                      <CTableHeaderCell className="text-center">
+                        <CIcon icon={cilDescription} />
+                      </CTableHeaderCell>
+                      <CTableHeaderCell
+                        style={{ cursor: newContractDocumentTableVisible ? '' : 'pointer' }}
+                        onClick={handleOpenStandardContractTable}
+                      >
+                        Standard Con
+                        <CIcon
+                          style={{ marginLeft: '1rem' }}
+                          icon={standardContractDocumentTableVisible ? cilChevronLeft : cilChevronRight}
+                        />
+                      </CTableHeaderCell>
+                      <CTableHeaderCell className="text-center">
+                        <CCollapse visible={standardContractDocumentTableVisible} horizontal>
+                          <p className="collapsable-table-header">Company</p>
+                        </CCollapse>
+                      </CTableHeaderCell>
+                      <CTableHeaderCell>
+                        <CCollapse visible={standardContractDocumentTableVisible} horizontal>
+                          <div className="d-flex justify-content-center">
+                            <CPopover
+                              placement="top"
+                              trigger={['hover', 'focus']}
+                              content={'해당 표준 계약서에 의해 작성된 계약서 개수입니다.'}
+                            >
+                              <CIcon icon={cilSitemap} size={'lg'} />
+                            </CPopover>
+                          </div>
+                        </CCollapse>
+                      </CTableHeaderCell>
+                      <CTableHeaderCell>
+                        <CCollapse visible={standardContractDocumentTableVisible} horizontal>
+                          <p className="collapsable-table-header">Activity</p>
+                        </CCollapse>
+                      </CTableHeaderCell>
+                    </CTableRow>
+                  </CTableHead>
+                  <CTableBody>
+                    {standardContractsExample.map((item, index) => (
+                      <CTableRow key={index}>
+                        <CTableDataCell className="text-center">
+                          <CAvatar size="md" src={item.avatar.src} status={item.avatar.status} />
+                        </CTableDataCell>
+                        <CTableDataCell>
+                          <CPopover content={item.displayName.name} placement="bottom" trigger="hover" delay={300}>
+                            <div>{item.displayName.name}</div>
+                          </CPopover>
+                          <div className="small text-medium-emphasis text-nowrap">
+                            Registered: {item.displayName.registered}
+                          </div>
+                        </CTableDataCell>
+                        <CTableDataCell>
+                          <CCollapse visible={standardContractDocumentTableVisible} horizontal>
+                            <div className="d-flex justify-content-center">
+                              <CIcon size="xl" icon={item.company.flag} />
+                            </div>
+                          </CCollapse>
+                        </CTableDataCell>
+                        <CTableDataCell>
+                          <CCollapse visible={standardContractDocumentTableVisible} horizontal>
+                            <div className="fw-semibold text-nowrap align-middle">{item.usage.value} 개</div>
+                          </CCollapse>
+                        </CTableDataCell>
+                        <CTableDataCell>
+                          <CCollapse visible={standardContractDocumentTableVisible} horizontal>
+                            <div className="collapsable-table-data">
+                              <div className="small text-medium-emphasis">CreatedAy</div>
+                              <div className="fw-semibold text-nowrap">{item.activity}</div>
+                            </div>
+                          </CCollapse>
+                        </CTableDataCell>
+                      </CTableRow>
+                    ))}
+                  </CTableBody>
+                </CTable>
+              </div>
+
+              <div
+                className={`table-container ${newContractDocumentTableVisible ? 'table-expanded-left' : ''}`}
+                style={{
+                  zIndex: newContractDocumentTableVisible ? 2 : 1,
+                  opacity: standardContractDocumentTableVisible ? 0.15 : 1,
+                  marginLeft: newContractDocumentTableVisible ? '-270px' : '10px',
+                }}
+              >
+                <CTable align="middle" className="mb-0 border me-2" hover responsive={'xl'} style={{ height: '430px' }}>
+                  <CTableHead color="light">
+                    <CTableRow style={{ height: '43px' }}>
+                      <CTableHeaderCell className="text-center">
+                        <CIcon icon={cilDescription} />
+                      </CTableHeaderCell>
+                      <CTableHeaderCell
+                        style={{ cursor: standardContractDocumentTableVisible ? '' : 'pointer' }}
+                        onClick={handleOpenNewContractDocumentTable}
+                      >
+                        Con
+                        <CIcon
+                          style={{ marginLeft: '5rem' }}
+                          icon={newContractDocumentTableVisible ? cilArrowThickFromLeft : cilArrowThickFromRight}
+                        />
+                      </CTableHeaderCell>
+                      <CTableHeaderCell>
+                        <CCollapse visible={newContractDocumentTableVisible} horizontal>
+                          <p className="collapsable-table-header">Company</p>
+                        </CCollapse>
+                      </CTableHeaderCell>
+                      <CTableHeaderCell>
+                        <CCollapse visible={newContractDocumentTableVisible} horizontal>
+                          <p className="collapsable-table-header">Activity</p>
+                        </CCollapse>
+                      </CTableHeaderCell>
+                    </CTableRow>
+                  </CTableHead>
+                  <CTableBody>
+                    {DocsExample.map((item, index) => (
+                      <CTableRow key={index}>
+                        <CTableDataCell className="text-center">
+                          <CAvatar size="md" src={item.avatar.src} status={item.avatar.status} />
+                        </CTableDataCell>
+                        <CTableDataCell>
+                          <CPopover content={item.displayName.name} placement="bottom" trigger="hover" delay={300}>
+                            <div
+                              className="overflow-hidden text-truncate"
+                              style={{
+                                maxWidth: '9.7rem',
+                              }}
+                            >
+                              {item.displayName.name}
+                            </div>
+                          </CPopover>
+                          <div className="small text-medium-emphasis text-nowrap">
+                            Registered: {item.displayName.registered}
+                          </div>
+                        </CTableDataCell>
+                        <CTableDataCell>
+                          <CCollapse visible={newContractDocumentTableVisible} horizontal>
+                            <div className="d-flex justify-content-center">
+                              <CIcon size="xl" icon={item.country.flag} />
+                            </div>
+                          </CCollapse>
+                        </CTableDataCell>
+                        <CTableDataCell>
+                          <CCollapse visible={newContractDocumentTableVisible} horizontal>
+                            <div className="collapsable-table-data">
+                              <div className="small text-medium-emphasis">CreatedAy</div>
+                              <div className="fw-semibold text-nowrap">{item.activity}</div>
+                            </div>
+                          </CCollapse>
+                        </CTableDataCell>
+                      </CTableRow>
+                    ))}
+                  </CTableBody>
+                </CTable>
+              </div>
+            </CCardBody>
+          </CCard>
+        </CCol>
+
+        <CCol sm={6}>
+          {/* 채팅 통계 정보 S*/}
+          <CCard className="m-3">
+            <CCardHeader>최근 좋아요 표시된 답변</CCardHeader>
+            <CCardBody className="d-flex justify-content-center">
+              <CSmartTable
+                items={ChatExample}
+                pagination={true}
+                columns={[
+                  {
+                    key: 'avatar',
+                    label: <CIcon icon={cilPeople} />,
+                    _style: { width: '33%' },
+                    _props: { className: 'text-center' },
+                    filter: false,
+                    sorter: false,
+                    //_cellComponent: ({ item }) => <CAvatar size="md" src={item.avatar.src} status={item.avatar.status} />,
+                  },
+                  { key: 'question', label: '질문', _props: { className: 'text-nowrap' }, _style: { width: '33%' } },
+
+                  // {
+                  //   key: 'avatar',
+                  //   label: '질문자',
+                  //   _style: { width: '10%' },
+                  //   _props: { className: 'text-center' },
+                  //   filter: false,
+                  //   sorter: false,
+                  //   // _cellComponent: ({ item }) => <CIcon size="xl" icon={item.country.flag} title={item.country.name} />,
+                  // },
+                  { key: 'askedAt', label: 'AskedAt', _style: { width: '34%' } },
+                ]}
+                tableProps={{
+                  // hover: true,
+                  // striped: true,
+                  // responsive: true,
+                  // align: 'middle',
+                  className: 'mb-0 border me-5',
+                  style: { width: '90%' },
+                  hover: true,
+                  responsive: true,
+                }}
+                tableHeadProps={{
+                  color: 'secondary',
+                }}
+                scopedColumns={{
+                  avatar: (item) => (
+                    <td>
+                      <CAvatar size="md" src={item.avatar.src} status={item.avatar.status} />
+                    </td>
+                  ),
+                  question: (item, index) => (
+                    <td
+                      onClick={() => {
+                        setHoveredIndex(index);
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div style={{ overflow: 'auto' }}>{item.question}</div>
+                    </td>
+                  ),
+                  askedAt: (item, index) => (
+                    <>
+                      <td
+                        onClick={() => {
+                          setHoveredIndex(index);
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <div className="small text-medium-emphasis">CreatedAt</div>
+                        <div className="fw-semibold text-nowrap">{item.activity}</div>
+                      </td>
+                      {hoveredIndex === index && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            display: 'flex',
+                            width: '4rem',
+                            height: 'max-content',
+                            borderWidth: '2px',
+                            borderColor: 'gray',
+                            borderTopRightRadius: '5px',
+                            borderBottomRightRadius: '5px',
+                            textAlign: 'center',
+                            alignContent: 'center',
+                          }}
+                        >
+                          {' >>>>>'}
+                        </div>
+                      )}
+                    </>
+                  ),
+                }}
+                onRowClick={(item, index) => {
+                  setHoveredIndex(index);
+                }}
+              />
+
+              <CCard style={{ width: '45%' }}>
+                <CCardHeader> 답변 </CCardHeader>
+                <CCardBody>
+                  <div>{AnswerExample?.[hoveredIndex]?.message}</div>
+                </CCardBody>
+              </CCard>
+            </CCardBody>
+          </CCard>
+          {/* 채팅 통계 정보 E*/}
+
+          <CCard className="m-3">
+            <CCardHeader>6월(이번달) 예상 결제 금액</CCardHeader>
+            <CCardBody>
+              <CRow>
+                <CCol sm={6}>
+                  <CWidgetStatsA
+                    style={{ height: '90%', backgroundColor: '#ffd600' }}
+                    className="mb-4"
+                    // color="primary"
+                    value={
+                      <span className="text-white">
+                        $9,000
+                        <span className="fs-6 fw-normal text-white">
+                          (10.9% <CIcon icon={cilArrowTop} />)
+                        </span>
+                      </span>
+                    }
+                    title={<span className="text-white">6월(이번달) 결제 금액</span>}
+                    action={
+                      <CDropdown alignment="end">
+                        <CDropdownToggle color="transparent" caret={false} className="p-0">
+                          <CIcon icon={cilOptions} className="text-white" />
+                        </CDropdownToggle>
+                        <CDropdownMenu>
+                          <CDropdownItem>Action</CDropdownItem>
+                          <CDropdownItem>Another action</CDropdownItem>
+                          <CDropdownItem>Something else here...</CDropdownItem>
+                          <CDropdownItem disabled>Disabled action</CDropdownItem>
+                        </CDropdownMenu>
+                      </CDropdown>
+                    }
+                    chart={
+                      <CChartLine
+                        className="mt-3 mx-3"
+                        style={{ height: '70px' }}
+                        data={{
+                          labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                          datasets: [
+                            {
+                              label: 'My First dataset',
+                              backgroundColor: 'transparent',
+                              borderColor: 'rgba(255,255,255,.55)',
+                              pointBackgroundColor: 'white',
+                              data: [65, 59, 40, 70, 84, 87],
+                            },
+                          ],
+                        }}
+                        options={{
+                          plugins: {
+                            legend: {
+                              display: false,
+                            },
+                          },
+                          maintainAspectRatio: false,
+                          scales: {
+                            x: {
+                              border: {
+                                display: false,
+                              },
+                              grid: {
+                                display: false,
+                                drawBorder: false,
+                              },
+                              ticks: {
+                                display: false,
+                              },
+                            },
+                            y: {
+                              min: 30,
+                              max: 100,
+                              display: false,
+                              grid: {
+                                display: false,
+                              },
+                              ticks: {
+                                display: false,
+                              },
+                            },
+                          },
+                          elements: {
+                            line: {
+                              borderWidth: 5,
+                              tension: 0.4,
+                            },
+                            point: {
+                              radius: 4,
+                              hitRadius: 10,
+                              hoverRadius: 4,
+                            },
+                          },
+                        }}
+                      />
+                    }
+                  />
+                </CCol>
+                <CCol sm={6}>
+                  <CWidgetStatsB
+                    className="mb-3"
+                    color="success"
+                    inverse
+                    progress={{ value: 89.9 }}
+                    text="쓸만큼 쓰셨군요! 다음달에도 만나요~"
+                    title="Rate of CMS operation"
+                    value="89.9%"
+                    style={{ height: '90%' }}
+                  />
+                </CCol>
+              </CRow>
+            </CCardBody>
           </CCard>
         </CCol>
       </CRow>
@@ -1031,6 +1515,19 @@ const DashboardPage = () => {
               {/*  </div>*/}
               {/*))}*/}
               <DailyTokenUsagesExampleBarChart />
+              <hr className="mt-3" />
+
+              <div id="todaysTokenUsage" className="mt-3">
+                <h5>금일 토큰 사용량 </h5>
+                <CProgress height={30}>
+                  <CProgressBar color="primary" value={25}>
+                    30
+                  </CProgressBar>
+                  <CProgressBar color="danger" value={75}>
+                    90
+                  </CProgressBar>
+                </CProgress>
+              </div>
             </CCol>
 
             <CCol xs={12} md={6} xl={6}>
@@ -1089,7 +1586,7 @@ const DashboardPage = () => {
                   <CIcon icon={cilPeople} />
                 </CTableHeaderCell>
                 <CTableHeaderCell>사용자</CTableHeaderCell>
-                <CTableHeaderCell className="text-center">Country</CTableHeaderCell>
+                <CTableHeaderCell className="text-center">Team</CTableHeaderCell>
                 <CTableHeaderCell>
                   토큰 사용량 <small> (단위 : 1000개) </small>
                 </CTableHeaderCell>
@@ -1110,7 +1607,8 @@ const DashboardPage = () => {
                     </div>
                   </CTableDataCell>
                   <CTableDataCell className="text-center">
-                    <CIcon size="xl" icon={item.country.flag} title={item.country.name} />
+                    {/*<CIcon size="xl" icon={item.country.flag} title={item.country.name} />*/}
+                    <div>{item.team}</div>
                   </CTableDataCell>
                   <CTableDataCell>
                     <div className="d-flex justify-content-between">
@@ -1136,209 +1634,6 @@ const DashboardPage = () => {
           </CTable>
         </CCardBody>
       </CCard>
-
-      <CRow>
-        <CCol sm={6}>
-          <CCard className="m-3">
-            <CCardHeader> NEW Docs! & New Standard Contract Docs</CCardHeader>
-            <CCardBody className="d-flex justify-content-center">
-              <CTable align="middle" className="mb-0 border me-5" hover responsive>
-                <CTableHead color="light">
-                  <CTableRow>
-                    <CTableHeaderCell className="text-center">
-                      <CIcon icon={cilDescription} />
-                    </CTableHeaderCell>
-                    <CTableHeaderCell>DisplayName</CTableHeaderCell>
-                    <CTableHeaderCell className="text-center">Company</CTableHeaderCell>
-                    <CTableHeaderCell>Activity</CTableHeaderCell>
-                  </CTableRow>
-                </CTableHead>
-                <CTableBody>
-                  {DocsExample.map((item, index) => (
-                    <CTableRow v-for="item in tableItems" key={index}>
-                      <CTableDataCell className="text-center">
-                        <CAvatar size="md" src={item.avatar.src} status={item.avatar.status} />
-                      </CTableDataCell>
-                      <CTableDataCell>
-                        <div>{item.displayName.name}</div>
-                        <div className="small text-medium-emphasis text-nowrap">
-                          <span>{item.displayName.new ? 'New' : 'Recurring'}</span> | Registered:{' '}
-                          {item.displayName.registered}
-                        </div>
-                      </CTableDataCell>
-                      <CTableDataCell className="text-center">
-                        <CIcon size="xl" icon={item.country.flag} title={item.country.name} />
-                      </CTableDataCell>
-                      <CTableDataCell>
-                        <div className="small text-medium-emphasis">CreatedAy</div>
-                        <div className="fw-semibold text-nowrap">{item.activity}</div>
-                      </CTableDataCell>
-                    </CTableRow>
-                  ))}
-                </CTableBody>
-              </CTable>
-              <CTable
-                align="middle"
-                className="mb-0 border"
-                hover
-                // style={{ width: '45%' }}
-                responsive
-              >
-                <CTableHead color="light">
-                  <CTableRow>
-                    <CTableHeaderCell className="text-center">
-                      <CIcon icon={cilDescription} />
-                    </CTableHeaderCell>
-                    <CTableHeaderCell>DisplayName</CTableHeaderCell>
-                    <CTableHeaderCell className="text-center">Company</CTableHeaderCell>
-                    <CTableHeaderCell className="text-center">파생 횟수</CTableHeaderCell>
-                    <CTableHeaderCell>Activity</CTableHeaderCell>
-                  </CTableRow>
-                </CTableHead>
-                <CTableBody>
-                  {standardContractsExample.map((item, index) => (
-                    <CTableRow v-for="item in tableItems" key={index}>
-                      <CTableDataCell className="text-center">
-                        <CAvatar size="md" src={item.avatar.src} status={item.avatar.status} />
-                      </CTableDataCell>
-                      <CTableDataCell>
-                        <div>{item.displayName.name}</div>
-                        <div className="small text-medium-emphasis text-nowrap">
-                          <span>{item.displayName.new ? 'New' : 'Recurring'}</span> | Registered:{' '}
-                          {item.displayName.registered}
-                        </div>
-                      </CTableDataCell>
-                      <CTableDataCell className="text-center">
-                        <CIcon size="xl" icon={item.company.flag} title={item.company.name} />
-                      </CTableDataCell>
-                      <CTableDataCell>
-                        {/*<div className="small text-medium-emphasis">기용 횟수</div>*/}
-                        <div className="fw-semibold text-nowrap">{item.usage.value} 회</div>
-                      </CTableDataCell>
-                      <CTableDataCell>
-                        <div className="small text-medium-emphasis">CreatedAy</div>
-                        <div className="fw-semibold text-nowrap">{item.activity}</div>
-                      </CTableDataCell>
-                    </CTableRow>
-                  ))}
-                </CTableBody>
-              </CTable>
-            </CCardBody>
-          </CCard>
-        </CCol>
-
-        <CCol sm={6}>
-          {/* 채팅 통계 정보 S*/}
-          <CCard className="m-3">
-            <CCardHeader>최근 좋아요 표시된 답변</CCardHeader>
-            <CCardBody className="d-flex justify-content-center">
-              <CSmartTable
-                items={ChatExample}
-                pagination={true}
-                columns={[
-                  {
-                    key: 'avatar',
-                    label: <CIcon icon={cilPeople} />,
-                    _style: { width: '33%' },
-                    _props: { className: 'text-center' },
-                    filter: false,
-                    sorter: false,
-                    //_cellComponent: ({ item }) => <CAvatar size="md" src={item.avatar.src} status={item.avatar.status} />,
-                  },
-                  { key: 'question', label: '질문', _props: { className: 'text-nowrap' }, _style: { width: '33%' } },
-
-                  // {
-                  //   key: 'avatar',
-                  //   label: '질문자',
-                  //   _style: { width: '10%' },
-                  //   _props: { className: 'text-center' },
-                  //   filter: false,
-                  //   sorter: false,
-                  //   // _cellComponent: ({ item }) => <CIcon size="xl" icon={item.country.flag} title={item.country.name} />,
-                  // },
-                  { key: 'askedAt', label: 'AskedAt', _props: { className: 'text-nowrap' }, _style: { width: '34%' } },
-                ]}
-                tableProps={{
-                  // hover: true,
-                  // striped: true,
-                  // responsive: true,
-                  // align: 'middle',
-                  className: 'mb-0 border me-5',
-                  style: { width: '90%' },
-                  hover: true,
-                  responsive: true,
-                }}
-                scopedColumns={{
-                  avatar: (item) => (
-                    <td>
-                      <CAvatar size="md" src={item.avatar.src} status={item.avatar.status} />
-                    </td>
-                  ),
-                  question: (item, index) => (
-                    <td
-                      onClick={() => {
-                        setHoveredIndex(index);
-                      }}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <div style={{ overflow: 'auto' }}>{item.question}</div>
-
-                      {/*<div className="small text-medium-emphasis text-nowrap">*/}
-                      {/*  <span>{item.displayName.new ? 'New' : 'Recurring'}</span> | Registered:{' '}*/}
-                      {/*  {item.displayName.registered}*/}
-                      {/*</div>*/}
-                    </td>
-                  ),
-                  askedAt: (item, index) => (
-                    <>
-                      <td
-                        onClick={() => {
-                          setHoveredIndex(index);
-                        }}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <div className="small text-medium-emphasis">CreatedAt</div>
-                        <div className="fw-semibold text-nowrap">{item.activity}</div>
-                      </td>
-                      {hoveredIndex === index && (
-                        <div
-                          style={{
-                            position: 'absolute',
-                            display: 'flex',
-                            width: '4rem',
-                            height: 'max-content',
-                            borderWidth: '2px',
-                            borderColor: 'gray',
-                            borderTopRightRadius: '5px',
-                            borderBottomRightRadius: '5px',
-                            textAlign: 'center',
-                            alignContent: 'center',
-                          }}
-                        >
-                          {' >>>>>'}
-                        </div>
-                      )}
-                    </>
-                  ),
-                }}
-                onRowClick={(item, index) => {
-                  setHoveredIndex(index);
-                  // onClick 이벤트를 여기에 추가하세요.
-                  // setChatContent(index);
-                }}
-              />
-
-              <CCard style={{ width: '45%' }}>
-                <CCardHeader> 답변 </CCardHeader>
-                <CCardBody>
-                  <div>{AnswerExample?.[hoveredIndex]?.message}</div>
-                </CCardBody>
-              </CCard>
-            </CCardBody>
-          </CCard>
-          {/* 채팅 통계 정보 E*/}
-        </CCol>
-      </CRow>
     </div>
   );
 };

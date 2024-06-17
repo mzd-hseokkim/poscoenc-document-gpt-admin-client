@@ -1,4 +1,9 @@
 // Here you can add other styles
+
+@function rem($px-value) {
+  @return $px-value / 16 * 1rem;
+}
+
 // ChatHistory QnA style S
 .code-block {
   position: relative;
@@ -61,3 +66,42 @@
 .white-space-pre {
   white-space: pre;
 }
+
+
+// Dashboard Style S
+
+.table-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  padding: rem(20) rem(20);
+}
+
+.table-container {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+//.table-expanded {
+//  z-index: 2;
+//}
+
+.table-expanded-left {
+  z-index: 2;
+}
+
+.table-expanded-right {
+  z-index: 2;
+}
+
+.collapsable-table-header {
+  display: table-cell;
+  vertical-align: inherit;
+}
+
+.collapsable-table-data {
+  display: table-row;
+  vertical-align: inherit;
+}
+
+// Dashboard Style E

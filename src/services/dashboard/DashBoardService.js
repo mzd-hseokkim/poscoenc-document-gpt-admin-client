@@ -1,12 +1,15 @@
 import api from 'api/Api';
 
-const getDocumentCollectionStatistics = async () => {
-  const response = await api.get('admin/dashboard-statistics/document-collections');
-  console.log(response);
+const getDocumentCollectionStatistics = async (startDate, endDate) => {
+  const response = await api.get(
+    `admin/dashboard-statistics/document-collections?startDate=${startDate}&endDate=${endDate}`
+  );
   return response?.data;
 };
-const getStandardContractDocumentStatistics = async () => {
-  const response = await api.get('admin/dashboard-statistics/standard-documents');
+const getStandardContractDocumentStatistics = async (startDate, endDate) => {
+  const response = await api.get(
+    `admin/dashboard-statistics/standard-documents?startDate=${startDate}&endDate=${endDate}}`
+  );
   console.log(response);
   return response?.data;
 };
