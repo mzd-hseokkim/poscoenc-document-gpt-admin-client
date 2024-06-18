@@ -8,9 +8,8 @@ const getDocumentCollectionStatistics = async (startDate, endDate) => {
 };
 const getStandardContractDocumentStatistics = async (startDate, endDate) => {
   const response = await api.get(
-    `admin/dashboard-statistics/standard-documents?startDate=${startDate}&endDate=${endDate}}`
+    `admin/dashboard-statistics/standard-documents?startDate=${startDate}&endDate=${endDate}`
   );
-  console.log(response);
   return response?.data;
 };
 const getUserAccountStatistics = async () => {
