@@ -28,6 +28,7 @@ import { useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
 import StatisticsService from 'services/statistics/StatisticsService';
 import UserService from 'services/UserService';
+import { sortByAggregationKey } from 'utils/chart/sortByAggregationKey';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/common/formModes';
 import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
@@ -122,18 +123,10 @@ const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {
           criteriaKey: userId,
           endDate: new Date().toISOString().split('T')[0],
         });
-        responseData.list.sort((a, b) => {
-          const [yearA, monthA] = a.aggregationKey.split('-').map(Number);
-          const [yearB, monthB] = b.aggregationKey.split('-').map(Number);
 
-          if (yearA !== yearB) {
-            return yearA - yearB;
-          } else {
-            return monthA - monthB;
-          }
-        });
+        const sortedData = sortByAggregationKey(responseData?.list);
+        const paddedData = padDataArrayWithZero(sortedData, currentMonth);
 
-        const paddedData = padDataArrayWithZero(responseData?.list, currentMonth);
         setStatisticsData({
           inputTokenData: paddedData.map((item) => item.sumInputTokens),
           outputTokenData: paddedData.map((item) => item.sumOutputTokens),
@@ -142,7 +135,7 @@ const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {
         });
       } catch (error) {
         console.log(error);
-        addToast('차트를 불러오는데 실패했습니다.');
+        addToast({ message: '차트를 불러오는데 실패했습니다.' });
       } finally {
         setIsLoading(false);
       }

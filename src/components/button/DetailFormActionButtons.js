@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
 import { CButton, CCol, CRow } from '@coreui/react-pro';
-import { colorButtonTextStyle } from 'components/button/colorButtonTextStyle';
 import DeleteAlertModal from 'components/modal/DeleteAlertModal';
 
 const DetailFormActionButtons = ({
@@ -21,9 +20,13 @@ const DetailFormActionButtons = ({
   const isUserData = isCreatedByCurrentUser !== undefined;
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const shouldShowModifyButton = () => {
-    if (!isReadMode) return false;
+    if (!isReadMode) {
+      return false;
+    }
 
-    if (!isUserData) return true;
+    if (!isUserData) {
+      return true;
+    }
 
     return isUserData && isCreatedByCurrentUser;
   };
@@ -49,7 +52,7 @@ const DetailFormActionButtons = ({
           )}
           {isReadMode && (
             <CButton
-              style={colorButtonTextStyle}
+              className="color-button-text-white"
               color={isDataDeleted ? 'success' : 'danger'}
               onClick={() => setDeleteModalVisible(true)}
             >

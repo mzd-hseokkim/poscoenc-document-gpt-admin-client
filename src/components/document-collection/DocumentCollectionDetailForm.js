@@ -23,6 +23,7 @@ import {
 import DocumentFileStatusBadge from 'components/badge/DocumentFileStatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import { TokenUsageChart } from 'components/chart/TokenUsageChart';
+import { padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import { AuditFields } from 'components/form/AuditFields';
 import FormInputGrid from 'components/input/FormInputGrid';
@@ -36,6 +37,7 @@ import DocumentCollectionFileService from 'services/document-collection/Document
 import DocumentCollectionService from 'services/document-collection/DocumentCollectionService';
 import StatisticsService from 'services/statistics/StatisticsService';
 import { userIdSelector } from 'states/jwtTokenState';
+import { sortByAggregationKey } from 'utils/chart/sortByAggregationKey';
 import { formatToYMD } from 'utils/common/dateUtils';
 import { formatFileSize } from 'utils/common/formatFileSize';
 import formModes from 'utils/common/formModes';
@@ -43,6 +45,8 @@ import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
 import { itemNameValidationPattern } from 'utils/common/validationUtils';
 
 const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocumentCollectionList }) => {
+  const currentMonth = new Date().getMonth() + 1;
+
   const [collectionDetail, setCollectionDetail] = useState({});
   const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
@@ -136,35 +140,34 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     },
     [addToast, closeModal, reset]
   );
-  const fetchStatisticsData = useCallback(async (collectionId) => {
-    try {
-      const responseData = await StatisticsService.getMonthlyStatisticsData({
-        criteria: 'documentCollection',
-        criteriaKey: collectionId,
-        endDate: new Date().toISOString().split('T')[0],
-      });
-      responseData.list.sort((a, b) => {
-        const [yearA, monthA] = a.aggregationKey.split('-').map(Number);
-        const [yearB, monthB] = b.aggregationKey.split('-').map(Number);
+  const fetchStatisticsData = useCallback(
+    async (collectionId) => {
+      setGetDetailIsLoading(true);
+      try {
+        const responseData = await StatisticsService.getMonthlyStatisticsData({
+          criteria: 'documentCollection',
+          criteriaKey: collectionId,
+          endDate: new Date().toISOString().split('T')[0],
+        });
 
-        if (yearA !== yearB) {
-          return yearA - yearB;
-        } else {
-          return monthA - monthB;
-        }
-      });
-      setStatisticsData({
-        inputTokenData: responseData.list.map((item) => item.sumInputTokens),
-        outputTokenData: responseData.list.map((item) => item.sumOutputTokens),
-        bingSearchsData: responseData.list.map((item) => item.sumBingSearchs),
-        dallE3GenerationsData: responseData.list.map((item) => item.sumDallE3Generations),
-      });
-    } catch (error) {
-      console.log(error);
-    } finally {
-      //REMIND Loading cover
-    }
-  }, []);
+        const sortedData = sortByAggregationKey(responseData?.list);
+        const paddedData = padDataArrayWithZero(sortedData, currentMonth);
+
+        setStatisticsData({
+          inputTokenData: paddedData.map((item) => item.sumInputTokens),
+          outputTokenData: paddedData.map((item) => item.sumOutputTokens),
+          bingSearchsData: paddedData.map((item) => item.sumBingSearchs),
+          dallE3GenerationsData: paddedData.map((item) => item.sumDallE3Generations),
+        });
+      } catch (error) {
+        console.log(error);
+        addToast({ message: '차트를 불러오는데 실패했습니다.' });
+      } finally {
+        setGetDetailIsLoading(false);
+      }
+    },
+    [addToast, currentMonth]
+  );
 
   useEffect(() => {
     const collectionId = searchParams.get('id');
@@ -199,7 +202,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
 
   const handleModificationCancelClick = async () => {
     setFormMode('read');
-    await fetchCollectionDetail();
+    await fetchCollectionDetail(searchParams.get('id'));
   };
   const onSubmit = async (data) => {
     await putModifiedCollection(data);
@@ -228,7 +231,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     refreshDocumentCollectionList();
   };
 
-  const toggleVisible = (fileId) => {
+  const togglePdfVisible = (fileId) => {
     setPdfVisible((prevState) => ({
       ...prevState,
       [fileId]: !prevState[fileId],
@@ -289,7 +292,13 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                 <>
                   <CFormLabel
                     htmlFor="detail-form-description"
-                    className="col-form-label fw-bold"
+                    className="fw-bold
+                              border
+                              border-start-0 border-top-0 border-end-0
+                              border-opacity-50
+                              border-bottom-2 border-info
+                              
+                              "
                     style={{ color: 'red' }}
                   >
                     에러 로그
@@ -358,7 +367,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                         </CCol>
                         <CCol md={3} className="align-content-center">
                           <div className="float-end">
-                            <CButton className="me-2" onClick={() => toggleVisible(file.id)}>
+                            <CButton className="me-2" onClick={() => togglePdfVisible(file.id)}>
                               {!pdfVisible[file.id] ? (
                                 <MdPictureAsPdf size="20" title="PDF Reader" />
                               ) : (
@@ -371,7 +380,10 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                           </div>
                         </CCol>
                         <CCollapse visible={pdfVisible[file.id] || false}>
-                          <PdfViewer file={file} visible={pdfVisible[file.id] || false}></PdfViewer>
+                          <PdfViewer
+                            fileUrl={`admin/document-collection-files/download/${file.id}`}
+                            visible={pdfVisible[file.id] || false}
+                          ></PdfViewer>
                         </CCollapse>
                       </CRow>
                     </CListGroupItem>

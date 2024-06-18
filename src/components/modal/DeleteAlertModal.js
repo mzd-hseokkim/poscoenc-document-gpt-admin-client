@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 
 import { CButton, CModal, CModalBody, CModalFooter, CModalHeader, CModalTitle } from '@coreui/react-pro';
-import { colorButtonTextStyle } from 'components/button/colorButtonTextStyle';
 
 const DeleteAlertModal = ({ isDataDeleted, visible, setVisible, deleteMethod }) => {
   const [pendingDataDeleted, setPendingDataDeleted] = useState(isDataDeleted);
@@ -23,11 +22,11 @@ const DeleteAlertModal = ({ isDataDeleted, visible, setVisible, deleteMethod }) 
         <p>{pendingDataDeleted ? '데이터를 복구합니다.' : '복구 버튼을 눌러 되돌릴 수 있습니다.'}</p>
       </CModalBody>
       <CModalFooter>
-        <CButton style={colorButtonTextStyle} color="secondary" onClick={() => setVisible(false)}>
+        <CButton className="color-button-text-white" color="secondary" onClick={() => setVisible(false)}>
           취소
         </CButton>
         <CButton
-          style={colorButtonTextStyle}
+          className="color-button-text-white"
           color={pendingDataDeleted ? 'success' : 'danger'}
           onClick={(e) => {
             deleteMethod(e);
