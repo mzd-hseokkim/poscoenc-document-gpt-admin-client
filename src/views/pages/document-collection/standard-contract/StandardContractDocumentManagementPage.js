@@ -68,7 +68,6 @@ const StandardContractDocumentManagementPage = () => {
   const handleSubmitSearchRequest = (e) => {
     e.preventDefault();
     setSearchFormData(stagedSearchFormData);
-    console.log(stagedSearchFormData);
   };
 
   const searchStandardContractDocument = useCallback(async () => {
@@ -115,9 +114,9 @@ const StandardContractDocumentManagementPage = () => {
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
-        addToast({ message: '삭제할 문서 집합을 선택해주세요.' });
+        addToast({ message: '삭제할 표준 계약서를 선택해주세요.' });
       } else if (status === 404) {
-        addToast({ message: '삭제할 문서 집합을 찾지 못했습니다. 다시 검색 해 주세요.' });
+        addToast({ message: '삭제할 표준 계약서를 찾지 못했습니다. 다시 검색 해 주세요.' });
       } else {
         console.log(error);
       }
@@ -132,26 +131,6 @@ const StandardContractDocumentManagementPage = () => {
   };
 
   const scopedColumns = {
-    originalFilename: (item) => (
-      <td
-        style={{ cursor: 'pointer' }}
-        onClick={() => {
-          handleRowClick(item.id);
-        }}
-      >
-        {item.originalFilename}
-      </td>
-    ),
-    displayName: (item) => (
-      <td
-        style={{ cursor: 'pointer' }}
-        onClick={() => {
-          handleRowClick(item.id);
-        }}
-      >
-        {item.displayName}
-      </td>
-    ),
     createdAt: (item) => <td>{formatToYMD(item.createdAt)}</td>,
     deleted: (item) => (
       <td>
@@ -162,7 +141,7 @@ const StandardContractDocumentManagementPage = () => {
 
   return (
     <>
-      <FormLoadingCover isLoading={false} />
+      <FormLoadingCover isLoading={searchResultIsLoading} />
       <CRow id="Standard Contract Document Search Form">
         <CCard className="row g-3">
           <CCardBody>
@@ -274,7 +253,7 @@ const StandardContractDocumentManagementPage = () => {
                 columns={standardContractDocumentColumnConfig}
                 items={standardContractDocumentList}
                 itemsPerPage={pageableData.size}
-                itemsPerPageLabel="페이지당 문서 집합 개수"
+                itemsPerPageLabel="페이지당 표준 계약 문서 개수"
                 itemsPerPageSelect
                 loading={searchResultIsLoading}
                 noItemsLabel={
@@ -292,12 +271,14 @@ const StandardContractDocumentManagementPage = () => {
                 selectable
                 selected={selectedRows}
                 tableProps={tableCustomProps}
+                clickableRows
+                onRowClick={(item) => handleRowClick(item.id)}
               />
             </CRow>
           </CCardBody>
         </CCard>
       </CRow>
-      <ModalContainer visible={modal.isOpen} title={'표준 계약서 상세'} onClose={modal.closeModal} size="lg">
+      <ModalContainer visible={modal.isOpen} title={'표준 계약서 문서 상세'} onClose={modal.closeModal} size="lg">
         <StandardContractDocumentDetailForm
           closeModal={modal.closeModal}
           initialFormMode={detailFormMode}

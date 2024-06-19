@@ -115,7 +115,7 @@ export const StandardContractDocumentDetailForm = ({
 
   const putModifiedDocument = async (data) => {
     try {
-      const isModified = await StandardContractService.putModifiedDocumentDetail(data);
+      const isModified = await StandardContractService.putModifiedStandardContractDocumentDetail(data);
       if (isModified) {
         closeModal();
         setStandardContractDocumentDetail({});
