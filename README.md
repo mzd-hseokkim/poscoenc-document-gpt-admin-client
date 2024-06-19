@@ -145,3 +145,69 @@ You must have a valid license purchased to legally use this product for
 your projects.
 
 You can buy a license on our website https://coreui.io
+
+# MZD AI-Lab Project Document
+
+Versioning
+
+24/6/19 초안 작성- 손용균
+
+## 코드 스타일 가이드
+
+### **컴포넌트 공통 구조**
+
+0. 컴포넌트 외부
+
+- 정적 요소들 정의
+  - ex) Form Field 정의
+
+
+1. React States
+2. React Hooks
+3. Custom Hooks
+4. Common const / let variables
+5. Functions
+
+6. Component Property Objects
+
+   : CoreUI Component 에 필요한 prop 들을 정의
+
+   ex) CSmartTable - columnConfig / css styles property
+
+7. Partitioned Internal Components
+   : Return 문 안의 복잡한 컴포넌트 구조를 작은 크기로 분리한 컴포넌트
+
+8. Return
+
+### 컴포넌트 별 구조
+
+JSX
+-------
+
+### Page
+
+### DetailForm
+
+- Function 순서 : 기능 중심 정렬
+
+1. **onSubmit**
+2. **get api** (include all actions related to fetch data)
+3. **put api** (include all actions related to modify data)
+4. **delete / restore api** (include all actions related to delete/restore data)
+5. **Other Event Handlers** ( ex. open/close modal, inputChanged, etc. )
+
+Service
+------
+
+CustomHook
+------
+
+PDF
+------
+
+Chart
+------
+
+Utils
+------
+
