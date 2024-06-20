@@ -45,9 +45,9 @@ const StandardContractDocumentManagementPage = () => {
 
   const [searchFormData, setSearchFormData] = useState({});
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
-  const [isSearchPerformed, setIsSearchPerformed] = useState(false);
   const [totalCollectionElements, setTotalCollectionElements] = useState(0);
   const [detailFormMode, setDetailFormMode] = useState('');
+  const [hasError, setHasError] = useState(false);
 
   const modal = useModal();
   const { addToast } = useToast();
@@ -63,38 +63,44 @@ const StandardContractDocumentManagementPage = () => {
   const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } =
     usePagination(totalCollectionElements);
   const isComponentMounted = useRef(true);
+  const isSearchPerformed = useRef(false);
 
   // search form logic start -------------------------
   const handleSubmitSearchRequest = (e) => {
     e.preventDefault();
+    setHasError(false); //reset error state for re-request
     setSearchFormData(stagedSearchFormData);
   };
 
   const searchStandardContractDocument = useCallback(async () => {
     setSearchResultIsLoading(true);
-    if (!isSearchPerformed) {
-      setIsSearchPerformed(true);
+    if (!isSearchPerformed.current) {
+      isSearchPerformed.current = true;
     }
     try {
       const searchResult = await StandardContractService.getStandardContractDocumentList(searchFormData, pageableData);
       setStandardContractDocumentList(searchResult.content);
       setTotalCollectionElements(searchResult.totalElements);
+      setHasError(false);
     } catch (error) {
       //REMIND only sever error occur
-      addToast('검색 결과를 가져 올 수 없습니다.');
+      addToast({ message: '검색 결과를 가져 올 수 없습니다.' });
       console.log(error);
+      setHasError(true);
     } finally {
       setSearchResultIsLoading(false);
     }
-  }, [addToast, isSearchPerformed, pageableData, searchFormData]);
+  }, [addToast, pageableData, searchFormData]);
 
   useEffect(() => {
     if (isComponentMounted.current) {
       isComponentMounted.current = false;
     } else {
-      void searchStandardContractDocument();
+      if (!hasError) {
+        void searchStandardContractDocument();
+      }
     }
-  }, [pageableData, searchStandardContractDocument]);
+  }, [hasError, pageableData, searchStandardContractDocument]);
 
   // search result list logic  start ----------------
   const isDeletedRow = (selectedRows) => {
@@ -259,7 +265,7 @@ const StandardContractDocumentManagementPage = () => {
                 noItemsLabel={
                   <CSmartTableNoItemLabel
                     contentLength={standardContractDocumentList.length}
-                    isSearchPerformed={isSearchPerformed}
+                    isSearchPerformed={isSearchPerformed.current}
                     defaultMessage="검색 조건에 맞는 표준 계약 문서를 검색합니다."
                   />
                 }
