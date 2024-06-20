@@ -106,7 +106,7 @@ export const StandardContractDocumentDetailForm = ({
     }
 
     void fetchStandardContractDetail(standardContractDocumentId);
-    // void fetchStatisticsData(standardContractDocumentId); 통계데이터는..? 보류
+    // void fetchStatisticsData(standardContractDocumentId); 통계데이터는 보류
   }, [closeModal, searchParams, fetchStandardContractDetail]);
 
   const onSubmit = async (data) => {

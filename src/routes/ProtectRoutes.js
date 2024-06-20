@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useToast } from 'context/ToastContext';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -6,37 +6,48 @@ import MenuService from 'services/menu/MenuService';
 import { uriUtil } from 'utils/common/uriUtil';
 
 export const ProtectRoutes = () => {
+  const [hasError, setHasError] = useState(false);
   const token = localStorage.getItem('token');
   const location = useLocation();
   const navigate = useNavigate();
   const { addToast } = useToast();
   useEffect(() => {
-    if (unprotectedPaths.includes(location.pathname)) {
-      return;
-    }
+    const checkAuth = async () => {
+      if (unprotectedPaths.includes(location.pathname)) {
+        return;
+      }
 
-    if (!token) {
-      navigate('/sign-in', { replace: true });
-      return;
-    }
-    if (token && location.pathname !== '/') {
-      try {
-        void MenuService.postUri({ uri: uriUtil(location.pathname) });
-      } catch (error) {
-        const status = error.response?.status;
-        if (status === 401) {
-          navigate('/sign-in', { replace: true });
-          localStorage.removeItem('token');
-          addToast({ message: '세션이 만료되었습니다. 다시 로그인 해주세요.' });
-        } else if (status === 403) {
-          navigate('/', { replace: true });
-          addToast('접근 권한이 없습니다');
-        } else if (status === 404) {
-          navigate('/404', { replace: true });
+      if (!token) {
+        navigate('/sign-in', { replace: true });
+        return;
+      }
+
+      if (token && location.pathname !== '/' && !hasError) {
+        try {
+          await MenuService.postUri({ uri: uriUtil(location.pathname) });
+          setHasError(false);
+        } catch (error) {
+          const status = error.response?.status;
+          setHasError(true);
+          if (status === 401) {
+            navigate('/sign-in', { replace: true });
+            localStorage.removeItem('token');
+            addToast({ message: '세션이 만료되었습니다. 다시 로그인 해주세요.' });
+          } else if (status === 403) {
+            navigate('/', { replace: true });
+            addToast('접근 권한이 없습니다');
+          } else if (status === 404) {
+            navigate('/404', { replace: true });
+          } else {
+            // 다른 오류 처리
+            console.error('Error:', error);
+          }
         }
       }
-    }
-  }, [token, location.pathname, navigate, addToast]);
+    };
+
+    void checkAuth();
+  }, [token, location.pathname, navigate, addToast, hasError]);
 
   return <Outlet />;
 };
