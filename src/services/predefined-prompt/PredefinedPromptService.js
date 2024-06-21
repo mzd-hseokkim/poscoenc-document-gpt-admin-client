@@ -23,9 +23,6 @@ const getPredefinedPromptList = async (params, pageable) => {
 };
 
 const getPredefinedPromptDetail = async (predefinedPromptId) => {
-  if (!predefinedPromptId) {
-    return;
-  }
   const response = await api.get(`/admin/predefined-prompts/${predefinedPromptId}`);
   return response?.data;
 };

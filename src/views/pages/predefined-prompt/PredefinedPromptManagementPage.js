@@ -18,6 +18,8 @@ import DeletionStatusBadge from 'components/badge/DeletionStatusBadge';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
+import ModalContainer from 'components/modal/ModalContainer';
+import { PredefinedPromptDetailForm } from 'components/predefined-prompt/PredefinedPromptDetailForm';
 import { useToast } from 'context/ToastContext';
 import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
@@ -28,11 +30,11 @@ import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTab
 import { predefinedPromptColumnConfig } from 'views/pages/predefined-prompt/predefinedPromptColumnConfig';
 
 const createInitialSearchFormData = () => ({
-  name: '',
-  description: '',
-  content: '',
+  name: '', // 프롬프트 이름
+  description: '', // 프롬프트에 대한 설명
+  content: '', // 실제 프롬프트 내용
   category: '',
-  approved: 'ALL',
+  approved: 'ALL', // 승인 여부
   createdByName: '',
   fromCreatedAt: getOneYearAgoDate(),
   toCreatedAt: getCurrentDate(),
@@ -43,9 +45,9 @@ const PredefinedPromptManagementPage = () => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchFormData, setSearchFormData] = useState({});
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
-  const [isSearchPerformed, setIsSearchPerformed] = useState(false);
   const [totalPromptElements, setTotalPromptElements] = useState(0);
   const [detailFormMode, setDetailFormMode] = useState('');
+  const [hasError, setHasError] = useState(false);
 
   const modal = useModal();
   const { addToast } = useToast();
@@ -60,19 +62,22 @@ const PredefinedPromptManagementPage = () => {
   const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } =
     usePagination(totalPromptElements);
   const isComponentMounted = useRef(true);
+  const isSearchPerformed = useRef(false);
 
-  const searchPrompt = useCallback(async () => {
+  const searchPredefinedPrompt = useCallback(async () => {
     setSearchResultIsLoading(true);
-    if (!isSearchPerformed) {
-      setIsSearchPerformed(true);
+    if (!isSearchPerformed.current) {
+      isSearchPerformed.current = true;
     }
     try {
       const searchResult = await PredefinedPromptService.getPredefinedPromptList(searchFormData, pageableData);
       setPromptList(searchResult.content);
       setTotalPromptElements(searchResult.totalElements);
+      setHasError(false);
     } catch (error) {
       console.log(error);
-      addToast({ message: error.response.data.message + error.response?.status });
+      setHasError(true);
+      addToast({ message: `프롬프트 검색 실패, ${error.response?.data?.message} ${error.response?.status}` });
     } finally {
       setSearchResultIsLoading(false);
     }
@@ -82,11 +87,14 @@ const PredefinedPromptManagementPage = () => {
     if (isComponentMounted.current) {
       isComponentMounted.current = false;
     } else {
-      void searchPrompt();
+      if (!hasError) {
+        void searchPredefinedPrompt();
+      }
     }
-  }, [pageableData, searchPrompt]);
+  }, [pageableData, searchPredefinedPrompt, hasError]);
   const handleSubmitSearchRequest = (e) => {
     e.preventDefault();
+    setHasError(false); //reset error state for re-request
     setSearchFormData(stagedSearchFormData);
   };
   const isDeletedRow = (selectedRows) => {
@@ -113,7 +121,7 @@ const PredefinedPromptManagementPage = () => {
         console.log(error);
       }
     } finally {
-      await searchPrompt();
+      await searchPredefinedPrompt();
     }
   };
 
@@ -123,7 +131,6 @@ const PredefinedPromptManagementPage = () => {
   };
   const handleTableRowClick = (itemId) => {
     setDetailFormMode('read');
-    console.log('clicked!');
     modal.openModal(itemId);
   };
 
@@ -280,7 +287,7 @@ const PredefinedPromptManagementPage = () => {
                 <ExcelDownloadCButton
                   downloadFunction={PredefinedPromptService.getDownloadSearchedPredefinedPromptList}
                   searchFormData={searchFormData}
-                  hasSearchResults={promptList.length !== 0}
+                  hasSearchResults={promptList?.length !== 0}
                 />
               </CCol>
               <CCol className="d-flex justify-content-end">
@@ -298,8 +305,8 @@ const PredefinedPromptManagementPage = () => {
                 loading={searchResultIsLoading}
                 noItemsLabel={
                   <CSmartTableNoItemLabel
-                    contentLength={promptList.length}
-                    isSearchPerformed={isSearchPerformed}
+                    contentLength={promptList?.length}
+                    isSearchPerformed={isSearchPerformed.current}
                     defaultMessage="검색 조건에 맞는 프롬프트를 검색합니다."
                   />
                 }
@@ -318,6 +325,18 @@ const PredefinedPromptManagementPage = () => {
           </CCardBody>
         </CCard>
       </CRow>
+      <ModalContainer
+        visible={modal.isOpen}
+        title={detailFormMode === 'create' ? '프롬프트 추가' : '프롬프트 상세'}
+        onClose={modal.closeModal}
+        size="lg"
+      >
+        <PredefinedPromptDetailForm
+          closeModal={modal.closeModal}
+          initialFormMode={detailFormMode}
+          refreshPredefinedPromptList={searchPredefinedPrompt}
+        />
+      </ModalContainer>
     </>
   );
 };

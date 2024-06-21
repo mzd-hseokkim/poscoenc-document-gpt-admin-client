@@ -192,9 +192,10 @@ JSX
 
 1. **onSubmit**
 2. **get api** (include all actions related to fetch data)
-3. **put api** (include all actions related to modify data)
-4. **delete / restore api** (include all actions related to delete/restore data)
-5. **Other Event Handlers** ( ex. open/close modal, inputChanged, etc. )
+3. **post api** (include all actions related to post new data)
+4. **put api** (include all actions related to modify data)
+5. **delete / restore api** (include all actions related to delete/restore data)
+6. **Other Event Handlers** ( ex. open/close modal, inputChanged, etc. )
 
 Service
 ------
