@@ -81,14 +81,14 @@ export const StandardContractDocumentDetailForm = ({
       try {
         const detail = await StandardContractService.getStandardContractDocumentDetail(standardContractDocumentId);
         if (detail) {
-          setStandardContractDocumentDetail(detail);
-
           const formattedDetail = {
             ...detail,
             createdAt: detail.createdAt && formatToYMD(detail.createdAt),
             modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
           };
           reset(formattedDetail);
+          setStandardContractDocumentDetail(formattedDetail);
+
           setHasError(false);
         }
       } catch (error) {
