@@ -26,7 +26,7 @@ export const setupInterceptors = ({ navigate, addToast }) => {
       } else {
         localStorage.removeItem('token');
         newConfig.headers.Authorization = '';
-        addToast({ message: '세션이 만료되었습니다. 다시 로그인 해주세요.' });
+        addToast({ message: '세션이 만료되었습니다. 다시 로그인 해주세요. log:Api.js' }, false);
         navigate('/sign-in');
       }
     } else {
