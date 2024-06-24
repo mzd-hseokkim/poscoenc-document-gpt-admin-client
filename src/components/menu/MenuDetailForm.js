@@ -140,7 +140,6 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
   );
 
   const getParentMenu = useCallback(async () => {
-    //REMIND 작성 모드일때는 상위 메뉴 못가져옴..
     const excludedId = isCreateMode ? '' : searchParams.get('id');
 
     if (!isCreateMode && !excludedId) {
@@ -177,7 +176,6 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
         const allowedRoles = data.allowedRoles.map((role) => role.id);
         await getRoles(allowedRoles);
       } catch (error) {
-        //REMIND 권한 에러인지, 메뉴 에러인지 구분해서 에러 처리
         const status = error.response?.status;
         if (status === 400) {
           addToast({ message: '메뉴 정보를 가져오지 못했습니다.' });
