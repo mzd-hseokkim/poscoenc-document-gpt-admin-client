@@ -8,7 +8,7 @@ const getPredefinedPromptList = async (params, pageable) => {
       description: params.description,
       content: params.content,
       category: params.category,
-      approved: params.approved,
+      approvalOption: params.approvalOption,
       createdByName: params.createdByName,
       fromCreatedAt: params.fromCreatedAt,
       toCreatedAt: params.toCreatedAt,

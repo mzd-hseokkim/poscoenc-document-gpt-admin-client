@@ -11,10 +11,12 @@ import {
   CFormInput,
   CFormLabel,
   CFormSelect,
+  CPopover,
   CRow,
   CSmartTable,
 } from '@coreui/react-pro';
 import DeletionStatusBadge from 'components/badge/DeletionStatusBadge';
+import PromptApprovalStatusBadge from 'components/badge/PromptApprovalStatusBadge';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
@@ -26,7 +28,7 @@ import usePagination from 'hooks/usePagination';
 import { useSearchForm } from 'hooks/useSearchForm';
 import PredefinedPromptService from 'services/predefined-prompt/PredefinedPromptService';
 import { formatToYMD, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
-import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
+import { CommonColumnSorterCustomProps, CommonTableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { predefinedPromptColumnConfig } from 'views/pages/predefined-prompt/predefinedPromptColumnConfig';
 
 const createInitialSearchFormData = () => ({
@@ -34,7 +36,7 @@ const createInitialSearchFormData = () => ({
   description: '', // 프롬프트에 대한 설명
   content: '', // 실제 프롬프트 내용
   category: '',
-  approved: 'ALL', // 승인 여부
+  approvalOption: 'ALL', // 승인 여부
   createdByName: '',
   fromCreatedAt: getOneYearAgoDate(),
   toCreatedAt: getCurrentDate(),
@@ -135,9 +137,27 @@ const PredefinedPromptManagementPage = () => {
   };
 
   const scopedColumns = {
+    name: (item) => (
+      <td
+        className="text-truncate"
+        style={{ cursor: 'pointer', maxWidth: '300px' }}
+        onClick={() => handleTableRowClick(item.id)}
+      >
+        {item.name}
+      </td>
+    ),
     description: (item) => (
-      <td className="text-truncate" style={{ cursor: 'pointer' }}>
-        {item.description}
+      <td style={{ cursor: 'pointer' }} onClick={() => handleTableRowClick(item.id)}>
+        <CPopover title={'설명'} content={item.description} trigger="hover" delay={500}>
+          <div className="text-truncate" style={{ maxWidth: '240px' }}>
+            {item.description}
+          </div>
+        </CPopover>
+      </td>
+    ),
+    approved: (item) => (
+      <td>
+        <PromptApprovalStatusBadge approved={item.approved} />
       </td>
     ),
     createdAt: (item) => <td>{formatToYMD(item.createdAt)}</td>,
@@ -208,16 +228,15 @@ const PredefinedPromptManagementPage = () => {
               <CRow className="mb-3 align-items-center">
                 <CCol md={6} style={{ paddingBottom: '10px' }}>
                   <CFormSelect
-                    id="approved"
+                    id="approvalOption"
                     label="승인 여부"
-                    name="approved"
+                    name="approvalOption"
                     options={[
                       { label: '선택하지 않음', value: '' },
-                      //REMIND yes no 로 수정예정
-                      { label: '예', value: true },
+                      { label: '예', value: 'Yes' },
                       { label: '아니오', value: 'NO' },
                     ]}
-                    value={stagedSearchFormData.approved}
+                    value={stagedSearchFormData.approvalOption}
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
@@ -296,7 +315,7 @@ const PredefinedPromptManagementPage = () => {
             </CRow>
             <CRow className="mb-3">
               <CSmartTable
-                columnSorter={columnSorterCustomProps}
+                columnSorter={CommonColumnSorterCustomProps}
                 columns={predefinedPromptColumnConfig}
                 items={promptList}
                 itemsPerPage={pageableData.size}
@@ -317,9 +336,7 @@ const PredefinedPromptManagementPage = () => {
                 scopedColumns={scopedColumns}
                 selectable
                 selected={selectedRows}
-                tableProps={tableCustomProps}
-                clickableRows
-                onRowClick={(item) => handleTableRowClick(item.id)}
+                tableProps={CommonTableCustomProps}
               />
             </CRow>
           </CCardBody>

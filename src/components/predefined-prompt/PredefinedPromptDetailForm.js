@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import {
+  CButton,
   CCard,
   CCardBody,
   CCol,
@@ -32,7 +33,6 @@ export const PredefinedPromptDetailForm = ({ initialFormMode, closeModal, refres
   const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
-
   const [searchParams] = useSearchParams();
 
   const { addToast } = useToast();
@@ -42,6 +42,7 @@ export const PredefinedPromptDetailForm = ({ initialFormMode, closeModal, refres
     reset,
     watch,
     register,
+    setValue,
     handleSubmit,
     formState: { errors },
   } = useForm({ mode: 'onChange' });
@@ -84,7 +85,7 @@ export const PredefinedPromptDetailForm = ({ initialFormMode, closeModal, refres
         setGetDetailIsLoading(false);
       }
     },
-    [addToast, closeModal]
+    [addToast, closeModal, reset]
   );
 
   useEffect(() => {
@@ -95,7 +96,11 @@ export const PredefinedPromptDetailForm = ({ initialFormMode, closeModal, refres
     if (!isCreateMode && !hasError) {
       void fetchPredefinedPromptDetails(predefinedPromptId);
     }
-  }, [closeModal, fetchPredefinedPromptDetails, hasError, isCreateMode, predefinedPromptId]);
+
+    if (isCreateMode) {
+      setValue('approved', true);
+    }
+  }, [closeModal, fetchPredefinedPromptDetails, hasError, isCreateMode, predefinedPromptId, setValue]);
 
   const postNewPredefinedPrompt = async (newPrompt) => {
     try {
@@ -198,21 +203,24 @@ export const PredefinedPromptDetailForm = ({ initialFormMode, closeModal, refres
                 <CCol>
                   <CInputGroup style={{ marginBottom: '1rem' }}>
                     {!isReadMode && <CInputGroupText>설명</CInputGroupText>}
-                    <CFormInput
-                      id="detailDescription"
-                      name="description"
-                      className="text-muted"
-                      placeholder=""
-                      defaultValue={predefinedPromptDetail?.description}
-                      readOnly={isReadMode}
-                      plainText={isReadMode}
-                      {...register('description', {
-                        required: '프롬프트 설명을 작성 해 주세요.',
-                        validate: (value) => value.trim().length > 0 || '공백만으로 설명을 작성할 수 없습니다.',
-                      })}
-                      invalid={!!errors.description}
-                      feedbackInvalid={errors.description?.message}
-                    />
+                    <>
+                      <CFormTextarea
+                        id="detailDescription"
+                        name="description"
+                        className="text-muted"
+                        placeholder=""
+                        rows={3}
+                        defaultValue={predefinedPromptDetail?.description}
+                        readOnly={isReadMode}
+                        plainText={isReadMode}
+                        {...register('description', {
+                          required: '프롬프트 설명을 작성 해 주세요.',
+                          validate: (value) => value.trim().length > 0 || '공백만으로 설명을 작성할 수 없습니다.',
+                        })}
+                        invalid={!!errors.description}
+                        feedbackInvalid={errors.description?.message}
+                      />
+                    </>
                   </CInputGroup>
                 </CCol>
               </CRow>
@@ -256,6 +264,7 @@ export const PredefinedPromptDetailForm = ({ initialFormMode, closeModal, refres
                     marginLeft: '2rem',
                     borderLeft: 'solid 3px',
                     borderColor: 'gray',
+                    position: 'relative',
                   }}
                 >
                   <CFormLabel
@@ -265,35 +274,29 @@ export const PredefinedPromptDetailForm = ({ initialFormMode, closeModal, refres
                   >
                     승인 여부
                   </CFormLabel>
-                  {!isReadMode ? (
-                    <CFormInput
-                      style={{ marginTop: '-0.6rem', fontWeight: '600' }}
-                      id="detailApprove"
-                      name="approved"
+                  <PromptApprovalStatusBadge
+                    approved={watch('approved')}
+                    style={{
+                      position: 'absolute',
+                      top: '2rem',
+                      left: '0.5rem',
+                    }}
+                  />
+                  {!isReadMode && (
+                    <CButton
+                      style={{
+                        position: 'absolute',
+                        top: '0.8rem',
+                        left: '6rem',
+                      }}
                       size="sm"
-                      placeholder=""
-                      //REMIND 승인여부가 true false 만 있는지 결정된 후 수정
-                      defaultValue={true.toString()}
-                      readOnly
-                      // ={isReadMode}
-                      plainText
-                      // ={isReadMode}
-                      {...register(
-                        'approved'
-                        // ,
-                        //   {
-                        //   required: '카테고리를 작성 해 주세요.',
-                        //   validate: (value) => value.trim().length > 0 || '공백만으로 카테고리를 작성할 수 없습니다.',
-                        // }
-                      )}
-                      invalid={!!errors.approved}
-                      feedbackInvalid={errors.approved?.message}
-                    />
-                  ) : (
-                    <>
-                      <br />
-                      <PromptApprovalStatusBadge approved={predefinedPromptDetail?.approved} />
-                    </>
+                      onClick={() => {
+                        setValue('approved', !watch('approved'));
+                      }}
+                      color={watch('approved') ? 'danger' : 'success'}
+                    >
+                      {watch('approved') ? '반려' : '승인'}
+                    </CButton>
                   )}
                 </CCol>
               </CRow>
@@ -302,7 +305,7 @@ export const PredefinedPromptDetailForm = ({ initialFormMode, closeModal, refres
                   <CFormTextarea
                     id="detailContent"
                     name="content"
-                    rows="5"
+                    rows={8}
                     placeholder="적용할 프롬프트를 작성 해 주세요."
                     defaultValue={predefinedPromptDetail?.content}
                     readOnly={isReadMode}
@@ -328,8 +331,7 @@ export const PredefinedPromptDetailForm = ({ initialFormMode, closeModal, refres
           handleCancel={handleModificationCancelClick}
           handleDeleteRestore={handleDeleteRestoreClick}
           handleUpdateClick={() => setFormMode('update')}
-          //REMIND API 수정후 복구 isCreatedByCurrentUser={predefinedPromptDetail?.createdBy === currentUserId}
-          isCreatedByCurrentUser={true}
+          isCreatedByCurrentUser={predefinedPromptDetail?.createdBy === currentUserId}
           isDataDeleted={predefinedPromptDetail.deleted}
           onSubmit={handleSubmit(onSubmit)}
         />
