@@ -33,7 +33,7 @@ import {
   getCurrentDate,
   getOneYearAgoDate,
 } from 'utils/common/dateUtils';
-import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
+import { CommonColumnSorterCustomProps, CommonTableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { postColumnConfig } from 'views/pages/board/postColumnConfig';
 
 const createInitialSearchFormData = () => ({
@@ -334,7 +334,7 @@ const BoardManagementPage = () => {
               </CCol>
             </CRow>
             <CSmartTable
-              columnSorter={columnSorterCustomProps}
+              columnSorter={CommonColumnSorterCustomProps}
               columns={postColumnConfig}
               items={postList}
               itemsPerPage={pageableData.size}
@@ -355,7 +355,7 @@ const BoardManagementPage = () => {
               scopedColumns={scopedColumnsUpdate}
               selectable
               selected={selectedRows}
-              tableProps={tableCustomProps}
+              tableProps={CommonTableCustomProps}
             />
             <ModalContainer visible={modal.isOpen} title="게시글" onClose={modal.closeModal} size="lg">
               <BoardPostDetailForm

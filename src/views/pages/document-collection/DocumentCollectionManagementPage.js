@@ -31,7 +31,7 @@ import {
   getCurrentDate,
   getOneYearAgoDate,
 } from 'utils/common/dateUtils';
-import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
+import { CommonColumnSorterCustomProps, CommonTableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { documentCollectionColumnConfig } from 'views/pages/document-collection/documentCollectionColumnConfig';
 
 const createInitialSearchFormData = () => ({
@@ -299,7 +299,7 @@ const DocumentCollectionManagementPage = () => {
             </CRow>
             <CRow className="mb-3">
               <CSmartTable
-                columnSorter={columnSorterCustomProps}
+                columnSorter={CommonColumnSorterCustomProps}
                 columns={documentCollectionColumnConfig}
                 items={documentCollectionList}
                 itemsPerPage={pageableData.size}
@@ -320,7 +320,7 @@ const DocumentCollectionManagementPage = () => {
                 scopedColumns={scopedColumns}
                 selectable
                 selected={selectedRows}
-                tableProps={tableCustomProps}
+                tableProps={CommonTableCustomProps}
               />
             </CRow>
           </CCardBody>

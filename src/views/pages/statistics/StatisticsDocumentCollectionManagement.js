@@ -10,7 +10,7 @@ import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
 import statisticsService from 'services/statistics/StatisticsService';
 import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
-import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
+import { CommonColumnSorterCustomProps, CommonTableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { StatisticsDocumentCollectionColumnConfig } from 'views/pages/statistics/statisticsDocumentCollectionColumnConfig';
 
 const StatisticsDocumentCollectionManagement = () => {
@@ -157,7 +157,7 @@ const StatisticsDocumentCollectionManagement = () => {
             </CRow>
             <CRow className="mb-3">
               <CSmartTable
-                columnSorter={columnSorterCustomProps}
+                columnSorter={CommonColumnSorterCustomProps}
                 columns={StatisticsDocumentCollectionColumnConfig}
                 items={statisticsDataList}
                 itemsPerPage={pageableData.size}
@@ -179,7 +179,7 @@ const StatisticsDocumentCollectionManagement = () => {
                 scopedColumns={scopedColumns}
                 selectable
                 selected={selectedRows}
-                tableProps={tableCustomProps}
+                tableProps={CommonTableCustomProps}
               />
             </CRow>
           </CCardBody>

@@ -26,7 +26,7 @@ import usePagination from 'hooks/usePagination';
 import { useSearchForm } from 'hooks/useSearchForm';
 import StandardContractService from 'services/document-collection/StandardContractService';
 import { formatToYMD, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
-import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
+import { CommonColumnSorterCustomProps, CommonTableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { standardContractDocumentColumnConfig } from 'views/pages/document-collection/standard-contract/standardContractDocumentColumnConfig';
 
 const createInitialSearchFormData = () => ({
@@ -137,6 +137,16 @@ const StandardContractDocumentManagementPage = () => {
   };
 
   const scopedColumns = {
+    originalFilename: (item) => (
+      <td style={{ cursor: 'pointer' }} onClick={() => handleRowClick(item.id)}>
+        {item.originalFilename}
+      </td>
+    ),
+    displayName: (item) => (
+      <td style={{ cursor: 'pointer' }} onClick={() => handleRowClick(item.id)}>
+        {item.displayName}
+      </td>
+    ),
     createdAt: (item) => <td>{formatToYMD(item.createdAt)}</td>,
     deleted: (item) => (
       <td>
@@ -255,7 +265,7 @@ const StandardContractDocumentManagementPage = () => {
             </CRow>
             <CRow className="mb-3">
               <CSmartTable
-                columnSorter={columnSorterCustomProps}
+                columnSorter={CommonColumnSorterCustomProps}
                 columns={standardContractDocumentColumnConfig}
                 items={standardContractDocumentList}
                 itemsPerPage={pageableData.size}
@@ -276,9 +286,7 @@ const StandardContractDocumentManagementPage = () => {
                 scopedColumns={scopedColumns}
                 selectable
                 selected={selectedRows}
-                tableProps={tableCustomProps}
-                clickableRows
-                onRowClick={(item) => handleRowClick(item.id)}
+                tableProps={CommonTableCustomProps}
               />
             </CRow>
           </CCardBody>

@@ -31,7 +31,7 @@ import {
   getCurrentDate,
   getOneYearAgoDate,
 } from 'utils/common/dateUtils';
-import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
+import { CommonColumnSorterCustomProps, CommonTableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { adminColumnConfig } from 'views/pages/admin/adminColumnConfig';
 
 const createInitialSearchFormData = () => ({
@@ -336,7 +336,7 @@ const AdminManagementPage = () => {
             </CRow>
             <CRow className="mb-3">
               <CSmartTable
-                columnSorter={columnSorterCustomProps}
+                columnSorter={CommonColumnSorterCustomProps}
                 columns={adminColumnConfig}
                 items={adminList}
                 itemsPerPage={pageableData.size}
@@ -357,7 +357,7 @@ const AdminManagementPage = () => {
                 selectable
                 selected={checkedItems}
                 scopedColumns={scopedColumns}
-                tableProps={tableCustomProps}
+                tableProps={CommonTableCustomProps}
               />
             </CRow>
           </CCardBody>

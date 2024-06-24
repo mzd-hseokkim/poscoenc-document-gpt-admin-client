@@ -30,7 +30,7 @@ import {
   getCurrentDate,
   getOneYearAgoDate,
 } from 'utils/common/dateUtils';
-import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
+import { CommonColumnSorterCustomProps, CommonTableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { documentChatHistoryColumnConfig } from 'views/pages/document-collection/chat-history/documentChatHistoryColumnConfig';
 
 const createInitialSearchFormData = () => ({
@@ -304,7 +304,7 @@ const DocumentChatHistoryManagementPage = () => {
             </CRow>
             <CRow className="mb-3">
               <CSmartTable
-                columnSorter={columnSorterCustomProps}
+                columnSorter={CommonColumnSorterCustomProps}
                 columns={documentChatHistoryColumnConfig}
                 items={chatHistoryList}
                 itemsPerPage={pageableData.size}
@@ -325,7 +325,7 @@ const DocumentChatHistoryManagementPage = () => {
                 scopedColumns={scopedColumns}
                 selectable
                 selected={selectedRows}
-                tableProps={tableCustomProps}
+                tableProps={CommonTableCustomProps}
               />
             </CRow>
           </CCardBody>
