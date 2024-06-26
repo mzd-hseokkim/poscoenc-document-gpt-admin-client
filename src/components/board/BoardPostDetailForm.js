@@ -158,12 +158,12 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
   const renderPostTitleInput = () => (
     <CRow className="mt-3">
       <CCol>
-        <CFormLabel htmlFor="title" className="border-bottom">
+        <CFormLabel htmlFor="detail-form-title" className="border-bottom">
           제목
         </CFormLabel>
         <CFormInput
           type="text"
-          id="title"
+          id="detail-form-title"
           name="title"
           placeholder="제목을 작성 해 주세요."
           defaultValue={postDetail?.title}
@@ -190,11 +190,11 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
   const renderPostContentTextarea = () => (
     <CRow className="mt-3">
       <CCol>
-        <CFormLabel htmlFor="content" className="border-bottom">
+        <CFormLabel htmlFor="detail-form-content" className="border-bottom">
           내용
         </CFormLabel>
         <CFormTextarea
-          id="content"
+          id="detail-form-content"
           name="content"
           rows="5"
           placeholder="내용을 작성 해 주세요."
