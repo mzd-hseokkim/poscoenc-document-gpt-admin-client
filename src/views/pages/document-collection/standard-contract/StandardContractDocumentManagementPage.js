@@ -60,8 +60,10 @@ const StandardContractDocumentManagementPage = () => {
     handleTimePickerCheck,
   } = useSearchForm(createInitialSearchFormData());
 
-  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } =
-    usePagination(totalCollectionElements);
+  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } = usePagination(
+    totalCollectionElements,
+    'id,desc'
+  );
   const isComponentMounted = useRef(true);
   const isSearchPerformed = useRef(false);
 
@@ -84,9 +86,9 @@ const StandardContractDocumentManagementPage = () => {
       setHasError(false);
     } catch (error) {
       //REMIND only sever error occur
-      addToast({ message: '검색 결과를 가져 올 수 없습니다.' });
       console.log(error);
       setHasError(true);
+      addToast({ message: '검색 결과를 가져 올 수 없습니다.' });
     } finally {
       setSearchResultIsLoading(false);
     }

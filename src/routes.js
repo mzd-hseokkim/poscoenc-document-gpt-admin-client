@@ -15,9 +15,9 @@ const ChatHistoryManagementPage = React.lazy(() =>
 const StandardContractDocumentPage = React.lazy(() =>
   import('views/pages/document-collection/standard-contract/StandardContractDocumentManagementPage')
 );
-const StatisticsUserManagement = React.lazy(() => import('views/pages/statistics/StatisticsUserManagement'));
+const StatisticsUserManagement = React.lazy(() => import('views/pages/statistics/StatisticsUserManagementPage'));
 const StatisticsDocumentCollectionManagement = React.lazy(() =>
-  import('views/pages/statistics/StatisticsDocumentCollectionManagement')
+  import('views/pages/statistics/StatisticsDocumentCollectionManagementPage')
 );
 const PredefinedPromptManagement = React.lazy(() =>
   import('views/pages/predefined-prompt/PredefinedPromptManagementPage')

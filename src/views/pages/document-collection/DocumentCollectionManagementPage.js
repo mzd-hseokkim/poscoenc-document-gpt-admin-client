@@ -48,48 +48,53 @@ const DocumentCollectionManagementPage = () => {
   const [detailFormMode, setDetailFormMode] = useState('read');
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
   const [totalCollectionElements, setTotalCollectionElements] = useState(0);
-  const [isSearchPerformed, setIsSearchPerformed] = useState(false);
   const [isPickTime, setIsPickTime] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   const [searchFormData, setSearchFormData] = useState({});
   const [stagedSearchFormData, setStagedSearchFormData] = useState(createInitialSearchFormData);
 
   const isComponentMounted = useRef(true);
+  const isSearchPerformed = useRef(false);
 
   const modal = useModal();
   const { addToast } = useToast();
-  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } =
-    usePagination(totalCollectionElements);
+  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } = usePagination(
+    totalCollectionElements,
+    'id,desc'
+  );
 
   const isDeletedRow = (selectedRows) => {
-    //REMIND is 가 맞는지 고려
     return selectedRows.some((row) => row.deleted === true);
   };
 
   const searchDocumentCollectionList = useCallback(async () => {
     setSearchResultIsLoading(true);
-    if (!isSearchPerformed) {
-      setIsSearchPerformed(true);
+    if (!isSearchPerformed.current) {
+      isSearchPerformed.current = true;
     }
     try {
       const searchResult = await DocumentCollectionService.getSearchedCollectionList(searchFormData, pageableData);
       setDocumentCollectionList(searchResult.content);
       setTotalCollectionElements(searchResult.totalElements);
     } catch (error) {
-      //REMIND only sever error occur
       console.log(error);
+      setHasError(true);
+      addToast({ color: 'danger', message: `${error.response.data.message} with ${error.response.status}` });
     } finally {
       setSearchResultIsLoading(false);
     }
-  }, [isSearchPerformed, pageableData, searchFormData]);
+  }, [addToast, pageableData, searchFormData]);
 
   useEffect(() => {
     if (isComponentMounted.current) {
       isComponentMounted.current = false;
     } else {
-      void searchDocumentCollectionList();
+      if (!hasError) {
+        void searchDocumentCollectionList();
+      }
     }
-  }, [pageableData, searchDocumentCollectionList]);
+  }, [hasError, pageableData, searchDocumentCollectionList]);
   const handleRowClick = (itemId) => {
     setDetailFormMode('read');
     modal.openModal(itemId);
@@ -131,6 +136,7 @@ const DocumentCollectionManagementPage = () => {
 
   const handleSubmitSearchRequest = async (e) => {
     e.preventDefault();
+    setHasError(false);
     setSearchFormData(stagedSearchFormData);
   };
   const handleSearchFormReset = () => {

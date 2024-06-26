@@ -4,7 +4,7 @@ const usePagination = (totalItems, defaultSort) => {
   const [pageableData, setPageableData] = useState({
     page: 0,
     size: 10,
-    sort: defaultSort || 'id,desc',
+    sort: defaultSort,
   });
 
   const handlePageChange = (newPage) => {
@@ -23,7 +23,7 @@ const usePagination = (totalItems, defaultSort) => {
   };
 
   const handlePageSortChange = ({ column, state }) => {
-    const newSort = state === 0 ? 'id,desc' : `${column},${state}`;
+    const newSort = state === 0 ? defaultSort : `${column},${state}`;
     setPageableData((prev) => ({
       ...prev,
       sort: newSort,
