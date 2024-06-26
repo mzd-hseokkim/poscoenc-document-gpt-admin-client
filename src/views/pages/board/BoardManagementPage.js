@@ -352,7 +352,7 @@ const BoardManagementPage = () => {
               noItemsLabel={
                 <CSmartTableNoItemLabel
                   contentLength={postList.length}
-                  isSearchPerformed={isSearchPerformed}
+                  isSearchPerformed={isSearchPerformed.current}
                   defaultMessage="검색 조건에 맞는 게시글을 검색합니다."
                 />
               }

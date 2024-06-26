@@ -315,7 +315,7 @@ const DocumentCollectionManagementPage = () => {
                 noItemsLabel={
                   <CSmartTableNoItemLabel
                     contentLength={documentCollectionList.length}
-                    isSearchPerformed={isSearchPerformed}
+                    isSearchPerformed={isSearchPerformed.current}
                     defaultMessage="검색 조건에 맞는 문서 집합을 검색합니다."
                   />
                 }

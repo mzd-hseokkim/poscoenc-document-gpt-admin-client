@@ -357,7 +357,7 @@ const AdminManagementPage = () => {
                 noItemsLabel={
                   <CSmartTableNoItemLabel
                     contentLength={adminList.length}
-                    isSearchPerformed={isSearchPerformed}
+                    isSearchPerformed={isSearchPerformed.current}
                     defaultMessage="검색 조건에 맞는 관리자를 검색합니다."
                   />
                 }
