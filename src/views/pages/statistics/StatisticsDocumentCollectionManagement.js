@@ -1,6 +1,17 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { CButton, CCard, CCardBody, CCol, CDatePicker, CForm, CRow, CSmartTable } from '@coreui/react-pro';
+import {
+  CButton,
+  CCard,
+  CCardBody,
+  CCol,
+  CForm,
+  CFormSelect,
+  CInputGroup,
+  CLoadingButton,
+  CRow,
+  CSmartTable,
+} from '@coreui/react-pro';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import ModalContainer from 'components/modal/ModalContainer';
@@ -16,22 +27,24 @@ import { StatisticsDocumentCollectionColumnConfig } from 'views/pages/statistics
 const StatisticsDocumentCollectionManagement = () => {
   const [totalStatisticsDataElements, setTotalStatisticsDataElements] = useState(0);
   const [selectedRows, setSelectedRows] = useState([]);
-  const [isSearchPerformed, setIsSearchPerformed] = useState(false);
+  const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
   const [statisticsDataList, setStatisticsDataList] = useState([]);
   const [clickedData, setClickedData] = useState({});
+  const [hasError, setHasError] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState({ label: '', value: '' });
+  const pastYearMonths = MonthLabelGenerator.pastYearMonthsSelectBoxLabels();
+  const lastIndex = pastYearMonths.length - 1;
+  const [stagedSelectedMonth, setStagedSelectedMonth] = useState(pastYearMonths[lastIndex]);
 
   const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } = usePagination(
     totalStatisticsDataElements,
     'sumInputTokens,desc'
   );
-  const { addToast } = useToast();
+
   const isComponentMounted = useRef(true);
+  const isSearchPerformed = useRef(false);
 
-  const pastYearMonths = MonthLabelGenerator.pastYearMonthsSelectBoxLabels();
-  const lastIndex = pastYearMonths.length - 1;
-  const [selectedMonth, setSelectedMonth] = useState({ label: '', value: '' });
-  const [stagedSelectedMonth, setStagedSelectedMonth] = useState(pastYearMonths[lastIndex]);
-
+  const { addToast } = useToast();
   const modal = useModal();
 
   const handleMonthSelectBoxChange = (e) => {
@@ -41,24 +54,26 @@ const StatisticsDocumentCollectionManagement = () => {
   };
 
   const searchDocumentCollectionUsageStatistics = useCallback(async () => {
-    if (!isSearchPerformed) {
-      setIsSearchPerformed(true);
+    setSearchResultIsLoading(true);
+    if (!isSearchPerformed.current) {
+      isSearchPerformed.current = true;
     }
     try {
       const response = await statisticsService.getDocumentCollectionUsageStatistics(selectedMonth.value, pageableData);
       setStatisticsDataList(response.content);
       setTotalStatisticsDataElements(response.totalElements);
     } catch (error) {
-      //REMIND implement error handling
       console.log(error);
-      addToast({ color: 'danger', message: `${error.response.data.message} with ${error.response.data.status}` });
+      setHasError(true);
+      addToast({ color: 'danger', message: `${error.response.data.message} with ${error.response.status}` });
     } finally {
-      //REMIND implement loading
+      setSearchResultIsLoading(false);
     }
-  }, [addToast, isSearchPerformed, pageableData, selectedMonth.value]);
+  }, [addToast, pageableData, selectedMonth.value]);
 
   const handleSubmitSearchRequest = async (e) => {
     e.preventDefault();
+    setHasError(false);
     setSelectedMonth(stagedSelectedMonth);
   };
 
@@ -66,9 +81,11 @@ const StatisticsDocumentCollectionManagement = () => {
     if (isComponentMounted.current) {
       isComponentMounted.current = false;
     } else {
-      void searchDocumentCollectionUsageStatistics();
+      if (!hasError) {
+        void searchDocumentCollectionUsageStatistics();
+      }
     }
-  }, [searchDocumentCollectionUsageStatistics]);
+  }, [hasError, searchDocumentCollectionUsageStatistics]);
 
   const handleRowClick = (item) => {
     setClickedData(item);
@@ -115,24 +132,25 @@ const StatisticsDocumentCollectionManagement = () => {
             <CForm onSubmit={handleSubmitSearchRequest}>
               <CRow className="mb-3">
                 <CCol>
-                  {/*<CInputGroup>*/}
-                  {/*  <CButton color="white" disabled>*/}
-                  {/*    기준 월*/}
-                  {/*  </CButton>*/}
-                  {/*  <CFormSelect*/}
-                  {/*    style={{ height: '58px' }}*/}
-                  {/*    floatingLabel=""*/}
-                  {/*    options={pastYearMonths}*/}
-                  {/*    value={stagedSelectedMonth.value}*/}
-                  {/*    onChange={handleMonthSelectBoxChange}*/}
-                  {/*  />*/}
-                  {/*</CInputGroup>*/}
-                  <CDatePicker placeholder="월 선택" label="Month Picker" locale="ko" />
+                  <CInputGroup>
+                    <CButton color="white" disabled>
+                      기준 월
+                    </CButton>
+                    <CFormSelect
+                      style={{ height: '58px' }}
+                      floatingLabel=""
+                      options={pastYearMonths}
+                      value={stagedSelectedMonth.value}
+                      onChange={handleMonthSelectBoxChange}
+                    />
+                  </CInputGroup>
                 </CCol>
               </CRow>
               <CRow className="mb-3">
                 <CCol className="d-grid gap-2 d-md-flex justify-content-md-center">
-                  <CButton type="submit">검색</CButton>
+                  <CLoadingButton loading={searchResultIsLoading} type="submit">
+                    검색
+                  </CLoadingButton>
                   <CButton
                     color="primary"
                     value="Reset"
@@ -163,12 +181,11 @@ const StatisticsDocumentCollectionManagement = () => {
                 itemsPerPage={pageableData.size}
                 itemsPerPageLabel="페이지당 문서 집합 개수"
                 itemsPerPageSelect
-                //REMIND implement loading
-                loading={undefined}
+                loading={searchResultIsLoading}
                 noItemsLabel={
                   <CSmartTableNoItemLabel
                     contentLength={statisticsDataList?.length}
-                    isSearchPerformed={isSearchPerformed}
+                    isSearchPerformed={isSearchPerformed.current}
                     defaultMessage="선택한 월의 토큰 사용량을 문서 집합 별로 검색합니다."
                   />
                 }

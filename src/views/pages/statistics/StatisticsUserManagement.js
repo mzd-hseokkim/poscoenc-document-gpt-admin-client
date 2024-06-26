@@ -17,10 +17,14 @@ import { statisticsUserColumnConfig } from 'views/pages/statistics/statisticsUse
 const StatisticsUserManagement = () => {
   const [totalStatisticsDataElements, setTotalStatisticsDataElements] = useState(0);
   const [selectedRows, setSelectedRows] = useState([]);
-  const [isSearchPerformed, setIsSearchPerformed] = useState(false);
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
   const [statisticsDataList, setStatisticsDataList] = useState([]);
   const [clickedData, setClickedData] = useState({});
+  const [hasError, setHasError] = useState(false);
+
+  const pastYearMonths = MonthLabelGenerator.pastYearMonthsSelectBoxLabels();
+  const lastIndex = pastYearMonths.length - 1;
+  const [selectedMonth, setSelectedMonth] = useState({ label: '', value: '' });
 
   const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } = usePagination(
     totalStatisticsDataElements,
@@ -28,18 +32,16 @@ const StatisticsUserManagement = () => {
   );
   const { addToast } = useToast();
   const isComponentMounted = useRef(true);
+  const isSearchPerformed = useRef(false);
 
-  const pastYearMonths = MonthLabelGenerator.pastYearMonthsSelectBoxLabels();
-  const lastIndex = pastYearMonths.length - 1;
-  const [selectedMonth, setSelectedMonth] = useState({ label: '', value: '' });
   const [stagedSelectedMonth, setStagedSelectedMonth] = useState(pastYearMonths[lastIndex]);
   const modal = useModal();
 
   const searchUserUsageStatistics = useCallback(async () => {
     setSearchResultIsLoading(true);
 
-    if (!isSearchPerformed) {
-      setIsSearchPerformed(true);
+    if (!isSearchPerformed.current) {
+      isSearchPerformed.current = true;
     }
 
     try {
@@ -47,16 +49,17 @@ const StatisticsUserManagement = () => {
       setStatisticsDataList(response.content);
       setTotalStatisticsDataElements(response.totalElements);
     } catch (error) {
-      //REMIND implement error handling
       console.log(error);
+      setHasError(true);
       addToast({ color: 'danger', message: `${error.response.data.message} with ${error.response.data.status}` });
     } finally {
       setSearchResultIsLoading(false);
     }
-  }, [addToast, isSearchPerformed, pageableData, selectedMonth.value]);
+  }, [addToast, pageableData, selectedMonth.value]);
 
   const handleSubmitSearchRequest = async (e) => {
     e.preventDefault();
+    setHasError(false);
     setSelectedMonth(stagedSelectedMonth);
   };
 
@@ -64,9 +67,11 @@ const StatisticsUserManagement = () => {
     if (isComponentMounted.current) {
       isComponentMounted.current = false;
     } else {
-      void searchUserUsageStatistics();
+      if (!hasError) {
+        void searchUserUsageStatistics();
+      }
     }
-  }, [searchUserUsageStatistics]);
+  }, [hasError, searchUserUsageStatistics]);
 
   const handleRowClick = (item) => {
     setClickedData(item);
@@ -125,7 +130,7 @@ const StatisticsUserManagement = () => {
                     <CButton color="white" disabled>
                       기준 월
                     </CButton>
-                    {/*REMIND 멀티셀렉트로 변경하기. */}
+                    {/* v5 로 버젼 업 이후에나 MultiSelect 로 변경 가능 */}
                     <CFormSelect
                       style={{ height: '58px' }}
                       floatingLabel=""
@@ -169,12 +174,11 @@ const StatisticsUserManagement = () => {
                 itemsPerPage={pageableData.size}
                 itemsPerPageLabel="페이지당 문서 집합 개수"
                 itemsPerPageSelect
-                //REMIND implement loading
-                loading={undefined}
+                loading={searchResultIsLoading}
                 noItemsLabel={
                   <CSmartTableNoItemLabel
                     contentLength={statisticsDataList?.length}
-                    isSearchPerformed={isSearchPerformed}
+                    isSearchPerformed={isSearchPerformed.current}
                     defaultMessage="선택한 월의 토큰 사용량을 사용자 별로 검색합니다."
                   />
                 }
