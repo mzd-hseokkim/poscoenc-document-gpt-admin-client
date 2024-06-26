@@ -40,10 +40,6 @@ const AppHeader = () => {
         <CHeaderToggler className="ps-1" onClick={() => dispatch({ type: 'set', sidebarShow: !sidebarShow })}>
           <CIcon icon={cilMenu} size="lg" />
         </CHeaderToggler>
-        {/*REMIND 비율 문제 발생시 복구 후 수정 */}
-        {/*<CHeaderBrand className="mx-auto d-md-none" to="/">*/}
-        {/*  <CIcon icon={logo} height={48} alt="Logo" />*/}
-        {/*</CHeaderBrand>*/}
         <CHeaderNav className="d-none d-md-flex me-auto">
           <CNavItem>
             <CNavLink to="/dashboard" component={NavLink}>
