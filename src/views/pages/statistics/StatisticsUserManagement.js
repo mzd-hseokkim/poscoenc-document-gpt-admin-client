@@ -11,7 +11,7 @@ import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
 import statisticsService from 'services/statistics/StatisticsService';
 import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
-import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
+import { CommonColumnSorterCustomProps, CommonTableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { statisticsUserColumnConfig } from 'views/pages/statistics/statisticsUserColumnConfig';
 
 const StatisticsUserManagement = () => {
@@ -163,7 +163,7 @@ const StatisticsUserManagement = () => {
             </CRow>
             <CRow className="mb-3">
               <CSmartTable
-                columnSorter={columnSorterCustomProps}
+                columnSorter={CommonColumnSorterCustomProps}
                 columns={statisticsUserColumnConfig}
                 items={statisticsDataList}
                 itemsPerPage={pageableData.size}
@@ -185,7 +185,7 @@ const StatisticsUserManagement = () => {
                 scopedColumns={scopedColumns}
                 selectable
                 selected={selectedRows}
-                tableProps={tableCustomProps}
+                tableProps={CommonTableCustomProps}
               />
             </CRow>
           </CCardBody>

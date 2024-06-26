@@ -19,6 +19,9 @@ const StatisticsUserManagement = React.lazy(() => import('views/pages/statistics
 const StatisticsDocumentCollectionManagement = React.lazy(() =>
   import('views/pages/statistics/StatisticsDocumentCollectionManagement')
 );
+const PredefinedPromptManagement = React.lazy(() =>
+  import('views/pages/predefined-prompt/PredefinedPromptManagementPage')
+);
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
@@ -41,7 +44,7 @@ const routes = [
     element: ChatHistoryManagementPage,
   },
   {
-    path: '/standard-contract/management',
+    path: '/standard-contract-documents/management',
     exact: true,
     name: '표준 계약서 관리',
     element: StandardContractDocumentPage,
@@ -52,6 +55,12 @@ const routes = [
     exact: true,
     name: '월별 토큰 사용량 DC',
     element: StatisticsDocumentCollectionManagement,
+  },
+  {
+    path: '/predefined-prompts/management',
+    exact: true,
+    name: '프롬프트 관리',
+    element: PredefinedPromptManagement,
   },
 ];
 

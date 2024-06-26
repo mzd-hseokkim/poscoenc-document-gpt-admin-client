@@ -59,9 +59,9 @@ const getDownloadSearchedStandardContractDocumentList = async (params) => {
   window.URL.revokeObjectURL(downloadUrl);
 };
 
-const putModifiedDocumentDetail = async (modifiedDocument) => {
+const putModifiedStandardContractDocumentDetail = async (modifiedDocument) => {
   const response = await api.put(`/admin/standard-contract-document/${modifiedDocument.id}`, modifiedDocument);
-  return (response.status = 200);
+  return response.status === 200;
 };
 
 const getDownloadContractDocument = async (standardContractDocument) => {
@@ -86,7 +86,7 @@ const StandardContractService = {
   patchStandardContractDocumentDeletionOption,
   getDownloadSearchedStandardContractDocumentList,
   getStandardContractDocumentDetail,
-  putModifiedDocumentDetail,
+  putModifiedStandardContractDocumentDetail,
   getDownloadContractDocument,
 };
 

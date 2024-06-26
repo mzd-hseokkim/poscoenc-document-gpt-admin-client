@@ -49,6 +49,7 @@ export const StandardContractDocumentDetailForm = ({
   const { isReadMode } = formModes(formMode);
   const [searchParams] = useSearchParams();
   const currentUserId = useRecoilValue(userIdSelector);
+  const [hasError, setHasError] = useState(false);
   const {
     register,
     reset,
@@ -80,18 +81,20 @@ export const StandardContractDocumentDetailForm = ({
       try {
         const detail = await StandardContractService.getStandardContractDocumentDetail(standardContractDocumentId);
         if (detail) {
-          setStandardContractDocumentDetail(detail);
-
           const formattedDetail = {
             ...detail,
             createdAt: detail.createdAt && formatToYMD(detail.createdAt),
             modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
           };
           reset(formattedDetail);
+          setStandardContractDocumentDetail(formattedDetail);
+
+          setHasError(false);
         }
       } catch (error) {
         console.log(error);
         addToast({ message: '표준 계약서 정보를 가져오지 못했습니다.' });
+        setHasError(true);
       } finally {
         setGetDetailIsLoading(false);
       }
@@ -105,9 +108,11 @@ export const StandardContractDocumentDetailForm = ({
       closeModal();
     }
 
-    void fetchStandardContractDetail(standardContractDocumentId);
-    // void fetchStatisticsData(standardContractDocumentId); 통계데이터는..? 보류
-  }, [closeModal, searchParams, fetchStandardContractDetail]);
+    if (!hasError) {
+      void fetchStandardContractDetail(standardContractDocumentId);
+    }
+    // void fetchStatisticsData(standardContractDocumentId); 통계데이터는 보류
+  }, [closeModal, searchParams, fetchStandardContractDetail, hasError]);
 
   const onSubmit = async (data) => {
     await putModifiedDocument(data);
@@ -115,7 +120,7 @@ export const StandardContractDocumentDetailForm = ({
 
   const putModifiedDocument = async (data) => {
     try {
-      const isModified = await StandardContractService.putModifiedDocumentDetail(data);
+      const isModified = await StandardContractService.putModifiedStandardContractDocumentDetail(data);
       if (isModified) {
         closeModal();
         setStandardContractDocumentDetail({});

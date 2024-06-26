@@ -102,11 +102,12 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
       if (isSucceed) {
         closeModal();
         refreshPosts();
+        addToast({ message: '새로운 게시글을 등록하였습니다.', color: 'success' });
       }
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
-        addToast({ message: '게시글을 등록할 수 없습니다.' });
+        addToast({ message: '잘못된 요청으로 게시글을 등록할 수 없습니다.' });
       }
     }
   };
@@ -127,14 +128,12 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
-        addToast({ message: '본인이 작성한 게시글만 수정 가능합니다.' });
+        addToast({ message: '잘못된 요청입니다.' });
       } else if (status === 404) {
         addToast({ message: '수정할 게시글을 찾지 못했습니다. 다시 검색 해 주세요.' });
       } else {
         console.log(error);
       }
-    } finally {
-      setFormMode('read');
     }
   };
   const handleDeleteRestoreClick = async (postId) => {

@@ -26,7 +26,7 @@ import usePagination from 'hooks/usePagination';
 import MenuService from 'services/menu/MenuService';
 import { formatToIsoEndDate, formatToIsoStartDate, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
 import { iconMapper } from 'utils/common/iconMapper';
-import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
+import { CommonColumnSorterCustomProps, CommonTableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { menuColumnConfig } from 'views/pages/menu/menuColumnConfig';
 
 const createInitialSearchFormData = () => ({
@@ -316,7 +316,7 @@ const MenuManagementPage = () => {
             <CRow className="mb-3">
               <CSmartTable
                 columns={menuColumnConfig}
-                columnSorter={columnSorterCustomProps}
+                columnSorter={CommonColumnSorterCustomProps}
                 items={menuList}
                 itemsPerPage={pageableData.size}
                 itemsPerPageLabel="페이지당 메뉴 개수"
@@ -336,7 +336,7 @@ const MenuManagementPage = () => {
                 selectable
                 scopedColumns={scopedColumns}
                 selected={checkedItems}
-                tableProps={tableCustomProps}
+                tableProps={CommonTableCustomProps}
               />
             </CRow>
           </CCardBody>
