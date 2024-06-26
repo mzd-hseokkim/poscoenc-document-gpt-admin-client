@@ -17,8 +17,8 @@ const getUserAccountStatistics = async () => {
   console.log(response);
   return response?.data;
 };
-const getChatHistoryStatistics = async () => {
-  const response = await api.get('admin/dashboard-statistics/chats');
+const getChatHistoryStatistics = async (startDate, endDate) => {
+  const response = await api.get(`/api/v1/admin/dashboard-statistics/chats?startDate=${startDate}&endDate=${endDate}`);
   console.log(response);
   return response?.data;
 };

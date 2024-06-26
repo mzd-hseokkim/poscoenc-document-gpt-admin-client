@@ -6,7 +6,6 @@ const SERVER_ENDPOINT = process.env.REACT_APP_SERVER_ENDPOINT;
 const api = axios.create({
   baseURL: SERVER_ENDPOINT,
 });
-//REMIND 세션 만료 시 아래의 토스트 메세지가 아니라, 이동은 되는데 메뉴를 가져올수 없다는 메세지가 표시됨. 확인 후 수정 필요
 export const setupInterceptors = ({ navigate, addToast }) => {
   api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');

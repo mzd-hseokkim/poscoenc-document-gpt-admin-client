@@ -1,14 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import {
-  cib500px5,
-  cibAdguard,
-  cibAdobeAfterEffects,
-  cibAirbnb,
-  cibAndroidAlt,
-  cibAnsible,
-  cibCcApplePay,
-  cibCcPaypal,
   cibFacebook,
   cibGoogle,
   cibLinkedin,
@@ -17,10 +9,9 @@ import {
   cilArrowThickFromLeft,
   cilArrowThickFromRight,
   cilArrowTop,
+  cilBook,
   cilChevronLeft,
   cilChevronRight,
-  cilCloudDownload,
-  cilDescription,
   cilExternalLink,
   cilOptions,
   cilPeople,
@@ -90,45 +81,53 @@ const DashboardPage = () => {
   });
 
   const [totalDocumentCount, setTotalDocumentCount] = useState(0);
-  const [recentlyAddedDocument, setRecentlyAddedDocument] = useState([]);
+  const [recentlyAddedDocumentList, setRecentlyAddedDocumentList] = useState([]);
   const [hotDocumentEntries, setHotDocumentEntries] = useState([]);
   const [totalStandardContractDocumentCount, setTotalStandardContractDocumentCount] = useState(0);
-  const [recentlyAddedStandardContract, setRecentlyAddedStandardContract] = useState([]);
+  const [recentlyAddedStandardContractList, setRecentlyAddedStandardContractList] = useState([]);
+
+  const [totalUserCount, setTotalUserCount] = useState(0);
+  const [isUserStatisticsLoading, setIsUserStatisticsLoading] = useState(false);
+
+  const [recentlyLikedChatList, setRecentlyLikedChatList] = useState([]);
+  const [isRecentlyLicedChatLoading, setIsRecentlyLicedChatLoading] = useState(false);
 
   const [standardContractDocumentTableVisible, setStandardContractDocumentTableVisible] = useState(false);
   const [newContractDocumentTableVisible, setNewContractDocumentTableVisible] = useState(false);
 
-  const [IsDocumentStatsticsLoading, setIsDocumentStatsticsLoading] = useState(false);
+  const [isDocumentStatisticsLoading, setIsDocumentStatisticsLoading] = useState(false);
   const [isStandardContractLoading, setIsStandardContractLoading] = useState(false);
-  const [hotConChartLabelOption, setHotConChartLabelOption] = useState('주간');
-  const [totalTokenUsageChartLabelOption, setTotalTokenUsageChartLabelOption] = useState('월간');
+  const [hotConChartLabelOption, setHotConChartLabelOption] = useState('days');
+  const [totalTokenUsageChartLabelOption, setTotalTokenUsageChartLabelOption] = useState('months');
   //REMIND 문서 공유 횟수 추가 고려
 
   const { navigate } = useNavigation();
 
+  //REMIND hotDocumentEntries 로 수정
   const hotDocTopFive = [
-    { title: 'Marl-E CMS in POSCO Corp.', value: '29,703 ', color: 'success' },
-    { title: 'Marl-E CMS in MZC.', value: '24,093 ', color: 'info' },
-    { title: 'Alphabetone', value: '78,706 ', color: 'warning' },
-    { title: '여섯글자는괜', value: '22,123 ', color: 'danger' },
-    { title: '여덟글자입니다요', value: '22,222 ', color: 'primary' },
+    { name: 'Marl-E CMS in POSCO Corp.', value: '29,703 ', color: 'success' },
+    { name: 'Marl-E CMS in MZC.', value: '24,093 ', color: 'info' },
+    { name: 'Alphabetone', value: '78,706 ', color: 'warning' },
+    { name: '여섯글자는괜', value: '22,123 ', color: 'danger' },
+    { name: '여덟글자입니다요', value: '22,222 ', color: 'primary' },
   ];
   useEffect(() => {
     const documentStatistics = async () => {
-      setIsDocumentStatsticsLoading(true);
+      setIsDocumentStatisticsLoading(true);
       try {
         const response = await DashBoardService.getDocumentCollectionStatistics(
           formatToIsoStartDate(getOneYearAgoDate()),
           formatToIsoEndDate(getCurrentDate())
         );
         setTotalDocumentCount(response.totalCount);
-        setRecentlyAddedDocument(response.recentlyAdded);
+        setRecentlyAddedDocumentList(response.recentlyAdded);
         setHotDocumentEntries(response.topEntries);
+        console.log(response.topEntries);
       } catch (error) {
         console.log(error);
         addToast({ message: '문서 집합에 대한 통계 정보를 가져오지 못했습니다' });
       } finally {
-        setIsDocumentStatsticsLoading(false);
+        setIsDocumentStatisticsLoading(false);
       }
     };
 
@@ -144,7 +143,7 @@ const DashboardPage = () => {
           formatToIsoEndDate(getCurrentDate())
         );
         setTotalStandardContractDocumentCount(response.totalCount);
-        setRecentlyAddedStandardContract(response.recentlyAdded);
+        setRecentlyAddedStandardContractList(response.recentlyAdded);
       } catch (error) {
         console.log(error);
         addToast({ message: ' 표준 계약서에 대한 통계 정보를 가져오지 못했습니다.' });
@@ -154,6 +153,42 @@ const DashboardPage = () => {
     };
     void standardContractStatistics();
   }, [addToast]);
+
+  useEffect(() => {
+    const userStatistics = async () => {
+      setIsUserStatisticsLoading(true);
+      try {
+        const response = await DashBoardService.getUserAccountStatistics(
+          formatToIsoStartDate(getOneYearAgoDate()),
+          formatToIsoEndDate(getOneYearAgoDate())
+        );
+        setTotalUserCount(response.totalCount);
+      } catch (error) {
+      } finally {
+        setIsUserStatisticsLoading(false);
+      }
+    };
+
+    void userStatistics();
+  }, []);
+
+  useEffect(() => {
+    const chatStatistics = async () => {
+      setIsRecentlyLicedChatLoading(true);
+      try {
+        const response = await DashBoardService.getChatHistoryStatistics(
+          formatToIsoStartDate(getOneYearAgoDate()),
+          formatToIsoEndDate(getOneYearAgoDate())
+        );
+        setRecentlyLikedChatList(response.likedEntry);
+      } catch (error) {
+      } finally {
+        setIsRecentlyLicedChatLoading(false);
+      }
+    };
+
+    void chatStatistics();
+  }, []);
 
   const tokenUsagesData = [
     { title: 'Total', value: '102,799 ', percent: 100, color: 'success' },
@@ -279,92 +314,43 @@ const DashboardPage = () => {
 
   const DocsExample = [
     {
-      avatar: { src: '/images/logos/marle-logo.png', status: 'success' },
       displayName: {
         name: '나는이름이열글자일거 에요',
         new: true,
         registered: 'Jan 1, 2021',
       },
-      country: { name: 'USA', flag: cib500px5 },
-      usage: {
-        value: 50,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'success',
-      },
-      payment: { name: 'Mastercard', icon: cibGoogle },
       activity: '10 sec ago',
     },
     {
-      avatar: { src: '/images/logos/marle-logo.png', status: 'danger' },
       displayName: {
         name: '계약 문서 2 하지만 이름이 너무나도 길어서 안보여야만하는데 어디까지 늘어날 생각이니 너는...3줄까지 내려간다면 나도 어쩔수 없이 계속해서 늘려야만 해. 그냥 계속 늘어날 생각이구나 너는하지만 이름이 너무나도 길어서 안보여야만하는데 어디까지 늘어날 생각이니 너는...3줄까지 내려간다면 나도 어쩔수 없이 계속해서 늘려야만 해. 그냥 계속 늘어날 생각이구나 너는하지만 이름이 너무나도 길어서 안보여야만하는데 어디까지 늘어날 생각이니 너는...3줄까지 내려간다면 나도 어쩔수 없이 계속해서 늘려야만 해. 그냥 계속 늘어날 생각이구나 너는하지만 이름이 너무나도 길어서 안보여야만하는데 어디까지 늘어날 생각이니 너는...3줄까지 내려간다면 나도 어쩔수 없이 계속해서 늘려야만 해. 그냥 계속 늘어날 생각이구나 너는하지만 이름이 너무나도 길어서 안보여야만하는데 어디까지 늘어날 생각이니 너는...3줄까지 내려간다면 나도 어쩔수 없이 계속해서 늘려야만 해. 그냥 계속 늘어날 생각이구나 너는하지만 이름이 너무나도 길어서 안보여야만하는데 어디까지 늘어날 생각이니 너는...3줄까지 내려간다면 나도 어쩔수 없이 계속해서 늘려야만 해. 그냥 계속 늘어날 생각이구나 너는',
         new: false,
         registered: 'Jan 1, 2021',
       },
-      country: { name: 'Brazil', flag: cibAdguard },
-      usage: {
-        value: 22,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'info',
-      },
-      payment: { name: 'Visa', icon: cibGoogle },
       activity: '5 minutes ago',
     },
     {
-      avatar: { src: '/images/logos/marle-logo.png', status: 'warning' },
       displayName: { name: '계약 문서 6', new: true, registered: 'Jan 1, 2021' },
-      country: { name: 'India', flag: cibAdobeAfterEffects },
-      usage: {
-        value: 74,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'warning',
-      },
-      payment: { name: 'Stripe', icon: cibGoogle },
       activity: '1 hour ago',
     },
     {
-      avatar: { src: '/images/logos/marle-logo.png', status: 'secondary' },
       displayName: { name: '계약 문서 3', new: true, registered: 'Jan 1, 2021' },
-      country: { name: 'France', flag: cibAirbnb },
-      usage: {
-        value: 98,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'danger',
-      },
-      payment: { name: 'PayPal', icon: cibCcPaypal },
       activity: 'Last month',
     },
     {
-      avatar: { src: '/images/logos/marle-logo.png', status: 'success' },
       displayName: {
         name: '계약 문서 4',
         new: true,
         registered: 'Jan 1, 2021',
       },
-      country: { name: 'Spain', flag: cibAndroidAlt },
-      usage: {
-        value: 22,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'primary',
-      },
-      payment: { name: 'Google Wallet', icon: cibGoogle },
       activity: 'Last week',
     },
     {
-      avatar: { src: '/images/logos/marle-logo.png', status: 'danger' },
       displayName: {
         name: '계약 문서 16',
         new: true,
         registered: 'Jan 1, 2021',
       },
-      country: { name: 'Poland', flag: cibAnsible },
-
-      usage: {
-        value: 43,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'success',
-      },
-      payment: { name: 'Amex', icon: cibGoogle },
       activity: 'Last week',
     },
   ];
@@ -385,14 +371,7 @@ const DashboardPage = () => {
         new: true,
         registered: 'Jan 1, 2021',
       },
-      //REMIND Company field 들 전부 id 로 변경 필요
-      company: { name: 'USA', flag: cib500px5 },
-      usage: {
-        value: 50,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'success',
-      },
-      activity: '10 sec ago',
+      usage: 50,
     },
     {
       avatar: { src: '/images/logos/marle-logo.png', status: 'danger' },
@@ -401,35 +380,17 @@ const DashboardPage = () => {
         new: false,
         registered: 'Jan 1, 2021',
       },
-      company: { name: 'Brazil', flag: cibAdguard },
-      usage: {
-        value: 22,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'info',
-      },
-      activity: '5 minutes ago',
+      usage: 22,
     },
     {
       avatar: { src: '/images/logos/marle-logo.png', status: 'warning' },
       displayName: { name: '표준 계약 문서 6', new: true, registered: 'Jan 1, 2021' },
-      company: { name: 'India', flag: cibAdobeAfterEffects },
-      usage: {
-        value: 74,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'warning',
-      },
-      activity: '1 hour ago',
+      usage: 74,
     },
     {
       avatar: { src: '/images/logos/marle-logo.png', status: 'secondary' },
       displayName: { name: '표준 계약 문서 3', new: true, registered: 'Jan 1, 2021' },
-      company: { name: 'France', flag: cibAirbnb },
-      usage: {
-        value: 98,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'danger',
-      },
-      activity: 'Last month',
+      usage: 98,
     },
     {
       avatar: { src: '/images/logos/marle-logo.png', status: 'success' },
@@ -438,14 +399,7 @@ const DashboardPage = () => {
         new: true,
         registered: 'Jan 1, 2021',
       },
-      company: { name: 'Spain', flag: cibAndroidAlt },
-      usage: {
-        value: 22,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'primary',
-      },
-      payment: { name: 'Google Wallet', icon: cibCcApplePay },
-      activity: 'Last week',
+      usage: 22,
     },
     {
       avatar: { src: '/images/logos/marle-logo.png', status: 'danger' },
@@ -454,13 +408,7 @@ const DashboardPage = () => {
         new: true,
         registered: 'Jan 1, 2021',
       },
-      company: { name: 'Poland', flag: cibAnsible },
-      usage: {
-        value: 43,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'success',
-      },
-      activity: 'Last week',
+      usage: 43,
     },
   ];
 
@@ -472,29 +420,29 @@ const DashboardPage = () => {
     setStandardContractDocumentTableVisible(!standardContractDocumentTableVisible);
   };
 
+  //REMIND recentlyLikedChatList 로 변경해야함..
   const ChatExample = [
     {
-      // avatar: { src: 'path/to/avatar1.jpg', status: 'success' },
       id: 3,
-      avatar: { src: '/images/logos/marle-logo.png', status: 'danger' },
+      //REMIND 버젼 업 할때 고려.
+      documentCollection: '문서1',
       question: `안녕?`,
-      // country: { flag: 'cilFlagAlt', name: 'USA' },
       modelName: 'GPT-4 Omni',
       pilotMode: 'A',
-      createdAt: '2024-06-12 10:00 AM',
+      createdAt: '2024-06-12',
     },
     {
-      // avatar: { src: 'path/to/avatar2.jpg', status: 'warning' },
       id: 8,
-      avatar: { src: '/images/logos/marle-logo.png', status: 'danger' },
+      documentCollection: '문서2',
       question: `이 계약서의 계약 기간과 계약금액, 배상금에 대한 내용들을 알려줘.`,
-      // country: { flag: 'cilFlagAlt', name: 'Canada' },
       modelName: 'Claude-3-Opus',
       pilotMode: 'C',
-      createdAt: '2024-06-11 09:00 AM',
+      createdAt: '2024-06-11',
     },
     // 더 많은 데이터 추가 가능
   ];
+
+  //REMIND 응답받은 entry 의 id 로 검색해서 가져오거나, 한번에 받아오거나 결정 필요.
   const AnswerExample = [
     {
       message: '안녕하세요 무엇을 도와드릴까요?',
@@ -540,8 +488,7 @@ const DashboardPage = () => {
               color="primary"
               value={
                 <>
-                  {totalDocumentCount}
-                  {'개'}
+                  {`${totalDocumentCount} 개`}
                   <span className="fs-6 fw-normal">
                     (40.9% <CIcon icon={cilArrowTop} /> , 월간)
                   </span>
@@ -631,8 +578,7 @@ const DashboardPage = () => {
             color="info"
             value={
               <>
-                {totalStandardContractDocumentCount}
-                {'개'}
+                {`${totalStandardContractDocumentCount} 개`}
                 <span className="fs-6 fw-normal">
                   (40.9% <CIcon icon={cilArrowBottom} />, 월간)
                 </span>
@@ -720,7 +666,7 @@ const DashboardPage = () => {
             color="warning"
             value={
               <>
-                10,000{'명'}
+                {`${totalUserCount} 명`}
                 <span className="fs-6 fw-normal">
                   (1.9% <CIcon icon={cilArrowTop} />, 월간)
                 </span>
@@ -802,11 +748,8 @@ const DashboardPage = () => {
                   <div className="small text-medium-emphasis">January - July 2021</div>
                 </CCol>
                 <CCol sm={7} className="d-none d-md-block">
-                  <CButton color="primary" className="float-end">
-                    <CIcon icon={cilCloudDownload} />
-                  </CButton>
                   <CButtonGroup className="float-end me-3">
-                    {['주간', '월간'].map((value) => (
+                    {['days', 'months'].map((value) => (
                       <CButton
                         color="outline-secondary"
                         key={value}
@@ -814,7 +757,7 @@ const DashboardPage = () => {
                         active={value === hotConChartLabelOption}
                         onClick={() => setHotConChartLabelOption(value)}
                       >
-                        {value}
+                        {value === 'days' ? '지난 7일' : '지난 6개월'}
                       </CButton>
                     ))}
                   </CButtonGroup>
@@ -823,7 +766,7 @@ const DashboardPage = () => {
               <CChartLine
                 style={{ height: '300px', marginTop: '40px' }}
                 data={{
-                  labels: hotConChartLabelOption === '주간' ? weeklyLabel : monthlyLabel,
+                  labels: hotConChartLabelOption === 'days' ? weeklyLabel : monthlyLabel,
                   datasets: [
                     {
                       label: 'Marl-E CMS in POSCO Corp.',
@@ -926,8 +869,8 @@ const DashboardPage = () => {
                 {hotDocTopFive.map((item, index) => (
                   <CCol className="mb-sm-2 mb-0 d-flex flex-column" key={index}>
                     <strong>{index + 1}위</strong>
-                    <CPopover content={item.title} placement="bottom" trigger="hover">
-                      <div className="text-medium-emphasis mb-3 text-truncate">{item.title}</div>
+                    <CPopover content={item.name} placement="bottom" trigger="hover">
+                      <div className="text-medium-emphasis mb-3 text-truncate">{item.name}</div>
                     </CPopover>
                     <div className="mt-auto mb-0">
                       <strong>{item.value} 개</strong>
@@ -951,11 +894,8 @@ const DashboardPage = () => {
                   <div className="small text-medium-emphasis">January - July 2021</div>
                 </CCol>
                 <CCol sm={7} className="d-none d-md-block">
-                  <CButton color="primary" className="float-end">
-                    <CIcon icon={cilCloudDownload} />
-                  </CButton>
                   <CButtonGroup className="float-end me-3">
-                    {['주간', '월간'].map((value) => (
+                    {['days', 'months'].map((value) => (
                       <CButton
                         color="outline-secondary"
                         key={value}
@@ -963,7 +903,7 @@ const DashboardPage = () => {
                         active={value === totalTokenUsageChartLabelOption}
                         onClick={() => setTotalTokenUsageChartLabelOption(value)}
                       >
-                        {value}
+                        {value === 'days' ? '지난 7일' : '지난 6개월'}{' '}
                       </CButton>
                     ))}
                   </CButtonGroup>
@@ -972,7 +912,7 @@ const DashboardPage = () => {
               <CChartLine
                 style={{ height: '300px', marginTop: '40px' }}
                 data={{
-                  labels: totalTokenUsageChartLabelOption === '주간' ? weeklyLabel : monthlyLabel,
+                  labels: totalTokenUsageChartLabelOption === 'days' ? weeklyLabel : monthlyLabel,
                   datasets: [
                     {
                       label: 'Total',
@@ -1066,9 +1006,9 @@ const DashboardPage = () => {
       </CRow>
 
       <CRow>
-        <CCol sm={6}>
+        <CCol sm={5}>
           <CCard className="m-3">
-            <CCardHeader> NEW Cons!🌽 & New Standard 🌽tract Docs</CCardHeader>
+            <CCardHeader className="bold"> 최근 등록된 표준 계약서 & 계약 문서 </CCardHeader>
             <CCardBody className="table-wrapper">
               <div
                 className={`table-container ${standardContractDocumentTableVisible ? 'table-expanded-right' : ''}`}
@@ -1081,9 +1021,6 @@ const DashboardPage = () => {
                 <CTable align="middle" className="mb-0 border" hover responsive="lg" style={{ height: '430px' }}>
                   <CTableHead color="light">
                     <CTableRow>
-                      <CTableHeaderCell className="text-center">
-                        <CIcon icon={cilDescription} />
-                      </CTableHeaderCell>
                       <CTableHeaderCell
                         style={{ cursor: newContractDocumentTableVisible ? '' : 'pointer' }}
                         onClick={handleOpenStandardContractTable}
@@ -1095,11 +1032,6 @@ const DashboardPage = () => {
                         />
                       </CTableHeaderCell>
 
-                      <CTableHeaderCell className="text-center">
-                        <CCollapse visible={standardContractDocumentTableVisible} horizontal>
-                          <p className="collapsable-table-header">Company</p>
-                        </CCollapse>
-                      </CTableHeaderCell>
                       <CTableHeaderCell>
                         <CCollapse visible={standardContractDocumentTableVisible} horizontal>
                           <div className="d-flex justify-content-center">
@@ -1113,11 +1045,7 @@ const DashboardPage = () => {
                           </div>
                         </CCollapse>
                       </CTableHeaderCell>
-                      <CTableHeaderCell>
-                        <CCollapse visible={standardContractDocumentTableVisible} horizontal>
-                          <p className="collapsable-table-header">Activity</p>
-                        </CCollapse>
-                      </CTableHeaderCell>
+
                       {standardContractDocumentTableVisible && (
                         <CTableHeaderCell>
                           <CCollapse visible={standardContractDocumentTableVisible} horizontal></CCollapse>
@@ -1128,9 +1056,6 @@ const DashboardPage = () => {
                   <CTableBody>
                     {standardContractsExample.map((item, index) => (
                       <CTableRow key={index}>
-                        <CTableDataCell className="text-center">
-                          <CAvatar size="md" src={item.avatar.src} status={item.avatar.status} />
-                        </CTableDataCell>
                         <CTableDataCell>
                           {item.displayName.name.length > 10 ? (
                             <CPopover content={item.displayName.name} placement="bottom" trigger="hover" delay={300}>
@@ -1160,24 +1085,10 @@ const DashboardPage = () => {
 
                         <CTableDataCell>
                           <CCollapse visible={standardContractDocumentTableVisible} horizontal>
-                            <div className="d-flex justify-content-center">
-                              <CIcon size="xl" icon={item.company.flag} />
-                            </div>
+                            <div className="fw-semibold text-nowrap align-middle">{item.usage} 개</div>
                           </CCollapse>
                         </CTableDataCell>
-                        <CTableDataCell>
-                          <CCollapse visible={standardContractDocumentTableVisible} horizontal>
-                            <div className="fw-semibold text-nowrap align-middle">{item.usage.value} 개</div>
-                          </CCollapse>
-                        </CTableDataCell>
-                        <CTableDataCell>
-                          <CCollapse visible={standardContractDocumentTableVisible} horizontal>
-                            <div className="collapsable-table-data">
-                              <div className="small text-medium-emphasis"> NewChat</div>
-                              <div className="fw-semibold text-nowrap">{item.activity}</div>
-                            </div>
-                          </CCollapse>
-                        </CTableDataCell>
+
                         {standardContractDocumentTableVisible && (
                           <CTableDataCell>
                             <CCollapse visible={standardContractDocumentTableVisible} horizontal>
@@ -1206,9 +1117,6 @@ const DashboardPage = () => {
                 <CTable align="middle" className="mb-0 border me-2" hover responsive={'lg'} style={{ height: '430px' }}>
                   <CTableHead color="light">
                     <CTableRow>
-                      <CTableHeaderCell className="text-center">
-                        <CIcon icon={cilDescription} />
-                      </CTableHeaderCell>
                       <CTableHeaderCell
                         style={{ cursor: standardContractDocumentTableVisible ? '' : 'pointer' }}
                         onClick={handleOpenNewContractDocumentTable}
@@ -1218,12 +1126,6 @@ const DashboardPage = () => {
                           style={{ marginLeft: '5rem' }}
                           icon={newContractDocumentTableVisible ? cilArrowThickFromLeft : cilArrowThickFromRight}
                         />
-                      </CTableHeaderCell>
-                      <CTableHeaderCell>
-                        <CCollapse visible={newContractDocumentTableVisible} horizontal>
-                          {/*REMIND Company 대신 관리자 페이지로 링크 이동 아이콘으로 변경, SmartTable 로 변경 예정 */}
-                          <p className="collapsable-table-header">Company</p>
-                        </CCollapse>
                       </CTableHeaderCell>
                       <CTableHeaderCell>
                         <CCollapse visible={newContractDocumentTableVisible} horizontal>
@@ -1241,9 +1143,6 @@ const DashboardPage = () => {
                   <CTableBody>
                     {DocsExample.map((item, index) => (
                       <CTableRow key={index}>
-                        <CTableDataCell className="text-center">
-                          <CAvatar size="md" src={item.avatar.src} status={item.avatar.status} />
-                        </CTableDataCell>
                         <CTableDataCell>
                           {item.displayName.name.length > 10 ? (
                             <CPopover content={item.displayName.name} placement="bottom" trigger="hover" delay={300}>
@@ -1270,13 +1169,7 @@ const DashboardPage = () => {
                             Registered: {item.displayName.registered}
                           </div>
                         </CTableDataCell>
-                        <CTableDataCell>
-                          <CCollapse visible={newContractDocumentTableVisible} horizontal>
-                            <div className="d-flex justify-content-center">
-                              <CIcon size="xl" icon={item.country.flag} />
-                            </div>
-                          </CCollapse>
-                        </CTableDataCell>
+
                         <CTableDataCell>
                           <CCollapse visible={newContractDocumentTableVisible} horizontal>
                             <div className="collapsable-table-data">
@@ -1306,52 +1199,49 @@ const DashboardPage = () => {
           </CCard>
         </CCol>
 
-        <CCol>
+        <CCol sm={7}>
           {/* 채팅 통계 정보 S*/}
           <CCard className="m-3">
-            <CCardHeader className="d-flex align-items-center justify-content-between">
+            <CCardHeader className="d-flex align-items-center justify-content-between bold">
               최근 좋아요 표시된 답변
               <small className="text-medium-emphasis"> 질문 클릭 시 해당 답변을 볼 수 있습니다.</small>
             </CCardHeader>
-            <CCardBody className="d-flex justify-content-center">
+            <CCardBody>
               <CSmartTable
                 items={ChatExample}
                 pagination={true}
                 columns={[
                   {
-                    key: 'avatar',
-                    label: <CIcon icon={cilPeople} />,
+                    key: 'documentCollection',
+                    label: <CIcon icon={cilBook} />,
                     _style: { width: '10%' },
                     _props: { className: 'text-center' },
                     filter: false,
                     sorter: false,
                   },
-                  { key: 'question', label: '질문', _props: { className: 'text-nowrap' }, _style: { width: '40%' } },
+                  { key: 'question', label: '질문', _props: { className: 'text-nowrap' }, _style: { width: '30%' } },
+                  { key: 'modelName', label: 'Model', _style: { width: '20%' } },
 
-                  { key: 'createdAt', label: 'CreatedAt', _style: { width: '34%' } },
+                  { key: 'pilotMode', label: 'Pilot', _style: { width: '10%' } },
+                  { key: 'createdAt', label: 'CreatedAt', _style: { width: '10%' } },
                   {
                     key: 'externalLink',
                     label: '',
-                    _style: { width: '16%' },
+                    _style: { width: '5%' },
                     filter: false,
                     sorter: false,
                   },
                 ]}
                 tableProps={{
                   align: 'middle',
-                  className: 'mb-0 border me-5',
+                  className: 'mb-0 border',
                   hover: true,
-                  responsive: true,
                 }}
                 tableHeadProps={{
                   color: 'secondary',
                 }}
                 scopedColumns={{
-                  avatar: (item) => (
-                    <td className="text-center">
-                      <CAvatar size="md" src={item.avatar.src} status={item.avatar.status} />
-                    </td>
-                  ),
+                  documentCollection: (item) => <td className="text-center">{item.documentCollection}</td>,
                   question: (item, index) => (
                     <CPopover
                       title={
@@ -1367,7 +1257,7 @@ const DashboardPage = () => {
                               <CBadge color={'primary'} id="pilotMode" className="m-2">
                                 {item.pilotMode === 'C' ? 'Co-pilot' : 'Auto-pilot'}
                               </CBadge>
-                              <CBadge id="thumb" className="m-2" style={{ backgroundColor: '#4d67c9' }}>
+                              <CBadge id="thumb" className="m-2" style={{ backgroundColor: '#3f66fc' }}>
                                 <PiThumbsUpFill />
                               </CBadge>
                               <CCloseButton
@@ -1418,12 +1308,15 @@ const DashboardPage = () => {
                       </td>
                     </CPopover>
                   ),
+                  pilotMode: (item) => (
+                    <td className="text-center">
+                      <CIcon icon={item.pilotMode === 'A' ? cilScreenDesktop : cilUser} />
+                    </td>
+                  ),
                   createdAt: (item) => (
-                    <>
-                      <td className="text-center">
-                        <div className="text-medium-emphasis text-nowrap">{item.createdAt}</div>
-                      </td>
-                    </>
+                    <td className="text-center">
+                      <div className="text-medium-emphasis text-nowrap">{item.createdAt}</div>
+                    </td>
                   ),
                   externalLink: (item) => (
                     <td className="text-center">
@@ -1449,7 +1342,6 @@ const DashboardPage = () => {
                   <CWidgetStatsA
                     style={{ height: '90%', backgroundColor: '#ffd700' }}
                     className="mb-4"
-                    // color="primary"
                     value={
                       <span className="text-white">
                         $9,000
@@ -1554,12 +1446,11 @@ const DashboardPage = () => {
           </CCard>
         </CCol>
       </CRow>
-
-      <CCard className="m-3">
-        <CCardHeader>Daily Token Usages {' & '} Popular Model</CCardHeader>
-        <CCardBody>
-          <CRow>
-            <CCol xs={12} md={6} xl={6}>
+      <CRow>
+        <CCol xs={12} md={6} xl={6}>
+          <CCard className="m-3">
+            <CCardHeader className="bold">Daily Token Usage Ratio</CCardHeader>
+            <CCardBody>
               <CRow>
                 <CCol sm={6}>
                   <div className="border-start border-start-4 border-start-info py-1 px-3 mb-3">
@@ -1574,35 +1465,26 @@ const DashboardPage = () => {
                   </div>
                 </CCol>
               </CRow>
-              <hr className="mt-0" />
-              {/*{dailyTokenUsagesExample.map((item, index) => (*/}
-              {/*  <div className="progress-group mb-4" key={index}>*/}
-              {/*    <div className="progress-group-prepend">*/}
-              {/*      <span className="text-medium-emphasis small">{item.title}</span>*/}
-              {/*    </div>*/}
-              {/*    <div className="progress-group-bars">*/}
-              {/*      <CProgress thin color="info-gradient" value={item.value1} />*/}
-              {/*      <CProgress thin color="danger-gradient" value={item.value2} />*/}
-              {/*    </div>*/}
-              {/*  </div>*/}
-              {/*))}*/}
+              <CProgress height={30}>
+                <CProgressBar color="primary" value={25}>
+                  25%
+                </CProgressBar>
+                <CProgressBar color="danger" value={75}>
+                  75%
+                </CProgressBar>
+              </CProgress>
+
+              <hr className="mt-3" />
               <DailyTokenUsagesExampleBarChart />
               <hr className="mt-3" />
+            </CCardBody>
+          </CCard>
+        </CCol>
 
-              <div id="todaysTokenUsage" className="mt-3">
-                <h5>금일 토큰 사용량 </h5>
-                <CProgress height={30}>
-                  <CProgressBar color="primary" value={25}>
-                    30
-                  </CProgressBar>
-                  <CProgressBar color="danger" value={75}>
-                    90
-                  </CProgressBar>
-                </CProgress>
-              </div>
-            </CCol>
-
-            <CCol xs={12} md={6} xl={6}>
+        <CCol xs={12} md={6} xl={6}>
+          <CCard className="m-3">
+            <CCardHeader className="bold">Pop-Model</CCardHeader>
+            <CCardBody>
               <CRow>
                 <CCol sm={6}>
                   <div className="border-start border-start-4 border-start-warning py-1 px-3 mb-3">
@@ -1649,8 +1531,15 @@ const DashboardPage = () => {
                   </div>
                 </div>
               ))}
-            </CCol>
-          </CRow>
+            </CCardBody>
+          </CCard>
+        </CCol>
+      </CRow>
+      <CCard className="m-3">
+        <CCardHeader className="bold">
+          <h2>✨ Flexers 😎</h2>
+        </CCardHeader>
+        <CCardBody>
           <CTable align="middle" className="mb-0 border" hover responsive>
             <CTableHead color="light">
               <CTableRow>
@@ -1663,7 +1552,7 @@ const DashboardPage = () => {
                   토큰 사용량 <small> (단위 : 1000개) </small>
                 </CTableHeaderCell>
                 <CTableHeaderCell className="text-center">AI Model</CTableHeaderCell>
-                <CTableHeaderCell>최근 활동</CTableHeaderCell>
+                <CTableHeaderCell>최근 로그인</CTableHeaderCell>
               </CTableRow>
             </CTableHead>
             <CTableBody>
@@ -1799,12 +1688,12 @@ const DailyTokenUsagesExampleBarChart = () => {
         datasets: [
           {
             label: 'Input Tokens',
-            backgroundColor: '#007bff', // Blue color for Value 1
+            backgroundColor: '#007bff',
             data: dailyTokenUsagesExampleInputToken,
           },
           {
             label: 'Output Tokens',
-            backgroundColor: '#dc3545', // Red color for Value 2
+            backgroundColor: '#dc3545',
             data: dailyTokenUsagesExampleOutputToken,
           },
         ],
