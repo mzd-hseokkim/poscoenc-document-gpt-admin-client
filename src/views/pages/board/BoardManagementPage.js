@@ -92,10 +92,10 @@ const BoardManagementPage = () => {
           {item.hasFiles ? <CIcon icon={cilPaperclip} size="sm" className="me-1" /> : ''}
           {item.title}
 
-          {item.comments ? (
+          {item.commentCount > 0 ? (
             <>
               <CIcon icon={cilCommentBubble} size="sm" className="ms-2" />
-              {item.comments.length}
+              {` ${item.commentCount}`}
             </>
           ) : (
             ''
@@ -115,10 +115,10 @@ const BoardManagementPage = () => {
   };
 
   const searchPostList = useCallback(async () => {
-    setSearchResultIsLoading(true);
     if (!isSearchPerformed.current) {
       isSearchPerformed.current = true;
     }
+    setSearchResultIsLoading(true);
     try {
       const searchResult = await BoardService.getSearchedPostList(searchFormData, pageableData);
       setPostList(searchResult.content);
@@ -126,7 +126,11 @@ const BoardManagementPage = () => {
     } catch (error) {
       console.log(error);
       setHasError(true);
-      addToast({ message: `검색 조건을 확인 해 주세요. ${error.response.data.message} with ${error.response.status}` });
+      if (error.response?.status === 400) {
+        addToast({
+          message: `검색 조건을 확인 해 주세요. ${error?.response?.data?.message} with ${error?.response?.status}`,
+        });
+      }
     } finally {
       setSearchResultIsLoading(false);
     }
