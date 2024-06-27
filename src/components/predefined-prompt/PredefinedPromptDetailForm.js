@@ -48,7 +48,7 @@ export const PredefinedPromptDetailForm = ({ initialFormMode, closeModal, refres
   } = useForm({ mode: 'onChange' });
 
   const deleted = watch('deleted');
-  const predefinedPromptId = searchParams.get('id');
+  const predefinedPromptIdParam = searchParams.get('id');
   const onSubmit = async (data) => {
     if (isCreateMode) {
       void postNewPredefinedPrompt(data);
@@ -57,50 +57,49 @@ export const PredefinedPromptDetailForm = ({ initialFormMode, closeModal, refres
     }
   };
 
-  const fetchPredefinedPromptDetails = useCallback(
-    async (promptId) => {
-      setGetDetailIsLoading(true);
-      try {
-        const detail = await PredefinedPromptService.getPredefinedPromptDetail(promptId);
-        if (detail) {
-          const formattedDetail = {
-            ...detail,
-            createdAt: detail.createdAt && formatToYMD(detail.createdAt),
-            modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
-          };
-          setPredefinedPromptDetail(formattedDetail);
-          reset(formattedDetail);
-          setHasError(false);
-        }
-      } catch (error) {
-        if (error.response?.status === 404) {
-          addToast({ message: `id={${promptId}} 해당 프롬프트를 찾을 수 없습니다.` });
-        } else {
-          addToast({ message: '프롬프트 정보를 가져오지 못했습니다.' });
-        }
-        console.log(error);
-        setHasError(true);
-        closeModal();
-      } finally {
-        setGetDetailIsLoading(false);
-      }
-    },
-    [addToast, closeModal, reset]
-  );
-
-  useEffect(() => {
-    if (!isCreateMode && !predefinedPromptId) {
-      closeModal();
+  const fetchPredefinedPromptDetails = useCallback(async () => {
+    if (!predefinedPromptIdParam) {
       return;
     }
+    setGetDetailIsLoading(true);
+    try {
+      const detail = await PredefinedPromptService.getPredefinedPromptDetail(predefinedPromptIdParam);
+      if (detail) {
+        const formattedDetail = {
+          ...detail,
+          createdAt: detail.createdAt && formatToYMD(detail.createdAt),
+          modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
+        };
+        setPredefinedPromptDetail(formattedDetail);
+        reset(formattedDetail);
+        setHasError(false);
+      }
+    } catch (error) {
+      if (error.response?.status === 404) {
+        addToast({ message: `id={${predefinedPromptIdParam}} 해당 프롬프트를 찾을 수 없습니다.` });
+      } else {
+        addToast({ message: '프롬프트 정보를 가져오지 못했습니다.' });
+      }
+      console.log(error);
+      setHasError(true);
+      closeModal();
+    } finally {
+      setGetDetailIsLoading(false);
+    }
+  }, [addToast, closeModal, reset, predefinedPromptIdParam]);
+
+  useEffect(() => {
+    if (!isCreateMode && !predefinedPromptIdParam) {
+      closeModal();
+    }
     if (!isCreateMode && !hasError) {
-      void fetchPredefinedPromptDetails(predefinedPromptId);
+      void fetchPredefinedPromptDetails();
     }
 
     if (isCreateMode) {
       setValue('approved', true);
     }
-  }, [closeModal, fetchPredefinedPromptDetails, hasError, isCreateMode, predefinedPromptId, setValue]);
+  }, [closeModal, fetchPredefinedPromptDetails, hasError, isCreateMode, predefinedPromptIdParam, setValue]);
 
   const postNewPredefinedPrompt = async (newPrompt) => {
     try {
@@ -121,7 +120,7 @@ export const PredefinedPromptDetailForm = ({ initialFormMode, closeModal, refres
 
   const putModifiedPredefinedPrompt = async (data) => {
     const modifiedData = {
-      id: predefinedPromptId,
+      id: predefinedPromptIdParam,
 
       ...data,
     };
@@ -130,7 +129,7 @@ export const PredefinedPromptDetailForm = ({ initialFormMode, closeModal, refres
       if (isModified) {
         await setFormMode('read');
         setPredefinedPromptDetail({});
-        await fetchPredefinedPromptDetails(searchParams.get('id'));
+        await fetchPredefinedPromptDetails();
         refreshPredefinedPromptList();
         addToast({ color: 'success', message: '프롬프트 수정이 완료되었습니다.' });
       }
@@ -148,7 +147,7 @@ export const PredefinedPromptDetailForm = ({ initialFormMode, closeModal, refres
   const handleModificationCancelClick = async () => {
     if (isUpdateMode) {
       setFormMode('read');
-      await fetchPredefinedPromptDetails(searchParams.get('id'));
+      await fetchPredefinedPromptDetails();
     } else if (isCreateMode) {
       closeModal();
     }
@@ -161,7 +160,7 @@ export const PredefinedPromptDetailForm = ({ initialFormMode, closeModal, refres
     } catch (error) {
       addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
-    await fetchPredefinedPromptDetails(searchParams.get('id'));
+    await fetchPredefinedPromptDetails();
     refreshPredefinedPromptList();
   };
 

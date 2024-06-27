@@ -31,6 +31,8 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
   const [formMode, setFormMode] = useState(initialFormMode || 'read');
   const [searchParams] = useSearchParams();
 
+  const postIdParam = searchParams.get('id');
+
   const { addToast } = useToast();
   const currentUserId = useRecoilValue(userIdSelector);
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
@@ -44,45 +46,42 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
 
   const deleted = watch('deleted');
 
-  const fetchPostDetails = useCallback(
-    async (postId) => {
-      if (!postId) {
-        return;
+  const fetchPostDetails = useCallback(async () => {
+    if (!postIdParam) {
+      return;
+    }
+    setGetDetailIsLoading(true);
+    try {
+      const detail = await BoardService.getPostDetail(postIdParam);
+      const formattedDetail = {
+        ...detail,
+        commentCount: detail.comments.length,
+        createdAt: detail.createdAt && formatToYMD(detail.createdAt),
+        modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
+      };
+      setPostDetail(formattedDetail);
+      reset(formattedDetail);
+    } catch (error) {
+      if (error.response?.status === 404) {
+        addToast({ message: `id={${postIdParam}} 해당 게시글을 찾을 수 없습니다.` });
+      } else {
+        console.log(error);
       }
-      setGetDetailIsLoading(true);
-      try {
-        const detail = await BoardService.getPostDetail(postId);
-        const formattedDetail = {
-          ...detail,
-          commentCount: detail.comments.length,
-          createdAt: detail.createdAt && formatToYMD(detail.createdAt),
-          modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
-        };
-        setPostDetail(formattedDetail);
-        reset(formattedDetail);
-      } catch (error) {
-        if (error.response?.status === 404) {
-          addToast({ message: `id={${postId}} 해당 게시글을 찾을 수 없습니다.` });
-        } else {
-          console.log(error);
-        }
-        closeModal();
-      } finally {
-        setGetDetailIsLoading(false);
-      }
-    },
-    [addToast, closeModal, reset]
-  );
+      closeModal();
+    } finally {
+      setGetDetailIsLoading(false);
+    }
+  }, [addToast, closeModal, postIdParam, reset]);
 
   useEffect(() => {
-    const postId = searchParams.get('id');
-
     if (!isCreateMode) {
-      void fetchPostDetails(postId);
+      if (!postIdParam) {
+        closeModal();
+      } else {
+        void fetchPostDetails();
+      }
     }
-  }, [closeModal, fetchPostDetails, isCreateMode, searchParams]);
-
-  //REMIND 모달 닫을 때, 불필요한 데이터들 제거해는 로직 추가
+  }, [closeModal, fetchPostDetails, isCreateMode, postIdParam]);
 
   const onSubmit = (data) => {
     if (isCreateMode) {
@@ -122,7 +121,7 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
       if (isModified) {
         await setFormMode('read');
         refreshPosts();
-        await fetchPostDetails(searchParams.get('id'));
+        await fetchPostDetails();
         addToast({ color: 'success', message: '게시글 수정이 완료되었습니다.' });
       }
     } catch (error) {
@@ -143,14 +142,14 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
     } catch (error) {
       addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
-    await fetchPostDetails(searchParams.get('id'));
+    await fetchPostDetails();
     refreshPosts();
   };
 
   const handleCancelClick = async () => {
     if (isUpdateMode) {
       setFormMode('read');
-      await fetchPostDetails(searchParams.get('id'));
+      await fetchPostDetails();
     } else if (isCreateMode) {
       closeModal();
     }
@@ -226,8 +225,12 @@ const BoardPostDetailForm = ({ initialFormMode, closeModal, refreshPosts }) => {
             </CCardBody>
           </CCard>
         </CForm>
-        {/*REMIND 전체 댓글을 가져오는게 아니라 댓글의 갯수만 가져오고 댓글 데이터는 따로 요청하는걸로 수정 요청*/}
-        {isReadMode && <PostCommentsForm totalCount={postDetail?.comments?.length} />}
+        {isReadMode && (
+          <PostCommentsForm
+            totalCount={postDetail?.comments?.length}
+            deletedCount={postDetail?.comments?.filter((comment) => comment.deleted).length}
+          />
+        )}
       </CModalBody>
       <CModalFooter>
         <DetailFormActionButtons

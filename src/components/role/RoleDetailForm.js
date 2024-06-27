@@ -14,9 +14,10 @@ import formModes from 'utils/common/formModes';
 
 const RoleDetailForm = ({ initialFormMode, closeModal, fetchRoleList }) => {
   const [formMode, setFormMode] = useState(initialFormMode || 'read');
-  const [formData, setFormData] = useState([]);
+  const [formData, setFormData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [searchParams] = useSearchParams();
+  const roleIdParam = searchParams.get('id');
 
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
   const { addToast } = useToast();
@@ -38,34 +39,32 @@ const RoleDetailForm = ({ initialFormMode, closeModal, fetchRoleList }) => {
     },
   ];
 
-  const fetchRoleDetail = useCallback(
-    async (roleId) => {
-      setIsLoading(true);
-      try {
-        const data = await RoleService.getRole(roleId);
-        const formattedData = {
-          ...data,
-          modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
-          createdAt: data.createdAt && formatToYMD(data.createdAt),
-        };
-        reset(formattedData);
-        setFormData(formattedData);
-      } catch (error) {
-        addToast({ message: `id={${roleId}} 해당 권한 정보를 찾을 수 없습니다.` });
-        closeModal();
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [addToast, closeModal, reset]
-  );
-  useEffect(() => {
-    setIsLoading(false);
-    const roleId = searchParams.get('id');
-    if (!isCreateMode && roleId) {
-      void fetchRoleDetail(roleId);
+  const fetchRoleDetail = useCallback(async () => {
+    if (!roleIdParam) {
+      return;
     }
-  }, [fetchRoleDetail, isCreateMode, searchParams]);
+    setIsLoading(true);
+    try {
+      const data = await RoleService.getRole(roleIdParam);
+      const formattedData = {
+        ...data,
+        modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
+        createdAt: data.createdAt && formatToYMD(data.createdAt),
+      };
+      reset(formattedData);
+      setFormData(formattedData);
+    } catch (error) {
+      addToast({ message: `id={${roleIdParam}} 해당 권한 정보를 찾을 수 없습니다.` });
+      closeModal();
+    } finally {
+      setIsLoading(false);
+    }
+  }, [roleIdParam, addToast, closeModal, reset]);
+  useEffect(() => {
+    if (!isCreateMode && roleIdParam) {
+      void fetchRoleDetail();
+    }
+  }, [roleIdParam, fetchRoleDetail, isCreateMode]);
 
   const createRole = async (data) => {
     try {
