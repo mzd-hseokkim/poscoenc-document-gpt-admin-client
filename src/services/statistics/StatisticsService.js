@@ -8,7 +8,7 @@ const getMonthlyStatisticsData = async (params) => {
       endDate: params.endDate,
     },
   });
-  return response.data;
+  return response?.data;
 };
 const getUserUsageStatistics = async (yyyyMM, pageable) => {
   const response = await api.get('/admin/token-statistics/created-by', {

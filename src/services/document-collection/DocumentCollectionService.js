@@ -19,7 +19,9 @@ const getSearchedCollectionList = async (params, pageable) => {
 };
 
 const getCollectionDetail = async (documentCollectionId) => {
-  if (!documentCollectionId) return;
+  if (!documentCollectionId) {
+    return;
+  }
   const response = await api.get(`/admin/document-collections/${documentCollectionId}`);
   return response?.data;
 };
@@ -49,17 +51,17 @@ const getDownloadSearchedCollectionList = async (params) => {
 };
 const patchCollectionsDeletionOption = async (collectionIds, deletionOption) => {
   const response = await api.patch(`/admin/document-collections/deleted/${deletionOption}`, collectionIds);
-  return response.status === 200;
+  return response?.status === 200;
 };
 
 const postNewCollection = async (newCollectionFormData) => {
   const response = await api.post('/admin/document-collections', newCollectionFormData);
-  return response.status === 200;
+  return response?.status === 200;
 };
 
 const putModifiedCollectionDetail = async (modifiedCollection) => {
   const response = await api.put(`/admin/document-collections/${modifiedCollection.id}`, modifiedCollection);
-  return response.status === 200;
+  return response?.status === 200;
 };
 
 const DocumentCollectionService = {
