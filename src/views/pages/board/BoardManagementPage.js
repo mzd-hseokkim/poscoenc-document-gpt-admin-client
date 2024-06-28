@@ -54,18 +54,21 @@ const BoardManagementPage = () => {
   const [postFormMode, setPostFormMode] = useState('');
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
   const [totalPostElements, setTotalPostElements] = useState(0);
-  const [isSearchPerformed, setIsSearchPerformed] = useState(false);
   const [isPickTime, setIsPickTime] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   const [searchFormData, setSearchFormData] = useState({});
   const [stagedSearchFormData, setStagedSearchFormData] = useState(createInitialSearchFormData);
 
   const isComponentMounted = useRef(true);
+  const isSearchPerformed = useRef(false);
 
   const modal = useModal();
   const { addToast } = useToast();
-  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } =
-    usePagination(totalPostElements);
+  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } = usePagination(
+    totalPostElements,
+    'id,desc'
+  );
 
   const handleRowClick = (itemId) => {
     setPostFormMode('read');
@@ -89,10 +92,10 @@ const BoardManagementPage = () => {
           {item.hasFiles ? <CIcon icon={cilPaperclip} size="sm" className="me-1" /> : ''}
           {item.title}
 
-          {item.comments ? (
+          {item.commentCount > 0 ? (
             <>
               <CIcon icon={cilCommentBubble} size="sm" className="ms-2" />
-              {item.comments.length}
+              {` ${item.commentCount}`}
             </>
           ) : (
             ''
@@ -112,16 +115,22 @@ const BoardManagementPage = () => {
   };
 
   const searchPostList = useCallback(async () => {
-    setSearchResultIsLoading(true);
-    if (!isSearchPerformed) {
-      setIsSearchPerformed(true);
+    if (!isSearchPerformed.current) {
+      isSearchPerformed.current = true;
     }
+    setSearchResultIsLoading(true);
     try {
       const searchResult = await BoardService.getSearchedPostList(searchFormData, pageableData);
       setPostList(searchResult.content);
       setTotalPostElements(searchResult.totalElements);
     } catch (error) {
-      addToast({ message: '검색 조건을 확인 해 주세요.' });
+      console.log(error);
+      setHasError(true);
+      if (error.response?.status === 400) {
+        addToast({
+          message: `검색 조건을 확인 해 주세요. ${error?.response?.data?.message} with ${error?.response?.status}`,
+        });
+      }
     } finally {
       setSearchResultIsLoading(false);
     }
@@ -131,12 +140,15 @@ const BoardManagementPage = () => {
     if (isComponentMounted.current) {
       isComponentMounted.current = false;
     } else {
-      void searchPostList();
+      if (!hasError) {
+        void searchPostList();
+      }
     }
-  }, [pageableData, searchPostList]);
+  }, [hasError, pageableData, searchPostList]);
 
   const handleSubmitSearchRequest = async (e) => {
     e.preventDefault();
+    setHasError(false);
     setSearchFormData(stagedSearchFormData);
   };
 
@@ -344,7 +356,7 @@ const BoardManagementPage = () => {
               noItemsLabel={
                 <CSmartTableNoItemLabel
                   contentLength={postList.length}
-                  isSearchPerformed={isSearchPerformed}
+                  isSearchPerformed={isSearchPerformed.current}
                   defaultMessage="검색 조건에 맞는 게시글을 검색합니다."
                 />
               }

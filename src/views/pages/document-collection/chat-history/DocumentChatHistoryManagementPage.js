@@ -19,6 +19,7 @@ import FormLoadingCover from 'components/cover/FormLoadingCover';
 import DocumentChatHistoryDetailForm from 'components/document-collection/DocumentChatHistoryDetailForm';
 import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import ModalContainer from 'components/modal/ModalContainer';
+import { useToast } from 'context/ToastContext';
 import { format } from 'date-fns';
 import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
@@ -45,26 +46,33 @@ const createInitialSearchFormData = () => ({
 
 const DocumentChatHistoryManagementPage = () => {
   const [chatHistoryList, setChatHistoryList] = useState([]);
-  const [isSearchPerformed, setIsSearchPerformed] = useState(false);
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [detailFormMode, setDetailFormMode] = useState('');
   const [totalChatHistoryElements, setTotalChatHistoryElements] = useState(0);
+  const [hasError, setHasError] = useState(false);
 
   const [searchFormData, setSearchFormData] = useState({});
   const [stagedSearchFormData, setStagedSearchFormData] = useState(createInitialSearchFormData);
   const [isPickTime, setIsPickTime] = useState(false);
 
   const isComponentMounted = useRef(true);
+  const isSearchPerformed = useRef(false);
+
   const modal = useModal();
-  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } =
-    usePagination(totalChatHistoryElements);
+  const { addToast } = useToast();
+  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } = usePagination(
+    totalChatHistoryElements,
+    'id,desc'
+  );
 
   const searchChatHistoryList = useCallback(async () => {
     setSearchResultIsLoading(true);
-    if (!isSearchPerformed) {
-      setIsSearchPerformed(true);
+
+    if (!isSearchPerformed.current) {
+      isSearchPerformed.current = true;
     }
+
     try {
       const searchResult = await DocumentChatHistoryService.getSearchedDocumentChatHistory(
         searchFormData,
@@ -76,18 +84,22 @@ const DocumentChatHistoryManagementPage = () => {
       }
     } catch (error) {
       console.log(error);
+      setHasError(true);
+      addToast({ message: `${error.response.data.message} with ${error.response.status}` });
     } finally {
       setSearchResultIsLoading(false);
     }
-  }, [isSearchPerformed, pageableData, searchFormData]);
+  }, [addToast, pageableData, searchFormData]);
 
   useEffect(() => {
     if (isComponentMounted.current) {
       isComponentMounted.current = false;
     } else {
-      void searchChatHistoryList();
+      if (!hasError) {
+        void searchChatHistoryList();
+      }
     }
-  }, [searchChatHistoryList]);
+  }, [hasError, searchChatHistoryList]);
 
   const handleRowClick = (itemId) => {
     setDetailFormMode('read');
@@ -95,6 +107,7 @@ const DocumentChatHistoryManagementPage = () => {
   };
   const handleSubmitSearchRequest = async (e) => {
     e.preventDefault();
+    setHasError(false);
     setSearchFormData(stagedSearchFormData);
   };
   const handleSearchFormReset = () => {
@@ -314,7 +327,7 @@ const DocumentChatHistoryManagementPage = () => {
                 noItemsLabel={
                   <CSmartTableNoItemLabel
                     contentLength={chatHistoryList?.length}
-                    isSearchPerformed={isSearchPerformed}
+                    isSearchPerformed={isSearchPerformed.current}
                     defaultMessage="검색 조건에 맞는 한 쌍의 질문-답변을 검색합니다."
                   />
                 }

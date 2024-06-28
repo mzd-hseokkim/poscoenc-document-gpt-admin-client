@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { CButton, CCard, CCardBody, CCol, CFormLabel, CRow, CSmartTable } from '@coreui/react-pro';
 import DeletionStatusBadge from 'components/badge/DeletionStatusBadge';
@@ -20,7 +20,9 @@ const RoleManagementPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [checkedItems, setCheckedItems] = useState([]);
   const [formMode, setFormMode] = useState('');
-  const [isSearchPerformed, setIsSearchPerformed] = useState(false);
+
+  const isSearchPerformed = useRef(false);
+
   const userRole = useRecoilValue(userRoleSelector);
 
   const { addToast } = useToast();
@@ -33,8 +35,8 @@ const RoleManagementPage = () => {
   };
 
   const fetchRoleList = useCallback(async () => {
-    if (!isSearchPerformed) {
-      setIsSearchPerformed(true);
+    if (!isSearchPerformed.current) {
+      isSearchPerformed.current = true;
     }
     try {
       setIsLoading(true);
@@ -48,11 +50,12 @@ const RoleManagementPage = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [addToast, isSearchPerformed]);
+  }, [addToast]);
 
   useEffect(() => {
     void fetchRoleList();
   }, [fetchRoleList]);
+
   const handleSignOut = () => {
     navigate('/sign-in');
     resetJwtToken();
@@ -118,6 +121,7 @@ const RoleManagementPage = () => {
               </CCol>
             </CRow>
             <CRow className="mb-3">
+              {/*REMIND Pagination 적용 필요*/}
               <CSmartTable
                 noItemsLabel={
                   <CSmartTableNoItemLabel contentLength={roleList.length} isSearchPerformed={isSearchPerformed} />

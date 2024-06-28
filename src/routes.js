@@ -15,9 +15,9 @@ const ChatHistoryManagementPage = React.lazy(() =>
 const StandardContractDocumentPage = React.lazy(() =>
   import('views/pages/document-collection/standard-contract/StandardContractDocumentManagementPage')
 );
-const StatisticsUserManagement = React.lazy(() => import('views/pages/statistics/StatisticsUserManagement'));
+const StatisticsUserManagement = React.lazy(() => import('views/pages/statistics/StatisticsUserManagementPage'));
 const StatisticsDocumentCollectionManagement = React.lazy(() =>
-  import('views/pages/statistics/StatisticsDocumentCollectionManagement')
+  import('views/pages/statistics/StatisticsDocumentCollectionManagementPage')
 );
 const PredefinedPromptManagement = React.lazy(() =>
   import('views/pages/predefined-prompt/PredefinedPromptManagementPage')
@@ -44,7 +44,7 @@ const routes = [
     element: ChatHistoryManagementPage,
   },
   {
-    path: '/standard-contract-documents/management',
+    path: '/standard-contract/management',
     exact: true,
     name: '표준 계약서 관리',
     element: StandardContractDocumentPage,

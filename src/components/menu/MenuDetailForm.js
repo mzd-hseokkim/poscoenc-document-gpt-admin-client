@@ -38,6 +38,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
   const { addToast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [searchParams] = useSearchParams();
+  const menuIdParam = searchParams.get('id');
 
   const {
     reset,
@@ -54,7 +55,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
     },
   });
 
-  const menuId = watch('id');
+  const watchMenuId = watch('id');
   const allowChildren = watch('allowChildren');
   const allowedRoles = watch('allowedRoles');
 
@@ -140,7 +141,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
   );
 
   const getParentMenu = useCallback(async () => {
-    const excludedId = isCreateMode ? '' : searchParams.get('id');
+    const excludedId = isCreateMode ? '' : menuIdParam;
 
     if (!isCreateMode && !excludedId) {
       return;
@@ -159,49 +160,48 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
         addToast({ message: '상위 메뉴 목록을 가져오지 못했습니다.' });
       }
     }
-  }, [addToast, isCreateMode, searchParams]);
+  }, [addToast, isCreateMode, menuIdParam]);
 
-  const fetchMenuDetail = useCallback(
-    async (menuId) => {
-      try {
-        setIsLoading(true);
-        const data = await MenuService.getMenuDetail(menuId);
-        const formattedData = {
-          ...data,
-          modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
-          createdAt: data.createdAt && formatToYMD(data.createdAt),
-        };
-        reset(formattedData);
-        setFormData(formattedData);
-        const allowedRoles = data.allowedRoles.map((role) => role.id);
-        await getRoles(allowedRoles);
-      } catch (error) {
-        const status = error.response?.status;
-        if (status === 400) {
-          addToast({ message: '메뉴 정보를 가져오지 못했습니다.' });
-        }
-        if (status === 404) {
-          addToast({ message: `id={${menuId}} 해당 메뉴를 찾을 수 없습니다.` });
-        }
-        closeModal();
-      } finally {
-        setIsLoading(false);
+  const fetchMenuDetail = useCallback(async () => {
+    if (!menuIdParam) {
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const data = await MenuService.getMenuDetail(menuIdParam);
+      const formattedData = {
+        ...data,
+        modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
+        createdAt: data.createdAt && formatToYMD(data.createdAt),
+      };
+      reset(formattedData);
+      setFormData(formattedData);
+      const allowedRoles = data.allowedRoles.map((role) => role.id);
+      await getRoles(allowedRoles);
+    } catch (error) {
+      const status = error.response?.status;
+      if (status === 400) {
+        addToast({ message: '메뉴 정보를 가져오지 못했습니다.' });
       }
-    },
-    [addToast, closeModal, getRoles, reset]
-  );
+      if (status === 404) {
+        addToast({ message: `id={${menuIdParam}} 해당 메뉴를 찾을 수 없습니다.` });
+      }
+      closeModal();
+    } finally {
+      setIsLoading(false);
+    }
+  }, [addToast, closeModal, getRoles, reset, menuIdParam]);
 
   useEffect(() => {
     setIsLoading(false);
-    const menuId = searchParams.get('id');
 
-    if (!isCreateMode && menuId) {
-      void fetchMenuDetail(menuId);
+    if (!isCreateMode && menuIdParam) {
+      void fetchMenuDetail();
     } else {
       void getRoles();
     }
     void getParentMenu();
-  }, [fetchMenuDetail, getParentMenu, getRoles, isCreateMode, searchParams]);
+  }, [fetchMenuDetail, getParentMenu, getRoles, isCreateMode, menuIdParam]);
 
   const postMenu = async (data) => {
     try {
@@ -231,7 +231,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
       const response = await MenuService.patchMenu(formattedData);
       if (response) {
         fetchMenuList();
-        void fetchMenuDetail(menuId);
+        void fetchMenuDetail();
         setFormMode('read');
         addToast({ color: 'success', message: '메뉴 수정이 완료되었습니다.' });
       }
@@ -257,7 +257,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
   const handleCancelClick = async () => {
     if (isUpdateMode) {
       setFormMode('read');
-      await fetchMenuDetail(searchParams.get('id'));
+      await fetchMenuDetail();
     } else if (isCreateMode) {
       closeModal();
     }
@@ -276,7 +276,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
       addToast({ message: `${shouldDelete ? '삭제' : '복구'}하지 못했습니다` });
     }
     fetchMenuList();
-    void fetchMenuDetail(menuId);
+    void fetchMenuDetail();
   };
   const renderAllowChildrenCheck = () => (
     <CRow className="mb-3">
@@ -377,7 +377,7 @@ const MenuDetailForm = ({ initialFormMode, closeModal, fetchMenuList }) => {
       </CModalBody>
       <CModalFooter>
         <DetailFormActionButtons
-          dataId={menuId}
+          dataId={watchMenuId}
           formModes={formModes(formMode)}
           handleCancel={handleCancelClick}
           handleDeleteRestore={handleDeleteRestoreClick}

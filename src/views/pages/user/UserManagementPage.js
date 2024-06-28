@@ -32,19 +32,22 @@ const createInitialSearchFormData = () => ({
 });
 const UserManagementPage = () => {
   const [userList, setUserList] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
   const [checkedItems, setCheckedItems] = useState([]);
   const [formMode, setFormMode] = useState('');
   const [totalUserElements, setTotalUserElements] = useState(0);
-  const [isSearchPerformed, setIsSearchPerformed] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   const [searchFormData, setSearchFormData] = useState({});
   const [stagedSearchFormData, setStagedSearchFormData] = useState(createInitialSearchFormData);
 
   const isComponentMounted = useRef(true);
+  const isSearchPerformed = useRef(false);
 
-  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } =
-    usePagination(totalUserElements);
+  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } = usePagination(
+    totalUserElements,
+    'id,desc'
+  );
   const { addToast } = useToast();
   const modal = useModal();
 
@@ -53,37 +56,42 @@ const UserManagementPage = () => {
   };
 
   const fetchUserList = useCallback(async () => {
-    if (!isSearchPerformed) {
-      setIsSearchPerformed(true);
+    setSearchResultIsLoading(true);
+    if (!isSearchPerformed.current) {
+      isSearchPerformed.current = true;
     }
     try {
-      setIsLoading(true);
       const data = await UserService.getUsers(searchFormData, pageableData);
       setUserList(data.content);
       setTotalUserElements(data.totalElements);
     } catch (error) {
+      console.log(error);
+      setHasError(true);
       const status = error.response?.status;
       if (status === 400) {
-        addToast({ message: error.response.data.message });
+        addToast({ message: `${error.response.data.message} with ${error.response.status}` });
       }
     } finally {
-      setIsLoading(false);
+      setSearchResultIsLoading(false);
     }
-  }, [addToast, searchFormData, isSearchPerformed, pageableData]);
+  }, [addToast, searchFormData, pageableData]);
 
   useEffect(() => {
     if (isComponentMounted.current) {
       isComponentMounted.current = false;
     } else {
-      void fetchUserList();
+      if (!hasError) {
+        void fetchUserList();
+      }
     }
-  }, [fetchUserList, pageableData]);
+  }, [fetchUserList, hasError]);
   const handleChange = ({ target: { id, value } }) => {
     setStagedSearchFormData((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setHasError(false);
     setSearchFormData(stagedSearchFormData);
   };
 
@@ -222,11 +230,11 @@ const UserManagementPage = () => {
                 itemsPerPage={pageableData.size}
                 itemsPerPageLabel="페이지당 사용자 수"
                 itemsPerPageSelect
-                loading={isLoading}
+                loading={searchResultIsLoading}
                 noItemsLabel={
                   <CSmartTableNoItemLabel
                     contentLength={userList.length}
-                    isSearchPerformed={isSearchPerformed}
+                    isSearchPerformed={isSearchPerformed.current}
                     defaultMessage="검색 조건에 맞는 사용자를 검색합니다."
                   />
                 }

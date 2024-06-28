@@ -2,9 +2,11 @@ import api from 'api/Api';
 import { formatToYMD, getCurrentDate } from 'utils/common/dateUtils';
 
 const getPostDetail = async (postId) => {
-  if (!postId) return;
+  if (!postId) {
+    return;
+  }
   const response = await api.get(`/admin/boards/${postId}`);
-  return response.data;
+  return response?.data;
 };
 
 const getSearchedPostList = async (params, pageable) => {
@@ -55,17 +57,17 @@ const getDownloadSearchedPostList = async (params) => {
 };
 const patchPostsDeletionOption = async (boardIds, deletionOption) => {
   const response = await api.patch(`/admin/boards/deleted/${deletionOption}`, boardIds);
-  return response.status === 200;
+  return response?.status === 200;
 };
 
 const postNew = async (newPost) => {
   const response = await api.post('/admin/boards', newPost);
-  return response.data;
+  return response?.data;
 };
 
 const putModifiedPostDetail = async (modifiedPost) => {
   const result = await api.put(`/admin/boards/${modifiedPost.id}`, modifiedPost);
-  return result.status === 200;
+  return result?.status === 200;
 };
 const BoardService = {
   getPostDetail,

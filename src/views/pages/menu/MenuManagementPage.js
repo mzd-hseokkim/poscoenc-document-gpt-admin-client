@@ -45,20 +45,22 @@ const MenuManagementPage = () => {
   const [menuList, setMenuList] = useState([]);
   const [checkedItems, setCheckedItems] = useState([]);
   const [formMode, setFormMode] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
   const [totalMenuElements, setTotalMenuElements] = useState(0);
-
   const [searchFormData, setSearchFormData] = useState({});
   const [stagedSearchFormData, setStagedSearchFormData] = useState(createInitialSearchFormData);
-
-  const [isSearchPerformed, setIsSearchPerformed] = useState(false);
   const [isPickTime, setIsPickTime] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   const isComponentMounted = useRef(true);
+  const isSearchPerformed = useRef(false);
 
-  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } =
-    usePagination(totalMenuElements);
+  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } = usePagination(
+    totalMenuElements,
+    'id,desc'
+  );
   const { addToast } = useToast();
+
   const modal = useModal();
 
   const isDeletedRow = (selectedRows) => {
@@ -66,31 +68,36 @@ const MenuManagementPage = () => {
   };
 
   const fetchMenuList = useCallback(async () => {
-    if (!isSearchPerformed) {
-      setIsSearchPerformed(true);
+    setSearchResultIsLoading(true);
+
+    if (!isSearchPerformed.current) {
+      isSearchPerformed.current = true;
     }
+
     try {
-      setIsLoading(true);
       const data = await MenuService.getMenus(searchFormData, pageableData);
       setMenuList(data.content);
       setTotalMenuElements(data.totalElements);
     } catch (error) {
+      setHasError(true);
       const status = error.response?.status;
       if (status === 400) {
         addToast({ message: error.response.data.message });
       }
     } finally {
-      setIsLoading(false);
+      setSearchResultIsLoading(false);
     }
-  }, [addToast, searchFormData, isSearchPerformed, pageableData]);
+  }, [addToast, searchFormData, pageableData]);
 
   useEffect(() => {
     if (isComponentMounted.current) {
       isComponentMounted.current = false;
     } else {
-      void fetchMenuList();
+      if (!hasError) {
+        void fetchMenuList();
+      }
     }
-  }, [fetchMenuList, pageableData]);
+  }, [fetchMenuList, hasError]);
 
   const handleDateChange = (id, newDate, isStartDate = true) => {
     const fieldMap = {
@@ -135,6 +142,7 @@ const MenuManagementPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setHasError(false);
     setSearchFormData(stagedSearchFormData);
   };
 
@@ -321,11 +329,11 @@ const MenuManagementPage = () => {
                 itemsPerPage={pageableData.size}
                 itemsPerPageLabel="페이지당 메뉴 개수"
                 itemsPerPageSelect
-                loading={isLoading}
+                loading={searchResultIsLoading}
                 noItemsLabel={
                   <CSmartTableNoItemLabel
                     contentLength={menuList.length}
-                    isSearchPerformed={isSearchPerformed}
+                    isSearchPerformed={isSearchPerformed.current}
                     defaultMessage="검색 조건에 맞는 메뉴를 검색합니다."
                   />
                 }

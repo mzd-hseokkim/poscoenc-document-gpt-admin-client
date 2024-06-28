@@ -8,7 +8,7 @@ const getPostComments = async (postId) => {
       size: 100,
     },
   });
-  return response.data.content;
+  return response?.data?.content;
 };
 const postComment = async (postId, content) => {
   const response = await api.post('/admin/board-comments', {
@@ -16,12 +16,12 @@ const postComment = async (postId, content) => {
     boardId: postId,
     content,
   });
-  return response.data;
+  return response?.data;
 };
 
 const patchDeletionOptionComment = async (commentId, deletionOption) => {
   const response = await api.patch(`/admin/board-comments/deleted/${deletionOption}`, [commentId]);
-  return response.data;
+  return response?.data;
 };
 
 // REMIND 댓글 수정 대신 생성,삭제

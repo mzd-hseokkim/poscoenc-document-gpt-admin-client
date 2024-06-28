@@ -61,8 +61,10 @@ const PredefinedPromptManagementPage = () => {
     handleSearchFormReset,
     handleTimePickerCheck,
   } = useSearchForm(createInitialSearchFormData());
-  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } =
-    usePagination(totalPromptElements);
+  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } = usePagination(
+    totalPromptElements,
+    'id,desc'
+  );
   const isComponentMounted = useRef(true);
   const isSearchPerformed = useRef(false);
 

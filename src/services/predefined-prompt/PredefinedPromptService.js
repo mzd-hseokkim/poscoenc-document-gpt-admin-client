@@ -28,17 +28,17 @@ const getPredefinedPromptDetail = async (predefinedPromptId) => {
 };
 const patchPredefinedPromptDeletionOption = async (predefinedPromptIds, deletionOption) => {
   const response = await api.patch(`/admin/predefined-prompts/deleted/${deletionOption}`, predefinedPromptIds);
-  return response.status === 200;
+  return response?.status === 200;
 };
 
 const putModifiedPredefinedPromptDetail = async (modifiedPrompt) => {
   const response = await api.put(`/admin/predefined-prompts/${modifiedPrompt.id}`, modifiedPrompt);
-  return response.status === 200;
+  return response?.status === 200;
 };
 
 const postPredefinedPrompt = async (newPrompt) => {
   const response = await api.post(`/admin/predefined-prompts`, newPrompt);
-  return response.data;
+  return response?.data;
 };
 const getDownloadSearchedPredefinedPromptList = async (params) => {
   const response = await api.get('/admin/predefined-prompts/excel', {

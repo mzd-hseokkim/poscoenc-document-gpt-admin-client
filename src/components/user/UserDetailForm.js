@@ -38,14 +38,18 @@ const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {
   const currentMonth = new Date().getMonth() + 1;
   const [isLoading, setIsLoading] = useState(false);
   const [formMode, setFormMode] = useState(initialFormMode || 'read');
-  const [formData, setFormData] = useState([]);
+  const [formData, setFormData] = useState({});
   const [statisticsData, setStatisticsData] = useState({
     inputTokenData: [],
     outputTokenData: [],
     bingSearchsData: [],
     dallE3GenerationsData: [],
   });
+  const [chartHasError, setChartHasError] = useState(false);
+
   const [searchParams] = useSearchParams();
+  const userIdParam = searchParams.get('id');
+
   const chartLabels = MonthLabelGenerator.pastYearMonthsChartLabels();
 
   const { isCreateMode, isReadMode, isUpdateMode } = formModes(formMode);
@@ -88,71 +92,67 @@ const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {
     },
   ];
 
-  const fetchUserDetail = useCallback(
-    async (userId) => {
-      if (!isCreateMode && !userId) {
-        return;
-      }
-      try {
-        setIsLoading(true);
-
-        const data = await UserService.getUser(userId);
-        const formattedData = {
-          ...data,
-          modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
-          createdAt: data.createdAt && formatToYMD(data.createdAt),
-        };
-        reset(formattedData);
-        setFormData(formattedData);
-      } catch (error) {
-        addToast({ message: `id={${userId}} 해당 사용자를 찾을 수 없습니다.` });
-        closeModal();
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [addToast, closeModal, isCreateMode, reset]
-  );
-
-  const fetchStatisticsData = useCallback(
-    async (userId) => {
+  const fetchUserDetail = useCallback(async () => {
+    if (!isCreateMode && !userIdParam) {
+      return;
+    }
+    try {
       setIsLoading(true);
-      try {
-        const responseData = await StatisticsService.getMonthlyStatisticsData({
-          criteria: 'createdBy',
-          criteriaKey: userId,
-          endDate: new Date().toISOString().split('T')[0],
-        });
 
-        const sortedData = sortByAggregationKey(responseData?.list);
-        const paddedData = padDataArrayWithZero(sortedData, currentMonth);
+      const data = await UserService.getUser(userIdParam);
+      const formattedData = {
+        ...data,
+        modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
+        createdAt: data.createdAt && formatToYMD(data.createdAt),
+      };
+      reset(formattedData);
+      setFormData(formattedData);
+    } catch (error) {
+      addToast({ message: `id={${userIdParam}} 해당 사용자를 찾을 수 없습니다.` });
+      closeModal();
+    } finally {
+      setIsLoading(false);
+    }
+  }, [addToast, closeModal, isCreateMode, reset, userIdParam]);
 
-        setStatisticsData({
-          inputTokenData: paddedData.map((item) => item.sumInputTokens),
-          outputTokenData: paddedData.map((item) => item.sumOutputTokens),
-          bingSearchsData: paddedData.map((item) => item.sumBingSearchs),
-          dallE3GenerationsData: paddedData.map((item) => item.sumDallE3Generations),
-        });
-      } catch (error) {
-        console.log(error);
-        addToast({ message: '차트를 불러오는데 실패했습니다.' });
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [addToast, currentMonth]
-  );
+  const fetchStatisticsData = useCallback(async () => {
+    if (!userIdParam) {
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const responseData = await StatisticsService.getMonthlyStatisticsData({
+        criteria: 'createdBy',
+        criteriaKey: userIdParam,
+        endDate: new Date().toISOString().split('T')[0],
+      });
+
+      const sortedData = sortByAggregationKey(responseData?.list);
+      const paddedData = padDataArrayWithZero(sortedData, currentMonth);
+
+      setStatisticsData({
+        inputTokenData: paddedData.map((item) => item.sumInputTokens),
+        outputTokenData: paddedData.map((item) => item.sumOutputTokens),
+        bingSearchsData: paddedData.map((item) => item.sumBingSearchs),
+        dallE3GenerationsData: paddedData.map((item) => item.sumDallE3Generations),
+      });
+    } catch (error) {
+      console.log(error);
+      setChartHasError(true);
+      addToast({ message: '차트를 불러오는데 실패했습니다.' });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [addToast, currentMonth, userIdParam]);
 
   useEffect(() => {
-    setIsLoading(false);
-
-    const userId = searchParams.get('id');
-
-    if (!isCreateMode && userId) {
-      void fetchUserDetail(userId);
-      void fetchStatisticsData(userId);
+    if (!isCreateMode && userIdParam) {
+      void fetchUserDetail();
+      if (!chartHasError) {
+        void fetchStatisticsData();
+      }
     }
-  }, [fetchStatisticsData, fetchUserDetail, isCreateMode, searchParams]);
+  }, [fetchStatisticsData, fetchUserDetail, isCreateMode, userIdParam]);
 
   const postUser = async (data) => {
     try {
@@ -172,7 +172,7 @@ const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {
 
   const patchUser = async (data) => {
     try {
-      const response = await UserService.putUser(searchParams.get('id'), data);
+      const response = await UserService.putUser(userIdParam, data);
       if (response) {
         fetchUserList();
         setFormMode('read');
@@ -210,7 +210,7 @@ const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {
   const handleCancelClick = async () => {
     if (isUpdateMode) {
       setFormMode('read');
-      await fetchUserDetail(searchParams.get('id'));
+      await fetchUserDetail();
     } else if (isCreateMode) {
       closeModal();
     }

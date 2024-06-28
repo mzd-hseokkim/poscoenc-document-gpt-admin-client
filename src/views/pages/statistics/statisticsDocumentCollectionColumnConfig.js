@@ -3,6 +3,7 @@ export const StatisticsDocumentCollectionColumnConfig = [
     key: 'aggregationName',
     label: 'D-C displayName',
     _style: { width: '20%' },
+    sorter: false,
   },
   {
     key: 'sumInputTokens',

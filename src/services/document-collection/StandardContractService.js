@@ -32,7 +32,7 @@ const patchStandardContractDocumentDeletionOption = async (standardContractDocum
     `/admin/standard-contract-document/deleted/${deletionOption}`,
     standardContractDocumentIds
   );
-  return response.status === 200;
+  return response?.status === 200;
 };
 
 const getDownloadSearchedStandardContractDocumentList = async (params) => {
@@ -61,7 +61,7 @@ const getDownloadSearchedStandardContractDocumentList = async (params) => {
 
 const putModifiedStandardContractDocumentDetail = async (modifiedDocument) => {
   const response = await api.put(`/admin/standard-contract-document/${modifiedDocument.id}`, modifiedDocument);
-  return response.status === 200;
+  return response?.status === 200;
 };
 
 const getDownloadContractDocument = async (standardContractDocument) => {

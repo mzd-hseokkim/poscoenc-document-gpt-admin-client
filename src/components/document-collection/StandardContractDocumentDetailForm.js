@@ -48,6 +48,7 @@ export const StandardContractDocumentDetailForm = ({
   const { addToast } = useToast();
   const { isReadMode } = formModes(formMode);
   const [searchParams] = useSearchParams();
+  const standardContractDocumentIdParam = searchParams.get('id');
   const currentUserId = useRecoilValue(userIdSelector);
   const [hasError, setHasError] = useState(false);
   const {
@@ -75,44 +76,45 @@ export const StandardContractDocumentDetailForm = ({
     },
   ];
 
-  const fetchStandardContractDetail = useCallback(
-    async (standardContractDocumentId) => {
-      setGetDetailIsLoading(true);
-      try {
-        const detail = await StandardContractService.getStandardContractDocumentDetail(standardContractDocumentId);
-        if (detail) {
-          const formattedDetail = {
-            ...detail,
-            createdAt: detail.createdAt && formatToYMD(detail.createdAt),
-            modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
-          };
-          reset(formattedDetail);
-          setStandardContractDocumentDetail(formattedDetail);
+  const fetchStandardContractDetail = useCallback(async () => {
+    if (!standardContractDocumentIdParam) {
+      return;
+    }
 
-          setHasError(false);
-        }
-      } catch (error) {
-        console.log(error);
-        addToast({ message: '표준 계약서 정보를 가져오지 못했습니다.' });
-        setHasError(true);
-      } finally {
-        setGetDetailIsLoading(false);
+    setGetDetailIsLoading(true);
+
+    try {
+      const detail = await StandardContractService.getStandardContractDocumentDetail(standardContractDocumentIdParam);
+      if (detail) {
+        const formattedDetail = {
+          ...detail,
+          createdAt: detail.createdAt && formatToYMD(detail.createdAt),
+          modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
+        };
+        reset(formattedDetail);
+        setStandardContractDocumentDetail(formattedDetail);
+
+        setHasError(false);
       }
-    },
-    [reset, addToast]
-  );
+    } catch (error) {
+      console.log(error);
+      addToast({ message: '표준 계약서 정보를 가져오지 못했습니다.' });
+      setHasError(true);
+    } finally {
+      setGetDetailIsLoading(false);
+    }
+  }, [standardContractDocumentIdParam, reset, addToast]);
 
   useEffect(() => {
-    const standardContractDocumentId = searchParams.get('id');
-    if (!standardContractDocumentId) {
+    if (!standardContractDocumentIdParam) {
       closeModal();
     }
 
     if (!hasError) {
-      void fetchStandardContractDetail(standardContractDocumentId);
+      void fetchStandardContractDetail();
     }
-    // void fetchStatisticsData(standardContractDocumentId); 통계데이터는 보류
-  }, [closeModal, searchParams, fetchStandardContractDetail, hasError]);
+    // void fetchStatisticsData(standardContractDocumentIdParam); 통계데이터는 보류
+  }, [standardContractDocumentIdParam, closeModal, searchParams, fetchStandardContractDetail, hasError]);
 
   const onSubmit = async (data) => {
     await putModifiedDocument(data);
