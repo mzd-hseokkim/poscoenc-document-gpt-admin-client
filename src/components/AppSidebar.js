@@ -3,6 +3,7 @@ import React from 'react';
 import { CSidebar, CSidebarBrand, CSidebarNav, CSidebarToggler } from '@coreui/react-pro';
 import useSidebarItems from 'hooks/useSidebarItems';
 import { useDispatch, useSelector } from 'react-redux';
+import { set } from 'store';
 
 import { AppSidebarNav } from './AppSidebarNav';
 
@@ -10,8 +11,8 @@ import 'simplebar/dist/simplebar.min.css';
 
 const AppSidebar = () => {
   const dispatch = useDispatch();
-  const unfoldable = useSelector((state) => state.sidebarUnfoldable);
-  const sidebarShow = useSelector((state) => state.sidebarShow);
+  const unfoldable = useSelector((state) => state.layout.sidebarUnfoldable);
+  const sidebarShow = useSelector((state) => state.layout.sidebarShow);
   const { menuItems, refetchMenuList } = useSidebarItems();
 
   return (
@@ -21,7 +22,7 @@ const AppSidebar = () => {
       unfoldable={unfoldable}
       visible={sidebarShow}
       onVisibleChange={(visible) => {
-        dispatch({ type: 'set', sidebarShow: visible });
+        dispatch(set({ sidebarShow: visible }));
       }}
     >
       <CSidebarBrand className="d-none d-md-flex" to="/">
@@ -36,10 +37,7 @@ const AppSidebar = () => {
       <CSidebarNav>
         <AppSidebarNav items={menuItems} refetchMenuList={refetchMenuList} />
       </CSidebarNav>
-      <CSidebarToggler
-        className="d-none d-lg-flex"
-        onClick={() => dispatch({ type: 'set', sidebarUnfoldable: !unfoldable })}
-      />
+      <CSidebarToggler className="d-none d-lg-flex" onClick={() => dispatch(set({ sidebarUnfoldable: !unfoldable }))} />
     </CSidebar>
   );
 };
