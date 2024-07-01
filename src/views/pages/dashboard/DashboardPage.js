@@ -5,22 +5,18 @@ import {
   cibGoogle,
   cibLinkedin,
   cibTwitter,
-  cilArrowBottom,
   cilArrowThickFromLeft,
   cilArrowThickFromRight,
-  cilArrowTop,
   cilBook,
   cilChevronLeft,
   cilChevronRight,
   cilExternalLink,
-  cilOptions,
   cilPeople,
   cilScreenDesktop,
   cilSitemap,
   cilUser,
 } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
-import { CChart, CChartLine } from '@coreui/react-chartjs';
 import {
   CAvatar,
   CBadge,
@@ -33,10 +29,6 @@ import {
   CCloseButton,
   CCol,
   CCollapse,
-  CDropdown,
-  CDropdownItem,
-  CDropdownMenu,
-  CDropdownToggle,
   CPopover,
   CProgress,
   CProgressBar,
@@ -48,52 +40,53 @@ import {
   CTableHead,
   CTableHeaderCell,
   CTableRow,
-  CWidgetStatsA,
-  CWidgetStatsB,
 } from '@coreui/react-pro';
-import { getStyle, hexToRgba } from '@coreui/utils';
-import { mergeAndSumArrays } from 'components/chart/utils/ChartStatisticsProcessor';
+import { DailyTokenUsageChart } from 'components/chart/dashboard/DailyTokenUsageChart';
+import { DocumentCollectionTopEntriesChart } from 'components/chart/dashboard/DocumentCollectionTopEntriesChart';
+import { TotalTokenUsageChart } from 'components/chart/dashboard/TotalTokenUsageChart';
+import { MonthlyDocumentCollectionCountWidget } from 'components/chart/dashboard/widzet/MonthlyDocumentCollectionCountWidget';
+import { MonthlyPaymentWidget } from 'components/chart/dashboard/widzet/MonthlyPaymentWidget';
+import { MonthlyStandardContractCountWidget } from 'components/chart/dashboard/widzet/MonthlyStandardContractCountWidget';
+import { MonthlyUserAccountCountWidget } from 'components/chart/dashboard/widzet/MonthlyUserAccountCountWidget';
+import { OperationRateWidget } from 'components/chart/dashboard/widzet/OperationRateWidget';
 import { useNavigation } from 'context/NavigationContext';
 import { useToast } from 'context/ToastContext';
+import { isToday } from 'date-fns';
 import { PiThumbsUpFill } from 'react-icons/pi';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import DashBoardService from 'services/dashboard/DashBoardService';
-import { formatToIsoEndDate, formatToIsoStartDate, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
+import {
+  formatToIsoEndDate,
+  formatToIsoStartDate,
+  formatToYMD,
+  getCurrentDate,
+  getOneYearAgoDate,
+} from 'utils/common/dateUtils';
 
 const DashboardPage = () => {
   const { addToast } = useToast();
 
-  // const dailyTokenUsagesExampleLabels = useMemo(() => dailyTokenUsagesExample.map((item) => item.title), []);
-  //
-  // const dailyTokenUsagesExampleInputToken = useMemo(() => dailyTokenUsagesExample.map((item) => item.InputTokens), []);
-  //
-  // const dailyTokenUsagesExampleOutputToken = useMemo(
-  //   () => dailyTokenUsagesExample.map((item) => item.OutputTokens),
-  //   []
-  // );
-
-  //REMIND API 연동 후 hoveredLikedChatIndexes 초기값 로직 변경 예정
-  const [hoveredLikedChatIndexes, setHoveredLikedChatIndexes] = useState({
-    0: false,
-    1: false,
-  });
-
   const [totalDocumentCount, setTotalDocumentCount] = useState(0);
   const [recentlyAddedDocumentList, setRecentlyAddedDocumentList] = useState([]);
   const [hotDocumentEntries, setHotDocumentEntries] = useState([]);
+  const [isDocumentStatisticsLoading, setIsDocumentStatisticsLoading] = useState(false);
+  const [hasDocumentStatisticsError, setHasDocumentStatisticsError] = useState(false);
+
   const [totalStandardContractDocumentCount, setTotalStandardContractDocumentCount] = useState(0);
   const [recentlyAddedStandardContractList, setRecentlyAddedStandardContractList] = useState([]);
+  const [isStandardContractLoading, setIsStandardContractLoading] = useState(false);
+  const [hasStandardContractError, setHasStandardContractError] = useState(false);
 
   const [totalUserCount, setTotalUserCount] = useState(0);
   const [isUserStatisticsLoading, setIsUserStatisticsLoading] = useState(false);
+  const [hasUserStatisticsError, setHasUserStatisticsError] = useState(false);
 
   const [recentlyLikedChatList, setRecentlyLikedChatList] = useState([]);
+  const [hoveredLikedChatIndexes, setHoveredLikedChatIndexes] = useState({});
   const [isRecentlyLikedChatLoading, setIsRecentlyLikedChatLoading] = useState(false);
-
-  const [isDocumentStatisticsLoading, setIsDocumentStatisticsLoading] = useState(false);
-  const [isStandardContractLoading, setIsStandardContractLoading] = useState(false);
+  const [hasRecentlyLikedChatError, setHasRecentlyLikedChatError] = useState(false);
 
   const [standardContractDocumentTableVisible, setStandardContractDocumentTableVisible] = useState(false);
   const [newContractDocumentTableVisible, setNewContractDocumentTableVisible] = useState(false);
@@ -101,21 +94,32 @@ const DashboardPage = () => {
   const [hotConChartLabelOption, setHotConChartLabelOption] = useState('days');
   const [totalTokenUsageChartLabelOption, setTotalTokenUsageChartLabelOption] = useState('months');
 
+  const [errorStates, setErrorStates] = useState({
+    documentStatistics: false,
+    standardContract: false,
+    userStatistics: false,
+    recentlyLikedChat: false,
+  });
+
   //REMIND 문서 공유 횟수 추가 고려
 
   const { navigate } = useNavigation();
 
   //REMIND hotDocumentEntries 로 수정
   const hotDocTopFive = [
-    { name: 'Marl-E CMS in POSCO Corp.', value: '29,703 ', color: 'success' },
-    { name: 'Marl-E CMS in MZC.', value: '24,093 ', color: 'info' },
-    { name: 'Alphabetone', value: '78,706 ', color: 'warning' },
-    { name: '여섯글자는괜', value: '22,123 ', color: 'danger' },
-    { name: '여덟글자입니다요', value: '22,222 ', color: 'primary' },
+    { rank: 1, name: 'Marl-E CMS in POSCO Corp.', value: '29,703 ', color: 'success' },
+    { rank: 2, name: 'Marl-E CMS in MZC.', value: '24,093 ', color: 'info' },
+    { rank: 3, name: 'Alphabetone', value: '78,706 ', color: 'warning' },
+    { rank: 4, name: '여섯글자는괜', value: '22,123 ', color: 'danger' },
+    { rank: 5, name: '여덟글자입니다요', value: '22,222 ', color: 'primary' },
   ];
 
   useEffect(() => {
     const fetchData = async () => {
+      if (Object.values(errorStates).some((hasError) => hasError)) {
+        return;
+      }
+
       const requests = [
         {
           loader: setIsDocumentStatisticsLoading,
@@ -128,6 +132,7 @@ const DashboardPage = () => {
             setRecentlyAddedDocumentList(data.recentlyAdded);
             setHotDocumentEntries(data.topEntries);
           },
+          setError: (hasError) => setErrorStates((prev) => ({ ...prev, documentStatistics: hasError })),
         },
         {
           loader: setIsStandardContractLoading,
@@ -139,6 +144,7 @@ const DashboardPage = () => {
             setTotalStandardContractDocumentCount(data.totalCount);
             setRecentlyAddedStandardContractList(data.recentlyAdded);
           },
+          setError: (hasError) => setErrorStates((prev) => ({ ...prev, standardContract: hasError })),
         },
         {
           loader: setIsUserStatisticsLoading,
@@ -149,6 +155,7 @@ const DashboardPage = () => {
           onSuccess: (data) => {
             setTotalUserCount(data.totalCount);
           },
+          setError: (hasError) => setErrorStates((prev) => ({ ...prev, userStatistics: hasError })),
         },
         {
           loader: setIsRecentlyLikedChatLoading,
@@ -158,7 +165,13 @@ const DashboardPage = () => {
           ),
           onSuccess: (data) => {
             setRecentlyLikedChatList(data.likedEntry);
+            const initialIndexes = {};
+            data.likedEntry.forEach((_, index) => {
+              initialIndexes[index] = false;
+            });
+            setHoveredLikedChatIndexes(initialIndexes);
           },
+          setError: (hasError) => setErrorStates((prev) => ({ ...prev, recentlyLikedChat: hasError })),
         },
       ];
 
@@ -167,9 +180,10 @@ const DashboardPage = () => {
           request.loader(true);
           try {
             const response = await request.service;
-            request.onSuccess(response.data);
+            request.onSuccess(response);
           } catch (error) {
             console.log(error);
+            request.setError(true);
             addToast({ message: `Request ${index + 1} failed: ${error.message}` }, false);
           } finally {
             request.loader(false);
@@ -179,7 +193,7 @@ const DashboardPage = () => {
     };
 
     void fetchData();
-  }, [addToast]);
+  }, [addToast, errorStates]);
 
   const tokenUsagesData = [
     { title: 'Total', value: '102,799 ', percent: 100, color: 'success' },
@@ -341,35 +355,6 @@ const DashboardPage = () => {
     setNewContractDocumentTableVisible(!newContractDocumentTableVisible);
   };
 
-  const standardContractsExample = [
-    {
-      displayName: '표준 계약 문서 1',
-      usage: 50,
-      registered: 'Jan 1, 2021',
-    },
-    {
-      displayName: '열글자짜리표준계약문 서에요',
-
-      usage: 22,
-      registered: 'Jan 1, 2021',
-    },
-    {
-      displayName: '표준 계약 문서 6',
-      usage: 74,
-      registered: 'Jan 1, 2021',
-    },
-    {
-      displayName: '표준 계약 문서 3',
-      usage: 98,
-      registered: 'Jan 1, 2021',
-    },
-    {
-      displayName: '아홉글자는어떤가요',
-      usage: 22,
-      registered: 'Jan 1, 2021',
-    },
-  ];
-
   const handleOpenStandardContractTable = () => {
     if (newContractDocumentTableVisible) {
       return;
@@ -377,55 +362,6 @@ const DashboardPage = () => {
 
     setStandardContractDocumentTableVisible(!standardContractDocumentTableVisible);
   };
-
-  //REMIND recentlyLikedChatList 로 변경해야함..
-  const ChatExample = [
-    {
-      id: 3,
-      //REMIND 버젼 업 할때 고려.
-      documentCollection: '문서1',
-      question: `안녕?`,
-      modelName: 'GPT-4 Omni',
-      pilotMode: 'A',
-      createdAt: '2024-06-12',
-    },
-    {
-      id: 8,
-      documentCollection: '문서2',
-      question: `이 계약서의 계약 기간과 계약금액, 배상금에 대한 내용들을 알려줘.`,
-      modelName: 'Claude-3-Opus',
-      pilotMode: 'C',
-      createdAt: '2024-06-11',
-    },
-    {
-      id: 3,
-      //REMIND 버젼 업 할때 고려.
-      documentCollection: '문서1',
-      question: `안녕?`,
-      modelName: 'GPT-4 Omni',
-      pilotMode: 'A',
-      createdAt: '2024-06-12',
-    },
-    {
-      id: 3,
-      //REMIND 버젼 업 할때 고려.
-      documentCollection: '문서1',
-      question: `안녕?`,
-      modelName: 'GPT-4 Omni',
-      pilotMode: 'A',
-      createdAt: '2024-06-12',
-    },
-    {
-      id: 3,
-      //REMIND 버젼 업 할때 고려.
-      documentCollection: '문서1',
-      question: `안녕?`,
-      modelName: 'GPT-4 Omni',
-      pilotMode: 'A',
-      createdAt: '2024-06-12',
-    },
-    // 더 많은 데이터 추가 가능
-  ];
 
   //REMIND 응답받은 entry 의 id 로 검색해서 가져오거나, 한번에 받아오거나 결정 필요.
   const AnswerExample = [
@@ -447,16 +383,7 @@ const DashboardPage = () => {
   };
   // LikedChat S ===================
 
-  //REMIND api 구현 후, 컴포넌트로 분리후 아래 로직 구현. hoveredLikedIndexes 에 초기값 설정하는 로직
-  //   useEffect(() => {
-  //     const initialIndexes = {};
-  //     rows.forEach((_, index) => {
-  //       initialIndexes[index] = false;
-  //     });
-  //     setHoveredLikedChatIndexes(initialIndexes);
-  //   }, [rows]);
   const togglePopoverVisibility = (index) => {
-    console.log(index);
     setHoveredLikedChatIndexes((prevState) => ({
       ...prevState,
       [index]: !prevState[index],
@@ -466,362 +393,24 @@ const DashboardPage = () => {
 
   return (
     <div className="d-flex flex-column flex-grow-1 overflow-auto" style={{ width: '100%' }}>
+      {/*REMIND Widget 의 그래프 구현 필요*/}
       <CRow className="justify-content-center">
         <CCol sm={4}>
-          <CWidgetStatsA
-            style={{ height: '90%', backgroundColor: '#ffd700' }}
-            className="mb-3"
-            value={
-              <span className="text-white">
-                $9,000
-                <span className="fs-6 fw-normal text-white">
-                  (10.9% <CIcon icon={cilArrowTop} />)
-                </span>
-              </span>
-            }
-            title={<span className="text-white">6월(이번달) 결제 금액</span>}
-            action={
-              <CDropdown alignment="end">
-                <CDropdownToggle color="transparent" caret={false} className="p-0">
-                  <CIcon icon={cilOptions} className="text-white" />
-                </CDropdownToggle>
-                <CDropdownMenu>
-                  <CDropdownItem>Action</CDropdownItem>
-                  <CDropdownItem>Another action</CDropdownItem>
-                  <CDropdownItem>Something else here...</CDropdownItem>
-                  <CDropdownItem disabled>Disabled action</CDropdownItem>
-                </CDropdownMenu>
-              </CDropdown>
-            }
-            chart={
-              <CChartLine
-                className="mt-3 mx-3"
-                style={{ height: '70px' }}
-                data={{
-                  labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-                  datasets: [
-                    {
-                      label: 'My First dataset',
-                      backgroundColor: 'transparent',
-                      borderColor: 'rgba(255,255,255,.55)',
-                      pointBackgroundColor: 'white',
-                      data: [65, 59, 40, 70, 84, 87],
-                    },
-                  ],
-                }}
-                options={{
-                  plugins: {
-                    legend: {
-                      display: false,
-                    },
-                  },
-                  maintainAspectRatio: false,
-                  scales: {
-                    x: {
-                      border: {
-                        display: false,
-                      },
-                      grid: {
-                        display: false,
-                        drawBorder: false,
-                      },
-                      ticks: {
-                        display: false,
-                      },
-                    },
-                    y: {
-                      min: 30,
-                      max: 100,
-                      display: false,
-                      grid: {
-                        display: false,
-                      },
-                      ticks: {
-                        display: false,
-                      },
-                    },
-                  },
-                  elements: {
-                    line: {
-                      borderWidth: 5,
-                      tension: 0.4,
-                    },
-                    point: {
-                      radius: 4,
-                      hitRadius: 10,
-                      hoverRadius: 4,
-                    },
-                  },
-                }}
-              />
-            }
-          />
+          <MonthlyPaymentWidget />
         </CCol>
         <CCol sm={4}>
-          {/*REMIND 사용률에 따른 색 변화 구현*/}
-          <CWidgetStatsB
-            className="mb-3"
-            color="success"
-            inverse
-            progress={{ value: 89.9 }}
-            text="쓸만큼 쓰셨군요! 다음달에도 만나요~"
-            title="Rate of CMS operation"
-            value="89.9%"
-            style={{ height: '90%' }}
-          />
+          <OperationRateWidget />
         </CCol>
       </CRow>
       <CRow className="p-3">
         <CCol sm={4}>
-          <div id="totalDocumentCountDiv">
-            <CWidgetStatsA
-              color="primary"
-              value={
-                <>
-                  {`${totalDocumentCount} 개`}
-                  <span className="fs-6 fw-normal">
-                    (40.9% <CIcon icon={cilArrowTop} /> , 월간)
-                  </span>
-                </>
-              }
-              title="등록된 계약서"
-              action={
-                <CDropdown alignment="end">
-                  <CDropdownToggle color="transparent" caret={false} className="p-0">
-                    <CIcon icon={cilOptions} className="text-white" />
-                  </CDropdownToggle>
-                  <CDropdownMenu>
-                    <CDropdownItem>Action</CDropdownItem>
-                    <CDropdownItem>Another action</CDropdownItem>
-                    <CDropdownItem>Something else here...</CDropdownItem>
-                    <CDropdownItem disabled>Disabled action</CDropdownItem>
-                  </CDropdownMenu>
-                </CDropdown>
-              }
-              chart={
-                <CChartLine
-                  className="mt-3 mx-3"
-                  style={{ height: '70px' }}
-                  data={{
-                    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-                    datasets: [
-                      {
-                        label: 'My First dataset',
-                        backgroundColor: 'transparent',
-                        borderColor: 'rgba(255,255,255,.55)',
-                        pointBackgroundColor: '#5856d6',
-                        data: [65, 59, 84, 84, 51, 55, 40],
-                      },
-                    ],
-                  }}
-                  options={{
-                    plugins: {
-                      legend: {
-                        display: false,
-                      },
-                    },
-                    maintainAspectRatio: false,
-                    scales: {
-                      x: {
-                        border: {
-                          display: false,
-                        },
-                        grid: {
-                          display: false,
-                          drawBorder: false,
-                        },
-                        ticks: {
-                          display: false,
-                        },
-                      },
-                      y: {
-                        min: 30,
-                        max: 89,
-                        display: false,
-                        grid: {
-                          display: false,
-                        },
-                        ticks: {
-                          display: false,
-                        },
-                      },
-                    },
-                    elements: {
-                      line: {
-                        borderWidth: 1,
-                        tension: 0.4,
-                      },
-                      point: {
-                        radius: 4,
-                        hitRadius: 10,
-                        hoverRadius: 4,
-                      },
-                    },
-                  }}
-                />
-              }
-            />
-          </div>
+          <MonthlyDocumentCollectionCountWidget totalDocumentCount={totalDocumentCount} />
         </CCol>
         <CCol sm={4}>
-          <CWidgetStatsA
-            color="info"
-            value={
-              <>
-                {`${totalStandardContractDocumentCount} 개`}
-                <span className="fs-6 fw-normal">
-                  (40.9% <CIcon icon={cilArrowBottom} />, 월간)
-                </span>
-              </>
-            }
-            title="등록된 표준 문서"
-            action={
-              <CDropdown alignment="end">
-                <CDropdownToggle color="transparent" caret={false} className="p-0">
-                  <CIcon icon={cilOptions} className="text-white" />
-                </CDropdownToggle>
-                <CDropdownMenu>
-                  <CDropdownItem>Action</CDropdownItem>
-                  <CDropdownItem>Another action</CDropdownItem>
-                  <CDropdownItem>Something else here...</CDropdownItem>
-                  <CDropdownItem disabled>Disabled action</CDropdownItem>
-                </CDropdownMenu>
-              </CDropdown>
-            }
-            chart={
-              <CChartLine
-                className="mt-3 mx-3"
-                style={{ height: '70px' }}
-                data={{
-                  labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-                  datasets: [
-                    {
-                      label: 'My First dataset',
-                      backgroundColor: 'transparent',
-                      borderColor: 'rgba(255,255,255,.55)',
-                      pointBackgroundColor: '#39f',
-                      data: [1, 18, 9, 17, 34, 22, 11],
-                    },
-                  ],
-                }}
-                options={{
-                  plugins: {
-                    legend: {
-                      display: false,
-                    },
-                  },
-                  maintainAspectRatio: false,
-                  scales: {
-                    x: {
-                      border: {
-                        display: false,
-                      },
-                      grid: {
-                        display: false,
-                        drawBorder: false,
-                      },
-                      ticks: {
-                        display: false,
-                      },
-                    },
-                    y: {
-                      min: -9,
-                      max: 39,
-                      display: false,
-                      grid: {
-                        display: false,
-                      },
-                      ticks: {
-                        display: false,
-                      },
-                    },
-                  },
-                  elements: {
-                    line: {
-                      borderWidth: 1,
-                    },
-                    point: {
-                      radius: 4,
-                      hitRadius: 10,
-                      hoverRadius: 4,
-                    },
-                  },
-                }}
-              />
-            }
-          />
+          <MonthlyStandardContractCountWidget totalStandardContractDocumentCount={totalStandardContractDocumentCount} />
         </CCol>
         <CCol sm={4}>
-          <CWidgetStatsA
-            color="warning"
-            value={
-              <>
-                {`${totalUserCount} 명`}
-                <span className="fs-6 fw-normal">
-                  (1.9% <CIcon icon={cilArrowTop} />, 월간)
-                </span>
-              </>
-            }
-            title="등록된 사용자"
-            action={
-              <CDropdown alignment="end">
-                <CDropdownToggle color="transparent" caret={false} className="p-0">
-                  <CIcon icon={cilOptions} className="text-white" />
-                </CDropdownToggle>
-                <CDropdownMenu>
-                  <CDropdownItem>Action</CDropdownItem>
-                  <CDropdownItem>Another action</CDropdownItem>
-                  <CDropdownItem>Something else here...</CDropdownItem>
-                  <CDropdownItem disabled>Disabled action</CDropdownItem>
-                </CDropdownMenu>
-              </CDropdown>
-            }
-            chart={
-              <CChartLine
-                className="mt-3"
-                style={{ height: '70px' }}
-                data={{
-                  labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-                  datasets: [
-                    {
-                      label: 'My First dataset',
-                      backgroundColor: 'rgba(255,255,255,.2)',
-                      borderColor: 'rgba(255,255,255,.55)',
-                      data: [78, 81, 80, 45, 34, 12, 40],
-                      fill: true,
-                    },
-                  ],
-                }}
-                options={{
-                  plugins: {
-                    legend: {
-                      display: false,
-                    },
-                  },
-                  maintainAspectRatio: false,
-                  scales: {
-                    x: {
-                      display: false,
-                    },
-                    y: {
-                      display: false,
-                    },
-                  },
-                  elements: {
-                    line: {
-                      borderWidth: 2,
-                      tension: 0.4,
-                    },
-                    point: {
-                      radius: 0,
-                      hitRadius: 10,
-                      hoverRadius: 4,
-                    },
-                  },
-                }}
-              />
-            }
-          />
+          <MonthlyUserAccountCountWidget totalUserCount={totalUserCount} />
         </CCol>
       </CRow>
 
@@ -853,100 +442,7 @@ const DashboardPage = () => {
                   </CButtonGroup>
                 </CCol>
               </CRow>
-              <CChartLine
-                style={{ height: '300px', marginTop: '40px' }}
-                data={{
-                  labels: hotConChartLabelOption === 'days' ? weeklyLabel : monthlyLabel,
-                  datasets: [
-                    {
-                      label: 'Marl-E CMS in POSCO Corp.',
-                      // backgroundColor: hexToRgba(getStyle('--cui-info'), 10),
-                      backgroundColor: 'transparent',
-                      borderColor: getStyle('--cui-info'),
-                      pointHoverBackgroundColor: getStyle('--cui-info'),
-                      borderWidth: 2,
-                      data: randomSevenElementsChartData,
-                      fill: true,
-                    },
-                    {
-                      label: 'Marl-E CMS in MZC.',
-                      backgroundColor: 'transparent',
-                      borderColor: getStyle('--cui-success'),
-                      pointHoverBackgroundColor: getStyle('--cui-success'),
-                      borderWidth: 2,
-                      data: randomSevenElementsChartData1,
-                    },
-                    {
-                      label: 'Marl-E CMS in Government',
-                      backgroundColor: 'transparent',
-                      borderColor: getStyle('--cui-danger'),
-                      pointHoverBackgroundColor: getStyle('--cui-danger'),
-                      borderWidth: 2,
-                      // borderDash: [8, 5],
-                      data: [65, 65, 65, 65, 65, 65, 65],
-                    },
-                    {
-                      label: 'Marl-E CMS 개발 인력 재검토',
-                      backgroundColor: 'transparent',
-                      borderColor: getStyle('--cui-danger'),
-                      pointHoverBackgroundColor: getStyle('--cui-success'),
-                      borderWidth: 2,
-                      data: randomSevenElementsChartData2,
-                    },
-                    {
-                      label: 'Marl-E CMS SI 파견 검토',
-                      backgroundColor: 'transparent',
-                      borderColor: getStyle('--cui-gray'),
-                      pointHoverBackgroundColor: getStyle('--cui-success'),
-                      borderWidth: 2,
-                      data: randomSevenElementsChartData3,
-                    },
-                    {
-                      label: 'Average',
-                      backgroundColor: 'transparent',
-                      borderColor: getStyle('--cui-gray'),
-                      pointHoverBackgroundColor: getStyle('--cui-success'),
-                      borderWidth: 2,
-                      borderDash: [8, 5],
-                      data: [125, 125, 125, 125, 125, 125, 125],
-                    },
-                  ],
-                }}
-                options={{
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: {
-                      display: false,
-                    },
-                  },
-                  scales: {
-                    x: {
-                      grid: {
-                        drawOnChartArea: false,
-                      },
-                    },
-                    y: {
-                      ticks: {
-                        beginAtZero: true,
-                        maxTicksLimit: 5,
-                        stepSize: Math.ceil(250 / 5),
-                        max: 250,
-                      },
-                    },
-                  },
-                  elements: {
-                    line: {
-                      tension: 0.4,
-                    },
-                    point: {
-                      radius: 0,
-                      hitRadius: 10,
-                      hoverRadius: 4,
-                      hoverBorderWidth: 3,
-                    },
-                  },
-                }}
-              />
+              <DocumentCollectionTopEntriesChart hotConChartLabelOption={hotConChartLabelOption} />
             </CCardBody>
             <CCardFooter style={{ height: '9rem' }}>
               <CRow className="d-inline-block justify-content-center mb-1">
@@ -958,7 +454,7 @@ const DashboardPage = () => {
               <CRow xs={{ cols: 1 }} md={{ cols: 5 }} className="text-center">
                 {hotDocTopFive.map((item, index) => (
                   <CCol className="mb-sm-2 mb-0 d-flex flex-column" key={index}>
-                    <strong>{index + 1}위</strong>
+                    <strong>{item.rank}위</strong>
                     <CPopover content={item.name} placement="bottom" trigger="hover">
                       <div className="text-medium-emphasis mb-3 text-truncate">{item.name}</div>
                     </CPopover>
@@ -999,83 +495,8 @@ const DashboardPage = () => {
                   </CButtonGroup>
                 </CCol>
               </CRow>
-              <CChartLine
-                style={{ height: '300px', marginTop: '40px' }}
-                data={{
-                  labels: totalTokenUsageChartLabelOption === 'days' ? weeklyLabel : monthlyLabel,
-                  datasets: [
-                    {
-                      label: 'Total',
-                      backgroundColor: hexToRgba(getStyle('--cui-success'), 10),
-                      borderColor: getStyle('--cui-success'),
-                      pointHoverBackgroundColor: getStyle('--cui-success'),
-                      borderWidth: 2,
-                      data: totalChartDataInTotalTokenUsage,
-                      fill: true,
-                    },
-                    {
-                      label: 'Input Tokens',
-                      backgroundColor: hexToRgba(getStyle('--cui-info'), 10),
-                      borderColor: getStyle('--cui-info'),
-                      pointHoverBackgroundColor: getStyle('--cui-info'),
-                      borderWidth: 2,
-                      data: randomInputTokenChartData,
-                      fill: true,
-                    },
-                    {
-                      label: 'Output Tokens',
-                      backgroundColor: 'transparent',
-                      borderColor: getStyle('--cui-warning'),
-                      pointHoverBackgroundColor: getStyle('--cui-warning'),
-                      borderWidth: 2,
-                      data: randomOutputTokenChartData,
-                    },
-                    {
-                      label: 'Maximum Token Usage',
-                      backgroundColor: 'transparent',
-                      borderColor: getStyle('--cui-danger'),
-                      pointHoverBackgroundColor: getStyle('--cui-danger'),
-                      borderWidth: 1,
-                      borderDash: [8, 5],
-                      data: [380, 380, 380, 380, 380, 380, 380],
-                    },
-                  ],
-                }}
-                options={{
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: {
-                      display: false,
-                    },
-                  },
-                  scales: {
-                    x: {
-                      grid: {
-                        drawOnChartArea: false,
-                      },
-                    },
-                    y: {
-                      ticks: {
-                        beginAtZero: true,
-                        maxTicksLimit: 5,
-                        stepSize: Math.ceil(250 / 5),
-                        max: 300,
-                      },
-                    },
-                  },
-                  elements: {
-                    line: {
-                      tension: 0.4,
-                    },
-                    point: {
-                      radius: 0,
-                      hitRadius: 10,
-                      hoverRadius: 4,
-                      hoverBorderWidth: 3,
-                    },
-                  },
-                }}
-              />
+              {/*REMIND should deliver chart data*/}
+              <TotalTokenUsageChart totalTokenUsageChartLabelOption={totalTokenUsageChartLabelOption} />
             </CCardBody>
             <CCardFooter style={{ height: '9rem' }}>
               <CRow className="d-inline-block justify-content-center mb-1">
@@ -1100,7 +521,7 @@ const DashboardPage = () => {
 
       <CRow className="mt-2">
         <CCol sm={6}>
-          <CCard className="m-3">
+          <CCard className="m-3" style={{ minHeight: '20rem' }}>
             <CCardHeader className="bold"> 최근 등록된 표준 계약서 & 계약 문서 </CCardHeader>
             <CCardBody className="table-wrapper">
               <div
@@ -1111,7 +532,7 @@ const DashboardPage = () => {
                   marginRight: standardContractDocumentTableVisible ? '-300px' : '-40px',
                 }}
               >
-                <CTable align="middle" className="mb-0 border ms-2" hover style={{ width: '15rem' }}>
+                <CTable align="middle" className="mb-0 border ms-2" hover>
                   <CTableHead color="light">
                     <CTableRow>
                       <CTableHeaderCell
@@ -1152,18 +573,18 @@ const DashboardPage = () => {
                     </CTableRow>
                   </CTableHead>
                   <CTableBody>
-                    {standardContractsExample.map((item, index) => (
+                    {recentlyAddedStandardContractList.map((item, index) => (
                       <CTableRow key={index}>
                         <CTableDataCell>
-                          {item.displayName.length > 12 ? (
-                            <CPopover content={item.displayName} placement="bottom" trigger="hover" delay={300}>
+                          {item.name.length > 12 ? (
+                            <CPopover content={item.name} placement="bottom" trigger="hover" delay={300}>
                               <div
                                 className="overflow-hidden text-truncate"
                                 style={{
                                   maxWidth: '11rem',
                                 }}
                               >
-                                {item.displayName}
+                                {item.name}
                               </div>
                             </CPopover>
                           ) : (
@@ -1173,29 +594,31 @@ const DashboardPage = () => {
                                 maxWidth: '11rem',
                               }}
                             >
-                              {item.displayName}
+                              {item.name}
                             </div>
                           )}
-                          {/*STARTFROM 뱃지 위치 조정부터 시작 */}
-                          <CBadge
-                            color="primary"
-                            style={{
-                              position: 'sticky',
-                              top: 0,
-                            }}
-                          >
-                            Today
-                          </CBadge>
+                          {!standardContractDocumentTableVisible && isToday(new Date(item.createdAt)) && (
+                            <CBadge
+                              color="primary"
+                              style={{
+                                position: 'absolute',
+                                top: 12 + 41 * (index + 1),
+                                right: 1.5,
+                              }}
+                            >
+                              Today
+                            </CBadge>
+                          )}
                         </CTableDataCell>
 
                         <CTableDataCell>
                           <CCollapse visible={standardContractDocumentTableVisible} horizontal>
-                            <div className="fw-semibold text-nowrap align-middle">{item.usage} 개</div>
+                            <div className="fw-semibold text-nowrap align-middle">{item.referCnt} 개</div>
                           </CCollapse>
                         </CTableDataCell>
                         <CTableDataCell>
                           <CCollapse visible={standardContractDocumentTableVisible} horizontal>
-                            <div className="small text-medium-emphasis text-nowrap">{item.registered}</div>
+                            <div className="small text-medium-emphasis text-nowrap">{item.createdAt}</div>
                           </CCollapse>
                         </CTableDataCell>
 
@@ -1282,6 +705,18 @@ const DashboardPage = () => {
                               {item.displayName}
                             </div>
                           )}
+                          {!newContractDocumentTableVisible && isToday(new Date(item.createdAt)) && (
+                            <CBadge
+                              color="primary"
+                              style={{
+                                position: 'absolute',
+                                top: 12 + 41 * (index + 1),
+                                right: 1.5,
+                              }}
+                            >
+                              Today
+                            </CBadge>
+                          )}
                         </CTableDataCell>
 
                         <CTableDataCell>
@@ -1322,25 +757,25 @@ const DashboardPage = () => {
 
         <CCol sm={6}>
           {/* 채팅 통계 정보 S*/}
-          <CCard className="m-3">
+          <CCard className="m-3" style={{ minHeight: '20rem' }}>
             <CCardHeader className="d-flex align-items-center justify-content-between bold">
               최근 좋아요 표시된 답변
               <small className="text-medium-emphasis"> 질문 클릭 시 해당 답변을 볼 수 있습니다.</small>
             </CCardHeader>
             <CCardBody>
               <CSmartTable
-                items={ChatExample}
+                items={recentlyLikedChatList}
                 pagination={true}
                 columns={[
                   {
-                    key: 'documentCollection',
-                    label: <CIcon icon={cilBook} />,
-                    _style: { width: '10%' },
+                    key: 'documentCollectionDisplayName',
+                    label: '해당 문서',
+                    _style: { width: '15%' },
                     _props: { className: 'text-center' },
                     filter: false,
                     sorter: false,
                   },
-                  { key: 'question', label: '질문', _props: { className: 'text-nowrap' }, _style: { width: '30%' } },
+                  { key: 'name', label: '질문', _props: { className: 'text-nowrap' }, _style: { width: '25%' } },
                   { key: 'modelName', label: 'Model', _style: { width: '20%' } },
 
                   { key: 'pilotMode', label: 'Pilot', _style: { width: '10%' } },
@@ -1362,8 +797,28 @@ const DashboardPage = () => {
                   color: 'secondary',
                 }}
                 scopedColumns={{
-                  documentCollection: (item) => <td className="text-center">{item.documentCollection}</td>,
-                  question: (item, index) => (
+                  documentCollectionDisplayName: (item) => (
+                    <td className="text-center">
+                      <CPopover
+                        content={<div className="bold">{item.metadata.documentCollectionDisplayName}</div>}
+                        placement="bottom"
+                        trigger="hover"
+                        delay={300}
+                        style={{
+                          '--cui-popover-border-color': 'var(--cui-primary)',
+                        }}
+                      >
+                        <CIcon
+                          icon={cilBook}
+                          style={{ cursor: 'pointer' }}
+                          onClick={() =>
+                            navigate(`/document-collections/management?id=${item.metadata.documentCollectionId}`)
+                          }
+                        />
+                      </CPopover>
+                    </td>
+                  ),
+                  name: (item, index) => (
                     <CPopover
                       title={
                         <>
@@ -1373,12 +828,15 @@ const DashboardPage = () => {
                             </CCol>
                             <CCol sm={8} className="d-flex align-content-center justify-content-end">
                               <CBadge color={'info'} id="modelName" className="m-2 text-center align-content-center">
-                                {item.modelName}
+                                {item.metadata.modelName}
                               </CBadge>
                               <CBadge color={'primary'} id="pilotMode" className="m-2">
-                                {item.pilotMode === 'C' ? 'Co-pilot' : 'Auto-pilot'}
+                                {item.metadata.pilotMode === 'C' ? 'Co-pilot' : 'Auto-pilot'}
                               </CBadge>
-                              <CBadge id="thumb" className="m-2" style={{ backgroundColor: '#3f66fc' }}>
+                              <CBadge
+                                id="thumb"
+                                style={{ backgroundColor: '#3f66fc', margin: '.5rem 1rem .5rem .25rem' }}
+                              >
                                 <PiThumbsUpFill />
                               </CBadge>
                               <CCloseButton
@@ -1393,6 +851,7 @@ const DashboardPage = () => {
                         </>
                       }
                       content={
+                        // REMIND ID 로 다시 불러오는걸로 일단 구현
                         <>
                           <CCard>
                             <CCollapse visible={index !== null}>
@@ -1415,7 +874,7 @@ const DashboardPage = () => {
                       style={customPopoverStyle}
                     >
                       <td onClick={() => togglePopoverVisibility(index)} style={{ cursor: 'pointer' }}>
-                        <CPopover content={item.question} placement="top" trigger="hover" delay={300}>
+                        <CPopover content={item.name} placement="top" trigger="hover" delay={300}>
                           <div
                             className="overflow-hidden text-truncate"
                             style={{
@@ -1423,7 +882,7 @@ const DashboardPage = () => {
                               overflowY: 'hidden',
                             }}
                           >
-                            {item.question}
+                            {item.name}
                           </div>
                         </CPopover>
                       </td>
@@ -1437,19 +896,20 @@ const DashboardPage = () => {
                         overflowY: 'hidden',
                       }}
                     >
-                      {item.modelName}
+                      {item.metadata.modelName}
                     </td>
                   ),
                   pilotMode: (item) => (
                     <td className="text-center">
-                      <CIcon icon={item.pilotMode === 'A' ? cilScreenDesktop : cilUser} />
+                      <CIcon icon={item.metadata.pilotMode === 'A' ? cilScreenDesktop : cilUser} />
                     </td>
                   ),
                   createdAt: (item) => (
                     <td className="text-center">
-                      <div className="text-medium-emphasis text-nowrap">{item.createdAt}</div>
+                      <div className="text-medium-emphasis text-nowrap">{formatToYMD(item.recordedAt)}</div>
                     </td>
                   ),
+
                   externalLink: (item) => (
                     <td className="text-center">
                       <CIcon
@@ -1465,117 +925,6 @@ const DashboardPage = () => {
             </CCardBody>
           </CCard>
           {/* 채팅 통계 정보 E*/}
-
-          {/*<CCard style={{ margin: '1rem 1rem 0' }}>*/}
-          {/*  <CCardHeader>6월(이번달) 예상 결제 금액</CCardHeader>*/}
-          {/*  <CCardBody style={{ paddingBottom: 0 }}>*/}
-          {/*    <CRow>*/}
-          {/*      <CCol sm={6}>*/}
-          {/*        <CWidgetStatsA*/}
-          {/*          style={{ height: '90%', backgroundColor: '#ffd700' }}*/}
-          {/*          className="mb-4"*/}
-          {/*          value={*/}
-          {/*            <span className="text-white">*/}
-          {/*              $9,000*/}
-          {/*              <span className="fs-6 fw-normal text-white">*/}
-          {/*                (10.9% <CIcon icon={cilArrowTop} />)*/}
-          {/*              </span>*/}
-          {/*            </span>*/}
-          {/*          }*/}
-          {/*          title={<span className="text-white">6월(이번달) 결제 금액</span>}*/}
-          {/*          action={*/}
-          {/*            <CDropdown alignment="end">*/}
-          {/*              <CDropdownToggle color="transparent" caret={false} className="p-0">*/}
-          {/*                <CIcon icon={cilOptions} className="text-white" />*/}
-          {/*              </CDropdownToggle>*/}
-          {/*              <CDropdownMenu>*/}
-          {/*                <CDropdownItem>Action</CDropdownItem>*/}
-          {/*                <CDropdownItem>Another action</CDropdownItem>*/}
-          {/*                <CDropdownItem>Something else here...</CDropdownItem>*/}
-          {/*                <CDropdownItem disabled>Disabled action</CDropdownItem>*/}
-          {/*              </CDropdownMenu>*/}
-          {/*            </CDropdown>*/}
-          {/*          }*/}
-          {/*          chart={*/}
-          {/*            <CChartLine*/}
-          {/*              className="mt-3 mx-3"*/}
-          {/*              style={{ height: '70px' }}*/}
-          {/*              data={{*/}
-          {/*                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],*/}
-          {/*                datasets: [*/}
-          {/*                  {*/}
-          {/*                    label: 'My First dataset',*/}
-          {/*                    backgroundColor: 'transparent',*/}
-          {/*                    borderColor: 'rgba(255,255,255,.55)',*/}
-          {/*                    pointBackgroundColor: 'white',*/}
-          {/*                    data: [65, 59, 40, 70, 84, 87],*/}
-          {/*                  },*/}
-          {/*                ],*/}
-          {/*              }}*/}
-          {/*              options={{*/}
-          {/*                plugins: {*/}
-          {/*                  legend: {*/}
-          {/*                    display: false,*/}
-          {/*                  },*/}
-          {/*                },*/}
-          {/*                maintainAspectRatio: false,*/}
-          {/*                scales: {*/}
-          {/*                  x: {*/}
-          {/*                    border: {*/}
-          {/*                      display: false,*/}
-          {/*                    },*/}
-          {/*                    grid: {*/}
-          {/*                      display: false,*/}
-          {/*                      drawBorder: false,*/}
-          {/*                    },*/}
-          {/*                    ticks: {*/}
-          {/*                      display: false,*/}
-          {/*                    },*/}
-          {/*                  },*/}
-          {/*                  y: {*/}
-          {/*                    min: 30,*/}
-          {/*                    max: 100,*/}
-          {/*                    display: false,*/}
-          {/*                    grid: {*/}
-          {/*                      display: false,*/}
-          {/*                    },*/}
-          {/*                    ticks: {*/}
-          {/*                      display: false,*/}
-          {/*                    },*/}
-          {/*                  },*/}
-          {/*                },*/}
-          {/*                elements: {*/}
-          {/*                  line: {*/}
-          {/*                    borderWidth: 5,*/}
-          {/*                    tension: 0.4,*/}
-          {/*                  },*/}
-          {/*                  point: {*/}
-          {/*                    radius: 4,*/}
-          {/*                    hitRadius: 10,*/}
-          {/*                    hoverRadius: 4,*/}
-          {/*                  },*/}
-          {/*                },*/}
-          {/*              }}*/}
-          {/*            />*/}
-          {/*          }*/}
-          {/*        />*/}
-          {/*      </CCol>*/}
-          {/*      <CCol sm={6}>*/}
-          {/*        /!*REMIND 사용률에 따른 색 변화 구현*!/*/}
-          {/*        <CWidgetStatsB*/}
-          {/*          className="mb-3"*/}
-          {/*          color="success"*/}
-          {/*          inverse*/}
-          {/*          progress={{ value: 89.9 }}*/}
-          {/*          text="쓸만큼 쓰셨군요! 다음달에도 만나요~"*/}
-          {/*          title="Rate of CMS operation"*/}
-          {/*          value="89.9%"*/}
-          {/*          style={{ height: '90%' }}*/}
-          {/*        />*/}
-          {/*      </CCol>*/}
-          {/*    </CRow>*/}
-          {/*  </CCardBody>*/}
-          {/*</CCard>*/}
         </CCol>
       </CRow>
       <CRow>
@@ -1607,7 +956,7 @@ const DashboardPage = () => {
               </CProgress>
 
               <hr className="mt-3" />
-              <DailyTokenUsagesExampleBarChart />
+              <DailyTokenUsageChart />
               <hr className="mt-3" />
             </CCardBody>
           </CCard>
@@ -1700,7 +1049,6 @@ const DashboardPage = () => {
                     </div>
                   </CTableDataCell>
                   <CTableDataCell className="text-center">
-                    {/*<CIcon size="xl" icon={item.country.flag} title={item.country.name} />*/}
                     <div>{item.team}</div>
                   </CTableDataCell>
                   <CTableDataCell>
@@ -1708,11 +1056,7 @@ const DashboardPage = () => {
                       <div className="float-start">
                         <strong>{item.usage.value} </strong>
                       </div>
-                      {/*<div className="float-end ms-1 text-nowrap">*/}
-                      {/*  <small className="text-medium-emphasis">{item.usage.period}</small>*/}
-                      {/*</div>*/}
                     </div>
-                    {/*<CProgress thin color={`${item.usage.color}-gradient`} value={item.usage.value} />*/}
                   </CTableDataCell>
                   <CTableDataCell className="text-center">
                     <CIcon size="xl" icon={item.payment.icon} />
@@ -1732,131 +1076,3 @@ const DashboardPage = () => {
 };
 
 export default DashboardPage;
-const random = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
-
-const randomInputTokenChartData = [
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-];
-const randomOutputTokenChartData = [
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-];
-
-const randomSevenElementsChartData1 = [
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-];
-
-const randomSevenElementsChartData2 = [
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-];
-
-const randomSevenElementsChartData3 = [
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-];
-
-const randomSevenElementsChartData = [
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-  random(50, 200),
-];
-
-const monthlyLabel = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
-const weeklyLabel = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
-const totalChartDataInTotalTokenUsage = mergeAndSumArrays(randomInputTokenChartData, randomOutputTokenChartData);
-
-const dailyTokenUsagesExample = [
-  { title: 'Monday', InputTokens: 34, OutputTokens: 78 },
-  { title: 'Tuesday', InputTokens: 56, OutputTokens: 94 },
-  { title: 'Wednesday', InputTokens: 12, OutputTokens: 67 },
-  { title: 'Thursday', InputTokens: 43, OutputTokens: 91 },
-  { title: 'Friday', InputTokens: 22, OutputTokens: 73 },
-  { title: 'Saturday', InputTokens: 53, OutputTokens: 82 },
-  { title: 'Sunday', InputTokens: 9, OutputTokens: 69 },
-];
-const dailyTokenUsagesExampleLabels = dailyTokenUsagesExample.map((item) => item.title);
-const dailyTokenUsagesExampleInputToken = dailyTokenUsagesExample.map((item) => item.InputTokens);
-const dailyTokenUsagesExampleOutputToken = dailyTokenUsagesExample.map((item) => item.OutputTokens);
-const DailyTokenUsagesExampleBarChart = () => {
-  //REMIND 매일 차트 라벨 변경해서, 가장 마지막 요일이 오늘이 되도록
-  return (
-    <CChart
-      type="bar"
-      data={{
-        labels: dailyTokenUsagesExampleLabels,
-        datasets: [
-          {
-            label: 'Input Tokens',
-            backgroundColor: '#007bff',
-            data: dailyTokenUsagesExampleInputToken,
-          },
-          {
-            label: 'Output Tokens',
-            backgroundColor: '#dc3545',
-            data: dailyTokenUsagesExampleOutputToken,
-          },
-        ],
-      }}
-      options={{
-        plugins: {
-          legend: {
-            labels: {
-              color: getStyle('--cui-body-color'),
-            },
-          },
-        },
-        scales: {
-          x: {
-            grid: {
-              color: getStyle('--cui-border-color-translucent'),
-            },
-            ticks: {
-              color: getStyle('--cui-body-color'),
-            },
-          },
-          y: {
-            grid: {
-              color: getStyle('--cui-border-color-translucent'),
-            },
-            ticks: {
-              color: getStyle('--cui-body-color'),
-            },
-          },
-        },
-      }}
-    />
-  );
-};

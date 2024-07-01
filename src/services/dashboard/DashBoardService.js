@@ -32,7 +32,6 @@ const getChatHistoryStatistics = async (startDate, endDate) => {
       endDate,
     },
   });
-  console.log(response);
   return response?.data;
 };
 

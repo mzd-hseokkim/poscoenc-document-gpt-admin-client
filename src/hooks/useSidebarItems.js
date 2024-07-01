@@ -93,7 +93,6 @@ const useSidebarItems = () => {
 
       setMenuItems(sidebarItems);
     } catch (error) {
-      console.log(error);
       if (error.response.status === 401) {
         //REMIND 서버가 다운되서 로그인 화면으로 이동한건지, 세션이 만료되어서 이동된건지 구분이 필요.
         addToast({ message: `세션 만료로 인한 401 에러 발생시 분기 수정 필요. + ${error.response.status}` }, false);
