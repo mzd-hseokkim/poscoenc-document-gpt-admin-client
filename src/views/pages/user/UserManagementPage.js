@@ -236,6 +236,7 @@ const UserManagementPage = () => {
                     contentLength={userList.length}
                     isSearchPerformed={isSearchPerformed.current}
                     defaultMessage="검색 조건에 맞는 사용자를 검색합니다."
+                    isLoading={searchResultIsLoading}
                   />
                 }
                 onItemsPerPageChange={handlePageSizeChange}

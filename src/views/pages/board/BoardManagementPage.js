@@ -358,6 +358,7 @@ const BoardManagementPage = () => {
                   contentLength={postList.length}
                   isSearchPerformed={isSearchPerformed.current}
                   defaultMessage="검색 조건에 맞는 게시글을 검색합니다."
+                  isLoading={searchResultIsLoading}
                 />
               }
               onItemsPerPageChange={handlePageSizeChange}

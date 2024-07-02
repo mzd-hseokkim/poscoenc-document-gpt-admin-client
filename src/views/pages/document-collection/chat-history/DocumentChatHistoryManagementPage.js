@@ -329,6 +329,7 @@ const DocumentChatHistoryManagementPage = () => {
                     contentLength={chatHistoryList?.length}
                     isSearchPerformed={isSearchPerformed.current}
                     defaultMessage="검색 조건에 맞는 한 쌍의 질문-답변을 검색합니다."
+                    isLoading={searchResultIsLoading}
                   />
                 }
                 onItemsPerPageChange={handlePageSizeChange}

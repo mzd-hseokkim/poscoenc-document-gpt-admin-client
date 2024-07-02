@@ -20,17 +20,11 @@ import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import ModalContainer from 'components/modal/ModalContainer';
 import { useToast } from 'context/ToastContext';
-import { format } from 'date-fns';
 import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
+import { useSearchForm } from 'hooks/useSearchForm';
 import AdminService from 'services/admin/AdminService';
-import {
-  formatToIsoEndDate,
-  formatToIsoStartDate,
-  formatToYMD,
-  getCurrentDate,
-  getOneYearAgoDate,
-} from 'utils/common/dateUtils';
+import { formatToYMD, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
 import { CommonColumnSorterCustomProps, CommonTableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { adminColumnConfig } from 'views/pages/admin/adminColumnConfig';
 
@@ -55,13 +49,22 @@ const AdminManagementPage = () => {
   const [formMode, setFormMode] = useState('');
   const [totalAdminElements, setTotalAdminElements] = useState(0);
   const [searchFormData, setSearchFormData] = useState({});
-  const [stagedSearchFormData, setStagedSearchFormData] = useState(createInitialSearchFormData);
+  // const [stagedSearchFormData, setStagedSearchFormData] = useState(createInitialSearchFormData);
   const [hasError, setHasError] = useState(false);
 
-  const [isPickTime, setIsPickTime] = useState(false);
+  // const [isPickTime, setIsPickTime] = useState(false);
 
   const isComponentMounted = useRef(true);
   const isSearchPerformed = useRef(false);
+
+  const {
+    isPickTime,
+    stagedSearchFormData,
+    handleDateChange,
+    handleSearchFormChange,
+    handleSearchFormReset,
+    handleTimePickerCheck,
+  } = useSearchForm(createInitialSearchFormData());
 
   const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } = usePagination(
     totalAdminElements,
@@ -108,45 +111,45 @@ const AdminManagementPage = () => {
     }
   }, [fetchAdminList, hasError]);
 
-  const handleDateChange = ({ id, newDate, isStartDate = true }) => {
-    //REMIND 시간날 때 함수 리팩토링, 모듈화
-    const fieldMap = {
-      createdAt: isStartDate ? 'fromCreatedAt' : 'toCreatedAt',
-      modifiedAt: isStartDate ? 'fromModifiedAt' : 'toModifiedAt',
-      lastLoggedInAt: isStartDate ? 'fromLoggedInAt' : 'toLoggedInAt',
-    };
-    const fieldToUpdate = fieldMap[id];
-    if (!fieldToUpdate) {
-      return;
-    }
+  // const handleDateChange = ({ id, newDate, isStartDate = true }) => {
+  //   //REMIND 시간날 때 함수 리팩토링, 모듈화
+  //   const fieldMap = {
+  //     createdAt: isStartDate ? 'fromCreatedAt' : 'toCreatedAt',
+  //     modifiedAt: isStartDate ? 'fromModifiedAt' : 'toModifiedAt',
+  //     lastLoggedInAt: isStartDate ? 'fromLoggedInAt' : 'toLoggedInAt',
+  //   };
+  //   const fieldToUpdate = fieldMap[id];
+  //   if (!fieldToUpdate) {
+  //     return;
+  //   }
+  //
+  //   const newFormattedDate = newDate
+  //     ? isPickTime
+  //       ? formatToIsoEndDate(newDate)
+  //       : format(new Date(newDate), "yyyy-MM-dd'T'23:59")
+  //     : null;
+  //
+  //   const formattedDate = isStartDate ? formatToIsoStartDate(newDate) : newFormattedDate;
+  //   setStagedSearchFormData((prev) => ({ ...prev, [fieldToUpdate]: formattedDate }));
+  // };
 
-    const newFormattedDate = newDate
-      ? isPickTime
-        ? formatToIsoEndDate(newDate)
-        : format(new Date(newDate), "yyyy-MM-dd'T'23:59")
-      : null;
-
-    const formattedDate = isStartDate ? formatToIsoStartDate(newDate) : newFormattedDate;
-    setStagedSearchFormData((prev) => ({ ...prev, [fieldToUpdate]: formattedDate }));
-  };
-
-  const handleTimePickerCheck = (e) => {
-    setIsPickTime(e.target.checked);
-
-    setStagedSearchFormData((prev) => ({
-      ...prev,
-      //검색 여부 체크 해제 시 기존의 설정된 시간 값들을 초기화
-      fromCreatedAt: format(stagedSearchFormData.fromCreatedAt, "yyyy-MM-dd'T'00:00"),
-      toCreatedAt: format(stagedSearchFormData.toCreatedAt, "yyyy-MM-dd'T'23:59"),
-      fromModifiedAt: format(stagedSearchFormData.fromModifiedAt, "yyyy-MM-dd'T'00:00"),
-      toModifiedAt: format(stagedSearchFormData.toModifiedAt, "yyyy-MM-dd'T'23:59"),
-      fromLoggedInAt: format(stagedSearchFormData.fromLoggedInAt, "yyyy-MM-dd'T'00:00"),
-      toLoggedInAt: format(stagedSearchFormData.toLoggedInAt, "yyyy-MM-dd'T'23:59"),
-    }));
-  };
-  const handleSearchFormChange = ({ target: { id, value } }) => {
-    setStagedSearchFormData((prev) => ({ ...prev, [id]: value }));
-  };
+  // const handleTimePickerCheck = (e) => {
+  //   setIsPickTime(e.target.checked);
+  //
+  //   setStagedSearchFormData((prev) => ({
+  //     ...prev,
+  //     //검색 여부 체크 해제 시 기존의 설정된 시간 값들을 초기화
+  //     fromCreatedAt: format(stagedSearchFormData.fromCreatedAt, "yyyy-MM-dd'T'00:00"),
+  //     toCreatedAt: format(stagedSearchFormData.toCreatedAt, "yyyy-MM-dd'T'23:59"),
+  //     fromModifiedAt: format(stagedSearchFormData.fromModifiedAt, "yyyy-MM-dd'T'00:00"),
+  //     toModifiedAt: format(stagedSearchFormData.toModifiedAt, "yyyy-MM-dd'T'23:59"),
+  //     fromLoggedInAt: format(stagedSearchFormData.fromLoggedInAt, "yyyy-MM-dd'T'00:00"),
+  //     toLoggedInAt: format(stagedSearchFormData.toLoggedInAt, "yyyy-MM-dd'T'23:59"),
+  //   }));
+  // };
+  // const handleSearchFormChange = ({ target: { id, value } }) => {
+  //   setStagedSearchFormData((prev) => ({ ...prev, [id]: value }));
+  // };
 
   const handleRowClick = (id) => {
     setFormMode('read');
@@ -158,10 +161,10 @@ const AdminManagementPage = () => {
     setHasError(false);
     setSearchFormData(stagedSearchFormData);
   };
-  const handleSearchFormReset = () => {
-    setStagedSearchFormData(createInitialSearchFormData);
-    setIsPickTime(false);
-  };
+  // const handleSearchFormReset = () => {
+  //   setStagedSearchFormData(createInitialSearchFormData);
+  //   setIsPickTime(false);
+  // };
   const handleCreateClick = () => {
     setFormMode('create');
 
@@ -359,6 +362,7 @@ const AdminManagementPage = () => {
                     contentLength={adminList.length}
                     isSearchPerformed={isSearchPerformed.current}
                     defaultMessage="검색 조건에 맞는 관리자를 검색합니다."
+                    isLoading={searchResultIsLoading}
                   />
                 }
                 onItemsPerPageChange={handlePageSizeChange}

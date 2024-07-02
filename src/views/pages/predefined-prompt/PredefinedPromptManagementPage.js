@@ -329,6 +329,7 @@ const PredefinedPromptManagementPage = () => {
                     contentLength={promptList?.length}
                     isSearchPerformed={isSearchPerformed.current}
                     defaultMessage="검색 조건에 맞는 프롬프트를 검색합니다."
+                    isLoading={searchResultIsLoading}
                   />
                 }
                 onItemsPerPageChange={handlePageSizeChange}

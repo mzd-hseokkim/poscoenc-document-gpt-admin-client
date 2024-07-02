@@ -279,6 +279,7 @@ const StandardContractDocumentManagementPage = () => {
                     contentLength={standardContractDocumentList.length}
                     isSearchPerformed={isSearchPerformed.current}
                     defaultMessage="검색 조건에 맞는 표준 계약 문서를 검색합니다."
+                    isLoading={searchResultIsLoading}
                   />
                 }
                 onItemsPerPageChange={handlePageSizeChange}
