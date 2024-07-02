@@ -124,7 +124,11 @@ const RoleManagementPage = () => {
               {/*REMIND Pagination 적용 필요*/}
               <CSmartTable
                 noItemsLabel={
-                  <CSmartTableNoItemLabel contentLength={roleList.length} isSearchPerformed={isSearchPerformed} />
+                  <CSmartTableNoItemLabel
+                    contentLength={roleList.length}
+                    isSearchPerformed={isSearchPerformed}
+                    isLoading={isLoading}
+                  />
                 }
                 loading={isLoading}
                 sorterValue={{ column: 'id', state: 'asc' }}

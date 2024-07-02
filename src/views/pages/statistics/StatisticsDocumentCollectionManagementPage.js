@@ -187,6 +187,7 @@ const StatisticsDocumentCollectionManagementPage = () => {
                     contentLength={statisticsDataList?.length}
                     isSearchPerformed={isSearchPerformed.current}
                     defaultMessage="선택한 월의 토큰 사용량을 문서 집합 별로 검색합니다."
+                    isLoading={searchResultIsLoading}
                   />
                 }
                 onItemsPerPageChange={handlePageSizeChange}

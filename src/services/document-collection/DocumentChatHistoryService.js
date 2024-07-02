@@ -11,8 +11,6 @@ const getSearchedDocumentChatHistory = async (params, pageable) => {
       fromCreatedAt: params.fromCreatedAt,
       toCreatedAt: params.toCreatedAt,
       createdByName: params.createdByName,
-      fromModifiedAt: params.fromModifiedAt,
-      toModifiedAt: params.toModifiedAt,
       page: pageable.page,
       size: pageable.size,
       sort: pageable.sort,
@@ -38,8 +36,6 @@ const getDownloadSearchedChatHistoryList = async (params) => {
       fromCreatedAt: params.fromCreatedAt,
       toCreatedAt: params.toCreatedAt,
       createdByName: params.createdByName,
-      fromModifiedAt: params.fromModifiedAt,
-      toModifiedAt: params.toModifiedAt,
     },
     responseType: 'blob',
   });
