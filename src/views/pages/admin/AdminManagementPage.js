@@ -49,13 +49,13 @@ const AdminManagementPage = () => {
   const [formMode, setFormMode] = useState('');
   const [totalAdminElements, setTotalAdminElements] = useState(0);
   const [searchFormData, setSearchFormData] = useState({});
-  // const [stagedSearchFormData, setStagedSearchFormData] = useState(createInitialSearchFormData);
   const [hasError, setHasError] = useState(false);
-
-  // const [isPickTime, setIsPickTime] = useState(false);
 
   const isComponentMounted = useRef(true);
   const isSearchPerformed = useRef(false);
+
+  const { addToast } = useToast();
+  const modal = useModal();
 
   const {
     isPickTime,
@@ -70,8 +70,6 @@ const AdminManagementPage = () => {
     totalAdminElements,
     'id,desc'
   );
-  const { addToast } = useToast();
-  const modal = useModal();
 
   const isDeletedRow = (selectedRows) => {
     return selectedRows.some((row) => row.deleted === true);
@@ -111,46 +109,6 @@ const AdminManagementPage = () => {
     }
   }, [fetchAdminList, hasError]);
 
-  // const handleDateChange = ({ id, newDate, isStartDate = true }) => {
-  //   //REMIND 시간날 때 함수 리팩토링, 모듈화
-  //   const fieldMap = {
-  //     createdAt: isStartDate ? 'fromCreatedAt' : 'toCreatedAt',
-  //     modifiedAt: isStartDate ? 'fromModifiedAt' : 'toModifiedAt',
-  //     lastLoggedInAt: isStartDate ? 'fromLoggedInAt' : 'toLoggedInAt',
-  //   };
-  //   const fieldToUpdate = fieldMap[id];
-  //   if (!fieldToUpdate) {
-  //     return;
-  //   }
-  //
-  //   const newFormattedDate = newDate
-  //     ? isPickTime
-  //       ? formatToIsoEndDate(newDate)
-  //       : format(new Date(newDate), "yyyy-MM-dd'T'23:59")
-  //     : null;
-  //
-  //   const formattedDate = isStartDate ? formatToIsoStartDate(newDate) : newFormattedDate;
-  //   setStagedSearchFormData((prev) => ({ ...prev, [fieldToUpdate]: formattedDate }));
-  // };
-
-  // const handleTimePickerCheck = (e) => {
-  //   setIsPickTime(e.target.checked);
-  //
-  //   setStagedSearchFormData((prev) => ({
-  //     ...prev,
-  //     //검색 여부 체크 해제 시 기존의 설정된 시간 값들을 초기화
-  //     fromCreatedAt: format(stagedSearchFormData.fromCreatedAt, "yyyy-MM-dd'T'00:00"),
-  //     toCreatedAt: format(stagedSearchFormData.toCreatedAt, "yyyy-MM-dd'T'23:59"),
-  //     fromModifiedAt: format(stagedSearchFormData.fromModifiedAt, "yyyy-MM-dd'T'00:00"),
-  //     toModifiedAt: format(stagedSearchFormData.toModifiedAt, "yyyy-MM-dd'T'23:59"),
-  //     fromLoggedInAt: format(stagedSearchFormData.fromLoggedInAt, "yyyy-MM-dd'T'00:00"),
-  //     toLoggedInAt: format(stagedSearchFormData.toLoggedInAt, "yyyy-MM-dd'T'23:59"),
-  //   }));
-  // };
-  // const handleSearchFormChange = ({ target: { id, value } }) => {
-  //   setStagedSearchFormData((prev) => ({ ...prev, [id]: value }));
-  // };
-
   const handleRowClick = (id) => {
     setFormMode('read');
     modal.openModal(id);
@@ -161,10 +119,7 @@ const AdminManagementPage = () => {
     setHasError(false);
     setSearchFormData(stagedSearchFormData);
   };
-  // const handleSearchFormReset = () => {
-  //   setStagedSearchFormData(createInitialSearchFormData);
-  //   setIsPickTime(false);
-  // };
+
   const handleCreateClick = () => {
     setFormMode('create');
 
@@ -222,7 +177,7 @@ const AdminManagementPage = () => {
                     id="name"
                     floatingLabel="이름"
                     placeholder=""
-                    value={searchFormData.name}
+                    value={stagedSearchFormData.name}
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
@@ -231,7 +186,7 @@ const AdminManagementPage = () => {
                     id="role"
                     floatingLabel="권한"
                     placeholder=""
-                    value={searchFormData.role}
+                    value={stagedSearchFormData.role}
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
@@ -264,21 +219,23 @@ const AdminManagementPage = () => {
                 <CCol md={4}>
                   <CDateRangePicker
                     key={`lastLoggedInAt-${isPickTime}`}
-                    id="lastLoggedInAt"
+                    id="loggedInAt"
                     label="최근 로그인"
                     startDate={stagedSearchFormData.fromLoggedInAt}
                     endDate={stagedSearchFormData.toLoggedInAt}
-                    onStartDateChange={(newDate) => handleDateChange({ id: 'lastLoggedInAt', newDate })}
-                    onEndDateChange={(newDate) =>
-                      handleDateChange({ id: 'lastLoggedInAt', newDate, isStartDate: false })
-                    }
+                    onStartDateChange={(newDate) => handleDateChange({ id: 'loggedInAt', newDate })}
+                    onEndDateChange={(newDate) => handleDateChange({ id: 'loggedInAt', newDate, isStartDate: false })}
                     timepicker={isPickTime}
                   />
                 </CCol>
               </CRow>
               <CRow className="mb-3">
                 <CCol>
-                  <CFormCheck label="시간 검색 여부" checked={isPickTime} onChange={(e) => handleTimePickerCheck(e)} />
+                  <CFormCheck
+                    label="시간 검색 여부"
+                    checked={isPickTime}
+                    onChange={(e) => handleTimePickerCheck(e, ['createdAt', 'modifiedAt', 'loggedInAt'])}
+                  />
                 </CCol>
               </CRow>
               <CRow className="mb-3">

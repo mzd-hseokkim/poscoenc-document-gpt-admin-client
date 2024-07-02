@@ -278,7 +278,11 @@ const MenuManagementPage = () => {
                   />
                 </CCol>
                 <CCol md={2} className="mt-5">
-                  <CFormCheck label="시간 검색 여부" checked={isPickTime} onChange={(e) => handleTimePickerCheck(e)} />
+                  <CFormCheck
+                    label="시간 검색 여부"
+                    checked={isPickTime}
+                    onChange={(e) => handleTimePickerCheck(e, ['createdAt', 'modifiedAt'])}
+                  />
                 </CCol>
               </CRow>
               <CRow className="mb-3">

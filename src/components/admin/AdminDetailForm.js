@@ -226,7 +226,7 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
     }
     fetchAdminList();
   };
-
+  //REMIND 현재 상세 보기 창에서 부여받지 않은 권한도 선택하면 추가 된 것 처럼 보이는 버그 발생
   const renderRoleSelect = () => (
     <CRow className="mb-3">
       <CCol>

@@ -22,17 +22,11 @@ import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import ModalContainer from 'components/modal/ModalContainer';
 import { useToast } from 'context/ToastContext';
-import { format } from 'date-fns';
 import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
+import { useSearchForm } from 'hooks/useSearchForm';
 import BoardService from 'services/board/BoardService';
-import {
-  formatToIsoEndDate,
-  formatToIsoStartDate,
-  formatToYMD,
-  getCurrentDate,
-  getOneYearAgoDate,
-} from 'utils/common/dateUtils';
+import { formatToYMD, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
 import { CommonColumnSorterCustomProps, CommonTableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { postColumnConfig } from 'views/pages/board/postColumnConfig';
 
@@ -54,17 +48,25 @@ const BoardManagementPage = () => {
   const [postFormMode, setPostFormMode] = useState('');
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
   const [totalPostElements, setTotalPostElements] = useState(0);
-  const [isPickTime, setIsPickTime] = useState(false);
   const [hasError, setHasError] = useState(false);
 
   const [searchFormData, setSearchFormData] = useState({});
-  const [stagedSearchFormData, setStagedSearchFormData] = useState(createInitialSearchFormData);
 
   const isComponentMounted = useRef(true);
   const isSearchPerformed = useRef(false);
 
   const modal = useModal();
   const { addToast } = useToast();
+
+  const {
+    isPickTime,
+    stagedSearchFormData,
+    handleDateChange,
+    handleSearchFormChange,
+    handleSearchFormReset,
+    handleTimePickerCheck,
+  } = useSearchForm(createInitialSearchFormData());
+
   const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } = usePagination(
     totalPostElements,
     'id,desc'
@@ -152,37 +154,37 @@ const BoardManagementPage = () => {
     setSearchFormData(stagedSearchFormData);
   };
 
-  const handleSearchFormReset = () => {
-    setStagedSearchFormData(createInitialSearchFormData);
-    setIsPickTime(false);
-  };
-  const handleSearchFormChange = ({ target: { id, value } }) => {
-    setStagedSearchFormData((prev) => ({ ...prev, [id]: value }));
-  };
+  // const handleSearchFormReset = () => {
+  //   setStagedSearchFormData(createInitialSearchFormData);
+  //   setIsPickTime(false);
+  // };
+  // const handleSearchFormChange = ({ target: { id, value } }) => {
+  //   setStagedSearchFormData((prev) => ({ ...prev, [id]: value }));
+  // };
 
-  const handleDateChange = ({ id, newDate, isStartDate = true }) => {
-    const fieldMap = {
-      createdAt: isStartDate ? 'fromCreatedAt' : 'toCreatedAt',
-      modifiedAt: isStartDate ? 'fromModifiedAt' : 'toModifiedAt',
-    };
+  // const handleDateChange = ({ id, newDate, isStartDate = true }) => {
+  //   const fieldMap = {
+  //     createdAt: isStartDate ? 'fromCreatedAt' : 'toCreatedAt',
+  //     modifiedAt: isStartDate ? 'fromModifiedAt' : 'toModifiedAt',
+  //   };
+  //
+  //   const fieldToUpdate = fieldMap[id];
+  //   if (fieldToUpdate) {
+  //     const formattedDate = isStartDate ? formatToIsoStartDate(newDate) : formatToIsoEndDate(newDate);
+  //     setStagedSearchFormData((prev) => ({ ...prev, [fieldToUpdate]: formattedDate }));
+  //   }
+  // };
 
-    const fieldToUpdate = fieldMap[id];
-    if (fieldToUpdate) {
-      const formattedDate = isStartDate ? formatToIsoStartDate(newDate) : formatToIsoEndDate(newDate);
-      setStagedSearchFormData((prev) => ({ ...prev, [fieldToUpdate]: formattedDate }));
-    }
-  };
-
-  const handleTimePickerCheck = (e) => {
-    setIsPickTime(e.target.checked);
-    setStagedSearchFormData((prev) => ({
-      ...prev,
-      fromCreatedAt: format(stagedSearchFormData.fromCreatedAt, "yyyy-MM-dd'T'00:00"),
-      toCreatedAt: format(stagedSearchFormData.toCreatedAt, "yyyy-MM-dd'T'23:59"),
-      fromModifiedAt: format(stagedSearchFormData.fromModifiedAt, "yyyy-MM-dd'T'00:00"),
-      toModifiedAt: format(stagedSearchFormData.toModifiedAt, "yyyy-MM-dd'T'23:59"),
-    }));
-  };
+  // const handleTimePickerCheck = (e) => {
+  //   setIsPickTime(e.target.checked);
+  //   setStagedSearchFormData((prev) => ({
+  //     ...prev,
+  //     fromCreatedAt: format(stagedSearchFormData.fromCreatedAt, "yyyy-MM-dd'T'00:00"),
+  //     toCreatedAt: format(stagedSearchFormData.toCreatedAt, "yyyy-MM-dd'T'23:59"),
+  //     fromModifiedAt: format(stagedSearchFormData.fromModifiedAt, "yyyy-MM-dd'T'00:00"),
+  //     toModifiedAt: format(stagedSearchFormData.toModifiedAt, "yyyy-MM-dd'T'23:59"),
+  //   }));
+  // };
 
   const togglePostStatus = async (deletionOption) => {
     try {
@@ -302,7 +304,11 @@ const BoardManagementPage = () => {
                   />
                 </CCol>
                 <CCol md={2} className="mt-5">
-                  <CFormCheck label="시간 검색 여부" checked={isPickTime} onChange={(e) => handleTimePickerCheck(e)} />
+                  <CFormCheck
+                    label="시간 검색 여부"
+                    checked={isPickTime}
+                    onChange={(e) => handleTimePickerCheck(e, ['createdAt', 'modifiedAt'])}
+                  />
                 </CCol>
               </CRow>
               <CRow className="mb-3">
