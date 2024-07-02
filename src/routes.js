@@ -15,9 +15,12 @@ const ChatHistoryManagementPage = React.lazy(() =>
 const StandardContractDocumentPage = React.lazy(() =>
   import('views/pages/document-collection/standard-contract/StandardContractDocumentManagementPage')
 );
-const StatisticsUserManagement = React.lazy(() => import('views/pages/statistics/StatisticsUserManagement'));
+const StatisticsUserManagement = React.lazy(() => import('views/pages/statistics/StatisticsUserManagementPage'));
 const StatisticsDocumentCollectionManagement = React.lazy(() =>
-  import('views/pages/statistics/StatisticsDocumentCollectionManagement')
+  import('views/pages/statistics/StatisticsDocumentCollectionManagementPage')
+);
+const PredefinedPromptManagement = React.lazy(() =>
+  import('views/pages/predefined-prompt/PredefinedPromptManagementPage')
 );
 
 const routes = [
@@ -52,6 +55,12 @@ const routes = [
     exact: true,
     name: '월별 토큰 사용량 DC',
     element: StatisticsDocumentCollectionManagement,
+  },
+  {
+    path: '/predefined-prompts/management',
+    exact: true,
+    name: '프롬프트 관리',
+    element: PredefinedPromptManagement,
   },
 ];
 

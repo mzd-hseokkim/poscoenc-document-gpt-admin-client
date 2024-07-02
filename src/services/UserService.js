@@ -3,7 +3,7 @@ import { formatToYMD, getCurrentDate } from 'utils/common/dateUtils';
 
 const postUser = async (payload) => {
   const response = await api.post('/admin/user-accounts', payload);
-  return response.data;
+  return response?.data;
 };
 const getUsers = async (params, pageable) => {
   const response = await api.get('/admin/user-accounts', {
@@ -18,7 +18,7 @@ const getUsers = async (params, pageable) => {
       sort: pageable.sort,
     },
   });
-  return response.data;
+  return response?.data;
 };
 
 const getDownloadSearchedUserList = async (params) => {
@@ -45,19 +45,21 @@ const getDownloadSearchedUserList = async (params) => {
 };
 
 const getUser = async (id) => {
-  if (!id) return;
+  if (!id) {
+    return;
+  }
   const response = await api.get(`/admin/user-accounts/${id}`);
-  return response.data;
+  return response?.data;
 };
 
 const putUser = async (id, payload) => {
   const response = await api.put(`/admin/user-accounts/${id}`, payload);
-  return response.data;
+  return response?.data;
 };
 
 const deleteUsers = async (ids, deleted) => {
   const response = await api.patch(`/admin/user-accounts/deleted/${deleted}`, ids);
-  return response.data;
+  return response?.data;
 };
 
 const UserService = {

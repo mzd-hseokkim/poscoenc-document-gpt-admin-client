@@ -11,41 +11,43 @@ import {
   CFormInput,
   CFormLabel,
   CFormSelect,
+  CPopover,
   CRow,
   CSmartTable,
 } from '@coreui/react-pro';
 import DeletionStatusBadge from 'components/badge/DeletionStatusBadge';
+import PromptApprovalStatusBadge from 'components/badge/PromptApprovalStatusBadge';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import { StandardContractDocumentDetailForm } from 'components/document-collection/StandardContractDocumentDetailForm';
 import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import ModalContainer from 'components/modal/ModalContainer';
+import { PredefinedPromptDetailForm } from 'components/predefined-prompt/PredefinedPromptDetailForm';
 import { useToast } from 'context/ToastContext';
 import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
 import { useSearchForm } from 'hooks/useSearchForm';
-import StandardContractService from 'services/document-collection/StandardContractService';
+import PredefinedPromptService from 'services/predefined-prompt/PredefinedPromptService';
 import { formatToYMD, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
 import { CommonColumnSorterCustomProps, CommonTableCustomProps } from 'utils/common/smartTablePropsConfig';
-import { standardContractDocumentColumnConfig } from 'views/pages/document-collection/standard-contract/standardContractDocumentColumnConfig';
+import { predefinedPromptColumnConfig } from 'views/pages/predefined-prompt/predefinedPromptColumnConfig';
 
 const createInitialSearchFormData = () => ({
-  originalFilename: '', // 파일명
-  displayName: '', // 표시명
-  // description: '', 문서 설명
-  // filePath: '', S3 서버의 경로가 될 것
-  createdByName: '', // 게시자
+  name: '', // 프롬프트 이름
+  description: '', // 프롬프트에 대한 설명
+  content: '', // 실제 프롬프트 내용
+  category: '',
+  approvalOption: 'ALL', // 승인 여부
+  createdByName: '',
   fromCreatedAt: getOneYearAgoDate(),
   toCreatedAt: getCurrentDate(),
-  deletionOption: 'ALL', // 삭제 여부
+  deletionOption: 'ALL',
 });
-const StandardContractDocumentManagementPage = () => {
-  const [standardContractDocumentList, setStandardContractDocumentList] = useState([]);
+const PredefinedPromptManagementPage = () => {
+  const [promptList, setPromptList] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
-
   const [searchFormData, setSearchFormData] = useState({});
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
-  const [totalCollectionElements, setTotalCollectionElements] = useState(0);
+  const [totalPromptElements, setTotalPromptElements] = useState(0);
   const [detailFormMode, setDetailFormMode] = useState('');
   const [hasError, setHasError] = useState(false);
 
@@ -59,59 +61,53 @@ const StandardContractDocumentManagementPage = () => {
     handleSearchFormReset,
     handleTimePickerCheck,
   } = useSearchForm(createInitialSearchFormData());
-
   const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } = usePagination(
-    totalCollectionElements,
+    totalPromptElements,
     'id,desc'
   );
   const isComponentMounted = useRef(true);
   const isSearchPerformed = useRef(false);
 
-  // search form logic start -------------------------
-  const handleSubmitSearchRequest = (e) => {
-    e.preventDefault();
-    setHasError(false); //reset error state for re-request
-    setSearchFormData(stagedSearchFormData);
-  };
-
-  const searchStandardContractDocument = useCallback(async () => {
+  const searchPredefinedPrompt = useCallback(async () => {
     setSearchResultIsLoading(true);
     if (!isSearchPerformed.current) {
       isSearchPerformed.current = true;
     }
     try {
-      const searchResult = await StandardContractService.getStandardContractDocumentList(searchFormData, pageableData);
-      setStandardContractDocumentList(searchResult.content);
-      setTotalCollectionElements(searchResult.totalElements);
+      const searchResult = await PredefinedPromptService.getPredefinedPromptList(searchFormData, pageableData);
+      setPromptList(searchResult.content);
+      setTotalPromptElements(searchResult.totalElements);
       setHasError(false);
     } catch (error) {
-      //REMIND only sever error occur
       console.log(error);
       setHasError(true);
-      addToast({ message: '검색 결과를 가져 올 수 없습니다.' });
+      addToast({ message: `프롬프트 검색 실패, ${error.response?.data?.message} ${error.response?.status}` });
     } finally {
       setSearchResultIsLoading(false);
     }
-  }, [addToast, pageableData, searchFormData]);
+  }, [addToast, isSearchPerformed, pageableData, searchFormData]);
 
   useEffect(() => {
     if (isComponentMounted.current) {
       isComponentMounted.current = false;
     } else {
       if (!hasError) {
-        void searchStandardContractDocument();
+        void searchPredefinedPrompt();
       }
     }
-  }, [hasError, pageableData, searchStandardContractDocument]);
-
-  // search result list logic  start ----------------
+  }, [pageableData, searchPredefinedPrompt, hasError]);
+  const handleSubmitSearchRequest = (e) => {
+    e.preventDefault();
+    setHasError(false); //reset error state for re-request
+    setSearchFormData(stagedSearchFormData);
+  };
   const isDeletedRow = (selectedRows) => {
     return selectedRows.some((row) => row.deleted === true);
   };
 
-  const toggleDocumentCollectionDeleted = async (deletionOption) => {
+  const togglePromptDeleted = async (deletionOption) => {
     try {
-      const isSuccess = await StandardContractService.patchStandardContractDocumentDeletionOption(
+      const isSuccess = await PredefinedPromptService.patchPredefinedPromptDeletionOption(
         selectedRows.map((row) => row.id),
         deletionOption
       );
@@ -122,31 +118,48 @@ const StandardContractDocumentManagementPage = () => {
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
-        addToast({ message: '삭제할 표준 계약서를 선택해주세요.' });
+        addToast({ message: '삭제할 프롬프트를 선택해주세요.' });
       } else if (status === 404) {
-        addToast({ message: '삭제할 표준 계약서를 찾지 못했습니다. 다시 검색 해 주세요.' });
+        addToast({ message: '삭제할 프롬프트를 찾지 못했습니다. 다시 검색 해 주세요.' });
       } else {
         console.log(error);
       }
     } finally {
-      await searchStandardContractDocument();
+      await searchPredefinedPrompt();
     }
   };
 
-  const handleRowClick = (itemId) => {
+  const handleCreateClick = () => {
+    setDetailFormMode('create');
+    modal.openModal();
+  };
+  const handleTableRowClick = (itemId) => {
     setDetailFormMode('read');
     modal.openModal(itemId);
   };
 
   const scopedColumns = {
-    originalFilename: (item) => (
-      <td style={{ cursor: 'pointer' }} onClick={() => handleRowClick(item.id)}>
-        {item.originalFilename}
+    name: (item) => (
+      <td
+        className="text-truncate"
+        style={{ cursor: 'pointer', maxWidth: '300px' }}
+        onClick={() => handleTableRowClick(item.id)}
+      >
+        {item.name}
       </td>
     ),
-    displayName: (item) => (
-      <td style={{ cursor: 'pointer' }} onClick={() => handleRowClick(item.id)}>
-        {item.displayName}
+    description: (item) => (
+      <td style={{ cursor: 'pointer' }} onClick={() => handleTableRowClick(item.id)}>
+        <CPopover title={'설명'} content={item.description} trigger="hover" delay={500}>
+          <div className="text-truncate" style={{ maxWidth: '240px' }}>
+            {item.description}
+          </div>
+        </CPopover>
+      </td>
+    ),
+    approved: (item) => (
+      <td>
+        <PromptApprovalStatusBadge approved={item.approved} />
       </td>
     ),
     createdAt: (item) => <td>{formatToYMD(item.createdAt)}</td>,
@@ -156,36 +169,44 @@ const StandardContractDocumentManagementPage = () => {
       </td>
     ),
   };
-
   return (
     <>
       <FormLoadingCover isLoading={searchResultIsLoading} />
-      <CRow id="Standard Contract Document Search Form">
+      <CRow id="PromptSearchForm">
         <CCard className="row g-3">
           <CCardBody>
             <CForm onSubmit={handleSubmitSearchRequest}>
               <CRow className="mb-3">
                 <CCol md={6}>
                   <CFormInput
-                    id="originalFilename"
-                    floatingLabel="파일명"
+                    id="name"
+                    floatingLabel="프롬프트 명"
                     placeholder=""
-                    value={stagedSearchFormData.originalFilename}
+                    value={stagedSearchFormData.name}
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
                 <CCol md={6}>
                   <CFormInput
-                    id="displayName"
-                    floatingLabel="표시명"
+                    id="description"
+                    floatingLabel="설명"
                     placeholder=""
-                    value={stagedSearchFormData.displayName}
+                    value={stagedSearchFormData.description}
                     onChange={handleSearchFormChange}
                   />
                 </CCol>
               </CRow>
-              <CRow className="mb-3 align-items-center">
-                <CCol md={6} className="position-relative">
+              <CRow className="mb-3">
+                <CCol md={6}>
+                  <CFormInput
+                    id="category"
+                    floatingLabel="카테고리"
+                    placeholder=""
+                    value={stagedSearchFormData.category}
+                    onChange={handleSearchFormChange}
+                  />
+                </CCol>
+                <CCol md={6}>
                   <CFormInput
                     id="createdByName"
                     floatingLabel="게시자"
@@ -194,10 +215,37 @@ const StandardContractDocumentManagementPage = () => {
                     value={stagedSearchFormData.createdByName}
                   />
                 </CCol>
+              </CRow>
+              <CRow className="mb-3">
+                <CCol md={6}>
+                  <CFormInput
+                    id="content"
+                    floatingLabel="내용"
+                    placeholder=""
+                    value={stagedSearchFormData.content}
+                    onChange={handleSearchFormChange}
+                  />
+                </CCol>
+              </CRow>
+              <CRow className="mb-3 align-items-center">
+                <CCol md={6} style={{ paddingBottom: '10px' }}>
+                  <CFormSelect
+                    id="approvalOption"
+                    label="승인 여부"
+                    name="approvalOption"
+                    options={[
+                      { label: '선택하지 않음', value: '' },
+                      { label: '예', value: 'Yes' },
+                      { label: '아니오', value: 'NO' },
+                    ]}
+                    value={stagedSearchFormData.approvalOption}
+                    onChange={handleSearchFormChange}
+                  />
+                </CCol>
                 <CCol md={6} style={{ paddingBottom: '10px' }}>
                   <CFormSelect
                     id="deletionOption"
-                    label="삭제된 문서 포함"
+                    label="삭제된 프롬프트 포함"
                     name="deletionOption"
                     options={[
                       { label: '선택하지 않음', value: '' },
@@ -238,47 +286,49 @@ const StandardContractDocumentManagementPage = () => {
           </CCardBody>
         </CCard>
       </CRow>
-      <CRow id="Standard Contract Document Search Result List">
+
+      <CRow id="PromptSearchResultTable">
         <CCard className="row g-3">
           <CCardBody>
             <CRow className="mb-3">
               <CCol className="d-grid gap-2 d-md-flex justify-content-md-start">
+                <CButton onClick={handleCreateClick}>프롬프트 추가</CButton>
                 <CButton
                   disabled={selectedRows?.length === 0 || isDeletedRow(selectedRows)}
-                  onClick={() => toggleDocumentCollectionDeleted(true)}
+                  onClick={() => togglePromptDeleted(true)}
                 >
                   삭제
                 </CButton>
                 <CButton
                   disabled={selectedRows?.length === 0 || !isDeletedRow(selectedRows)}
-                  onClick={() => toggleDocumentCollectionDeleted(false)}
+                  onClick={() => togglePromptDeleted(false)}
                 >
                   복구
                 </CButton>
                 <ExcelDownloadCButton
-                  downloadFunction={StandardContractService.getDownloadSearchedStandardContractDocumentList}
+                  downloadFunction={PredefinedPromptService.getDownloadSearchedPredefinedPromptList}
                   searchFormData={searchFormData}
-                  hasSearchResults={standardContractDocumentList.length !== 0}
+                  hasSearchResults={promptList?.length !== 0}
                 />
               </CCol>
               <CCol className="d-flex justify-content-end">
-                <CFormLabel>총 {totalCollectionElements} 개의 검색 결과</CFormLabel>
+                <CFormLabel>총 {totalPromptElements} 개의 검색 결과</CFormLabel>
               </CCol>
             </CRow>
             <CRow className="mb-3">
               <CSmartTable
                 columnSorter={CommonColumnSorterCustomProps}
-                columns={standardContractDocumentColumnConfig}
-                items={standardContractDocumentList}
+                columns={predefinedPromptColumnConfig}
+                items={promptList}
                 itemsPerPage={pageableData.size}
-                itemsPerPageLabel="페이지당 표준 계약 문서 개수"
+                itemsPerPageLabel="페이지당 프롬프트 개수"
                 itemsPerPageSelect
                 loading={searchResultIsLoading}
                 noItemsLabel={
                   <CSmartTableNoItemLabel
-                    contentLength={standardContractDocumentList.length}
+                    contentLength={promptList?.length}
                     isSearchPerformed={isSearchPerformed.current}
-                    defaultMessage="검색 조건에 맞는 표준 계약 문서를 검색합니다."
+                    defaultMessage="검색 조건에 맞는 프롬프트를 검색합니다."
                   />
                 }
                 onItemsPerPageChange={handlePageSizeChange}
@@ -294,15 +344,20 @@ const StandardContractDocumentManagementPage = () => {
           </CCardBody>
         </CCard>
       </CRow>
-      <ModalContainer visible={modal.isOpen} title={'표준 계약서 문서 상세'} onClose={modal.closeModal} size="lg">
-        <StandardContractDocumentDetailForm
+      <ModalContainer
+        visible={modal.isOpen}
+        title={detailFormMode === 'create' ? '프롬프트 추가' : '프롬프트 상세'}
+        onClose={modal.closeModal}
+        size="lg"
+      >
+        <PredefinedPromptDetailForm
           closeModal={modal.closeModal}
           initialFormMode={detailFormMode}
-          refreshStandardContractDocumentList={searchStandardContractDocument}
+          refreshPredefinedPromptList={searchPredefinedPrompt}
         />
       </ModalContainer>
     </>
   );
 };
 
-export default StandardContractDocumentManagementPage;
+export default PredefinedPromptManagementPage;

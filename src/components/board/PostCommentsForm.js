@@ -19,7 +19,7 @@ import { useToast } from 'context/ToastContext';
 import { useSearchParams } from 'react-router-dom';
 import BoardCommentService from 'services/board/BoardCommentService';
 
-const PostCommentsForm = ({ totalCount }) => {
+const PostCommentsForm = ({ totalCount, deletedCount }) => {
   const [commentText, setCommentText] = useState('');
   const [postComments, setPostComments] = useState([]);
   const [filterOption, setFilterOption] = useState('모두 표시');
@@ -122,7 +122,7 @@ const PostCommentsForm = ({ totalCount }) => {
           }
           return true;
         })
-        .map((comment, index) => renderCommentItem(comment, index))}{' '}
+        .map((comment, index) => renderCommentItem(comment, index))}
       <div ref={endOfCommentsRef} />
     </CRow>
   );
@@ -193,7 +193,10 @@ const PostCommentsForm = ({ totalCount }) => {
       <CCard className="mt-3 mb-3">
         <CCardHeader className="d-flex justify-content-between align-items-center border-bottom-0">
           <div className="d-flex align-items-center">
-            댓글 <small className="text-muted text white-space-pre">{` ${totalCount} 개`}</small>
+            댓글{' '}
+            <small className="text-muted text white-space-pre">{` ${
+              totalCount - deletedCount
+            } 개, 삭제된 댓글 ${deletedCount} 개`}</small>
             <CIcon
               onClick={() => setVisible((prev) => !prev)}
               style={{ cursor: 'pointer' }}

@@ -8,11 +8,16 @@ const getMonthlyStatisticsData = async (params) => {
       endDate: params.endDate,
     },
   });
-  return response.data;
+  return response?.data;
 };
 const getUserUsageStatistics = async (yyyyMM, pageable) => {
   const response = await api.get('/admin/token-statistics/created-by', {
-    params: { yyyyMM, page: pageable.page, size: pageable.size, sort: pageable.sort },
+    params: {
+      month: yyyyMM,
+      page: pageable.page,
+      size: pageable.size,
+      sort: pageable.sort,
+    },
   });
 
   return response?.data;
@@ -20,7 +25,7 @@ const getUserUsageStatistics = async (yyyyMM, pageable) => {
 
 const getDocumentCollectionUsageStatistics = async (yyyyMM, pageable) => {
   const response = await api.get('/admin/token-statistics/document-collection', {
-    params: { yyyyMM, page: pageable.page, size: pageable.size, sort: pageable.sort },
+    params: { month: yyyyMM, page: pageable.page, size: pageable.size, sort: pageable.sort },
   });
   return response?.data;
 };

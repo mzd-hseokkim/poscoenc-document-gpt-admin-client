@@ -3,13 +3,15 @@ import React from 'react';
 import { CBadge } from '@coreui/react-pro';
 
 const translate = (deleted) => {
-  if (deleted == null) return 'No-Data';
+  if (deleted == null) {
+    return 'No-Data';
+  }
   return deleted ? 'Deleted' : '';
 };
 const getBadgeColor = (deleted) => {
   switch (deleted) {
     case true:
-      return 'danger';
+      return 'dark';
     default:
       return 'primary';
   }
@@ -17,7 +19,7 @@ const getBadgeColor = (deleted) => {
 
 const DeletionStatusBadge = ({ deleted }) => {
   return (
-    <CBadge className="justify-content-center" color={getBadgeColor(deleted)}>
+    <CBadge className="justify-content-center opacity-75" color={getBadgeColor(deleted)}>
       {translate(deleted)}
     </CBadge>
   );

@@ -31,7 +31,7 @@ import {
   getCurrentDate,
   getOneYearAgoDate,
 } from 'utils/common/dateUtils';
-import { columnSorterCustomProps, tableCustomProps } from 'utils/common/smartTablePropsConfig';
+import { CommonColumnSorterCustomProps, CommonTableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { adminColumnConfig } from 'views/pages/admin/adminColumnConfig';
 
 const createInitialSearchFormData = () => ({
@@ -50,20 +50,23 @@ const createInitialSearchFormData = () => ({
 
 const AdminManagementPage = () => {
   const [adminList, setAdminList] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
   const [checkedItems, setCheckedItems] = useState([]);
   const [formMode, setFormMode] = useState('');
   const [totalAdminElements, setTotalAdminElements] = useState(0);
   const [searchFormData, setSearchFormData] = useState({});
   const [stagedSearchFormData, setStagedSearchFormData] = useState(createInitialSearchFormData);
+  const [hasError, setHasError] = useState(false);
 
-  const [isSearchPerformed, setIsSearchPerformed] = useState(false);
   const [isPickTime, setIsPickTime] = useState(false);
 
   const isComponentMounted = useRef(true);
+  const isSearchPerformed = useRef(false);
 
-  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } =
-    usePagination(totalAdminElements);
+  const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } = usePagination(
+    totalAdminElements,
+    'id,desc'
+  );
   const { addToast } = useToast();
   const modal = useModal();
 
@@ -72,31 +75,38 @@ const AdminManagementPage = () => {
   };
 
   const fetchAdminList = useCallback(async () => {
-    if (!isSearchPerformed) {
-      setIsSearchPerformed(true);
+    setSearchResultIsLoading(true);
+
+    if (!isSearchPerformed.current) {
+      isSearchPerformed.current = true;
     }
+
     try {
-      setIsLoading(true);
       const data = await AdminService.getAdmins(searchFormData, pageableData);
       setAdminList(data.content);
       setTotalAdminElements(data.totalElements);
     } catch (error) {
+      setHasError(true);
       const status = error.response?.status;
       if (status === 400) {
-        addToast({ color: 'danger', message: error.response.data.message });
+        addToast({ message: `잘못된 요청입니다. with ${error.response.status}` });
+      } else {
+        addToast({ message: `${error.response.data.message} with ${error.response.status}` });
       }
     } finally {
-      setIsLoading(false);
+      setSearchResultIsLoading(false);
     }
-  }, [addToast, searchFormData, isSearchPerformed, pageableData]);
+  }, [addToast, searchFormData, pageableData]);
 
   useEffect(() => {
     if (isComponentMounted.current) {
       isComponentMounted.current = false;
     } else {
-      void fetchAdminList();
+      if (!hasError) {
+        void fetchAdminList();
+      }
     }
-  }, [fetchAdminList]);
+  }, [fetchAdminList, hasError]);
 
   const handleDateChange = ({ id, newDate, isStartDate = true }) => {
     //REMIND 시간날 때 함수 리팩토링, 모듈화
@@ -145,6 +155,7 @@ const AdminManagementPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setHasError(false);
     setSearchFormData(stagedSearchFormData);
   };
   const handleSearchFormReset = () => {
@@ -336,17 +347,17 @@ const AdminManagementPage = () => {
             </CRow>
             <CRow className="mb-3">
               <CSmartTable
-                columnSorter={columnSorterCustomProps}
+                columnSorter={CommonColumnSorterCustomProps}
                 columns={adminColumnConfig}
                 items={adminList}
                 itemsPerPage={pageableData.size}
                 itemsPerPageLabel="페이지당 관리자 수"
                 itemsPerPageSelect
-                loading={isLoading}
+                loading={searchResultIsLoading}
                 noItemsLabel={
                   <CSmartTableNoItemLabel
                     contentLength={adminList.length}
-                    isSearchPerformed={isSearchPerformed}
+                    isSearchPerformed={isSearchPerformed.current}
                     defaultMessage="검색 조건에 맞는 관리자를 검색합니다."
                   />
                 }
@@ -357,7 +368,7 @@ const AdminManagementPage = () => {
                 selectable
                 selected={checkedItems}
                 scopedColumns={scopedColumns}
-                tableProps={tableCustomProps}
+                tableProps={CommonTableCustomProps}
               />
             </CRow>
           </CCardBody>

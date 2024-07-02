@@ -33,7 +33,7 @@ const pastYearMonthsSelectBoxLabels = () => {
   let previousYear = null;
   const options = months.map(({ monthIndex, year }) => {
     const label = monthsNames[monthIndex];
-    const value = `${year}${(monthIndex + 1).toString().padStart(2, '0')}`;
+    const value = `${year}-${(monthIndex + 1).toString().padStart(2, '0')}`;
 
     if (previousYear !== year) {
       previousYear = year;

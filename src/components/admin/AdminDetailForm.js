@@ -26,7 +26,7 @@ import { emailValidationPattern, passwordValidationPattern } from 'utils/common/
 
 const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
   const [formMode, setFormMode] = useState(initialFormMode || 'read');
-  const [formData, setFormData] = useState([]);
+  const [formData, setFormData] = useState({});
   const [roles, setRoles] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchParams] = useSearchParams();
@@ -113,40 +113,46 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
     [addToast]
   );
 
-  const fetchAdminDetail = useCallback(
-    async (adminId) => {
-      try {
-        setIsLoading(true);
+  const fetchAdminDetail = useCallback(async () => {
+    if (!adminIdParam) {
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const data = await AdminService.getAdmin(adminIdParam);
+      const formattedData = {
+        ...data,
+        modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
+        lastLoggedInAt: data.lastLoggedInAt && formatToYMD(data.lastLoggedInAt),
+        createdAt: data.createdAt && formatToYMD(data.createdAt),
+      };
+      reset(formattedData);
+      setFormData(formattedData);
 
-        const data = await AdminService.getAdmin(adminId);
-        const formattedData = {
-          ...data,
-          modifiedAt: data.modifiedAt && formatToYMD(data.modifiedAt),
-          lastLoggedInAt: data.lastLoggedInAt && formatToYMD(data.lastLoggedInAt),
-          createdAt: data.createdAt && formatToYMD(data.createdAt),
-        };
-        reset(formattedData);
-        setFormData(formattedData);
-
-        const allowedRoles = data.roles;
-        await getRoles(allowedRoles);
-      } catch (error) {
-        addToast({ message: `id={${adminId}} 해당 관리자를 찾을 수 없습니다.` });
-        closeModal();
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [addToast, closeModal, getRoles, reset]
-  );
+      const allowedRoles = data.roles;
+      await getRoles(allowedRoles);
+    } catch (error) {
+      addToast({ message: `id={${adminIdParam}} 해당 관리자를 찾을 수 없습니다.` });
+      closeModal();
+    } finally {
+      setIsLoading(false);
+    }
+  }, [addToast, closeModal, getRoles, reset, adminIdParam]);
   useEffect(() => {
-    setIsLoading(false);
-    if (!isCreateMode && adminIdParam) {
-      void fetchAdminDetail(adminIdParam);
-    } else {
+    if (!isCreateMode) {
+      if (!adminIdParam) {
+        closeModal();
+      } else {
+        void fetchAdminDetail();
+      }
+    }
+  }, [closeModal, fetchAdminDetail, isCreateMode, adminIdParam]);
+
+  useEffect(() => {
+    if (isCreateMode) {
       void getRoles();
     }
-  }, [fetchAdminDetail, getRoles, isCreateMode, searchParams, adminIdParam]);
+  }, [getRoles, isCreateMode]);
 
   const createAdmin = async (data) => {
     try {
@@ -200,7 +206,7 @@ const AdminDetailForm = ({ initialFormMode, closeModal, fetchAdminList }) => {
   const handleCancelClick = async () => {
     if (isUpdateMode) {
       setFormMode('read');
-      await fetchAdminDetail(adminIdParam);
+      await fetchAdminDetail();
     } else if (isCreateMode) {
       closeModal();
     }

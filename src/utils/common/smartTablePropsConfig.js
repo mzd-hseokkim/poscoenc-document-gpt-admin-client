@@ -1,9 +1,9 @@
-export const tableCustomProps = {
+export const CommonTableCustomProps = {
   hover: true,
   responsive: true,
 };
 
-export const columnSorterCustomProps = {
+export const CommonColumnSorterCustomProps = {
   external: true,
   resetable: true,
 };

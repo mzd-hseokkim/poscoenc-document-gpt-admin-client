@@ -3,7 +3,7 @@ import { formatToYMD, getCurrentDate } from 'utils/common/dateUtils';
 
 const postAdmin = async (payload) => {
   const response = await api.post(`/admin/admin-users`, payload);
-  return response.data;
+  return response?.data;
 };
 
 const getAdmins = async (params, pageable) => {
@@ -25,13 +25,15 @@ const getAdmins = async (params, pageable) => {
       sort: pageable.sort,
     },
   });
-  return response.data;
+  return response?.data;
 };
 
 const getAdmin = async (id) => {
-  if (!id) return;
+  if (!id) {
+    return;
+  }
   const response = await api.get(`/admin/admin-users/${id}`);
-  return response.data;
+  return response?.data;
 };
 const getDownloadAdminList = async (params) => {
   const response = await api.get('/admin/admin-users/excel', {
@@ -64,12 +66,12 @@ const getDownloadAdminList = async (params) => {
 };
 const putAdmin = async (id, payload) => {
   const response = await api.put(`/admin/admin-users/${id}`, payload);
-  return response.data;
+  return response?.data;
 };
 
 const deleteAdmins = async (ids, deleted) => {
   const response = await api.patch(`/admin/admin-users/deleted/${deleted}`, ids);
-  return response.data;
+  return response?.data;
 };
 
 const AdminService = {

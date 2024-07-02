@@ -49,6 +49,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
 
   const [collectionDetail, setCollectionDetail] = useState({});
   const [formMode, setFormMode] = useState(initialFormMode || 'read');
+  const [getDetailChartIsLoading, setGetDetailChartIsLoading] = useState(false);
   const [getDetailIsLoading, setGetDetailIsLoading] = useState(false);
   const [pdfVisible, setPdfVisible] = useState({});
   const [statisticsData, setStatisticsData] = useState({
@@ -58,7 +59,10 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     dallE3GenerationsData: [],
   });
   const [sharedUsers, setSharedUsers] = useState([]);
+  const [chartHasError, setChartHasError] = useState(false);
+
   const [searchParams] = useSearchParams();
+  const collectionIdParam = searchParams.get('id');
 
   const { addToast } = useToast();
   const currentUserId = useRecoilValue(userIdSelector);
@@ -102,82 +106,84 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     },
   ];
 
-  const fetchCollectionDetail = useCallback(
-    async (collectionId) => {
-      if (!collectionId) {
-        return;
-      }
-      setGetDetailIsLoading(true);
-      try {
-        const detail = await DocumentCollectionService.getCollectionDetail(collectionId);
-        setCollectionDetail(detail);
-        const formattedDetail = {
-          ...detail,
-          createdAt: detail.createdAt && formatToYMD(detail.createdAt),
-          modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
+  const fetchCollectionDetail = useCallback(async () => {
+    if (!collectionIdParam) {
+      return;
+    }
+    setGetDetailIsLoading(true);
+    try {
+      const detail = await DocumentCollectionService.getCollectionDetail(collectionIdParam);
+      setCollectionDetail(detail);
+      const formattedDetail = {
+        ...detail,
+        createdAt: detail.createdAt && formatToYMD(detail.createdAt),
+        modifiedAt: detail.modifiedAt && formatToYMD(detail.modifiedAt),
+      };
+      reset(formattedDetail);
+
+      const formattedSharedUsers = detail.accessAssociations.map((association) => {
+        return {
+          selected: true,
+          disabled: true,
+          value: association.targetId,
+          text: association.targetName,
         };
-        reset(formattedDetail);
-
-        const formattedSharedUsers = detail.accessAssociations.map((association) => {
-          return {
-            selected: true,
-            disabled: true,
-            value: association.targetId,
-            text: association.targetName,
-          };
-        });
-        setSharedUsers(formattedSharedUsers);
-      } catch (error) {
-        if (error.response?.status === 404) {
-          addToast({ message: `id={${collectionId}} 해당 문서 집합을 찾을 수 없습니다.` });
-        } else {
-          console.log(error);
-        }
-        closeModal();
-      } finally {
-        setGetDetailIsLoading(false);
-      }
-    },
-    [addToast, closeModal, reset]
-  );
-  const fetchStatisticsData = useCallback(
-    async (collectionId) => {
-      setGetDetailIsLoading(true);
-      try {
-        const responseData = await StatisticsService.getMonthlyStatisticsData({
-          criteria: 'documentCollection',
-          criteriaKey: collectionId,
-          endDate: new Date().toISOString().split('T')[0],
-        });
-
-        const sortedData = sortByAggregationKey(responseData?.list);
-        const paddedData = padDataArrayWithZero(sortedData, currentMonth);
-
-        setStatisticsData({
-          inputTokenData: paddedData.map((item) => item.sumInputTokens),
-          outputTokenData: paddedData.map((item) => item.sumOutputTokens),
-          bingSearchsData: paddedData.map((item) => item.sumBingSearchs),
-          dallE3GenerationsData: paddedData.map((item) => item.sumDallE3Generations),
-        });
-      } catch (error) {
+      });
+      setSharedUsers(formattedSharedUsers);
+    } catch (error) {
+      if (error.response?.status === 404) {
+        addToast({ message: `id={${collectionIdParam}} 해당 문서 집합을 찾을 수 없습니다.` });
+      } else {
         console.log(error);
-        addToast({ message: '차트를 불러오는데 실패했습니다.' });
-      } finally {
-        setGetDetailIsLoading(false);
       }
-    },
-    [addToast, currentMonth]
-  );
+      closeModal();
+    } finally {
+      setGetDetailIsLoading(false);
+    }
+  }, [collectionIdParam, addToast, closeModal, reset]);
+
+  const fetchStatisticsData = useCallback(async () => {
+    if (!collectionIdParam) {
+      return;
+    }
+    setGetDetailChartIsLoading(true);
+    try {
+      const responseData = await StatisticsService.getMonthlyStatisticsData({
+        criteria: 'documentCollection',
+        criteriaKey: collectionIdParam,
+        endDate: new Date().toISOString().split('T')[0],
+      });
+
+      const sortedData = sortByAggregationKey(responseData?.list);
+      const paddedData = padDataArrayWithZero(sortedData, currentMonth);
+
+      setStatisticsData({
+        inputTokenData: paddedData.map((item) => item.sumInputTokens),
+        outputTokenData: paddedData.map((item) => item.sumOutputTokens),
+        bingSearchsData: paddedData.map((item) => item.sumBingSearchs),
+        dallE3GenerationsData: paddedData.map((item) => item.sumDallE3Generations),
+      });
+    } catch (error) {
+      console.log(error);
+      setChartHasError(true);
+      addToast({ message: '차트를 불러오는데 실패했습니다.' });
+    } finally {
+      setGetDetailChartIsLoading(false);
+    }
+  }, [collectionIdParam, addToast, currentMonth]);
 
   useEffect(() => {
-    const collectionId = searchParams.get('id');
-    if (!collectionId) {
+    if (!collectionIdParam) {
       closeModal();
     }
 
-    void fetchCollectionDetail(collectionId);
-    void fetchStatisticsData(collectionId);
-  }, [closeModal, fetchCollectionDetail, fetchStatisticsData, searchParams]);
+    void fetchCollectionDetail();
+
+    if (!chartHasError) {
+      void fetchStatisticsData();
+    }
+  }, [collectionIdParam, closeModal, fetchCollectionDetail, fetchStatisticsData, chartHasError]);
+
   const putModifiedCollection = async (data) => {
     try {
       const isModified = await DocumentCollectionService.putModifiedCollectionDetail(data);
@@ -202,7 +208,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
 
   const handleModificationCancelClick = async () => {
     setFormMode('read');
-    await fetchCollectionDetail(searchParams.get('id'));
+    await fetchCollectionDetail();
   };
   const onSubmit = async (data) => {
     await putModifiedCollection(data);
@@ -260,6 +266,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
             </CRow>
           </CCardHeader>
           <CCardBody>
+            <FormLoadingCover isLoading={getDetailChartIsLoading} />
             <CRow className="mb-3 justify-content-center">
               <TokenUsageChart
                 outputTokenData={statisticsData.outputTokenData}
@@ -297,7 +304,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
                               border-start-0 border-top-0 border-end-0
                               border-opacity-50
                               border-bottom-2 border-info
-                              
+
                               "
                     style={{ color: 'red' }}
                   >

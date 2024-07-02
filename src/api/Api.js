@@ -25,7 +25,7 @@ export const setupInterceptors = ({ navigate, addToast }) => {
       } else {
         localStorage.removeItem('token');
         newConfig.headers.Authorization = '';
-        addToast({ message: '세션이 만료되었습니다. 다시 로그인 해주세요.' });
+        addToast({ message: '세션이 만료되었습니다. 다시 로그인 해주세요. log:Api.js' }, false);
         navigate('/sign-in');
       }
     } else {
@@ -57,8 +57,8 @@ export const setupInterceptors = ({ navigate, addToast }) => {
         console.error(error.request);
       } else {
         addToast({ message: '알 수 없는 오류가 발생하였습니다. 잠시 후 다시 시도해 주세요.' });
-        console.log('Error', error.message);
       }
+      console.log('Api.js Error', error.message);
       throw error;
     }
   );
