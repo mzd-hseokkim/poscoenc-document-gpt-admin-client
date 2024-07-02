@@ -20,6 +20,7 @@ import UserDetailForm from 'components/user/UserDetailForm';
 import { useToast } from 'context/ToastContext';
 import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
+import { useSearchForm } from 'hooks/useSearchForm';
 import UserService from 'services/UserService';
 import { userColumnConfig } from 'views/pages/user/userColumnConfig';
 
@@ -39,7 +40,6 @@ const UserManagementPage = () => {
   const [hasError, setHasError] = useState(false);
 
   const [searchFormData, setSearchFormData] = useState({});
-  const [stagedSearchFormData, setStagedSearchFormData] = useState(createInitialSearchFormData);
 
   const isComponentMounted = useRef(true);
   const isSearchPerformed = useRef(false);
@@ -50,6 +50,10 @@ const UserManagementPage = () => {
   );
   const { addToast } = useToast();
   const modal = useModal();
+
+  const { stagedSearchFormData, handleSearchFormChange, handleSearchFormReset } = useSearchForm(
+    createInitialSearchFormData()
+  );
 
   const isDeletedRow = (selectedRows) => {
     return selectedRows.some((row) => row.deleted === true);
@@ -85,18 +89,11 @@ const UserManagementPage = () => {
       }
     }
   }, [fetchUserList, hasError]);
-  const handleChange = ({ target: { id, value } }) => {
-    setStagedSearchFormData((prev) => ({ ...prev, [id]: value }));
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setHasError(false);
     setSearchFormData(stagedSearchFormData);
-  };
-
-  const handleReset = () => {
-    setStagedSearchFormData(createInitialSearchFormData);
   };
 
   const handleRowClick = (id) => {
@@ -133,7 +130,7 @@ const UserManagementPage = () => {
                     floatingLabel="이름"
                     placeholder=""
                     value={stagedSearchFormData.name}
-                    onChange={handleChange}
+                    onChange={handleSearchFormChange}
                   />
                 </CCol>
                 <CCol md={6}>
@@ -142,7 +139,7 @@ const UserManagementPage = () => {
                     floatingLabel="이메일"
                     placeholder=""
                     value={stagedSearchFormData.email}
-                    onChange={handleChange}
+                    onChange={handleSearchFormChange}
                   />
                 </CCol>
               </CRow>
@@ -153,7 +150,7 @@ const UserManagementPage = () => {
                     floatingLabel="팀"
                     placeholder=""
                     value={stagedSearchFormData.team}
-                    onChange={handleChange}
+                    onChange={handleSearchFormChange}
                   />
                 </CCol>
                 <CCol md={6}>
@@ -162,7 +159,7 @@ const UserManagementPage = () => {
                     floatingLabel="메모"
                     placeholder=""
                     value={stagedSearchFormData.memo}
-                    onChange={handleChange}
+                    onChange={handleSearchFormChange}
                   />
                 </CCol>
                 <CRow className="mb-3"></CRow>
@@ -177,14 +174,14 @@ const UserManagementPage = () => {
                       { label: '삭제되지 않음', value: 'NO' },
                     ]}
                     value={stagedSearchFormData.deletionOption}
-                    onChange={handleChange}
+                    onChange={handleSearchFormChange}
                   />
                 </CCol>
               </CRow>
               <CRow className="mb-3">
                 <CCol className="d-grid gap-2 d-md-flex justify-content-md-center">
                   <CButton type="submit">검색</CButton>
-                  <CButton onClick={handleReset}>초기화</CButton>
+                  <CButton onClick={handleSearchFormReset}>초기화</CButton>
                 </CCol>
               </CRow>
             </CForm>

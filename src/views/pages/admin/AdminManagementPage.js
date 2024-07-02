@@ -58,7 +58,7 @@ const AdminManagementPage = () => {
   const modal = useModal();
 
   const {
-    isPickTime,
+    includeTimePicker,
     stagedSearchFormData,
     handleDateChange,
     handleSearchFormChange,
@@ -194,38 +194,38 @@ const AdminManagementPage = () => {
               <CRow className="mb-3">
                 <CCol md={4}>
                   <CDateRangePicker
-                    key={`createdAt-${isPickTime}`}
+                    key={`createdAt-${includeTimePicker}`}
                     id="createdAt"
                     label="등록일"
                     startDate={stagedSearchFormData.fromCreatedAt}
                     endDate={stagedSearchFormData.toCreatedAt}
                     onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
                     onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
-                    timepicker={isPickTime}
+                    timepicker={includeTimePicker}
                   />
                 </CCol>
                 <CCol md={4}>
                   <CDateRangePicker
-                    key={`modifiedAt-${isPickTime}`}
+                    key={`modifiedAt-${includeTimePicker}`}
                     id="modifiedAt"
                     label="수정일"
                     startDate={stagedSearchFormData.fromModifiedAt}
                     endDate={stagedSearchFormData.toModifiedAt}
                     onStartDateChange={(newDate) => handleDateChange({ id: 'modifiedAt', newDate })}
                     onEndDateChange={(newDate) => handleDateChange({ id: 'modifiedAt', newDate, isStartDate: false })}
-                    timepicker={isPickTime}
+                    timepicker={includeTimePicker}
                   />
                 </CCol>
                 <CCol md={4}>
                   <CDateRangePicker
-                    key={`lastLoggedInAt-${isPickTime}`}
+                    key={`lastLoggedInAt-${includeTimePicker}`}
                     id="loggedInAt"
                     label="최근 로그인"
                     startDate={stagedSearchFormData.fromLoggedInAt}
                     endDate={stagedSearchFormData.toLoggedInAt}
                     onStartDateChange={(newDate) => handleDateChange({ id: 'loggedInAt', newDate })}
                     onEndDateChange={(newDate) => handleDateChange({ id: 'loggedInAt', newDate, isStartDate: false })}
-                    timepicker={isPickTime}
+                    timepicker={includeTimePicker}
                   />
                 </CCol>
               </CRow>
@@ -233,7 +233,7 @@ const AdminManagementPage = () => {
                 <CCol>
                   <CFormCheck
                     label="시간 검색 여부"
-                    checked={isPickTime}
+                    checked={includeTimePicker}
                     onChange={(e) => handleTimePickerCheck(e, ['createdAt', 'modifiedAt', 'loggedInAt'])}
                   />
                 </CCol>

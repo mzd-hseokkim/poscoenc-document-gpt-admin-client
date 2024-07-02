@@ -20,17 +20,11 @@ import DocumentCollectionDetailForm from 'components/document-collection/Documen
 import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import ModalContainer from 'components/modal/ModalContainer';
 import { useToast } from 'context/ToastContext';
-import { format } from 'date-fns';
 import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
+import { useSearchForm } from 'hooks/useSearchForm';
 import DocumentCollectionService from 'services/document-collection/DocumentCollectionService';
-import {
-  formatToIsoEndDate,
-  formatToIsoStartDate,
-  formatToYMD,
-  getCurrentDate,
-  getOneYearAgoDate,
-} from 'utils/common/dateUtils';
+import { formatToYMD, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
 import { CommonColumnSorterCustomProps, CommonTableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { documentCollectionColumnConfig } from 'views/pages/document-collection/documentCollectionColumnConfig';
 
@@ -48,17 +42,23 @@ const DocumentCollectionManagementPage = () => {
   const [detailFormMode, setDetailFormMode] = useState('read');
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
   const [totalCollectionElements, setTotalCollectionElements] = useState(0);
-  const [isPickTime, setIsPickTime] = useState(false);
   const [hasError, setHasError] = useState(false);
 
   const [searchFormData, setSearchFormData] = useState({});
-  const [stagedSearchFormData, setStagedSearchFormData] = useState(createInitialSearchFormData);
 
   const isComponentMounted = useRef(true);
   const isSearchPerformed = useRef(false);
 
   const modal = useModal();
   const { addToast } = useToast();
+  const {
+    includeTimePicker,
+    stagedSearchFormData,
+    handleDateChange,
+    handleSearchFormChange,
+    handleSearchFormReset,
+    handleTimePickerCheck,
+  } = useSearchForm(createInitialSearchFormData());
   const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } = usePagination(
     totalCollectionElements,
     'id,desc'
@@ -100,49 +100,12 @@ const DocumentCollectionManagementPage = () => {
     modal.openModal(itemId);
   };
 
-  const handleSearchFormChange = ({ target: { id, value } }) => {
-    setStagedSearchFormData((prev) => ({ ...prev, [id]: value }));
-  };
-  const handleDateChange = ({ id, newDate, isStartDate = true }) => {
-    //REMIND 시간날 때 함수 리팩토링, 모듈화
-    const fieldMap = {
-      createdAt: isStartDate ? 'fromCreatedAt' : 'toCreatedAt',
-    };
-    const fieldToUpdate = fieldMap[id];
-
-    if (!fieldToUpdate) {
-      return;
-    }
-
-    const newFormattedDate = newDate
-      ? isPickTime
-        ? formatToIsoEndDate(newDate)
-        : format(new Date(newDate), "yyyy-MM-dd'T'23:59")
-      : null;
-
-    const formattedDate = isStartDate ? formatToIsoStartDate(newDate) : newFormattedDate;
-    setStagedSearchFormData((prev) => ({ ...prev, [fieldToUpdate]: formattedDate }));
-  };
-
-  const handleTimePickerCheck = (e) => {
-    setIsPickTime(e.target.checked);
-    setStagedSearchFormData((prev) => ({
-      ...prev,
-      //REMIND date range picker data 가 null 타임피커 체크하면  에러 발생해서 여기서 null 체크 해주는것
-      fromCreatedAt: format(stagedSearchFormData.fromCreatedAt, "yyyy-MM-dd'T'00:00"),
-      toCreatedAt: format(stagedSearchFormData.toCreatedAt, "yyyy-MM-dd'T'23:59"),
-    }));
-  };
-
   const handleSubmitSearchRequest = async (e) => {
     e.preventDefault();
     setHasError(false);
     setSearchFormData(stagedSearchFormData);
   };
-  const handleSearchFormReset = () => {
-    setStagedSearchFormData(createInitialSearchFormData);
-    setIsPickTime(false);
-  };
+
   const toggleDocumentCollectionDeleted = async (deletionOption) => {
     try {
       const isSuccess = await DocumentCollectionService.patchCollectionsDeletionOption(
@@ -250,18 +213,22 @@ const DocumentCollectionManagementPage = () => {
               <CRow className="mb-3">
                 <CCol md={6}>
                   <CDateRangePicker
-                    key={`createdAt-${isPickTime}`}
+                    key={`createdAt-${includeTimePicker}`}
                     id="createdAt"
                     label="등록일"
                     startDate={stagedSearchFormData.fromCreatedAt}
                     endDate={stagedSearchFormData.toCreatedAt}
                     onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
                     onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
-                    timepicker={isPickTime}
+                    timepicker={includeTimePicker}
                   />
                 </CCol>
                 <CCol md={2} className="mt-5">
-                  <CFormCheck label="시간 검색 여부" checked={isPickTime} onChange={(e) => handleTimePickerCheck(e)} />
+                  <CFormCheck
+                    label="시간 검색 여부"
+                    checked={includeTimePicker}
+                    onChange={(e) => handleTimePickerCheck(e)}
+                  />
                 </CCol>
               </CRow>
               <CRow className="mb-3">

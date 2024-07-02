@@ -59,7 +59,7 @@ const BoardManagementPage = () => {
   const { addToast } = useToast();
 
   const {
-    isPickTime,
+    includeTimePicker,
     stagedSearchFormData,
     handleDateChange,
     handleSearchFormChange,
@@ -281,32 +281,32 @@ const BoardManagementPage = () => {
               <CRow className="mb-3">
                 <CCol md={5}>
                   <CDateRangePicker
-                    key={`createdAt-${isPickTime}`}
+                    key={`createdAt-${includeTimePicker}`}
                     id="createdAt"
                     label="등록일"
                     startDate={stagedSearchFormData.fromCreatedAt}
                     endDate={stagedSearchFormData.toCreatedAt}
                     onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
                     onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
-                    timepicker={isPickTime}
+                    timepicker={includeTimePicker}
                   />
                 </CCol>
                 <CCol md={5}>
                   <CDateRangePicker
-                    key={`modifiedAt-${isPickTime}`}
+                    key={`modifiedAt-${includeTimePicker}`}
                     id="modifiedAt"
                     label="수정일"
                     startDate={stagedSearchFormData.fromModifiedAt}
                     endDate={stagedSearchFormData.toModifiedAt}
                     onStartDateChange={(newDate) => handleDateChange({ id: 'modifiedAt', newDate })}
                     onEndDateChange={(newDate) => handleDateChange({ id: 'modifiedAt', newDate, isStartDate: false })}
-                    timepicker={isPickTime}
+                    timepicker={includeTimePicker}
                   />
                 </CCol>
                 <CCol md={2} className="mt-5">
                   <CFormCheck
                     label="시간 검색 여부"
-                    checked={isPickTime}
+                    checked={includeTimePicker}
                     onChange={(e) => handleTimePickerCheck(e, ['createdAt', 'modifiedAt'])}
                   />
                 </CCol>

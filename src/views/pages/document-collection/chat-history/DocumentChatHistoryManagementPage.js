@@ -20,17 +20,11 @@ import DocumentChatHistoryDetailForm from 'components/document-collection/Docume
 import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import ModalContainer from 'components/modal/ModalContainer';
 import { useToast } from 'context/ToastContext';
-import { format } from 'date-fns';
 import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
+import { useSearchForm } from 'hooks/useSearchForm';
 import DocumentChatHistoryService from 'services/document-collection/DocumentChatHistoryService';
-import {
-  formatToIsoEndDate,
-  formatToIsoStartDate,
-  formatToYMD,
-  getCurrentDate,
-  getOneYearAgoDate,
-} from 'utils/common/dateUtils';
+import { formatToYMD, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
 import { CommonColumnSorterCustomProps, CommonTableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { documentChatHistoryColumnConfig } from 'views/pages/document-collection/chat-history/documentChatHistoryColumnConfig';
 
@@ -53,14 +47,22 @@ const DocumentChatHistoryManagementPage = () => {
   const [hasError, setHasError] = useState(false);
 
   const [searchFormData, setSearchFormData] = useState({});
-  const [stagedSearchFormData, setStagedSearchFormData] = useState(createInitialSearchFormData);
-  const [isPickTime, setIsPickTime] = useState(false);
 
   const isComponentMounted = useRef(true);
   const isSearchPerformed = useRef(false);
 
   const modal = useModal();
   const { addToast } = useToast();
+
+  const {
+    includeTimePicker,
+    stagedSearchFormData,
+    handleDateChange,
+    handleSearchFormChange,
+    handleSearchFormReset,
+    handleTimePickerCheck,
+  } = useSearchForm(createInitialSearchFormData());
+
   const { pageableData, handlePageSizeChange, handlePageSortChange, smartPaginationProps } = usePagination(
     totalChatHistoryElements,
     'id,desc'
@@ -109,45 +111,6 @@ const DocumentChatHistoryManagementPage = () => {
     e.preventDefault();
     setHasError(false);
     setSearchFormData(stagedSearchFormData);
-  };
-  const handleSearchFormReset = () => {
-    setStagedSearchFormData(createInitialSearchFormData);
-    setIsPickTime(false);
-  };
-
-  const handleSearchFormChange = ({ target: { id, value } }) => {
-    setStagedSearchFormData((prev) => ({ ...prev, [id]: value }));
-  };
-
-  const handleDateChange = ({ id, newDate, isStartDate = true }) => {
-    //REMIND 시간날 때 함수 리팩토링, 모듈화
-    const fieldMap = {
-      createdAt: isStartDate ? 'fromCreatedAt' : 'toCreatedAt',
-    };
-
-    const fieldToUpdate = fieldMap[id];
-
-    if (!fieldToUpdate) {
-      return;
-    }
-
-    const newFormattedDate = newDate
-      ? isPickTime
-        ? formatToIsoEndDate(newDate)
-        : format(new Date(newDate), "yyyy-MM-dd'T'23:59")
-      : null;
-
-    const formattedDate = isStartDate ? formatToIsoStartDate(newDate) : newFormattedDate;
-    setStagedSearchFormData((prev) => ({ ...prev, [fieldToUpdate]: formattedDate }));
-  };
-
-  const handleTimePickerCheck = (e) => {
-    setIsPickTime(e.target.checked);
-    setStagedSearchFormData((prev) => ({
-      ...prev,
-      fromCreatedAt: format(prev.fromCreatedAt, "yyyy-MM-dd'T'00:00"),
-      toCreatedAt: format(prev.toCreatedAt, "yyyy-MM-dd'T'23:59"),
-    }));
   };
 
   const scopedColumns = {
@@ -266,14 +229,14 @@ const DocumentChatHistoryManagementPage = () => {
                       등록일
                     </CButton>
                     <CDateRangePicker
-                      key={`createdAt-${isPickTime}`}
+                      key={`createdAt-${includeTimePicker}`}
                       id="createdAt"
                       className="col-10"
                       startDate={stagedSearchFormData.fromCreatedAt}
                       endDate={stagedSearchFormData.toCreatedAt}
                       onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
                       onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
-                      timepicker={isPickTime}
+                      timepicker={includeTimePicker}
                     />
                   </CInputGroup>
                 </CCol>
@@ -283,7 +246,7 @@ const DocumentChatHistoryManagementPage = () => {
                   id="timepicker"
                   label="시간 검색 여부"
                   className="mt-2"
-                  checked={isPickTime}
+                  checked={includeTimePicker}
                   onChange={(e) => handleTimePickerCheck(e)}
                 />
               </CCol>

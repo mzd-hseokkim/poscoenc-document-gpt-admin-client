@@ -1,11 +1,18 @@
 import { useCallback, useState } from 'react';
 
 import { format } from 'date-fns';
-import { formatToIsoEndDate } from 'utils/common/dateUtils';
 
 export const useSearchForm = (createInitialSearchFormData) => {
-  const [isPickTime, setIsPickTime] = useState(false);
+  const [includeTimePicker, setIncludeTimePicker] = useState(false);
   const [stagedSearchFormData, setStagedSearchFormData] = useState(createInitialSearchFormData);
+
+  const formatStartDate = (date, includeTime) => {
+    return includeTime ? format(new Date(date), "yyyy-MM-dd'T'HH:mm") : format(new Date(date), "yyyy-MM-dd'T'00:00");
+  };
+
+  const formatEndDate = (date, includeTime) => {
+    return includeTime ? format(new Date(date), "yyyy-MM-dd'T'HH:mm") : format(new Date(date), "yyyy-MM-dd'T'23:59");
+  };
 
   const handleDateChange = useCallback(
     ({ id, newDate, isStartDate = true }) => {
@@ -20,26 +27,20 @@ export const useSearchForm = (createInitialSearchFormData) => {
         return;
       }
 
-      const newFormattedDate = newDate
-        ? isPickTime
-          ? formatToIsoEndDate(newDate)
-          : format(new Date(newDate), "yyyy-MM-dd'T'23:59")
+      const formattedDate = newDate
+        ? isStartDate
+          ? formatStartDate(newDate, includeTimePicker)
+          : formatEndDate(newDate, includeTimePicker)
         : null;
 
-      const formattedDate = isStartDate ? format(new Date(newDate), "yyyy-MM-dd'T'00:00") : newFormattedDate;
       setStagedSearchFormData((prev) => ({ ...prev, [fieldToUpdate]: formattedDate }));
     },
-    [isPickTime]
+    [includeTimePicker]
   );
 
   /**
    * handleTimePickerCheck 함수는 체크박스 상태에 따라 시간 필터링을 설정하거나 초기화합니다.
-   *
-   * @function
-   * @param {Object} e - 이벤트 객체. 체크박스의 체크 상태를 가져오는 데 사용됩니다.
-   * @param {string[]} [fields=['createdAt']] - 업데이트할 필드의 배열. 기본값은 ['createdAt']입니다.
-   * @returns {void}
-   *
+
    * @description
    * 이 함수는 체크박스의 상태에 따라 시간 필터링 기능을 설정하거나 해제합니다. 체크박스를 체크하면,
    * 선택한 시간 범위를 설정하고, 체크를 해제하면 기존의 설정된 시간 값을 초기화(지정 하지 않음)합니다.
@@ -49,11 +50,10 @@ export const useSearchForm = (createInitialSearchFormData) => {
    * - Param: string[] - 업데이트할 CDateRangePicker를 사용하는 필드의 배열. 기본값은 ['createdAt']입니다.
    */
   const handleTimePickerCheck = useCallback((e, fields = ['createdAt']) => {
-    setIsPickTime(e.target.checked);
+    setIncludeTimePicker(e.target.checked);
 
     setStagedSearchFormData((prev) => {
       const updatedData = { ...prev };
-
       fields.forEach((id) => {
         const fromField = `from${id.charAt(0).toUpperCase() + id.slice(1)}`;
         const toField = `to${id.charAt(0).toUpperCase() + id.slice(1)}`;
@@ -76,11 +76,13 @@ export const useSearchForm = (createInitialSearchFormData) => {
 
   const handleSearchFormReset = useCallback(() => {
     setStagedSearchFormData(createInitialSearchFormData);
-    setIsPickTime(false);
-  }, [createInitialSearchFormData]);
+    if (includeTimePicker) {
+      setIncludeTimePicker(false);
+    }
+  }, [createInitialSearchFormData, includeTimePicker]);
 
   return {
-    isPickTime,
+    includeTimePicker,
     stagedSearchFormData,
     handleDateChange,
     handleTimePickerCheck,
