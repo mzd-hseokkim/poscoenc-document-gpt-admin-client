@@ -20,11 +20,11 @@ import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel'
 import MenuDetailForm from 'components/menu/MenuDetailForm';
 import ModalContainer from 'components/modal/ModalContainer';
 import { useToast } from 'context/ToastContext';
-import { format } from 'date-fns';
 import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
+import { useSearchForm } from 'hooks/useSearchForm';
 import MenuService from 'services/menu/MenuService';
-import { formatToIsoEndDate, formatToIsoStartDate, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
+import { getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
 import { iconMapper } from 'utils/common/iconMapper';
 import { CommonColumnSorterCustomProps, CommonTableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { menuColumnConfig } from 'views/pages/menu/menuColumnConfig';
@@ -48,8 +48,6 @@ const MenuManagementPage = () => {
   const [searchResultIsLoading, setSearchResultIsLoading] = useState(false);
   const [totalMenuElements, setTotalMenuElements] = useState(0);
   const [searchFormData, setSearchFormData] = useState({});
-  const [stagedSearchFormData, setStagedSearchFormData] = useState(createInitialSearchFormData);
-  const [isPickTime, setIsPickTime] = useState(false);
   const [hasError, setHasError] = useState(false);
 
   const isComponentMounted = useRef(true);
@@ -62,6 +60,15 @@ const MenuManagementPage = () => {
   const { addToast } = useToast();
 
   const modal = useModal();
+
+  const {
+    includeTimePicker,
+    stagedSearchFormData,
+    handleDateChange,
+    handleSearchFormChange,
+    handleSearchFormReset,
+    handleTimePickerCheck,
+  } = useSearchForm(createInitialSearchFormData());
 
   const isDeletedRow = (selectedRows) => {
     return selectedRows.some((row) => row.deleted === true);
@@ -99,42 +106,6 @@ const MenuManagementPage = () => {
     }
   }, [fetchMenuList, hasError]);
 
-  const handleDateChange = (id, newDate, isStartDate = true) => {
-    const fieldMap = {
-      createdAt: isStartDate ? 'fromCreatedAt' : 'toCreatedAt',
-      modifiedAt: isStartDate ? 'fromModifiedAt' : 'toModifiedAt',
-    };
-
-    const fieldToUpdate = fieldMap[id];
-    if (!fieldToUpdate) {
-      return;
-    }
-
-    const newFormattedDate = newDate
-      ? isPickTime
-        ? formatToIsoEndDate(newDate)
-        : format(new Date(newDate), "yyyy-MM-dd'T'23:59")
-      : null;
-
-    const formattedDate = isStartDate ? formatToIsoStartDate(newDate) : newFormattedDate;
-    setStagedSearchFormData((prev) => ({ ...prev, [fieldToUpdate]: formattedDate }));
-  };
-
-  const handleTimePickerCheck = (e) => {
-    setIsPickTime(e.target.checked);
-    setStagedSearchFormData((prev) => ({
-      ...prev,
-      fromModifiedAt: format(stagedSearchFormData.fromModifiedAt, "yyyy-MM-dd'T'00:00"),
-      toModifiedAt: format(stagedSearchFormData.toModifiedAt, "yyyy-MM-dd'T'23:59"),
-      fromCreatedAt: format(stagedSearchFormData.fromCreatedAt, "yyyy-MM-dd'T'00:00"),
-      toCreatedAt: format(stagedSearchFormData.toCreatedAt, "yyyy-MM-dd'T'23:59"),
-    }));
-  };
-
-  const handleChange = ({ target: { id, value } }) => {
-    setStagedSearchFormData((prev) => ({ ...prev, [id]: value }));
-  };
-
   const handleRowClick = (id) => {
     setFormMode('read');
     modal.openModal(id);
@@ -146,11 +117,6 @@ const MenuManagementPage = () => {
     setSearchFormData(stagedSearchFormData);
   };
 
-  const handleReset = () => {
-    setStagedSearchFormData(createInitialSearchFormData);
-    setIsPickTime(false);
-  };
-
   const handleCreateClick = () => {
     setFormMode('create');
     modal.openModal();
@@ -160,7 +126,7 @@ const MenuManagementPage = () => {
     const ids = checkedItems.map((item) => item.id);
     try {
       await MenuService.deleteMenus(ids, shouldDelete);
-      fetchMenuList();
+      void fetchMenuList();
     } catch (error) {
       const status = error.response?.status;
       if (status === 400) {
@@ -200,7 +166,7 @@ const MenuManagementPage = () => {
                     id="name"
                     placeholder=""
                     floatingLabel="이름"
-                    onChange={handleChange}
+                    onChange={handleSearchFormChange}
                     value={stagedSearchFormData.name}
                   />
                 </CCol>
@@ -211,7 +177,7 @@ const MenuManagementPage = () => {
                     id="menuOrder"
                     placeholder=""
                     floatingLabel="메뉴 순서"
-                    onChange={handleChange}
+                    onChange={handleSearchFormChange}
                     value={stagedSearchFormData.menuOrder}
                   />
                 </CCol>
@@ -221,7 +187,7 @@ const MenuManagementPage = () => {
                     type="number"
                     id="parentId"
                     placeholder=""
-                    onChange={handleChange}
+                    onChange={handleSearchFormChange}
                     floatingLabel="상위 메뉴 ID"
                     value={stagedSearchFormData.parentId}
                   />
@@ -233,7 +199,7 @@ const MenuManagementPage = () => {
                     id="urlPath"
                     placeholder=""
                     floatingLabel="경로 (Url)"
-                    onChange={handleChange}
+                    onChange={handleSearchFormChange}
                     value={stagedSearchFormData.urlPath}
                   />
                 </CCol>
@@ -248,43 +214,47 @@ const MenuManagementPage = () => {
                       { label: '아니오', value: 'NO' },
                     ]}
                     value={stagedSearchFormData.deletionOption}
-                    onChange={handleChange}
+                    onChange={handleSearchFormChange}
                   />
                 </CCol>
               </CRow>
               <CRow className="mb-3">
                 <CCol md={5}>
                   <CDateRangePicker
-                    key={`createdAt-${isPickTime}`}
+                    key={`createdAt-${includeTimePicker}`}
                     id="createdAt"
                     label="등록일"
                     startDate={stagedSearchFormData.fromCreatedAt}
                     endDate={stagedSearchFormData.toCreatedAt}
-                    onStartDateChange={(newDate) => handleDateChange('createdAt', newDate, true)}
-                    onEndDateChange={(newDate) => handleDateChange('createdAt', newDate, false)}
-                    timepicker={isPickTime}
+                    onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
+                    onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
+                    timepicker={includeTimePicker}
                   />
                 </CCol>
                 <CCol md={5}>
                   <CDateRangePicker
-                    key={`modifiedAt-${isPickTime}`}
+                    key={`modifiedAt-${includeTimePicker}`}
                     id="modifiedAt"
                     label="수정일"
                     startDate={stagedSearchFormData.fromModifiedAt}
                     endDate={stagedSearchFormData.toModifiedAt}
-                    onStartDateChange={(newDate) => handleDateChange('modifiedAt', newDate, true)}
-                    onEndDateChange={(newDate) => handleDateChange('modifiedAt', newDate, false)}
-                    timepicker={isPickTime}
+                    onStartDateChange={(newDate) => handleDateChange({ id: 'modifiedAt', newDate })}
+                    onEndDateChange={(newDate) => handleDateChange({ id: 'modifiedAt', newDate, isStartDate: false })}
+                    timepicker={includeTimePicker}
                   />
                 </CCol>
                 <CCol md={2} className="mt-5">
-                  <CFormCheck label="시간 검색 여부" checked={isPickTime} onChange={(e) => handleTimePickerCheck(e)} />
+                  <CFormCheck
+                    label="시간 검색 여부"
+                    checked={includeTimePicker}
+                    onChange={(e) => handleTimePickerCheck(e, ['createdAt', 'modifiedAt'])}
+                  />
                 </CCol>
               </CRow>
               <CRow className="mb-3">
                 <CCol className="d-grid gap-2 d-md-flex justify-content-md-center">
                   <CButton type="submit">검색</CButton>
-                  <CButton color="primary" value="Reset" onClick={handleReset}>
+                  <CButton color="primary" value="Reset" onClick={handleSearchFormReset}>
                     초기화
                   </CButton>
                 </CCol>
@@ -335,6 +305,7 @@ const MenuManagementPage = () => {
                     contentLength={menuList.length}
                     isSearchPerformed={isSearchPerformed.current}
                     defaultMessage="검색 조건에 맞는 메뉴를 검색합니다."
+                    isLoading={searchResultIsLoading}
                   />
                 }
                 onItemsPerPageChange={handlePageSizeChange}

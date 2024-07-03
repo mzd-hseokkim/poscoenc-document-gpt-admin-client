@@ -184,6 +184,7 @@ const StatisticsUserManagementPage = () => {
                     contentLength={statisticsDataList?.length}
                     isSearchPerformed={isSearchPerformed.current}
                     defaultMessage="선택한 월의 토큰 사용량을 사용자 별로 검색합니다."
+                    isLoading={searchResultIsLoading}
                   />
                 }
                 onItemsPerPageChange={handlePageSizeChange}

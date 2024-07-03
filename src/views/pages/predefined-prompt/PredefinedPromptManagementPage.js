@@ -54,7 +54,7 @@ const PredefinedPromptManagementPage = () => {
   const modal = useModal();
   const { addToast } = useToast();
   const {
-    isPickTime,
+    includeTimePicker,
     stagedSearchFormData,
     handleDateChange,
     handleSearchFormChange,
@@ -260,18 +260,22 @@ const PredefinedPromptManagementPage = () => {
               <CRow className="mb-3">
                 <CCol md={6}>
                   <CDateRangePicker
-                    key={`createdAt-${isPickTime}`}
+                    key={`createdAt-${includeTimePicker}`}
                     id="createdAt"
                     label="등록일"
                     startDate={stagedSearchFormData.fromCreatedAt}
                     endDate={stagedSearchFormData.toCreatedAt}
                     onStartDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate })}
                     onEndDateChange={(newDate) => handleDateChange({ id: 'createdAt', newDate, isStartDate: false })}
-                    timepicker={isPickTime}
+                    timepicker={includeTimePicker}
                   />
                 </CCol>
                 <CCol md={2} className="mt-5">
-                  <CFormCheck label="시간 검색 여부" checked={isPickTime} onChange={(e) => handleTimePickerCheck(e)} />
+                  <CFormCheck
+                    label="시간 검색 여부"
+                    checked={includeTimePicker}
+                    onChange={(e) => handleTimePickerCheck(e)}
+                  />
                 </CCol>
               </CRow>
               <CRow className="mb-3">
@@ -329,6 +333,7 @@ const PredefinedPromptManagementPage = () => {
                     contentLength={promptList?.length}
                     isSearchPerformed={isSearchPerformed.current}
                     defaultMessage="검색 조건에 맞는 프롬프트를 검색합니다."
+                    isLoading={searchResultIsLoading}
                   />
                 }
                 onItemsPerPageChange={handlePageSizeChange}
