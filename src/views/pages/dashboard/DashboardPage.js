@@ -11,14 +11,12 @@ import {
   cilChevronLeft,
   cilChevronRight,
   cilExternalLink,
-  cilPeople,
   cilScreenDesktop,
   cilSitemap,
   cilUser,
 } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import {
-  CAvatar,
   CBadge,
   CButton,
   CButtonGroup,
@@ -49,6 +47,7 @@ import { MonthlyPaymentWidget } from 'components/chart/dashboard/widzet/MonthlyP
 import { MonthlyStandardContractCountWidget } from 'components/chart/dashboard/widzet/MonthlyStandardContractCountWidget';
 import { MonthlyUserAccountCountWidget } from 'components/chart/dashboard/widzet/MonthlyUserAccountCountWidget';
 import { OperationRateWidget } from 'components/chart/dashboard/widzet/OperationRateWidget';
+import { AIModelIcon } from 'components/icon/AIModelIcon';
 import { useNavigation } from 'context/NavigationContext';
 import { useToast } from 'context/ToastContext';
 import { isToday } from 'date-fns';
@@ -80,6 +79,7 @@ const DashboardPage = () => {
   const [hasStandardContractError, setHasStandardContractError] = useState(false);
 
   const [totalUserCount, setTotalUserCount] = useState(0);
+  const [topTokenUsers, setTopTokenUsers] = useState([]);
   const [isUserStatisticsLoading, setIsUserStatisticsLoading] = useState(false);
   const [hasUserStatisticsError, setHasUserStatisticsError] = useState(false);
 
@@ -115,6 +115,7 @@ const DashboardPage = () => {
   ];
 
   useEffect(() => {
+    //REMIND error message 관련해서, 에러가 여러개 날 경우 4개의 promise 경합이 발생해서 4개의 에러 메세지 대신 하나의 에러메세지가뜬다. 한개가 여러번 뜨던가.
     const fetchData = async () => {
       if (Object.values(errorStates).some((hasError) => hasError)) {
         return;
@@ -154,6 +155,7 @@ const DashboardPage = () => {
           ),
           onSuccess: (data) => {
             setTotalUserCount(data.totalCount);
+            setTopTokenUsers(data.topTokenUsage);
           },
           setError: (hasError) => setErrorStates((prev) => ({ ...prev, userStatistics: hasError })),
         },
@@ -224,97 +226,6 @@ const DashboardPage = () => {
     { title: 'Llama3-8B', icon: cibTwitter, percent: 8, value: '30,598' },
     { title: 'Llama3-70B', icon: cibTwitter, percent: 6, value: '22,948' },
     { title: 'Mixtral 8x7B', icon: cibLinkedin, percent: 3, value: '11,474' },
-  ];
-
-  const flexerExample = [
-    {
-      avatar: { src: '/images/avatars/1.jpg', status: 'success' },
-      user: {
-        name: 'Yiorgos Avraamu',
-        new: true,
-        registered: 'Jan 1, 2021',
-      },
-      team: '영업 1팀 ',
-      usage: {
-        value: 550,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'success',
-      },
-      payment: { name: 'Mastercard', icon: cibGoogle },
-      activity: '10 sec ago',
-    },
-    {
-      avatar: { src: '/images/avatars/1.jpg', status: 'danger' },
-      user: {
-        name: 'Avram Tarasios',
-        new: false,
-        registered: 'Jan 1, 2021',
-      },
-      team: '영업 2팀',
-      usage: {
-        value: 229,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'info',
-      },
-      payment: { name: 'Visa', icon: cibGoogle },
-      activity: '5 minutes ago',
-    },
-    {
-      avatar: { src: '/images/avatars/1.jpg', status: 'warning' },
-      user: { name: 'Quintin Ed', new: true, registered: 'Jan 1, 2021' },
-      team: '영업 1팀',
-      usage: {
-        value: 174,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'warning',
-      },
-      payment: { name: 'Stripe', icon: cibGoogle },
-      activity: '1 hour ago',
-    },
-    {
-      avatar: { src: '/images/avatars/1.jpg', status: 'secondary' },
-      user: { name: 'Enéas Kwadwo', new: true, registered: 'Jan 1, 2021' },
-      team: '영업 2팀',
-      usage: {
-        value: 108,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'danger',
-      },
-      payment: { name: 'PayPal', icon: cibFacebook },
-      activity: 'Last month',
-    },
-    {
-      avatar: { src: '/images/avatars/1.jpg', status: 'success' },
-      user: {
-        name: 'Agapetus Tadeáš',
-        new: true,
-        registered: 'Jan 1, 2021',
-      },
-      team: '영업 4팀',
-      usage: {
-        value: 77,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'primary',
-      },
-      payment: { name: 'Google Wallet', icon: cibGoogle },
-      activity: 'Last week',
-    },
-    {
-      avatar: { src: '/images/avatars/1.jpg', status: 'danger' },
-      user: {
-        name: 'Friderik Dávid',
-        new: true,
-        registered: 'Jan 1, 2021',
-      },
-      team: ' 영업 4팀',
-      usage: {
-        value: 43,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'success',
-      },
-      payment: { name: 'Amex', icon: cibGoogle },
-      activity: 'Last week',
-    },
   ];
 
   const DocsExample = [
@@ -765,7 +676,7 @@ const DashboardPage = () => {
             <CCardBody>
               <CSmartTable
                 items={recentlyLikedChatList}
-                pagination={true}
+                // pagination={true}
                 columns={[
                   {
                     key: 'documentCollectionDisplayName',
@@ -1018,57 +929,73 @@ const DashboardPage = () => {
       </CRow>
       <CCard className="m-3">
         <CCardHeader className="bold">
-          <h2>✨ Flexers 😎</h2>
+          <h2>✨ Top Token Users 😎</h2>
         </CCardHeader>
         <CCardBody>
-          <CTable align="middle" className="mb-0 border" hover responsive>
-            <CTableHead color="light">
-              <CTableRow>
-                <CTableHeaderCell className="text-center">
-                  <CIcon icon={cilPeople} />
-                </CTableHeaderCell>
-                <CTableHeaderCell>사용자</CTableHeaderCell>
-                <CTableHeaderCell className="text-center">Team</CTableHeaderCell>
-                <CTableHeaderCell>
-                  토큰 사용량 <small> (단위 : 1000개) </small>
-                </CTableHeaderCell>
-                <CTableHeaderCell className="text-center">AI Model</CTableHeaderCell>
-                <CTableHeaderCell>최근 로그인</CTableHeaderCell>
-              </CTableRow>
-            </CTableHead>
-            <CTableBody>
-              {flexerExample.map((item, index) => (
-                <CTableRow v-for="item in tableItems" key={index}>
-                  <CTableDataCell className="text-center">
-                    <CAvatar size="md" src={item.avatar.src} status={item.avatar.status} />
-                  </CTableDataCell>
-                  <CTableDataCell>
-                    <div>{item.user.name}</div>
-                    <div className="small text-medium-emphasis text-nowrap">
-                      <span>{item.user.new ? 'New' : 'Recurring'}</span> | Registered: {item.user.registered}
-                    </div>
-                  </CTableDataCell>
-                  <CTableDataCell className="text-center">
-                    <div>{item.team}</div>
-                  </CTableDataCell>
-                  <CTableDataCell>
-                    <div className="d-flex justify-content-between">
-                      <div className="float-start">
-                        <strong>{item.usage.value} </strong>
-                      </div>
-                    </div>
-                  </CTableDataCell>
-                  <CTableDataCell className="text-center">
-                    <CIcon size="xl" icon={item.payment.icon} />
-                  </CTableDataCell>
-                  <CTableDataCell>
-                    <div className="small text-medium-emphasis">Last login</div>
-                    <div className="fw-semibold text-nowrap">{item.activity}</div>
-                  </CTableDataCell>
-                </CTableRow>
-              ))}
-            </CTableBody>
-          </CTable>
+          <CSmartTable
+            items={topTokenUsers}
+            columns={[
+              {
+                key: 'name',
+                label: '사용자',
+                _style: { width: '15%' },
+              },
+              {
+                key: 'team',
+                label: '소속',
+                _style: { width: '10%', textAlign: 'center' },
+              },
+              {
+                key: 'tokenUsage',
+                label: '토큰 사용량',
+                _style: { width: '12%', textAlign: 'center' },
+              },
+              {
+                key: 'usedModels',
+                label: 'AI Model',
+                _style: { width: '10%', textAlign: 'center' },
+              },
+              {
+                key: 'registeredAt',
+                label: '가입일',
+                _style: { width: '15%', textAlign: 'center' },
+              },
+            ]}
+            scopedColumns={{
+              name: (item) => (
+                <td>
+                  <div>{item.name}</div>
+                  {/*REMIND new 뱃지 구현 <span>{item.user.new ? 'New' : 'Recurring'}</span>*/}
+                </td>
+              ),
+              team: (item) => <td className="text-center">{item.metadata.team}</td>,
+              tokenUsage: (item) => <td className="text-center">{item.metadata.tokenUsage}</td>,
+              usedModels: (item) => (
+                <td>
+                  <div className="d-flex justify-content-center align-content-center">
+                    {item.metadata.usedModels.map((name, index) => (
+                      <AIModelIcon key={index} modelName={name} />
+                    ))}
+                  </div>
+                </td>
+              ),
+              registeredAt: (item) => (
+                <td>
+                  <div className="text-medium-emphasis text-nowrap text-center">
+                    {formatToYMD(item.metadata.registeredAt)}
+                  </div>
+                </td>
+              ),
+            }}
+            tableProps={{
+              align: 'middle',
+              className: 'mb-0 border',
+              hover: true,
+            }}
+            tableHeadProps={{
+              color: 'secondary',
+            }}
+          />
         </CCardBody>
       </CCard>
     </div>

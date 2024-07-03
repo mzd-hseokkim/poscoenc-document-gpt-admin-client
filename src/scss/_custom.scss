@@ -1,8 +1,6 @@
 // Here you can add other styles
 
-@function rem($px-value) {
-  @return $px-value / 16 * 1rem;
-}
+@import 'src/scss/function';
 
 // ChatHistory QnA style S
 .code-block {
@@ -109,9 +107,6 @@
   transition: all 0.3s ease;
 }
 
-//.table-expanded {
-//  z-index: 2;
-//}
 
 .table-expanded-left {
   z-index: 2;
