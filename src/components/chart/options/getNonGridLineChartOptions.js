@@ -1,4 +1,4 @@
-export const getNonGridLineChartOptions = () => ({
+export const getNonGridLineChartOptions = (customOptions = {}) => ({
   elements: {
     line: {
       tension: 0.3,
@@ -25,4 +25,5 @@ export const getNonGridLineChartOptions = () => ({
       min: 0,
     },
   },
+  ...customOptions,
 });

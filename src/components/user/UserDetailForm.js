@@ -19,7 +19,6 @@ import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import { BingSearchsChart } from 'components/chart/BingSearchsChart';
 import { DallE3GenerationChart } from 'components/chart/DallE3GenerationChart';
 import { TokenUsageChart } from 'components/chart/TokenUsageChart';
-import { padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import { AuditFields } from 'components/form/AuditFields';
 import FormInputGrid from 'components/input/FormInputGrid';
@@ -28,7 +27,8 @@ import { useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
 import StatisticsService from 'services/statistics/StatisticsService';
 import UserService from 'services/UserService';
-import { sortByAggregationKey } from 'utils/chart/sortByAggregationKey';
+import { padDataArrayWithZero, tokenStatisticsPaddingObject } from 'utils/chart/ChartStatisticsProcessor';
+import sortByPropertyKey from 'utils/chart/sortByPropertyKey';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/common/formModes';
 import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
@@ -127,8 +127,14 @@ const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {
         endDate: new Date().toISOString().split('T')[0],
       });
 
-      const sortedData = sortByAggregationKey(responseData?.list);
-      const paddedData = padDataArrayWithZero(sortedData, currentMonth);
+      const sortedData = sortByPropertyKey(responseData?.list, 'aggregationKey');
+      const paddedData = padDataArrayWithZero(
+        sortedData,
+        currentMonth,
+        12,
+        'aggregationKey',
+        tokenStatisticsPaddingObject
+      );
 
       setStatisticsData({
         inputTokenData: paddedData.map((item) => item.sumInputTokens),

@@ -3,10 +3,11 @@ import CIcon from '@coreui/icons-react';
 import { CChart } from '@coreui/react-chartjs';
 import { CWidgetStatsD } from '@coreui/react-pro';
 import { getNonGridLineChartOptions } from 'components/chart/options/getNonGridLineChartOptions';
-import { calculateGrowthRateWithIcon } from 'components/chart/utils/ChartStatisticsProcessor';
+import { calculateGrowthRateWithIcon, findPaddedMaxMin } from 'utils/chart/ChartStatisticsProcessor';
 import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
 
 export const DallE3GenerationChart = ({ statisticsData }) => {
+  const { paddedMax, paddedMin } = findPaddedMaxMin(statisticsData);
   return (
     <CWidgetStatsD
       className="mb-4"
@@ -29,7 +30,18 @@ export const DallE3GenerationChart = ({ statisticsData }) => {
                 },
               ],
             }}
-            options={getNonGridLineChartOptions()}
+            options={getNonGridLineChartOptions({
+              scales: {
+                x: {
+                  display: false,
+                },
+                y: {
+                  display: false,
+                  min: paddedMin,
+                  max: paddedMax,
+                },
+              },
+            })}
           />
         ),
       }}

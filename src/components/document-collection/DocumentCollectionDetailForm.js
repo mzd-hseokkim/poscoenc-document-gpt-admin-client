@@ -23,7 +23,6 @@ import {
 import DocumentFileStatusBadge from 'components/badge/DocumentFileStatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import { TokenUsageChart } from 'components/chart/TokenUsageChart';
-import { padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import { AuditFields } from 'components/form/AuditFields';
 import FormInputGrid from 'components/input/FormInputGrid';
@@ -37,7 +36,8 @@ import DocumentCollectionFileService from 'services/document-collection/Document
 import DocumentCollectionService from 'services/document-collection/DocumentCollectionService';
 import StatisticsService from 'services/statistics/StatisticsService';
 import { userIdSelector } from 'states/jwtTokenState';
-import { sortByAggregationKey } from 'utils/chart/sortByAggregationKey';
+import { padDataArrayWithZero, tokenStatisticsPaddingObject } from 'utils/chart/ChartStatisticsProcessor';
+import sortByPropertyKey from 'utils/chart/sortByPropertyKey';
 import { formatToYMD } from 'utils/common/dateUtils';
 import { formatFileSize } from 'utils/common/formatFileSize';
 import formModes from 'utils/common/formModes';
@@ -154,8 +154,14 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
         endDate: new Date().toISOString().split('T')[0],
       });
 
-      const sortedData = sortByAggregationKey(responseData?.list);
-      const paddedData = padDataArrayWithZero(sortedData, currentMonth);
+      const sortedData = sortByPropertyKey(responseData?.list, 'aggregationKey');
+      const paddedData = padDataArrayWithZero(
+        sortedData,
+        currentMonth,
+        12,
+        'aggregationKey',
+        tokenStatisticsPaddingObject
+      );
 
       setStatisticsData({
         inputTokenData: paddedData.map((item) => item.sumInputTokens),
