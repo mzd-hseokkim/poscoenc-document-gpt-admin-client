@@ -1,11 +1,31 @@
 import React from 'react';
 
-import { cilArrowTop, cilOptions } from '@coreui/icons';
+import { cilOptions } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import { CChartLine } from '@coreui/react-chartjs';
 import { CDropdown, CDropdownItem, CDropdownMenu, CDropdownToggle, CWidgetStatsA } from '@coreui/react-pro';
+import { getLastSixMonthsLabel } from 'components/chart/ChartLabel';
+import {
+  calculateAccumulatedGrowthRate,
+  findPaddedMaxMin,
+  padDataArrayWithZero,
+} from 'utils/chart/ChartStatisticsProcessor';
 
-export const MonthlyDocumentCollectionCountWidget = ({ totalDocumentCount }) => {
+const zeroObject = {
+  name: '',
+  value: 0,
+  recordedAt: null,
+  metadata: {},
+};
+export const MonthlyDocumentCollectionCountWidget = ({ totalDocumentCount, monthlyChartData }) => {
+  const paddedMonthlyChartData = padDataArrayWithZero(
+    monthlyChartData,
+    new Date().getMonth() + 1,
+    6,
+    'name',
+    zeroObject
+  ).map((item) => item.value);
+  const { paddedMax, paddedMin } = findPaddedMaxMin(paddedMonthlyChartData);
   return (
     <CWidgetStatsA
       color="primary"
@@ -13,11 +33,12 @@ export const MonthlyDocumentCollectionCountWidget = ({ totalDocumentCount }) => 
         <>
           {`${totalDocumentCount} 개`}
           <span className="fs-6 fw-normal">
-            (40.9% <CIcon icon={cilArrowTop} /> , 월간)
+            ({calculateAccumulatedGrowthRate(totalDocumentCount, paddedMonthlyChartData[5])} , 월간)
           </span>
         </>
       }
       title="등록된 계약서"
+      // REMIND action 을 없애던가, 구현
       action={
         <CDropdown alignment="end">
           <CDropdownToggle color="transparent" caret={false} className="p-0">
@@ -36,14 +57,14 @@ export const MonthlyDocumentCollectionCountWidget = ({ totalDocumentCount }) => 
           className="mt-3 mx-3"
           style={{ height: '70px' }}
           data={{
-            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+            labels: getLastSixMonthsLabel(),
             datasets: [
               {
-                label: 'My First dataset',
+                label: '등록된 계약서',
                 backgroundColor: 'transparent',
                 borderColor: 'rgba(255,255,255,.55)',
                 pointBackgroundColor: '#5856d6',
-                data: [65, 59, 84, 84, 51, 55, 40],
+                data: paddedMonthlyChartData,
               },
             ],
           }}
@@ -68,8 +89,8 @@ export const MonthlyDocumentCollectionCountWidget = ({ totalDocumentCount }) => 
                 },
               },
               y: {
-                min: 30,
-                max: 89,
+                min: paddedMin,
+                max: paddedMax,
                 display: false,
                 grid: {
                   display: false,
