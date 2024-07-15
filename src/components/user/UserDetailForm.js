@@ -28,8 +28,8 @@ import { useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
 import StatisticsService from 'services/statistics/StatisticsService';
 import UserService from 'services/UserService';
-import { padDataArrayWithZero, tokenStatisticsPaddingObject } from 'utils/chart/ChartStatisticsProcessor';
-import sortByPropertyKey from 'utils/chart/sortByPropertyKey';
+import { padDataArrayWithZeroForMonth, tokenStatisticsPaddingObject } from 'utils/chart/ChartStatisticsProcessor';
+import { sortByPropertyKeyForMonth } from 'utils/chart/sortByPropertyKeyForMonth';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/common/formModes';
 import { emailValidationPattern } from 'utils/common/validationUtils';
@@ -127,8 +127,8 @@ const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {
         endDate: new Date().toISOString().split('T')[0],
       });
 
-      const sortedData = sortByPropertyKey(responseData?.list, 'aggregationKey');
-      const paddedData = padDataArrayWithZero(
+      const sortedData = sortByPropertyKeyForMonth(responseData?.list, 'aggregationKey');
+      const paddedData = padDataArrayWithZeroForMonth(
         sortedData,
         currentMonth,
         12,

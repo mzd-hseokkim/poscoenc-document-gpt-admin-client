@@ -37,8 +37,8 @@ import DocumentCollectionFileService from 'services/document-collection/Document
 import DocumentCollectionService from 'services/document-collection/DocumentCollectionService';
 import StatisticsService from 'services/statistics/StatisticsService';
 import { userIdSelector } from 'states/jwtTokenState';
-import { padDataArrayWithZero, tokenStatisticsPaddingObject } from 'utils/chart/ChartStatisticsProcessor';
-import sortByPropertyKey from 'utils/chart/sortByPropertyKey';
+import { padDataArrayWithZeroForMonth, tokenStatisticsPaddingObject } from 'utils/chart/ChartStatisticsProcessor';
+import { sortByPropertyKeyForMonth } from 'utils/chart/sortByPropertyKeyForMonth';
 import { formatToYMD } from 'utils/common/dateUtils';
 import { formatFileSize } from 'utils/common/formatFileSize';
 import formModes from 'utils/common/formModes';
@@ -101,7 +101,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     },
     {
       name: 'status',
-      label: '문서 상태',
+      label: '업로드 상태',
       badge: 'DocumentFileStatusBadge',
     },
   ];
@@ -154,8 +154,8 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
         endDate: new Date().toISOString().split('T')[0],
       });
 
-      const sortedData = sortByPropertyKey(responseData?.list, 'aggregationKey');
-      const paddedData = padDataArrayWithZero(
+      const sortedData = sortByPropertyKeyForMonth(responseData?.list, 'aggregationKey');
+      const paddedData = padDataArrayWithZeroForMonth(
         sortedData,
         currentMonth,
         12,
