@@ -9,7 +9,7 @@ import { getNonGridLineChartOptions } from 'components/chart/options/getNonGridL
 import { calculateMonthOnMonthGrowthRateWithArrow, findPaddedMaxMin } from 'utils/chart/ChartStatisticsProcessor';
 
 export const BingSearchsChart = ({ statisticsData }) => {
-  const { paddedMax, paddedMin } = findPaddedMaxMin(statisticsData);
+  const { paddedMonthlyMax, paddedDailyMin } = findPaddedMaxMin(statisticsData);
   return (
     <CWidgetStatsD
       className="mb-4"

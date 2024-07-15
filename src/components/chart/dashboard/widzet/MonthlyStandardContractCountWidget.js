@@ -4,8 +4,19 @@ import { cilArrowBottom, cilOptions } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import { CChartLine } from '@coreui/react-chartjs';
 import { CDropdown, CDropdownItem, CDropdownMenu, CDropdownToggle, CWidgetStatsA } from '@coreui/react-pro';
+import { findPaddedMaxMin, padDataArrayWithZeroForMonth } from 'utils/chart/ChartStatisticsProcessor';
 
-export const MonthlyStandardContractCountWidget = ({ totalStandardContractDocumentCount }) => {
+const zeroObject = {};
+//REMIND  API 미구현
+export const MonthlyStandardContractCountWidget = ({ totalStandardContractDocumentCount, monthlyChartData = [] }) => {
+  const paddedMonthlyChartData = padDataArrayWithZeroForMonth(
+    monthlyChartData,
+    new Date().getMonth() + 1,
+    6,
+    'name',
+    zeroObject
+  ).map((item) => item.value);
+  const { paddedMonthlyMax, paddedDailyMin } = findPaddedMaxMin(paddedMonthlyChartData);
   return (
     <CWidgetStatsA
       color="info"

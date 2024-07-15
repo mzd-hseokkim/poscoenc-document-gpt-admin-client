@@ -8,7 +8,7 @@ import { getLastSixMonthsLabel } from 'components/chart/ChartLabel';
 import {
   calculateAccumulatedGrowthRate,
   findPaddedMaxMin,
-  padDataArrayWithZero,
+  padDataArrayWithZeroForMonth,
 } from 'utils/chart/ChartStatisticsProcessor';
 
 const zeroObject = {
@@ -18,7 +18,7 @@ const zeroObject = {
   metadata: {},
 };
 export const MonthlyDocumentCollectionCountWidget = ({ totalDocumentCount, monthlyChartData }) => {
-  const paddedMonthlyChartData = padDataArrayWithZero(
+  const paddedMonthlyChartData = padDataArrayWithZeroForMonth(
     monthlyChartData,
     new Date().getMonth() + 1,
     6,
