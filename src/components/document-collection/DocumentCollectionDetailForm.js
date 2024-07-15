@@ -22,6 +22,7 @@ import {
 } from '@coreui/react-pro';
 import DocumentFileStatusBadge from 'components/badge/DocumentFileStatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
+import MonthLabelGenerator from 'components/chart/MonthLabelGenerator';
 import { TokenUsageChart } from 'components/chart/TokenUsageChart';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import { AuditFields } from 'components/form/AuditFields';
@@ -41,7 +42,6 @@ import sortByPropertyKey from 'utils/chart/sortByPropertyKey';
 import { formatToYMD } from 'utils/common/dateUtils';
 import { formatFileSize } from 'utils/common/formatFileSize';
 import formModes from 'utils/common/formModes';
-import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
 import { itemNameValidationPattern } from 'utils/common/validationUtils';
 
 const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocumentCollectionList }) => {

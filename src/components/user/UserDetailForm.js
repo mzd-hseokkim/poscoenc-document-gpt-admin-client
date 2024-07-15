@@ -18,6 +18,7 @@ import {
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import { BingSearchsChart } from 'components/chart/BingSearchsChart';
 import { DallE3GenerationChart } from 'components/chart/DallE3GenerationChart';
+import MonthLabelGenerator from 'components/chart/MonthLabelGenerator';
 import { TokenUsageChart } from 'components/chart/TokenUsageChart';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import { AuditFields } from 'components/form/AuditFields';
@@ -31,7 +32,6 @@ import { padDataArrayWithZero, tokenStatisticsPaddingObject } from 'utils/chart/
 import sortByPropertyKey from 'utils/chart/sortByPropertyKey';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/common/formModes';
-import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
 import { emailValidationPattern } from 'utils/common/validationUtils';
 
 const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {

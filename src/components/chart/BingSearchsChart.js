@@ -4,9 +4,9 @@ import { cibBing, cilOptions } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import { CChart } from '@coreui/react-chartjs';
 import { CDropdown, CDropdownItem, CDropdownMenu, CDropdownToggle, CWidgetStatsD } from '@coreui/react-pro';
+import MonthLabelGenerator from 'components/chart/MonthLabelGenerator';
 import { getNonGridLineChartOptions } from 'components/chart/options/getNonGridLineChartOptions';
-import { calculateGrowthRateWithIcon, findPaddedMaxMin } from 'utils/chart/ChartStatisticsProcessor';
-import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
+import { calculateMonthOnMonthGrowthRateWithArrow, findPaddedMaxMin } from 'utils/chart/ChartStatisticsProcessor';
 
 export const BingSearchsChart = ({ statisticsData }) => {
   const { paddedMax, paddedMin } = findPaddedMaxMin(statisticsData);
@@ -68,7 +68,7 @@ export const BingSearchsChart = ({ statisticsData }) => {
         { title: 'Bing 검색 횟수', value: `${statisticsData[11]} 회` },
         {
           title: '전월 대비',
-          value: calculateGrowthRateWithIcon(statisticsData[10], statisticsData[11]),
+          value: calculateMonthOnMonthGrowthRateWithArrow(statisticsData[10], statisticsData[11]),
         },
       ]}
       style={{

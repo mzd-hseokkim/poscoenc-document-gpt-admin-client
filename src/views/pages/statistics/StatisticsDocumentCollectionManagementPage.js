@@ -13,6 +13,7 @@ import {
   CSmartTable,
 } from '@coreui/react-pro';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
+import MonthLabelGenerator from 'components/chart/MonthLabelGenerator';
 import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import ModalContainer from 'components/modal/ModalContainer';
 import StatisticsDetailChart from 'components/statistics/StatisticsDetailChart';
@@ -20,7 +21,6 @@ import { useToast } from 'context/ToastContext';
 import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
 import statisticsService from 'services/statistics/StatisticsService';
-import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
 import { CommonColumnSorterCustomProps, CommonTableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { StatisticsDocumentCollectionColumnConfig } from 'views/pages/statistics/statisticsDocumentCollectionColumnConfig';
 
