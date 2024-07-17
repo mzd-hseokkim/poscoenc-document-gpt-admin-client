@@ -7,7 +7,7 @@
  * @description
  * Chart 를 그리기 위해 월 기준으로 정렬하는 함수입니다.
  */
-const sortByPropertyKey = function (data, prop) {
+const sortByPropertyKeyForMonth = (data, prop) => {
   return data.sort((a, b) => {
     const [yearA, monthA] = a[prop].split('-').map(Number);
     const [yearB, monthB] = b[prop].split('-').map(Number);
@@ -20,4 +20,17 @@ const sortByPropertyKey = function (data, prop) {
   });
 };
 
-export default sortByPropertyKey;
+const sortByPropertyKeyForDay = (data, prop) => {
+  return data.sort((a, b) => {
+    const [yearA, monthA, dayA] = a[prop].split('-').map(Number);
+    const [yearB, monthB, dayB] = b[prop].split('-').map(Number);
+
+    if (monthA !== monthB) {
+      return monthA - monthB;
+    } else {
+      return dayA - dayB;
+    }
+  });
+};
+
+export { sortByPropertyKeyForMonth, sortByPropertyKeyForDay };

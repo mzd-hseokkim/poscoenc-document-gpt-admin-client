@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import {
-  cibFacebook,
-  cibGoogle,
-  cibLinkedin,
-  cibTwitter,
   cilArrowThickFromLeft,
   cilArrowThickFromRight,
   cilBook,
@@ -18,18 +14,14 @@ import {
 import CIcon from '@coreui/icons-react';
 import {
   CBadge,
-  CButton,
-  CButtonGroup,
   CCard,
   CCardBody,
-  CCardFooter,
   CCardHeader,
   CCloseButton,
   CCol,
   CCollapse,
   CPopover,
   CProgress,
-  CProgressBar,
   CRow,
   CSmartTable,
   CTable,
@@ -40,7 +32,7 @@ import {
   CTableRow,
 } from '@coreui/react-pro';
 import { DailyTokenUsageChart } from 'components/chart/dashboard/DailyTokenUsageChart';
-import { DocumentCollectionTopEntriesChart } from 'components/chart/dashboard/DocumentCollectionTopEntriesChart';
+import { DocumentCollectionTopChatChart } from 'components/chart/dashboard/DocumentCollectionTopChatChart';
 import { TotalTokenUsageChart } from 'components/chart/dashboard/TotalTokenUsageChart';
 import { MonthlyDocumentCollectionCountWidget } from 'components/chart/dashboard/widzet/MonthlyDocumentCollectionCountWidget';
 import { MonthlyPaymentWidget } from 'components/chart/dashboard/widzet/MonthlyPaymentWidget';
@@ -56,6 +48,7 @@ import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import DashBoardService from 'services/dashboard/DashBoardService';
+import { sortByPropertyKeyForMonth } from 'utils/chart/sortByPropertyKeyForMonth';
 import {
   formatToIsoEndDate,
   formatToIsoStartDate,
@@ -64,55 +57,73 @@ import {
   getOneYearAgoDate,
 } from 'utils/common/dateUtils';
 
+const initialAIModels = [
+  { name: 'gpt-4o', value: 0, metadata: { rank: 1 } },
+  { name: 'mixtral-8x7b-32768', value: 0, metadata: { rank: 2 } },
+  { name: 'llama3-70b-8192', value: 0, metadata: { rank: 3 } },
+  { name: 'llama3-8b-8192', value: 0, metadata: { rank: 4 } },
+  { name: 'claude-3-opus-20240229', value: 0, metadata: { rank: 5 } },
+  { name: 'claude-3-sonnet-20240229', value: 0, metadata: { rank: 6 } },
+];
 const DashboardPage = () => {
   const { addToast } = useToast();
 
   const [totalDocumentCount, setTotalDocumentCount] = useState(0);
-  const [recentlyAddedDocumentList, setRecentlyAddedDocumentList] = useState([]);
-  const [hotDocumentEntries, setHotDocumentEntries] = useState([]);
+  const [recentlyAddedDocumentCollectionList, setRecentlyAddedDocumentCollectionList] = useState([]);
+  const [accumulatedMonthlyDocumentCollection, setAccumulatedMonthlyDocumentCollection] = useState([]);
+  const [topChatDocuments, setTopChatDocuments] = useState([]);
   const [isDocumentStatisticsLoading, setIsDocumentStatisticsLoading] = useState(false);
-  const [hasDocumentStatisticsError, setHasDocumentStatisticsError] = useState(false);
+  const [isPeriodDocumentStatisticsLoading, setIsPeriodDocumentStatisticsLoading] = useState(false);
 
   const [totalStandardContractDocumentCount, setTotalStandardContractDocumentCount] = useState(0);
   const [recentlyAddedStandardContractList, setRecentlyAddedStandardContractList] = useState([]);
   const [isStandardContractLoading, setIsStandardContractLoading] = useState(false);
-  const [hasStandardContractError, setHasStandardContractError] = useState(false);
 
   const [totalUserCount, setTotalUserCount] = useState(0);
   const [topTokenUsers, setTopTokenUsers] = useState([]);
   const [isUserStatisticsLoading, setIsUserStatisticsLoading] = useState(false);
-  const [hasUserStatisticsError, setHasUserStatisticsError] = useState(false);
 
   const [recentlyLikedChatList, setRecentlyLikedChatList] = useState([]);
   const [hoveredLikedChatIndexes, setHoveredLikedChatIndexes] = useState({});
   const [isRecentlyLikedChatLoading, setIsRecentlyLikedChatLoading] = useState(false);
-  const [hasRecentlyLikedChatError, setHasRecentlyLikedChatError] = useState(false);
+
+  //Daily Token Usage Ratio
+  const [dailyTokenUsages, setDailyTokenUsages] = useState([]);
+  //전체 토큰 사용량 추이 ( 지난 7일 사용량, 지난 6개월 사용량, 파일럿 모드 별 사용량, AI모델 별 사용량 )
+  const [totalTokenUsages, setTotalTokenUsages] = useState([]);
+  const [isTokenUsageStatisticsLoading, setIsTokenUsageStatisticsLoading] = useState(false);
+  // 모든 Pilot 모드의 토큰 사용량 총계
+  const totalTokenUsageCalculatedByPilotMode = totalTokenUsages?.total?.byPilotMode?.reduce(
+    (acc, item) => acc + item.value,
+    0
+  );
+
+  // rank 로 정렬한 AI model의 토큰 사용량 총계
+  const respondAIModelsUsages = initialAIModels
+    .map((model) => {
+      const respondModel = totalTokenUsages?.total?.byModelName.find((rm) => rm.name === model.name);
+      return respondModel ? { ...model, value: respondModel.value, metadata: respondModel.metadata } : model;
+    })
+    .sort((a, b) => a.metadata.rank - b.metadata.rank);
+
+  // 모든 AI Model의 토큰 사용량 총계
+  const totalTokenUsageCalculatedByAIModel = respondAIModelsUsages.reduce((acc, item) => acc + item.value, 0);
 
   const [standardContractDocumentTableVisible, setStandardContractDocumentTableVisible] = useState(false);
   const [newContractDocumentTableVisible, setNewContractDocumentTableVisible] = useState(false);
-
-  const [hotConChartLabelOption, setHotConChartLabelOption] = useState('days');
-  const [totalTokenUsageChartLabelOption, setTotalTokenUsageChartLabelOption] = useState('months');
 
   const [errorStates, setErrorStates] = useState({
     documentStatistics: false,
     standardContract: false,
     userStatistics: false,
     recentlyLikedChat: false,
+    totalTokenUsages: false,
+    recentlyAddedDocument: false,
   });
 
   //REMIND 문서 공유 횟수 추가 고려
 
   const { navigate } = useNavigation();
-
-  //REMIND hotDocumentEntries 로 수정
-  const hotDocTopFive = [
-    { rank: 1, name: 'Marl-E CMS in POSCO Corp.', value: '29,703 ', color: 'success' },
-    { rank: 2, name: 'Marl-E CMS in MZC.', value: '24,093 ', color: 'info' },
-    { rank: 3, name: 'Alphabetone', value: '78,706 ', color: 'warning' },
-    { rank: 4, name: '여섯글자는괜', value: '22,123 ', color: 'danger' },
-    { rank: 5, name: '여덟글자입니다요', value: '22,222 ', color: 'primary' },
-  ];
 
   useEffect(() => {
     //REMIND error message 관련해서, 에러가 여러개 날 경우 4개의 promise 경합이 발생해서 4개의 에러 메세지 대신 하나의 에러메세지가뜬다. 한개가 여러번 뜨던가.
@@ -123,20 +134,29 @@ const DashboardPage = () => {
 
       const requests = [
         {
-          loader: setIsDocumentStatisticsLoading,
+          loadingFlagSetter: setIsDocumentStatisticsLoading,
           service: DashBoardService.getDocumentCollectionStatistics(
             formatToIsoStartDate(getOneYearAgoDate()),
             formatToIsoEndDate(getCurrentDate())
           ),
           onSuccess: (data) => {
             setTotalDocumentCount(data.totalCount);
-            setRecentlyAddedDocumentList(data.recentlyAdded);
-            setHotDocumentEntries(data.topEntries);
+            setRecentlyAddedDocumentCollectionList(data.recentlyAdded);
+            setTopChatDocuments(data.topChats);
           },
           setError: (hasError) => setErrorStates((prev) => ({ ...prev, documentStatistics: hasError })),
         },
         {
-          loader: setIsStandardContractLoading,
+          loadingFlagSetter: setIsPeriodDocumentStatisticsLoading,
+          service: DashBoardService.getPeriodDocumentCollectionStatistics(),
+          onSuccess: (data) => {
+            const sortedMonthlyData = sortByPropertyKeyForMonth(data.added.monthly, 'name');
+            setAccumulatedMonthlyDocumentCollection(sortedMonthlyData);
+          },
+          setError: (hasError) => setErrorStates((prev) => ({ ...prev, recentlyAddedDocument: hasError })),
+        },
+        {
+          loadingFlagSetter: setIsStandardContractLoading,
           service: DashBoardService.getStandardContractDocumentStatistics(
             formatToIsoStartDate(getOneYearAgoDate()),
             formatToIsoEndDate(getCurrentDate())
@@ -148,7 +168,7 @@ const DashboardPage = () => {
           setError: (hasError) => setErrorStates((prev) => ({ ...prev, standardContract: hasError })),
         },
         {
-          loader: setIsUserStatisticsLoading,
+          loadingFlagSetter: setIsUserStatisticsLoading,
           service: DashBoardService.getUserAccountStatistics(
             formatToIsoStartDate(getOneYearAgoDate()),
             formatToIsoEndDate(getCurrentDate())
@@ -160,7 +180,7 @@ const DashboardPage = () => {
           setError: (hasError) => setErrorStates((prev) => ({ ...prev, userStatistics: hasError })),
         },
         {
-          loader: setIsRecentlyLikedChatLoading,
+          loadingFlagSetter: setIsRecentlyLikedChatLoading,
           service: DashBoardService.getChatHistoryStatistics(
             formatToIsoStartDate(getOneYearAgoDate()),
             formatToIsoEndDate(getCurrentDate())
@@ -175,11 +195,22 @@ const DashboardPage = () => {
           },
           setError: (hasError) => setErrorStates((prev) => ({ ...prev, recentlyLikedChat: hasError })),
         },
+        {
+          loadingFlagSetter: setIsTokenUsageStatisticsLoading,
+          service: DashBoardService.getTokenUsageStatistics(
+            formatToIsoStartDate(getOneYearAgoDate()),
+            formatToIsoEndDate(getCurrentDate())
+          ),
+          onSuccess: (data) => {
+            setTotalTokenUsages(data);
+          },
+          setError: (hasError) => setErrorStates((prev) => ({ ...prev, totalTokenUsages: hasError })),
+        },
       ];
 
       await Promise.allSettled(
         requests.map(async (request, index) => {
-          request.loader(true);
+          request.loadingFlagSetter(true);
           try {
             const response = await request.service;
             request.onSuccess(response);
@@ -188,7 +219,7 @@ const DashboardPage = () => {
             request.setError(true);
             addToast({ message: `Request ${index + 1} failed: ${error.message}` }, false);
           } finally {
-            request.loader(false);
+            request.loadingFlagSetter(false);
           }
         })
       );
@@ -196,67 +227,6 @@ const DashboardPage = () => {
 
     void fetchData();
   }, [addToast, errorStates]);
-
-  const tokenUsagesData = [
-    { title: 'Total', value: '102,799 ', percent: 100, color: 'success' },
-    { title: 'Input Tokens', value: '24,093 ', percent: parseInt(((24093 / 102799) * 100).toFixed(0)), color: 'info' },
-    {
-      title: 'Output Tokens',
-      value: '78,706 ',
-      percent: parseInt(((78706 / 102799) * 100).toFixed(0)),
-      color: 'warning',
-    },
-    {
-      title: 'Remaining',
-      value: '190,000 ',
-      percent: parseInt(((1 - 102799 / 190000) * 100).toFixed(1)),
-      color: 'danger',
-    },
-  ];
-
-  const popularPilotModeExample = [
-    { title: 'Auto', icon: cilScreenDesktop, value: 53 },
-    { title: 'Co', icon: cilUser, value: 47 },
-  ];
-
-  const popularModelExample = [
-    { title: 'GPT-4 Omni', icon: cibGoogle, percent: 58, value: '221,832' },
-    { title: 'Claude-3-Sonnet', icon: cibFacebook, percent: 15, value: '57,370' },
-    { title: 'Claude-3-Opus', icon: cibFacebook, percent: 10, value: '38,247' },
-    { title: 'Llama3-8B', icon: cibTwitter, percent: 8, value: '30,598' },
-    { title: 'Llama3-70B', icon: cibTwitter, percent: 6, value: '22,948' },
-    { title: 'Mixtral 8x7B', icon: cibLinkedin, percent: 3, value: '11,474' },
-  ];
-
-  const DocsExample = [
-    {
-      displayName: '나는이름이열글자일거 에요',
-
-      activity: '10 sec ago',
-      registered: 'Jan 1, 2021',
-    },
-    {
-      displayName:
-        '계약 문서 2 하지만 이름이 너무나도 길어서 안보여야만하는데 어디까지 늘어날 생각이니 너는...3줄까지 내려간다면 나도 어쩔수 없이 계속해서 늘려야만 해. 그냥 계속 늘어날 생각이구나 너는하지만 이름이 너무나도 길어서 안보여야만하는데 어디까지 늘어날 생각이니 너는...3줄까지 내려간다면 나도 어쩔수 없이 계속해서 늘려야만 해. 그냥 계속 늘어날 생각이구나 너는하지만 이름이 너무나도 길어서 안보여야만하는데 어디까지 늘어날 생각이니 너는...3줄까지 내려간다면 나도 어쩔수 없이 계속해서 늘려야만 해. 그냥 계속 늘어날 생각이구나 너는하지만 이름이 너무나도 길어서 안보여야만하는데 어디까지 늘어날 생각이니 너는...3줄까지 내려간다면 나도 어쩔수 없이 계속해서 늘려야만 해. 그냥 계속 늘어날 생각이구나 너는하지만 이름이 너무나도 길어서 안보여야만하는데 어디까지 늘어날 생각이니 너는...3줄까지 내려간다면 나도 어쩔수 없이 계속해서 늘려야만 해. 그냥 계속 늘어날 생각이구나 너는하지만 이름이 너무나도 길어서 안보여야만하는데 어디까지 늘어날 생각이니 너는...3줄까지 내려간다면 나도 어쩔수 없이 계속해서 늘려야만 해. 그냥 계속 늘어날 생각이구나 너는',
-      activity: '5 minutes ago',
-      registered: 'Jan 1, 2021',
-    },
-    {
-      displayName: '계약 문서 6',
-      activity: '1 hour ago',
-      registered: 'Jan 1, 2021',
-    },
-    {
-      displayName: '계약 문서 3',
-      activity: 'Last month',
-      registered: 'Jan 1, 2021',
-    },
-    {
-      displayName: '계약 문서 4',
-      activity: 'Last week',
-      registered: 'Jan 1, 2021',
-    },
-  ];
 
   const handleOpenNewContractDocumentTable = () => {
     if (standardContractDocumentTableVisible) {
@@ -285,6 +255,7 @@ const DashboardPage = () => {
     },
   ];
 
+  // LikedChat S ===================
   const customPopoverStyle = {
     '--cui-popover-max-width': '500px',
     '--cui-popover-max-height': '1000px',
@@ -292,7 +263,6 @@ const DashboardPage = () => {
     '--cui-popover-header-bg': 'var(--cui-primary)',
     '--cui-popover-header-color': 'var(--cui-white)',
   };
-  // LikedChat S ===================
 
   const togglePopoverVisibility = (index) => {
     setHoveredLikedChatIndexes((prevState) => ({
@@ -315,10 +285,16 @@ const DashboardPage = () => {
       </CRow>
       <CRow className="p-3">
         <CCol sm={4}>
-          <MonthlyDocumentCollectionCountWidget totalDocumentCount={totalDocumentCount} />
+          <MonthlyStandardContractCountWidget
+            totalStandardContractDocumentCount={totalStandardContractDocumentCount}
+            // monthlyChartData={}
+          />
         </CCol>
         <CCol sm={4}>
-          <MonthlyStandardContractCountWidget totalStandardContractDocumentCount={totalStandardContractDocumentCount} />
+          <MonthlyDocumentCollectionCountWidget
+            totalDocumentCount={totalDocumentCount}
+            monthlyChartData={accumulatedMonthlyDocumentCollection}
+          />
         </CCol>
         <CCol sm={4}>
           <MonthlyUserAccountCountWidget totalUserCount={totalUserCount} />
@@ -328,105 +304,11 @@ const DashboardPage = () => {
       <CRow>
         <CCol sm={6}>
           {/* 핫독 랭크 S -----------------------------------------------------*/}
-          <CCard className="m-3">
-            <CCardBody>
-              <CRow>
-                <CCol sm={5}>
-                  <h4 id="HotCon" className="card-title mb-0">
-                    🔥Hot🔥 Con TOP 5
-                  </h4>
-                  <div className="small text-medium-emphasis">January - July 2021</div>
-                </CCol>
-                <CCol sm={7} className="d-none d-md-block">
-                  <CButtonGroup className="float-end me-3">
-                    {['days', 'months'].map((value) => (
-                      <CButton
-                        color="outline-secondary"
-                        key={value}
-                        className="mx-0"
-                        active={value === hotConChartLabelOption}
-                        onClick={() => setHotConChartLabelOption(value)}
-                      >
-                        {value === 'days' ? '지난 7일' : '지난 6개월'}
-                      </CButton>
-                    ))}
-                  </CButtonGroup>
-                </CCol>
-              </CRow>
-              <DocumentCollectionTopEntriesChart hotConChartLabelOption={hotConChartLabelOption} />
-            </CCardBody>
-            <CCardFooter style={{ height: '9rem' }}>
-              <CRow className="d-inline-block justify-content-center mb-1">
-                <h5 className="d-inline">핫콘 순위</h5>
-                <small className="text-medium-emphasis d-inline">
-                  클릭 시 해당 문서의 상세 정보 창으로 이동합니다.
-                </small>
-              </CRow>
-              <CRow xs={{ cols: 1 }} md={{ cols: 5 }} className="text-center">
-                {hotDocTopFive.map((item, index) => (
-                  <CCol className="mb-sm-2 mb-0 d-flex flex-column" key={index}>
-                    <strong>{item.rank}위</strong>
-                    <CPopover content={item.name} placement="bottom" trigger="hover">
-                      <div className="text-medium-emphasis mb-3 text-truncate">{item.name}</div>
-                    </CPopover>
-                    <div className="mt-auto mb-0">
-                      <strong>{item.value} 개</strong>
-                    </div>
-                  </CCol>
-                ))}
-              </CRow>
-            </CCardFooter>
-          </CCard>
-
+          <DocumentCollectionTopChatChart chartData={topChatDocuments} />
           {/* 핫독 랭크 E -----------------------------------------------------*/}
         </CCol>
         <CCol sm={6}>
-          <CCard className="m-3">
-            <CCardBody>
-              <CRow>
-                <CCol sm={5}>
-                  <h4 id="TokenUsage" className="card-title mb-0">
-                    전체 토큰 사용량 추이
-                  </h4>
-                  <div className="small text-medium-emphasis">January - July 2021</div>
-                </CCol>
-                <CCol sm={7} className="d-none d-md-block">
-                  <CButtonGroup className="float-end me-3">
-                    {['days', 'months'].map((value) => (
-                      <CButton
-                        color="outline-secondary"
-                        key={value}
-                        className="mx-0"
-                        active={value === totalTokenUsageChartLabelOption}
-                        onClick={() => setTotalTokenUsageChartLabelOption(value)}
-                      >
-                        {value === 'days' ? '지난 7일' : '지난 6개월'}{' '}
-                      </CButton>
-                    ))}
-                  </CButtonGroup>
-                </CCol>
-              </CRow>
-              {/*REMIND should deliver chart data*/}
-              <TotalTokenUsageChart totalTokenUsageChartLabelOption={totalTokenUsageChartLabelOption} />
-            </CCardBody>
-            <CCardFooter style={{ height: '9rem' }}>
-              <CRow className="d-inline-block justify-content-center mb-1">
-                <h5> {totalTokenUsageChartLabelOption === 'days' ? '이번 주 사용량' : '이번 달 사용량'}</h5>
-              </CRow>
-              <CRow xs={{ cols: 1 }} md={{ cols: 4 }} className="text-center">
-                {tokenUsagesData.map((item, index) => (
-                  <CCol className="mb-sm-2 mb-0" key={index}>
-                    <div className="text-medium-emphasis">{item.title}</div>
-                    <strong>
-                      {item.value}
-                      <br />({item.percent}%)
-                    </strong>
-                    <CProgress thin className="mt-2" color={`${item.color}-gradient`} value={item.percent} />
-                  </CCol>
-                ))}
-              </CRow>
-            </CCardFooter>
-          </CCard>
+          <TotalTokenUsageChart monthlyChartData={totalTokenUsages?.monthly} dailyChartData={totalTokenUsages?.daily} />
         </CCol>
       </CRow>
 
@@ -529,7 +411,7 @@ const DashboardPage = () => {
                         </CTableDataCell>
                         <CTableDataCell>
                           <CCollapse visible={standardContractDocumentTableVisible} horizontal>
-                            <div className="small text-medium-emphasis text-nowrap">{item.createdAt}</div>
+                            <div className="small text-medium-emphasis text-nowrap">{formatToYMD(item.createdAt)}</div>
                           </CCollapse>
                         </CTableDataCell>
 
@@ -540,7 +422,7 @@ const DashboardPage = () => {
                                 style={{ cursor: 'pointer' }}
                                 icon={cilExternalLink}
                                 //REMIND ID 파라미터 추가해서 해당 문서 보여주도록 수정
-                                onClick={() => navigate('/document-collections/management')}
+                                onClick={() => navigate(`/standard-contracts/management?id=${item.id}`)}
                               />
                             </CCollapse>
                           </CTableDataCell>
@@ -558,7 +440,7 @@ const DashboardPage = () => {
                   marginLeft: newContractDocumentTableVisible ? '-310px' : '-15px',
                 }}
               >
-                <CTable align="middle" className="mb-0 border me-2" hover responsive={'lg'} style={{ width: '15rem' }}>
+                <CTable align="middle" className="mb-0 border me-2" hover responsive={'lg'}>
                   <CTableHead color="light">
                     <CTableRow>
                       <CTableHeaderCell
@@ -592,18 +474,18 @@ const DashboardPage = () => {
                     </CTableRow>
                   </CTableHead>
                   <CTableBody>
-                    {DocsExample.map((item, index) => (
+                    {recentlyAddedDocumentCollectionList.map((item, index) => (
                       <CTableRow key={index}>
                         <CTableDataCell>
-                          {item.displayName.length > 12 ? (
-                            <CPopover content={item.displayName} placement="bottom" trigger="hover" delay={300}>
+                          {item.name.length > 12 ? (
+                            <CPopover content={item.name} placement="bottom" trigger="hover" delay={300}>
                               <div
                                 className="overflow-hidden text-truncate"
                                 style={{
                                   maxWidth: '11rem',
                                 }}
                               >
-                                {item.displayName}
+                                {item.name}
                               </div>
                             </CPopover>
                           ) : (
@@ -613,7 +495,7 @@ const DashboardPage = () => {
                                 maxWidth: '11rem',
                               }}
                             >
-                              {item.displayName}
+                              {item.name}
                             </div>
                           )}
                           {!newContractDocumentTableVisible && isToday(new Date(item.createdAt)) && (
@@ -634,13 +516,15 @@ const DashboardPage = () => {
                           <CCollapse visible={newContractDocumentTableVisible} horizontal>
                             <div className="collapsable-table-data">
                               {/*<div className="small text-medium-emphasis">New</div>*/}
-                              <div className="fw-semibold text-nowrap">{item.activity}</div>
+                              <div className="fw-semibold text-nowrap small text-medium-emphasis">
+                                {formatToYMD(item.metadata.lastChatAt) || 'No chat'}
+                              </div>
                             </div>
                           </CCollapse>
                         </CTableDataCell>
                         <CTableDataCell>
                           <CCollapse visible={newContractDocumentTableVisible} horizontal>
-                            <div className="small text-medium-emphasis text-nowrap">{item.registered}</div>
+                            <div className="small text-medium-emphasis text-nowrap">{formatToYMD(item.createdAt)}</div>
                           </CCollapse>
                         </CTableDataCell>
                         {newContractDocumentTableVisible && (
@@ -650,8 +534,8 @@ const DashboardPage = () => {
                                 <CIcon
                                   style={{ cursor: 'pointer' }}
                                   icon={cilExternalLink}
-                                  //REMIND ID 파라미터 추가해서 해당 문서 보여주도록 수정
-                                  onClick={() => navigate('/standard-contract/management')}
+                                  //REMIND 아래 링크에서 없는 아이디로 요청 할 경우 서버에서 오류발생이라는 에러가 잘못뜨고있다. 찾을수없음으로 변경
+                                  onClick={() => navigate(`/document-collections/management?id=${item.id}`)}
                                 />
                               </CCollapse>
                             </CTableDataCell>
@@ -687,7 +571,7 @@ const DashboardPage = () => {
                     sorter: false,
                   },
                   { key: 'name', label: '질문', _props: { className: 'text-nowrap' }, _style: { width: '25%' } },
-                  { key: 'modelName', label: 'Model', _style: { width: '20%' } },
+                  { key: 'modelName', label: 'Model', _style: { width: '20%' }, _props: { className: 'text-center' } },
 
                   { key: 'pilotMode', label: 'Pilot', _style: { width: '10%' } },
                   { key: 'createdAt', label: 'CreatedAt', _style: { width: '10%' } },
@@ -807,7 +691,9 @@ const DashboardPage = () => {
                         overflowY: 'hidden',
                       }}
                     >
-                      {item.metadata.modelName}
+                      <div className="d-flex justify-content-center align-content-center">
+                        <AIModelIcon modelName={item.metadata.modelName} />
+                      </div>
                     </td>
                   ),
                   pilotMode: (item) => (
@@ -840,37 +726,7 @@ const DashboardPage = () => {
       </CRow>
       <CRow>
         <CCol xs={12} md={6} xl={6}>
-          <CCard className="m-3">
-            <CCardHeader className="bold">Daily Token Usage Ratio</CCardHeader>
-            <CCardBody>
-              <CRow>
-                <CCol sm={6}>
-                  <div className="border-start border-start-4 border-start-info py-1 px-3 mb-3">
-                    <div className="text-medium-emphasis small">Input Tokens</div>
-                    <div className="fs-5 fw-semibold">913</div>
-                  </div>
-                </CCol>
-                <CCol sm={6}>
-                  <div className="border-start border-start-4 border-start-danger py-1 px-3 mb-3">
-                    <div className="text-medium-emphasis small">Output Tokens</div>
-                    <div className="fs-5 fw-semibold">2643</div>
-                  </div>
-                </CCol>
-              </CRow>
-              <CProgress height={30}>
-                <CProgressBar color="primary" value={25}>
-                  25%
-                </CProgressBar>
-                <CProgressBar color="danger" value={75}>
-                  75%
-                </CProgressBar>
-              </CProgress>
-
-              <hr className="mt-3" />
-              <DailyTokenUsageChart />
-              <hr className="mt-3" />
-            </CCardBody>
-          </CCard>
+          <DailyTokenUsageChart data={totalTokenUsages?.daily} />
         </CCol>
 
         <CCol xs={12} md={6} xl={6}>
@@ -881,7 +737,14 @@ const DashboardPage = () => {
                 <CCol sm={6}>
                   <div className="border-start border-start-4 border-start-warning py-1 px-3 mb-3">
                     <div className="text-medium-emphasis small">Popular Pilot Mode</div>
-                    <div className="fs-5 fw-semibold">Auto</div>
+                    <div className="fs-5 fw-semibold">
+                      {totalTokenUsages?.total?.byPilotMode?.reduce(
+                        (maxItem, currentItem) => (currentItem.value > maxItem.value ? currentItem : maxItem),
+                        totalTokenUsages?.total?.byPilotMode?.[0].name
+                      ) === 'C'
+                        ? 'Co'
+                        : 'Auto'}
+                    </div>
                   </div>
                 </CCol>
                 <CCol sm={6}>
@@ -894,12 +757,14 @@ const DashboardPage = () => {
 
               <hr className="mt-0" />
 
-              {popularPilotModeExample.map((item, index) => (
+              {totalTokenUsages?.total?.byPilotMode?.map((item, index) => (
                 <div className="progress-group mb-4" key={index}>
                   <div className="progress-group-header">
-                    <CIcon className="me-2" icon={item.icon} size="lg" />
-                    <span>{item.title}</span>
-                    <span className="ms-auto fw-semibold">{item.value}%</span>
+                    <CIcon className="me-2" icon={item.name === 'C' ? cilUser : cilScreenDesktop} size="lg" />
+                    <span>{item.name === 'C' ? 'Co' : 'Auto'}</span>
+                    <span className="ms-auto fw-semibold">
+                      {((item.value / totalTokenUsageCalculatedByPilotMode) * 100).toFixed(1)}%
+                    </span>
                   </div>
                   <div className="progress-group-bars">
                     <CProgress thin color="warning-gradient" value={item.value} />
@@ -909,17 +774,24 @@ const DashboardPage = () => {
 
               <div className="mb-5"></div>
 
-              {popularModelExample.map((item, index) => (
+              {respondAIModelsUsages.map((item, index) => (
                 <div className="progress-group" key={index}>
                   <div className="progress-group-header">
-                    <CIcon className="me-2" icon={item.icon} size="lg" />
-                    <span>{item.title}</span>
+                    <AIModelIcon modelName={item.name} />
+                    <span>{item.name}</span>
                     <span className="ms-auto fw-semibold">
-                      {item.value} <span className="text-medium-emphasis small">({item.percent}%)</span>
+                      {item.value}
+                      <span className="text-medium-emphasis small">
+                        ({((item.value / totalTokenUsageCalculatedByAIModel) * 100).toFixed(1)}%)
+                      </span>
                     </span>
                   </div>
                   <div className="progress-group-bars">
-                    <CProgress thin color="success-gradient" value={item.percent} />
+                    <CProgress
+                      thin
+                      color="success-gradient"
+                      value={parseInt(((item.value / totalTokenUsageCalculatedByAIModel) * 100).toFixed(1))}
+                    />
                   </div>
                 </div>
               ))}

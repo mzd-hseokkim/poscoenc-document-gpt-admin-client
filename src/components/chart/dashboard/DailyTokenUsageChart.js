@@ -1,36 +1,37 @@
+import React from 'react';
+
 import { CChart } from '@coreui/react-chartjs';
+import { CCard, CCardBody, CCardHeader, CCol, CProgress, CProgressBar, CRow } from '@coreui/react-pro';
 import { getStyle } from '@coreui/utils';
+import { getUpdatedWeeklyLabel } from 'components/chart/ChartLabel';
+import { padDataArrayWithZeroForDay, totalTokenUsagePaddingObject } from 'utils/chart/ChartStatisticsProcessor';
+import { sortByPropertyKeyForDay } from 'utils/chart/sortByPropertyKeyForMonth';
 
-export const DailyTokenUsageChart = () => {
-  const dailyTokenUsagesExample = [
-    { title: 'Monday', InputTokens: 34, OutputTokens: 78 },
-    { title: 'Tuesday', InputTokens: 56, OutputTokens: 94 },
-    { title: 'Wednesday', InputTokens: 12, OutputTokens: 67 },
-    { title: 'Thursday', InputTokens: 43, OutputTokens: 91 },
-    { title: 'Friday', InputTokens: 22, OutputTokens: 73 },
-    { title: 'Saturday', InputTokens: 53, OutputTokens: 82 },
-    { title: 'Sunday', InputTokens: 9, OutputTokens: 69 },
-  ];
-  const dailyTokenUsagesExampleLabels = dailyTokenUsagesExample.map((item) => item.title);
-  const dailyTokenUsagesExampleInputToken = dailyTokenUsagesExample.map((item) => item.InputTokens);
-  const dailyTokenUsagesExampleOutputToken = dailyTokenUsagesExample.map((item) => item.OutputTokens);
+const weeklyLabel = getUpdatedWeeklyLabel();
 
-  //REMIND 매일 차트 라벨 변경해서, 가장 마지막 요일이 오늘이 되도록
-  return (
+export const DailyTokenUsageChart = ({ data = [] }) => {
+  const paddedDailyChartData = padDataArrayWithZeroForDay(data, 'name', totalTokenUsagePaddingObject);
+  const sortedDailyChartData = sortByPropertyKeyForDay(paddedDailyChartData, 'name');
+  const totalInputTokens = sortedDailyChartData.map((data) => data.metadata.total_input_tokens);
+  const totalOutputTokens = sortedDailyChartData.map((data) => data.metadata.total_output_tokens);
+  const inputOfToday = totalInputTokens[totalInputTokens.length - 1];
+  const outputOfToday = totalOutputTokens[totalOutputTokens.length - 1];
+  const totalOfToday = inputOfToday + outputOfToday;
+  const renderChart = () => (
     <CChart
       type="bar"
       data={{
-        labels: dailyTokenUsagesExampleLabels,
+        labels: weeklyLabel,
         datasets: [
           {
             label: 'Input Tokens',
             backgroundColor: '#007bff',
-            data: dailyTokenUsagesExampleInputToken,
+            data: totalInputTokens,
           },
           {
             label: 'Output Tokens',
             backgroundColor: '#dc3545',
-            data: dailyTokenUsagesExampleOutputToken,
+            data: totalOutputTokens,
           },
         ],
       }}
@@ -62,5 +63,39 @@ export const DailyTokenUsageChart = () => {
         },
       }}
     />
+  );
+
+  return (
+    <CCard className="m-3">
+      <CCardHeader className="bold">Daily Token Usage Ratio</CCardHeader>
+      <CCardBody>
+        <CRow>
+          <CCol sm={6}>
+            <div className="border-start border-start-4 border-start-info py-1 px-3 mb-3">
+              <div className="text-medium-emphasis small">Input Tokens</div>
+              <div className="fs-5 fw-semibold">{inputOfToday}</div>
+            </div>
+          </CCol>
+          <CCol sm={6}>
+            <div className="border-start border-start-4 border-start-danger py-1 px-3 mb-3">
+              <div className="text-medium-emphasis small">Output Tokens</div>
+              <div className="fs-5 fw-semibold">{outputOfToday}</div>
+            </div>
+          </CCol>
+        </CRow>
+        <CProgress height={30}>
+          <CProgressBar color="primary" value={parseInt(((inputOfToday / totalOfToday) * 100).toFixed(0))}>
+            {`${((inputOfToday / totalOfToday) * 100).toFixed(1)}%`}
+          </CProgressBar>
+          <CProgressBar color="danger" value={parseInt(((outputOfToday / totalOfToday) * 100).toFixed(0))}>
+            {`${((outputOfToday / totalOfToday) * 100).toFixed(1)}%`}
+          </CProgressBar>
+        </CProgress>
+
+        <hr className="mt-3" />
+        {renderChart()}
+        <hr className="mt-3" />
+      </CCardBody>
+    </CCard>
   );
 };
