@@ -34,8 +34,8 @@ const sortByPropertyKeyForMonth = (data, prop) => {
  */
 const sortByPropertyKeyForDay = (data, prop) => {
   return data.sort((a, b) => {
-    const [yearA, monthA, dayA] = a[prop].split('-').map(Number);
-    const [yearB, monthB, dayB] = b[prop].split('-').map(Number);
+    const [monthA, dayA] = a[prop].split('-').map(Number);
+    const [monthB, dayB] = b[prop].split('-').map(Number);
 
     if (monthA !== monthB) {
       return monthA - monthB;
