@@ -4,12 +4,13 @@ import { CChart } from '@coreui/react-chartjs';
 import { CCard, CCardBody, CCardHeader, CCol, CProgress, CProgressBar, CRow } from '@coreui/react-pro';
 import { getStyle } from '@coreui/utils';
 import { getUpdatedWeeklyLabel } from 'components/chart/ChartLabel';
+import FormLoadingCover from 'components/cover/FormLoadingCover';
 import { padDataArrayWithZeroForDay, totalTokenUsagePaddingObject } from 'utils/chart/ChartStatisticsProcessor';
 import { sortByPropertyKeyForDay } from 'utils/chart/sortByPropertyKeyForMonth';
 
 const weeklyLabel = getUpdatedWeeklyLabel();
 
-export const DailyTokenUsageChart = ({ data = [] }) => {
+export const DailyTokenUsageChart = ({ isLoading, data = [] }) => {
   const paddedDailyChartData = padDataArrayWithZeroForDay(data, 'name', totalTokenUsagePaddingObject);
   const sortedDailyChartData = sortByPropertyKeyForDay(paddedDailyChartData, 'name');
   const totalInputTokens = sortedDailyChartData.map((data) => data.metadata.total_input_tokens);
@@ -69,6 +70,7 @@ export const DailyTokenUsageChart = ({ data = [] }) => {
     <CCard className="m-3">
       <CCardHeader className="bold">Daily Token Usage Ratio</CCardHeader>
       <CCardBody>
+        <FormLoadingCover isLoading={isLoading} />
         <CRow>
           <CCol sm={6}>
             <div className="border-start border-start-4 border-start-info py-1 px-3 mb-3">

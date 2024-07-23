@@ -23,11 +23,17 @@ import {
   CTableHeaderCell,
   CTableRow,
 } from '@coreui/react-pro';
+import FormLoadingCover from 'components/cover/FormLoadingCover';
 import { useNavigation } from 'context/NavigationContext';
 import { isToday } from 'date-fns';
 import { formatToYMD } from 'utils/common/dateUtils';
 
-export const RecentlyAddedDocumentList = ({ standardContractList, documentCollectionList }) => {
+export const RecentlyAddedDocumentList = ({
+  isStandardContractLoading,
+  isDocumentCollectionLoading,
+  standardContractList,
+  documentCollectionList,
+}) => {
   const [standardContractDocumentTableVisible, setStandardContractDocumentTableVisible] = useState(false);
   const [newContractDocumentTableVisible, setNewContractDocumentTableVisible] = useState(false);
 
@@ -59,6 +65,7 @@ export const RecentlyAddedDocumentList = ({ standardContractList, documentCollec
             marginRight: standardContractDocumentTableVisible ? '-300px' : '-40px',
           }}
         >
+          <FormLoadingCover isLoading={isStandardContractLoading} />
           <CTable align="middle" className="mb-0 border ms-2" hover>
             <CTableHead color="light">
               <CTableRow>
@@ -174,6 +181,7 @@ export const RecentlyAddedDocumentList = ({ standardContractList, documentCollec
             marginLeft: newContractDocumentTableVisible ? '-310px' : '-15px',
           }}
         >
+          <FormLoadingCover isLoading={isDocumentCollectionLoading} />
           <CTable align="middle" className="mb-0 border me-2" hover responsive={'lg'}>
             <CTableHead color="light">
               <CTableRow>

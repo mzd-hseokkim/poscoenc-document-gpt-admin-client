@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { cilBook, cilExternalLink, cilScreenDesktop, cilUser } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
@@ -14,6 +14,7 @@ import {
   CRow,
   CSmartTable,
 } from '@coreui/react-pro';
+import FormLoadingCover from 'components/cover/FormLoadingCover';
 import { AIModelIcon } from 'components/icon/AIModelIcon';
 import { useNavigation } from 'context/NavigationContext';
 import { PiThumbsUpFill } from 'react-icons/pi';
@@ -33,9 +34,17 @@ const AnswerExample = [
   },
 ];
 
-export const RecentlyLikedChatHistoryList = ({ recentlyLikedChatList }) => {
+export const RecentlyLikedChatHistoryList = ({ isLoading, recentlyLikedChatList }) => {
   const [hoveredLikedChatIndexes, setHoveredLikedChatIndexes] = useState({});
   const { navigate } = useNavigation();
+
+  useEffect(() => {
+    const initialIndexes = {};
+    recentlyLikedChatList.forEach((_, index) => {
+      initialIndexes[index] = false;
+    });
+    setHoveredLikedChatIndexes(initialIndexes);
+  }, [recentlyLikedChatList]);
 
   const togglePopoverVisibility = (index) => {
     setHoveredLikedChatIndexes((prevState) => ({
@@ -59,6 +68,7 @@ export const RecentlyLikedChatHistoryList = ({ recentlyLikedChatList }) => {
         <small className="text-medium-emphasis"> 질문 클릭 시 해당 답변을 볼 수 있습니다.</small>
       </CCardHeader>
       <CCardBody>
+        <FormLoadingCover isLoading={isLoading} />
         <CSmartTable
           items={recentlyLikedChatList}
           // pagination={true}

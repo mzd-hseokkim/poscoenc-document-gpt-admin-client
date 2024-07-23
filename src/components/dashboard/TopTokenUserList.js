@@ -2,9 +2,10 @@ import React from 'react';
 
 import { CCard, CCardBody, CCardHeader, CSmartTable } from '@coreui/react-pro';
 import { AIModelIcon } from 'components/icon/AIModelIcon';
+import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import { formatToYMD } from 'utils/common/dateUtils';
 
-export const TopTokenUserList = ({ topTokenUsers }) => {
+export const TopTokenUserList = ({ isLoading, topTokenUsers }) => {
   return (
     <CCard className="m-3">
       <CCardHeader className="bold">
@@ -12,6 +13,8 @@ export const TopTokenUserList = ({ topTokenUsers }) => {
       </CCardHeader>
       <CCardBody>
         <CSmartTable
+          loading={isLoading}
+          noItemsLabel={<CSmartTableNoItemLabel defaultMessage="로딩중입니다..." />}
           items={topTokenUsers}
           columns={[
             {

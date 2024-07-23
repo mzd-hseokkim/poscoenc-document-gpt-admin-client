@@ -4,6 +4,7 @@ import { CChartLine } from '@coreui/react-chartjs';
 import { CButton, CButtonGroup, CCard, CCardBody, CCardFooter, CCol, CPopover, CRow } from '@coreui/react-pro';
 import { getStyle } from '@coreui/utils';
 import { getLastSixMonthsLabel, getUpdatedWeeklyLabel } from 'components/chart/ChartLabel';
+import FormLoadingCover from 'components/cover/FormLoadingCover';
 import { padDataArrayWithZeroForDay, padDataArrayWithZeroForMonth } from 'utils/chart/ChartStatisticsProcessor';
 
 const lastSixMonthLabel = getLastSixMonthsLabel();
@@ -18,7 +19,7 @@ const topChatDocumentPaddingObject = {
   metadata: {},
 };
 
-export const DocumentCollectionTopChatChart = ({ chartData = [] }) => {
+export const DocumentCollectionTopChatChart = ({ isLoading, chartData = [] }) => {
   const [hotConChartLabelOption, setHotConChartLabelOption] = useState('days');
 
   const allTime = chartData?.allTime || [{ id: 0, name: '-', rank: 0, recordedAt: '-', value: 0 }];
@@ -134,6 +135,7 @@ export const DocumentCollectionTopChatChart = ({ chartData = [] }) => {
   return (
     <CCard className="m-3">
       <CCardBody>
+        <FormLoadingCover isLoading={isLoading} />
         <CRow>
           <CCol sm={5}>
             <h4 id="HotCon" className="card-title mb-0">

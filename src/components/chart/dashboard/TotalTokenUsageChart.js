@@ -4,6 +4,7 @@ import { CChartLine } from '@coreui/react-chartjs';
 import { CButton, CButtonGroup, CCard, CCardBody, CCardFooter, CCol, CProgress, CRow } from '@coreui/react-pro';
 import { getStyle } from '@coreui/utils';
 import { getLastSixMonthsLabel, getUpdatedWeeklyLabel } from 'components/chart/ChartLabel';
+import FormLoadingCover from 'components/cover/FormLoadingCover';
 import {
   findPaddedMaxMin,
   mergeAndSumArrays,
@@ -17,7 +18,7 @@ const lastSixMonthLabel = getLastSixMonthsLabel();
 const weeklyLabel = getUpdatedWeeklyLabel();
 
 //REMIND Bing search, Dalle3 useage 는 반영하지 않았음. 추후 필요에 따라 구현해야함.
-export const TotalTokenUsageChart = ({ monthlyChartData = [], dailyChartData = [] }) => {
+export const TotalTokenUsageChart = ({ isLoading, monthlyChartData = [], dailyChartData = [] }) => {
   const [chartOptions, setChartOptions] = useState({
     labelOption: 'months',
     monthlyData: {
@@ -236,6 +237,7 @@ export const TotalTokenUsageChart = ({ monthlyChartData = [], dailyChartData = [
   return (
     <CCard className="m-3">
       <CCardBody>
+        <FormLoadingCover isLoading={isLoading} />
         <CRow>
           <CCol sm={5}>
             <h4 id="TokenUsage" className="card-title mb-0">

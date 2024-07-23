@@ -1,8 +1,9 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 
 import { cilScreenDesktop, cilUser } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import { CCard, CCardBody, CCardHeader, CCol, CProgress, CRow } from '@coreui/react-pro';
+import FormLoadingCover from 'components/cover/FormLoadingCover';
 import { AIModelIcon } from 'components/icon/AIModelIcon';
 
 const initialAIModels = [
@@ -13,7 +14,7 @@ const initialAIModels = [
   { name: 'claude-3-opus-20240229', value: 0, metadata: { rank: 5 } },
   { name: 'claude-3-sonnet-20240229', value: 0, metadata: { rank: 6 } },
 ];
-export const PopularModelsRatio = ({ byPilotMode = [], byModelName = [] }) => {
+export const PopularModelsRatio = ({ isLoading, byPilotMode = [], byModelName = [] }) => {
   // rank 로 정렬한 AI model의 토큰 사용량 총계
   const respondAIModelsUsages = initialAIModels
     .map((model) => {
@@ -32,7 +33,7 @@ export const PopularModelsRatio = ({ byPilotMode = [], byModelName = [] }) => {
     <CCard className="m-3">
       <CCardHeader className="bold">Pop-Model</CCardHeader>
       <CCardBody>
-        <Suspense />
+        <FormLoadingCover isLoading={isLoading} />
         <CRow>
           <CCol sm={6}>
             <div className="border-start border-start-4 border-start-warning py-1 px-3 mb-3">
