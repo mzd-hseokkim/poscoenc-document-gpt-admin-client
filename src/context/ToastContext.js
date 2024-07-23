@@ -1,37 +1,44 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useRef, useState } from 'react';
 
 import { CToast, CToastBody, CToastClose, CToaster } from '@coreui/react-pro';
 
-const ToastContext = createContext();
+const ToastContext = createContext({});
 
 export const ToastProvider = ({ children }) => {
-  const [toast, setToast] = useState(null);
+  const [toasts, setToasts] = useState([]);
+  const nextKeyRef = useRef(1);
 
-  /**
-   *
-   * @param message - The message to display in the toast.
-   * @param color - The color of the toast. Defaults to 'danger'.
-   * @param autoHide - Whether the toast should automatically hide. Defaults to true.
-   */
   const addToast = ({ message, color = 'danger' }, autoHide = true) => {
-    setToast({ message, color, key: Date.now(), autoHide });
+    const key = `toastNum${nextKeyRef.current}`;
+    setToasts((prevToasts) => [...prevToasts, { message, color, key, autoHide }]);
+    nextKeyRef.current = nextKeyRef.current === 10 ? 1 : nextKeyRef.current + 1;
+  };
+
+  const removeToast = (key) => {
+    setToasts((prevToasts) => prevToasts.filter((toast) => toast.key !== key));
   };
 
   return (
     <ToastContext.Provider value={{ addToast }}>
       {children}
-      <CToaster
-        placement="bottom-end"
-        push={
-          toast && (
-            <CToast autohide={toast.autoHide} visible={true} color={toast.color} className="d-flex">
-              <CToastBody className="text-white">{toast.message}</CToastBody>
-              <CToastClose className="me-2 m-auto" white />
-            </CToast>
-          )
-        }
-      />
+      <CToaster placement="bottom-end">
+        {toasts.map((toast) => (
+          <CToast
+            autoFocus
+            key={toast.key}
+            autohide={toast.autoHide}
+            visible={true}
+            color={toast.color}
+            className="d-flex"
+            onClose={() => removeToast(toast.key)}
+          >
+            <CToastBody className="text-white">{toast.message}</CToastBody>
+            <CToastClose className="me-2 m-auto" white />
+          </CToast>
+        ))}
+      </CToaster>
     </ToastContext.Provider>
   );
 };
+
 export const useToast = () => useContext(ToastContext);
