@@ -1,16 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import {
-  cilArrowThickFromLeft,
-  cilArrowThickFromRight,
-  cilBook,
-  cilChevronLeft,
-  cilChevronRight,
-  cilExternalLink,
-  cilScreenDesktop,
-  cilSitemap,
-  cilUser,
-} from '@coreui/icons';
+import { cilBook, cilExternalLink, cilScreenDesktop, cilUser } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import {
   CBadge,
@@ -24,12 +14,6 @@ import {
   CProgress,
   CRow,
   CSmartTable,
-  CTable,
-  CTableBody,
-  CTableDataCell,
-  CTableHead,
-  CTableHeaderCell,
-  CTableRow,
 } from '@coreui/react-pro';
 import { DailyTokenUsageChart } from 'components/chart/dashboard/DailyTokenUsageChart';
 import { DocumentCollectionTopChatChart } from 'components/chart/dashboard/DocumentCollectionTopChatChart';
@@ -39,10 +23,10 @@ import { MonthlyPaymentWidget } from 'components/chart/dashboard/widzet/MonthlyP
 import { MonthlyStandardContractCountWidget } from 'components/chart/dashboard/widzet/MonthlyStandardContractCountWidget';
 import { MonthlyUserAccountCountWidget } from 'components/chart/dashboard/widzet/MonthlyUserAccountCountWidget';
 import { OperationRateWidget } from 'components/chart/dashboard/widzet/OperationRateWidget';
+import { RecentlyAddedDocumentList } from 'components/dashboard/RecentlyAddedDocumentList';
 import { AIModelIcon } from 'components/icon/AIModelIcon';
 import { useNavigation } from 'context/NavigationContext';
 import { useToast } from 'context/ToastContext';
-import { isToday } from 'date-fns';
 import { PiThumbsUpFill } from 'react-icons/pi';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
@@ -108,9 +92,6 @@ const DashboardPage = () => {
 
   // 모든 AI Model의 토큰 사용량 총계
   const totalTokenUsageCalculatedByAIModel = respondAIModelsUsages.reduce((acc, item) => acc + item.value, 0);
-
-  const [standardContractDocumentTableVisible, setStandardContractDocumentTableVisible] = useState(false);
-  const [newContractDocumentTableVisible, setNewContractDocumentTableVisible] = useState(false);
 
   const [errorStates, setErrorStates] = useState({
     documentStatistics: false,
@@ -228,21 +209,21 @@ const DashboardPage = () => {
     void fetchData();
   }, [addToast, errorStates]);
 
-  const handleOpenNewContractDocumentTable = () => {
-    if (standardContractDocumentTableVisible) {
-      return;
-    }
-
-    setNewContractDocumentTableVisible(!newContractDocumentTableVisible);
-  };
-
-  const handleOpenStandardContractTable = () => {
-    if (newContractDocumentTableVisible) {
-      return;
-    }
-
-    setStandardContractDocumentTableVisible(!standardContractDocumentTableVisible);
-  };
+  // const handleOpenNewContractDocumentTable = () => {
+  //   if (standardContractDocumentTableVisible) {
+  //     return;
+  //   }
+  //
+  //   setNewContractDocumentTableVisible(!newContractDocumentTableVisible);
+  // };
+  //
+  // const handleOpenStandardContractTable = () => {
+  //   if (newContractDocumentTableVisible) {
+  //     return;
+  //   }
+  //
+  //   setStandardContractDocumentTableVisible(!standardContractDocumentTableVisible);
+  // };
 
   //REMIND 응답받은 entry 의 id 로 검색해서 가져오거나, 한번에 받아오거나 결정 필요.
   const AnswerExample = [
@@ -314,240 +295,10 @@ const DashboardPage = () => {
 
       <CRow className="mt-2">
         <CCol sm={6}>
-          <CCard className="m-3" style={{ minHeight: '20rem' }}>
-            <CCardHeader className="bold"> 최근 등록된 표준 계약서 & 계약 문서 </CCardHeader>
-            <CCardBody className="table-wrapper">
-              <div
-                className={`table-container ${standardContractDocumentTableVisible ? 'table-expanded-right' : ''}`}
-                style={{
-                  zIndex: standardContractDocumentTableVisible ? 2 : 1,
-                  opacity: newContractDocumentTableVisible ? 0.15 : 1,
-                  marginRight: standardContractDocumentTableVisible ? '-300px' : '-40px',
-                }}
-              >
-                <CTable align="middle" className="mb-0 border ms-2" hover>
-                  <CTableHead color="light">
-                    <CTableRow>
-                      <CTableHeaderCell
-                        style={{ cursor: newContractDocumentTableVisible ? '' : 'pointer' }}
-                        onClick={handleOpenStandardContractTable}
-                      >
-                        Standard Con
-                        <CIcon
-                          style={{ marginLeft: '1rem' }}
-                          icon={standardContractDocumentTableVisible ? cilChevronLeft : cilChevronRight}
-                        />
-                      </CTableHeaderCell>
-
-                      <CTableHeaderCell>
-                        <CCollapse visible={standardContractDocumentTableVisible} horizontal>
-                          <div className="d-flex justify-content-center">
-                            <CPopover
-                              placement="top"
-                              trigger={['hover', 'focus']}
-                              content={'해당 표준 계약서에 의해 작성된 계약서 개수입니다.'}
-                            >
-                              <CIcon icon={cilSitemap} size={'lg'} />
-                            </CPopover>
-                          </div>
-                        </CCollapse>
-                      </CTableHeaderCell>
-                      <CTableHeaderCell>
-                        <CCollapse visible={standardContractDocumentTableVisible} horizontal>
-                          <p className="collapsable-table-header">CreatedAt</p>
-                        </CCollapse>
-                      </CTableHeaderCell>
-
-                      {standardContractDocumentTableVisible && (
-                        <CTableHeaderCell>
-                          <CCollapse visible={standardContractDocumentTableVisible} horizontal></CCollapse>
-                        </CTableHeaderCell>
-                      )}
-                    </CTableRow>
-                  </CTableHead>
-                  <CTableBody>
-                    {recentlyAddedStandardContractList.map((item, index) => (
-                      <CTableRow key={index}>
-                        <CTableDataCell>
-                          {item.name.length > 12 ? (
-                            <CPopover content={item.name} placement="bottom" trigger="hover" delay={300}>
-                              <div
-                                className="overflow-hidden text-truncate"
-                                style={{
-                                  maxWidth: '11rem',
-                                }}
-                              >
-                                {item.name}
-                              </div>
-                            </CPopover>
-                          ) : (
-                            <div
-                              className="overflow-hidden text-truncate"
-                              style={{
-                                maxWidth: '11rem',
-                              }}
-                            >
-                              {item.name}
-                            </div>
-                          )}
-                          {!standardContractDocumentTableVisible && isToday(new Date(item.createdAt)) && (
-                            <CBadge
-                              color="primary"
-                              style={{
-                                position: 'absolute',
-                                top: 12 + 41 * (index + 1),
-                                right: 1.5,
-                              }}
-                            >
-                              Today
-                            </CBadge>
-                          )}
-                        </CTableDataCell>
-
-                        <CTableDataCell>
-                          <CCollapse visible={standardContractDocumentTableVisible} horizontal>
-                            <div className="fw-semibold text-nowrap align-middle">{item.referCnt} 개</div>
-                          </CCollapse>
-                        </CTableDataCell>
-                        <CTableDataCell>
-                          <CCollapse visible={standardContractDocumentTableVisible} horizontal>
-                            <div className="small text-medium-emphasis text-nowrap">{formatToYMD(item.createdAt)}</div>
-                          </CCollapse>
-                        </CTableDataCell>
-
-                        {standardContractDocumentTableVisible && (
-                          <CTableDataCell>
-                            <CCollapse visible={standardContractDocumentTableVisible} horizontal>
-                              <CIcon
-                                style={{ cursor: 'pointer' }}
-                                icon={cilExternalLink}
-                                //REMIND ID 파라미터 추가해서 해당 문서 보여주도록 수정
-                                onClick={() => navigate(`/standard-contracts/management?id=${item.id}`)}
-                              />
-                            </CCollapse>
-                          </CTableDataCell>
-                        )}
-                      </CTableRow>
-                    ))}
-                  </CTableBody>
-                </CTable>
-              </div>
-              <div
-                className={`table-container ${newContractDocumentTableVisible ? 'table-expanded-left' : ''}`}
-                style={{
-                  zIndex: newContractDocumentTableVisible ? 2 : 1,
-                  opacity: standardContractDocumentTableVisible ? 0.15 : 1,
-                  marginLeft: newContractDocumentTableVisible ? '-310px' : '-15px',
-                }}
-              >
-                <CTable align="middle" className="mb-0 border me-2" hover responsive={'lg'}>
-                  <CTableHead color="light">
-                    <CTableRow>
-                      <CTableHeaderCell
-                        style={{ cursor: standardContractDocumentTableVisible ? '' : 'pointer' }}
-                        onClick={handleOpenNewContractDocumentTable}
-                      >
-                        Con
-                        <CIcon
-                          style={{ marginLeft: '5rem' }}
-                          icon={newContractDocumentTableVisible ? cilArrowThickFromLeft : cilArrowThickFromRight}
-                        />
-                      </CTableHeaderCell>
-                      <CTableHeaderCell>
-                        <CCollapse visible={newContractDocumentTableVisible} horizontal>
-                          <p className="collapsable-table-header">New Chat</p>
-                        </CCollapse>
-                      </CTableHeaderCell>
-                      <CTableHeaderCell>
-                        <CCollapse visible={newContractDocumentTableVisible} horizontal>
-                          <p className="collapsable-table-header">CreatedAt</p>
-                        </CCollapse>
-                      </CTableHeaderCell>
-
-                      {newContractDocumentTableVisible && (
-                        <>
-                          <CTableHeaderCell>
-                            <CCollapse visible={newContractDocumentTableVisible} horizontal></CCollapse>
-                          </CTableHeaderCell>
-                        </>
-                      )}
-                    </CTableRow>
-                  </CTableHead>
-                  <CTableBody>
-                    {recentlyAddedDocumentCollectionList.map((item, index) => (
-                      <CTableRow key={index}>
-                        <CTableDataCell>
-                          {item.name.length > 12 ? (
-                            <CPopover content={item.name} placement="bottom" trigger="hover" delay={300}>
-                              <div
-                                className="overflow-hidden text-truncate"
-                                style={{
-                                  maxWidth: '11rem',
-                                }}
-                              >
-                                {item.name}
-                              </div>
-                            </CPopover>
-                          ) : (
-                            <div
-                              className="overflow-hidden text-truncate"
-                              style={{
-                                maxWidth: '11rem',
-                              }}
-                            >
-                              {item.name}
-                            </div>
-                          )}
-                          {!newContractDocumentTableVisible && isToday(new Date(item.createdAt)) && (
-                            <CBadge
-                              color="primary"
-                              style={{
-                                position: 'absolute',
-                                top: 12 + 41 * (index + 1),
-                                right: 1.5,
-                              }}
-                            >
-                              Today
-                            </CBadge>
-                          )}
-                        </CTableDataCell>
-
-                        <CTableDataCell>
-                          <CCollapse visible={newContractDocumentTableVisible} horizontal>
-                            <div className="collapsable-table-data">
-                              {/*<div className="small text-medium-emphasis">New</div>*/}
-                              <div className="fw-semibold text-nowrap small text-medium-emphasis">
-                                {formatToYMD(item.metadata.lastChatAt) || 'No chat'}
-                              </div>
-                            </div>
-                          </CCollapse>
-                        </CTableDataCell>
-                        <CTableDataCell>
-                          <CCollapse visible={newContractDocumentTableVisible} horizontal>
-                            <div className="small text-medium-emphasis text-nowrap">{formatToYMD(item.createdAt)}</div>
-                          </CCollapse>
-                        </CTableDataCell>
-                        {newContractDocumentTableVisible && (
-                          <>
-                            <CTableDataCell>
-                              <CCollapse visible={newContractDocumentTableVisible} horizontal>
-                                <CIcon
-                                  style={{ cursor: 'pointer' }}
-                                  icon={cilExternalLink}
-                                  //REMIND 아래 링크에서 없는 아이디로 요청 할 경우 서버에서 오류발생이라는 에러가 잘못뜨고있다. 찾을수없음으로 변경
-                                  onClick={() => navigate(`/document-collections/management?id=${item.id}`)}
-                                />
-                              </CCollapse>
-                            </CTableDataCell>
-                          </>
-                        )}
-                      </CTableRow>
-                    ))}
-                  </CTableBody>
-                </CTable>
-              </div>
-            </CCardBody>
-          </CCard>
+          <RecentlyAddedDocumentList
+            documentCollectionList={recentlyAddedDocumentCollectionList}
+            standardContractList={recentlyAddedStandardContractList}
+          />
         </CCol>
 
         <CCol sm={6}>
