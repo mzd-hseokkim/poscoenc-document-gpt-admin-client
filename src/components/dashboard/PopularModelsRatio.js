@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 
 import { cilScreenDesktop, cilUser } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
@@ -13,20 +13,18 @@ const initialAIModels = [
   { name: 'claude-3-opus-20240229', value: 0, metadata: { rank: 5 } },
   { name: 'claude-3-sonnet-20240229', value: 0, metadata: { rank: 6 } },
 ];
-export const PopularModelsRatio = ({ totalTokenUsages }) => {
+export const PopularModelsRatio = ({ byPilotMode = [], byModelName = [] }) => {
   // rank 로 정렬한 AI model의 토큰 사용량 총계
   const respondAIModelsUsages = initialAIModels
     .map((model) => {
-      const respondModel = totalTokenUsages?.total?.byModelName.find((rm) => rm.name === model.name);
+      const respondModel = byModelName.find((rm) => rm?.name === model.name);
       return respondModel ? { ...model, value: respondModel.value, metadata: respondModel.metadata } : model;
     })
     .sort((a, b) => a.metadata.rank - b.metadata.rank);
 
   // 모든 Pilot 모드의 토큰 사용량 총계
-  const totalTokenUsageCalculatedByPilotMode = totalTokenUsages?.total?.byPilotMode?.reduce(
-    (acc, item) => acc + item.value,
-    0
-  );
+  const totalTokenUsageCalculatedByPilotMode = byPilotMode.reduce((acc, item) => acc + item.value, 0);
+
   // 모든 AI Model의 토큰 사용량 총계
   const totalTokenUsageCalculatedByAIModel = respondAIModelsUsages.reduce((acc, item) => acc + item.value, 0);
 
@@ -34,14 +32,15 @@ export const PopularModelsRatio = ({ totalTokenUsages }) => {
     <CCard className="m-3">
       <CCardHeader className="bold">Pop-Model</CCardHeader>
       <CCardBody>
+        <Suspense />
         <CRow>
           <CCol sm={6}>
             <div className="border-start border-start-4 border-start-warning py-1 px-3 mb-3">
               <div className="text-medium-emphasis small">Popular Pilot Mode</div>
               <div className="fs-5 fw-semibold">
-                {totalTokenUsages?.total?.byPilotMode?.reduce(
+                {byPilotMode.reduce(
                   (maxItem, currentItem) => (currentItem.value > maxItem.value ? currentItem : maxItem),
-                  totalTokenUsages?.total?.byPilotMode?.[0].name
+                  byPilotMode?.[0]?.name
                 ) === 'C'
                   ? 'Co'
                   : 'Auto'}
@@ -58,7 +57,7 @@ export const PopularModelsRatio = ({ totalTokenUsages }) => {
 
         <hr className="mt-0" />
 
-        {totalTokenUsages?.total?.byPilotMode?.map((item, index) => (
+        {byPilotMode.map((item, index) => (
           <div className="progress-group mb-4" key={index}>
             <div className="progress-group-header">
               <CIcon className="me-2" icon={item.name === 'C' ? cilUser : cilScreenDesktop} size="lg" />

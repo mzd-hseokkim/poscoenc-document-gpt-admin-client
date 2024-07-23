@@ -160,26 +160,6 @@ const DashboardPage = () => {
     void fetchData();
   }, [addToast, errorStates]);
 
-  // const handleOpenNewContractDocumentTable = () => {
-  //   if (standardContractDocumentTableVisible) {
-  //     return;
-  //   }
-  //
-  //   setNewContractDocumentTableVisible(!newContractDocumentTableVisible);
-  // };
-  //
-  // const handleOpenStandardContractTable = () => {
-  //   if (newContractDocumentTableVisible) {
-  //     return;
-  //   }
-  //
-  //   setStandardContractDocumentTableVisible(!standardContractDocumentTableVisible);
-  // };
-
-  // LikedChat S ===================
-
-  // LikedChat E ===================
-
   return (
     <div className="d-flex flex-column flex-grow-1 overflow-auto" style={{ width: '100%' }}>
       {/*REMIND Widget 의 그래프 구현 필요*/}
@@ -238,7 +218,10 @@ const DashboardPage = () => {
         </CCol>
 
         <CCol xs={12} md={6} xl={6}>
-          <PopularModelsRatio totalTokenUsages={totalTokenUsages} />
+          <PopularModelsRatio
+            byModelName={totalTokenUsages?.total?.byModelName}
+            byPilotMode={totalTokenUsages?.total?.byPilotMode}
+          />
         </CCol>
       </CRow>
       <CRow>
