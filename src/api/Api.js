@@ -6,7 +6,6 @@ const SERVER_ENDPOINT = process.env.REACT_APP_SERVER_ENDPOINT;
 const api = axios.create({
   baseURL: SERVER_ENDPOINT,
 });
-
 export const setupInterceptors = ({ navigate, addToast }) => {
   api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
@@ -26,7 +25,7 @@ export const setupInterceptors = ({ navigate, addToast }) => {
       } else {
         localStorage.removeItem('token');
         newConfig.headers.Authorization = '';
-        addToast({ message: '세션이 만료되었습니다. 다시 로그인 해주세요. log:Api.js' }, false);
+        addToast({ message: '세션이 만료되었습니다. 다시 로그인 해주세요.' }, false);
         navigate('/sign-in');
       }
     } else {
@@ -55,11 +54,12 @@ export const setupInterceptors = ({ navigate, addToast }) => {
         }
       } else if (error.request) {
         addToast({ message: '서버에서 응답이 없습니다. 잠시 후 다시 시도해 주세요.' }, false);
-        console.error(error.request);
+        return;
       } else {
+        // 요청 설정 중에 오류가 발생한 경우 등
         addToast({ message: '알 수 없는 오류가 발생하였습니다. 잠시 후 다시 시도해 주세요.' });
+        return;
       }
-      console.log('Api.js Error', error.message);
       throw error;
     }
   );

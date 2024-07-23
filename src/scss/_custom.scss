@@ -1,4 +1,7 @@
 // Here you can add other styles
+
+@import 'src/scss/function';
+
 // ChatHistory QnA style S
 .code-block {
   position: relative;
@@ -89,3 +92,39 @@
 
 // Global Loading Cover E
 
+
+// Dashboard Style S
+
+.table-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  padding: rem(16) rem(16);
+}
+
+.table-container {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+
+.table-expanded-left {
+  z-index: 2;
+}
+
+.table-expanded-right {
+  z-index: 2;
+}
+
+.collapsable-table-header {
+  display: table-cell;
+  vertical-align: inherit;
+  white-space: nowrap;
+}
+
+.collapsable-table-data {
+  display: table-row;
+  vertical-align: inherit;
+}
+
+// Dashboard Style E

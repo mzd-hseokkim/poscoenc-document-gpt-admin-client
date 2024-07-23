@@ -311,7 +311,7 @@ const AdminManagementPage = () => {
                 columns={adminColumnConfig}
                 items={adminList}
                 itemsPerPage={pageableData.size}
-                itemsPerPageLabel="페이지당 관리자 개수"
+                itemsPerPageLabel="페이지당 관리자 수"
                 itemsPerPageSelect
                 loading={searchResultIsLoading}
                 noItemsLabel={

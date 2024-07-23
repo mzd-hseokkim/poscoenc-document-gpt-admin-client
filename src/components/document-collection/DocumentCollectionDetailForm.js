@@ -22,8 +22,8 @@ import {
 } from '@coreui/react-pro';
 import DocumentFileStatusBadge from 'components/badge/DocumentFileStatusBadge';
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
+import MonthLabelGenerator from 'components/chart/MonthLabelGenerator';
 import { TokenUsageChart } from 'components/chart/TokenUsageChart';
-import { padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import { AuditFields } from 'components/form/AuditFields';
 import FormInputGrid from 'components/input/FormInputGrid';
@@ -37,11 +37,11 @@ import DocumentCollectionFileService from 'services/document-collection/Document
 import DocumentCollectionService from 'services/document-collection/DocumentCollectionService';
 import StatisticsService from 'services/statistics/StatisticsService';
 import { userIdSelector } from 'states/jwtTokenState';
-import { sortByAggregationKey } from 'utils/chart/sortByAggregationKey';
+import { padDataArrayWithZeroForMonth, tokenStatisticsPaddingObject } from 'utils/chart/ChartStatisticsProcessor';
+import { sortByPropertyKeyForMonth } from 'utils/chart/sortByPropertyKeyForMonth';
 import { formatToYMD } from 'utils/common/dateUtils';
 import { formatFileSize } from 'utils/common/formatFileSize';
 import formModes from 'utils/common/formModes';
-import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
 import { itemNameValidationPattern } from 'utils/common/validationUtils';
 
 const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocumentCollectionList }) => {
@@ -101,7 +101,7 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
     },
     {
       name: 'status',
-      label: '문서 상태',
+      label: '업로드 상태',
       badge: 'DocumentFileStatusBadge',
     },
   ];
@@ -154,8 +154,14 @@ const DocumentCollectionDetailForm = ({ initialFormMode, closeModal, refreshDocu
         endDate: new Date().toISOString().split('T')[0],
       });
 
-      const sortedData = sortByAggregationKey(responseData?.list);
-      const paddedData = padDataArrayWithZero(sortedData, currentMonth);
+      const sortedData = sortByPropertyKeyForMonth(responseData?.list, 'aggregationKey');
+      const paddedData = padDataArrayWithZeroForMonth(
+        sortedData,
+        currentMonth,
+        12,
+        'aggregationKey',
+        tokenStatisticsPaddingObject
+      );
 
       setStatisticsData({
         inputTokenData: paddedData.map((item) => item.sumInputTokens),

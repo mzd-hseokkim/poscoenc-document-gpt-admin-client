@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { CButton, CCard, CCardBody, CCol, CForm, CFormSelect, CInputGroup, CRow, CSmartTable } from '@coreui/react-pro';
 import ExcelDownloadCButton from 'components/button/ExcelDownloadCButton';
+import MonthLabelGenerator from 'components/chart/MonthLabelGenerator';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import { CSmartTableNoItemLabel } from 'components/label/CSmartTableNoItemLabel';
 import ModalContainer from 'components/modal/ModalContainer';
@@ -10,7 +11,6 @@ import { useToast } from 'context/ToastContext';
 import useModal from 'hooks/useModal';
 import usePagination from 'hooks/usePagination';
 import statisticsService from 'services/statistics/StatisticsService';
-import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
 import { CommonColumnSorterCustomProps, CommonTableCustomProps } from 'utils/common/smartTablePropsConfig';
 import { statisticsUserColumnConfig } from 'views/pages/statistics/statisticsUserColumnConfig';
 

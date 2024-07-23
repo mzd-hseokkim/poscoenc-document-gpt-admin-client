@@ -1,20 +1,27 @@
-import { createStore } from 'redux';
+import { configureStore, createSlice } from '@reduxjs/toolkit';
 
-//REMIND update to use Redux Toolkit
-const initialState = {
+const layoutState = {
   sidebarShow: true,
   asideShow: false,
   theme: 'default',
 };
 
-const changeState = (state = initialState, { type, ...rest }) => {
-  switch (type) {
-    case 'set':
-      return { ...state, ...rest };
-    default:
-      return state;
-  }
-};
+const layoutSlice = createSlice({
+  name: 'layout',
+  initialState: layoutState,
+  reducers: {
+    set(state, action) {
+      return { ...state, ...action.payload };
+    },
+  },
+});
 
-const store = createStore(changeState);
+export const { set } = layoutSlice.actions;
+
+const store = configureStore({
+  reducer: {
+    layout: layoutSlice.reducer,
+  },
+});
+
 export default store;

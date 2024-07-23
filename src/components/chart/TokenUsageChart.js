@@ -2,8 +2,8 @@ import React from 'react';
 
 import { CChart } from '@coreui/react-chartjs';
 import { getStyle } from '@coreui/utils';
-import { mergeAndSumArrays } from 'components/chart/utils/ChartStatisticsProcessor';
-import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
+import MonthLabelGenerator from 'components/chart/MonthLabelGenerator';
+import { mergeAndSumArrays } from 'utils/chart/ChartStatisticsProcessor';
 
 export const TokenUsageChart = ({ inputTokenData, outputTokenData }) => {
   return (

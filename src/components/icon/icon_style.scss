@@ -1,0 +1,33 @@
+@import 'src/scss/function';
+
+.ai-model-icon {
+  width: rem(24) !important;
+  height: rem(24) !important;
+  background-position: 50% 50%;
+  background-size: rem(24) rem(24);
+  margin-right: rem(12);
+}
+
+.gpt-4o {
+  background-image: url(../../assets/icons/open-ai.svg);
+}
+
+.llama3-70b-8192 {
+  background-image: url(../../assets/icons/llama.png);
+}
+
+.llama3-8b-8192 {
+  background-image: url(../../assets/icons/alpaca.png);
+}
+
+.mixtral-8x7b-32768 {
+  background-image: url(../../assets/icons/mixtral.png);
+}
+
+.claude-3-opus-20240229 {
+  background-image: url(../../assets/icons/claude-3-opus.svg);
+}
+
+.claude-3-sonnet-20240229 {
+  background-image: url(../../assets/icons/claude-3-opus.svg);
+}

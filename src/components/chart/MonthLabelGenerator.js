@@ -1,4 +1,4 @@
-const monthsNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+import { monthlyLabel } from 'components/chart/ChartLabel';
 
 const getPastYearMonths = () => {
   const today = new Date();
@@ -23,7 +23,7 @@ const pastYearMonthsChartLabels = () => {
       label += `${year}년 / `;
     }
 
-    label += monthsNames[monthIndex];
+    label += monthlyLabel[monthIndex];
     return label;
   });
 };
@@ -32,7 +32,7 @@ const pastYearMonthsSelectBoxLabels = () => {
   const months = getPastYearMonths();
   let previousYear = null;
   const options = months.map(({ monthIndex, year }) => {
-    const label = monthsNames[monthIndex];
+    const label = monthlyLabel[monthIndex];
     const value = `${year}-${(monthIndex + 1).toString().padStart(2, '0')}`;
 
     if (previousYear !== year) {

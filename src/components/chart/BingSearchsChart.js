@@ -4,11 +4,12 @@ import { cibBing, cilOptions } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import { CChart } from '@coreui/react-chartjs';
 import { CDropdown, CDropdownItem, CDropdownMenu, CDropdownToggle, CWidgetStatsD } from '@coreui/react-pro';
+import MonthLabelGenerator from 'components/chart/MonthLabelGenerator';
 import { getNonGridLineChartOptions } from 'components/chart/options/getNonGridLineChartOptions';
-import { calculateGrowthRateWithIcon } from 'components/chart/utils/ChartStatisticsProcessor';
-import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
+import { calculateMonthOnMonthGrowthRateWithArrow, findPaddedMaxMin } from 'utils/chart/ChartStatisticsProcessor';
 
 export const BingSearchsChart = ({ statisticsData }) => {
+  const { paddedMonthlyMax, paddedDailyMin } = findPaddedMaxMin(statisticsData);
   return (
     <CWidgetStatsD
       className="mb-4"
@@ -47,7 +48,18 @@ export const BingSearchsChart = ({ statisticsData }) => {
                 },
               ],
             }}
-            options={getNonGridLineChartOptions()}
+            options={getNonGridLineChartOptions({
+              scales: {
+                x: {
+                  display: false,
+                },
+                y: {
+                  display: false,
+                  min: paddedMin,
+                  max: paddedMax,
+                },
+              },
+            })}
           />
         ),
       }}
@@ -56,7 +68,7 @@ export const BingSearchsChart = ({ statisticsData }) => {
         { title: 'Bing 검색 횟수', value: `${statisticsData[11]} 회` },
         {
           title: '전월 대비',
-          value: calculateGrowthRateWithIcon(statisticsData[10], statisticsData[11]),
+          value: calculateMonthOnMonthGrowthRateWithArrow(statisticsData[10], statisticsData[11]),
         },
       ]}
       style={{

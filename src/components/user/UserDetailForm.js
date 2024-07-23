@@ -18,8 +18,8 @@ import {
 import DetailFormActionButtons from 'components/button/DetailFormActionButtons';
 import { BingSearchsChart } from 'components/chart/BingSearchsChart';
 import { DallE3GenerationChart } from 'components/chart/DallE3GenerationChart';
+import MonthLabelGenerator from 'components/chart/MonthLabelGenerator';
 import { TokenUsageChart } from 'components/chart/TokenUsageChart';
-import { padDataArrayWithZero } from 'components/chart/utils/ChartStatisticsProcessor';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import { AuditFields } from 'components/form/AuditFields';
 import FormInputGrid from 'components/input/FormInputGrid';
@@ -28,10 +28,10 @@ import { useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
 import StatisticsService from 'services/statistics/StatisticsService';
 import UserService from 'services/UserService';
-import { sortByAggregationKey } from 'utils/chart/sortByAggregationKey';
+import { padDataArrayWithZeroForMonth, tokenStatisticsPaddingObject } from 'utils/chart/ChartStatisticsProcessor';
+import { sortByPropertyKeyForMonth } from 'utils/chart/sortByPropertyKeyForMonth';
 import { formatToYMD } from 'utils/common/dateUtils';
 import formModes from 'utils/common/formModes';
-import MonthLabelGenerator from 'utils/common/MonthLabelGenerator';
 import { emailValidationPattern } from 'utils/common/validationUtils';
 
 const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {
@@ -127,8 +127,14 @@ const UserDetailForm = ({ initialFormMode, closeModal, fetchUserList }) => {
         endDate: new Date().toISOString().split('T')[0],
       });
 
-      const sortedData = sortByAggregationKey(responseData?.list);
-      const paddedData = padDataArrayWithZero(sortedData, currentMonth);
+      const sortedData = sortByPropertyKeyForMonth(responseData?.list, 'aggregationKey');
+      const paddedData = padDataArrayWithZeroForMonth(
+        sortedData,
+        currentMonth,
+        12,
+        'aggregationKey',
+        tokenStatisticsPaddingObject
+      );
 
       setStatisticsData({
         inputTokenData: paddedData.map((item) => item.sumInputTokens),

@@ -44,7 +44,7 @@ const routes = [
     element: ChatHistoryManagementPage,
   },
   {
-    path: '/standard-contract/management',
+    path: '/standard-contracts/management',
     exact: true,
     name: '표준 계약서 관리',
     element: StandardContractDocumentPage,

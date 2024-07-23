@@ -1,621 +1,251 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-import {
-  cibFacebook,
-  cibGoogle,
-  cibLinkedin,
-  cibTwitter,
-  cilArrowTop,
-  cilCloudDownload,
-  cilOptions,
-  cilUser,
-  cilUserFemale,
-} from '@coreui/icons';
-import CIcon from '@coreui/icons-react';
-import { CChartBar, CChartLine } from '@coreui/react-chartjs';
-import {
-  CButton,
-  CButtonGroup,
-  CCard,
-  CCardBody,
-  CCardFooter,
-  CCardHeader,
-  CCol,
-  CDropdown,
-  CDropdownItem,
-  CDropdownMenu,
-  CDropdownToggle,
-  CProgress,
-  CRow,
-  CWidgetStatsA,
-} from '@coreui/react-pro';
-import { getStyle, hexToRgba } from '@coreui/utils';
+import { CCol, CRow } from '@coreui/react-pro';
+import { DailyTokenUsageChart } from 'components/chart/dashboard/DailyTokenUsageChart';
+import { DocumentCollectionTopChatChart } from 'components/chart/dashboard/DocumentCollectionTopChatChart';
+import { TotalTokenUsageChart } from 'components/chart/dashboard/TotalTokenUsageChart';
+import { MonthlyDocumentCollectionCountWidget } from 'components/chart/dashboard/widzet/MonthlyDocumentCollectionCountWidget';
+import { MonthlyPaymentWidget } from 'components/chart/dashboard/widzet/MonthlyPaymentWidget';
+import { MonthlyStandardContractCountWidget } from 'components/chart/dashboard/widzet/MonthlyStandardContractCountWidget';
+import { MonthlyUserAccountCountWidget } from 'components/chart/dashboard/widzet/MonthlyUserAccountCountWidget';
+import { OperationRateWidget } from 'components/chart/dashboard/widzet/OperationRateWidget';
+import { PopularModelsRatio } from 'components/dashboard/PopularModelsRatio';
+import { RecentlyAddedDocumentList } from 'components/dashboard/RecentlyAddedDocumentList';
+import { RecentlyLikedChatHistoryList } from 'components/dashboard/RecentlyLikedChatHistoryList';
+import { TopTokenUserList } from 'components/dashboard/TopTokenUserList';
+import { useToast } from 'context/ToastContext';
+import DashBoardService from 'services/dashboard/DashBoardService';
+import { sortByPropertyKeyForMonth } from 'utils/chart/sortByPropertyKeyForMonth';
+import { formatToIsoEndDate, formatToIsoStartDate, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
 
 const DashboardPage = () => {
-  const random = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
+  const { addToast } = useToast();
 
-  const progressExample = [
-    { title: 'Visits', value: '29.703 Users', percent: 40, color: 'success' },
-    { title: 'Unique', value: '24.093 Users', percent: 20, color: 'info' },
-    { title: 'Pageviews', value: '78.706 Views', percent: 60, color: 'warning' },
-    { title: 'New Users', value: '22.123 Users', percent: 80, color: 'danger' },
-    { title: 'Bounce Rate', value: 'Average Rate', percent: 40.15, color: 'primary' },
-  ];
+  const [totalDocumentCount, setTotalDocumentCount] = useState(0);
+  const [recentlyAddedDocumentCollectionList, setRecentlyAddedDocumentCollectionList] = useState([]);
+  const [accumulatedMonthlyDocumentCollection, setAccumulatedMonthlyDocumentCollection] = useState([]);
+  const [topChatDocuments, setTopChatDocuments] = useState([]);
+  const [isDocumentStatisticsLoading, setIsDocumentStatisticsLoading] = useState(false);
+  const [isPeriodDocumentStatisticsLoading, setIsPeriodDocumentStatisticsLoading] = useState(false);
 
-  const progressGroupExample1 = [
-    { title: 'Monday', value1: 34, value2: 78 },
-    { title: 'Tuesday', value1: 56, value2: 94 },
-    { title: 'Wednesday', value1: 12, value2: 67 },
-    { title: 'Thursday', value1: 43, value2: 91 },
-    { title: 'Friday', value1: 22, value2: 73 },
-    { title: 'Saturday', value1: 53, value2: 82 },
-    { title: 'Sunday', value1: 9, value2: 69 },
-  ];
+  const [totalStandardContractDocumentCount, setTotalStandardContractDocumentCount] = useState(0);
+  const [recentlyAddedStandardContractList, setRecentlyAddedStandardContractList] = useState([]);
+  const [isStandardContractLoading, setIsStandardContractLoading] = useState(false);
 
-  const progressGroupExample2 = [
-    { title: 'Male', icon: cilUser, value: 53 },
-    { title: 'Female', icon: cilUserFemale, value: 43 },
-  ];
+  const [totalUserCount, setTotalUserCount] = useState(0);
+  const [topTokenUsers, setTopTokenUsers] = useState([]);
+  const [isUserStatisticsLoading, setIsUserStatisticsLoading] = useState(false);
 
-  const progressGroupExample3 = [
-    { title: 'Organic Search', icon: cibGoogle, percent: 56, value: '191,235' },
-    { title: 'Facebook', icon: cibFacebook, percent: 15, value: '51,223' },
-    { title: 'Twitter', icon: cibTwitter, percent: 11, value: '37,564' },
-    { title: 'LinkedIn', icon: cibLinkedin, percent: 8, value: '27,319' },
-  ];
+  const [recentlyLikedChatList, setRecentlyLikedChatList] = useState([]);
+  const [hoveredLikedChatIndexes, setHoveredLikedChatIndexes] = useState({});
+  const [isRecentlyLikedChatLoading, setIsRecentlyLikedChatLoading] = useState(false);
+
+  //Daily Token Usage Ratio
+  const [dailyTokenUsages, setDailyTokenUsages] = useState([]);
+  //전체 토큰 사용량 추이 ( 지난 7일 사용량, 지난 6개월 사용량, 파일럿 모드 별 사용량, AI모델 별 사용량 )
+  const [totalTokenUsages, setTotalTokenUsages] = useState([]);
+  const [isTokenUsageStatisticsLoading, setIsTokenUsageStatisticsLoading] = useState(false);
+
+  const [errorStates, setErrorStates] = useState({
+    documentStatistics: false,
+    standardContract: false,
+    userStatistics: false,
+    recentlyLikedChat: false,
+    totalTokenUsages: false,
+    recentlyAddedDocument: false,
+  });
+
+  //REMIND 문서 공유 횟수 추가 고려
+
+  useEffect(() => {
+    //REMIND error message 관련해서, 에러가 여러개 날 경우 4개의 promise 경합이 발생해서 4개의 에러 메세지 대신 하나의 에러메세지가뜬다. 한개가 여러번 뜨던가.
+    const fetchData = async () => {
+      if (Object.values(errorStates).some((hasError) => hasError)) {
+        return;
+      }
+
+      const requests = [
+        {
+          loadingFlagSetter: setIsDocumentStatisticsLoading,
+          service: DashBoardService.getDocumentCollectionStatistics(
+            formatToIsoStartDate(getOneYearAgoDate()),
+            formatToIsoEndDate(getCurrentDate())
+          ),
+          onSuccess: (data) => {
+            setTotalDocumentCount(data.totalCount);
+            setRecentlyAddedDocumentCollectionList(data.recentlyAdded);
+            setTopChatDocuments(data.topChats);
+          },
+          setError: (hasError) => setErrorStates((prev) => ({ ...prev, documentStatistics: hasError })),
+        },
+        {
+          loadingFlagSetter: setIsPeriodDocumentStatisticsLoading,
+          service: DashBoardService.getPeriodDocumentCollectionStatistics(),
+          onSuccess: (data) => {
+            const sortedMonthlyData = sortByPropertyKeyForMonth(data.added.monthly, 'name');
+            setAccumulatedMonthlyDocumentCollection(sortedMonthlyData);
+          },
+          setError: (hasError) => setErrorStates((prev) => ({ ...prev, recentlyAddedDocument: hasError })),
+        },
+        {
+          loadingFlagSetter: setIsStandardContractLoading,
+          service: DashBoardService.getStandardContractDocumentStatistics(
+            formatToIsoStartDate(getOneYearAgoDate()),
+            formatToIsoEndDate(getCurrentDate())
+          ),
+          onSuccess: (data) => {
+            setTotalStandardContractDocumentCount(data.totalCount);
+            setRecentlyAddedStandardContractList(data.recentlyAdded);
+          },
+          setError: (hasError) => setErrorStates((prev) => ({ ...prev, standardContract: hasError })),
+        },
+        {
+          loadingFlagSetter: setIsUserStatisticsLoading,
+          service: DashBoardService.getUserAccountStatistics(
+            formatToIsoStartDate(getOneYearAgoDate()),
+            formatToIsoEndDate(getCurrentDate())
+          ),
+          onSuccess: (data) => {
+            setTotalUserCount(data.totalCount);
+            setTopTokenUsers(data.topTokenUsage);
+          },
+          setError: (hasError) => setErrorStates((prev) => ({ ...prev, userStatistics: hasError })),
+        },
+        {
+          loadingFlagSetter: setIsRecentlyLikedChatLoading,
+          service: DashBoardService.getChatHistoryStatistics(
+            formatToIsoStartDate(getOneYearAgoDate()),
+            formatToIsoEndDate(getCurrentDate())
+          ),
+          onSuccess: (data) => {
+            setRecentlyLikedChatList(data.likedEntry);
+            const initialIndexes = {};
+            data.likedEntry.forEach((_, index) => {
+              initialIndexes[index] = false;
+            });
+            setHoveredLikedChatIndexes(initialIndexes);
+          },
+          setError: (hasError) => setErrorStates((prev) => ({ ...prev, recentlyLikedChat: hasError })),
+        },
+        {
+          loadingFlagSetter: setIsTokenUsageStatisticsLoading,
+          service: DashBoardService.getTokenUsageStatistics(
+            formatToIsoStartDate(getOneYearAgoDate()),
+            formatToIsoEndDate(getCurrentDate())
+          ),
+          onSuccess: (data) => {
+            setTotalTokenUsages(data);
+          },
+          setError: (hasError) => setErrorStates((prev) => ({ ...prev, totalTokenUsages: hasError })),
+        },
+      ];
+
+      await Promise.allSettled(
+        requests.map(async (request, index) => {
+          request.loadingFlagSetter(true);
+          try {
+            const response = await request.service;
+            request.onSuccess(response);
+          } catch (error) {
+            console.log(error);
+            request.setError(true);
+            addToast({ message: `Request ${index + 1} failed: ${error.message}` }, false);
+          } finally {
+            request.loadingFlagSetter(false);
+          }
+        })
+      );
+    };
+
+    void fetchData();
+  }, [addToast, errorStates]);
+
+  // const handleOpenNewContractDocumentTable = () => {
+  //   if (standardContractDocumentTableVisible) {
+  //     return;
+  //   }
+  //
+  //   setNewContractDocumentTableVisible(!newContractDocumentTableVisible);
+  // };
+  //
+  // const handleOpenStandardContractTable = () => {
+  //   if (newContractDocumentTableVisible) {
+  //     return;
+  //   }
+  //
+  //   setStandardContractDocumentTableVisible(!standardContractDocumentTableVisible);
+  // };
+
+  // LikedChat S ===================
+
+  // LikedChat E ===================
 
   return (
-    <div className="d-flex flex-column flex-grow-1 overflow-auto">
-      <CRow className="p-3">
-        <CCol sm={3}>
-          <CWidgetStatsA
-            color="primary"
-            value={
-              <>
-                $9.000{' '}
-                <span className="fs-6 fw-normal">
-                  (40.9% <CIcon icon={cilArrowTop} />)
-                </span>
-              </>
-            }
-            title="Widget title"
-            action={
-              <CDropdown alignment="end">
-                <CDropdownToggle color="transparent" caret={false} className="p-0">
-                  <CIcon icon={cilOptions} className="text-white" />
-                </CDropdownToggle>
-                <CDropdownMenu>
-                  <CDropdownItem>Action</CDropdownItem>
-                  <CDropdownItem>Another action</CDropdownItem>
-                  <CDropdownItem>Something else here...</CDropdownItem>
-                  <CDropdownItem disabled>Disabled action</CDropdownItem>
-                </CDropdownMenu>
-              </CDropdown>
-            }
-            chart={
-              <CChartLine
-                className="mt-3 mx-3"
-                style={{ height: '70px' }}
-                data={{
-                  labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-                  datasets: [
-                    {
-                      label: 'My First dataset',
-                      backgroundColor: 'transparent',
-                      borderColor: 'rgba(255,255,255,.55)',
-                      pointBackgroundColor: '#5856d6',
-                      data: [65, 59, 84, 84, 51, 55, 40],
-                    },
-                  ],
-                }}
-                options={{
-                  plugins: {
-                    legend: {
-                      display: false,
-                    },
-                  },
-                  maintainAspectRatio: false,
-                  scales: {
-                    x: {
-                      border: {
-                        display: false,
-                      },
-                      grid: {
-                        display: false,
-                        drawBorder: false,
-                      },
-                      ticks: {
-                        display: false,
-                      },
-                    },
-                    y: {
-                      min: 30,
-                      max: 89,
-                      display: false,
-                      grid: {
-                        display: false,
-                      },
-                      ticks: {
-                        display: false,
-                      },
-                    },
-                  },
-                  elements: {
-                    line: {
-                      borderWidth: 1,
-                      tension: 0.4,
-                    },
-                    point: {
-                      radius: 4,
-                      hitRadius: 10,
-                      hoverRadius: 4,
-                    },
-                  },
-                }}
-              />
-            }
-          />
+    <div className="d-flex flex-column flex-grow-1 overflow-auto" style={{ width: '100%' }}>
+      {/*REMIND Widget 의 그래프 구현 필요*/}
+      <CRow className="justify-content-center">
+        <CCol sm={4}>
+          <MonthlyPaymentWidget />
         </CCol>
-        <CCol sm={3}>
-          <CWidgetStatsA
-            color="info"
-            value={
-              <>
-                $9.000{' '}
-                <span className="fs-6 fw-normal">
-                  (40.9% <CIcon icon={cilArrowTop} />)
-                </span>
-              </>
-            }
-            title="Widget title"
-            action={
-              <CDropdown alignment="end">
-                <CDropdownToggle color="transparent" caret={false} className="p-0">
-                  <CIcon icon={cilOptions} className="text-white" />
-                </CDropdownToggle>
-                <CDropdownMenu>
-                  <CDropdownItem>Action</CDropdownItem>
-                  <CDropdownItem>Another action</CDropdownItem>
-                  <CDropdownItem>Something else here...</CDropdownItem>
-                  <CDropdownItem disabled>Disabled action</CDropdownItem>
-                </CDropdownMenu>
-              </CDropdown>
-            }
-            chart={
-              <CChartLine
-                className="mt-3 mx-3"
-                style={{ height: '70px' }}
-                data={{
-                  labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-                  datasets: [
-                    {
-                      label: 'My First dataset',
-                      backgroundColor: 'transparent',
-                      borderColor: 'rgba(255,255,255,.55)',
-                      pointBackgroundColor: '#39f',
-                      data: [1, 18, 9, 17, 34, 22, 11],
-                    },
-                  ],
-                }}
-                options={{
-                  plugins: {
-                    legend: {
-                      display: false,
-                    },
-                  },
-                  maintainAspectRatio: false,
-                  scales: {
-                    x: {
-                      border: {
-                        display: false,
-                      },
-                      grid: {
-                        display: false,
-                        drawBorder: false,
-                      },
-                      ticks: {
-                        display: false,
-                      },
-                    },
-                    y: {
-                      min: -9,
-                      max: 39,
-                      display: false,
-                      grid: {
-                        display: false,
-                      },
-                      ticks: {
-                        display: false,
-                      },
-                    },
-                  },
-                  elements: {
-                    line: {
-                      borderWidth: 1,
-                    },
-                    point: {
-                      radius: 4,
-                      hitRadius: 10,
-                      hoverRadius: 4,
-                    },
-                  },
-                }}
-              />
-            }
-          />
-        </CCol>
-        <CCol sm={3}>
-          <CWidgetStatsA
-            color="warning"
-            value={
-              <>
-                $9.000{' '}
-                <span className="fs-6 fw-normal">
-                  (40.9% <CIcon icon={cilArrowTop} />)
-                </span>
-              </>
-            }
-            title="Widget title"
-            action={
-              <CDropdown alignment="end">
-                <CDropdownToggle color="transparent" caret={false} className="p-0">
-                  <CIcon icon={cilOptions} className="text-white" />
-                </CDropdownToggle>
-                <CDropdownMenu>
-                  <CDropdownItem>Action</CDropdownItem>
-                  <CDropdownItem>Another action</CDropdownItem>
-                  <CDropdownItem>Something else here...</CDropdownItem>
-                  <CDropdownItem disabled>Disabled action</CDropdownItem>
-                </CDropdownMenu>
-              </CDropdown>
-            }
-            chart={
-              <CChartLine
-                className="mt-3"
-                style={{ height: '70px' }}
-                data={{
-                  labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-                  datasets: [
-                    {
-                      label: 'My First dataset',
-                      backgroundColor: 'rgba(255,255,255,.2)',
-                      borderColor: 'rgba(255,255,255,.55)',
-                      data: [78, 81, 80, 45, 34, 12, 40],
-                      fill: true,
-                    },
-                  ],
-                }}
-                options={{
-                  plugins: {
-                    legend: {
-                      display: false,
-                    },
-                  },
-                  maintainAspectRatio: false,
-                  scales: {
-                    x: {
-                      display: false,
-                    },
-                    y: {
-                      display: false,
-                    },
-                  },
-                  elements: {
-                    line: {
-                      borderWidth: 2,
-                      tension: 0.4,
-                    },
-                    point: {
-                      radius: 0,
-                      hitRadius: 10,
-                      hoverRadius: 4,
-                    },
-                  },
-                }}
-              />
-            }
-          />
-        </CCol>
-        <CCol sm={3}>
-          <CWidgetStatsA
-            color="danger"
-            value={
-              <>
-                $9.000{' '}
-                <span className="fs-6 fw-normal">
-                  (40.9% <CIcon icon={cilArrowTop} />)
-                </span>
-              </>
-            }
-            title="Widget title"
-            action={
-              <CDropdown alignment="end">
-                <CDropdownToggle color="transparent" caret={false} className="p-0">
-                  <CIcon icon={cilOptions} className="text-white" />
-                </CDropdownToggle>
-                <CDropdownMenu>
-                  <CDropdownItem>Action</CDropdownItem>
-                  <CDropdownItem>Another action</CDropdownItem>
-                  <CDropdownItem>Something else here...</CDropdownItem>
-                  <CDropdownItem disabled>Disabled action</CDropdownItem>
-                </CDropdownMenu>
-              </CDropdown>
-            }
-            chart={
-              <CChartBar
-                className="mt-3 mx-3"
-                style={{ height: '70px' }}
-                data={{
-                  labels: [
-                    'January',
-                    'February',
-                    'March',
-                    'April',
-                    'May',
-                    'June',
-                    'July',
-                    'August',
-                    'September',
-                    'October',
-                    'November',
-                    'December',
-                    'January',
-                    'February',
-                    'March',
-                    'April',
-                  ],
-                  datasets: [
-                    {
-                      label: 'My First dataset',
-                      backgroundColor: 'rgba(255,255,255,.2)',
-                      borderColor: 'rgba(255,255,255,.55)',
-                      data: [78, 81, 80, 45, 34, 12, 40, 85, 65, 23, 12, 98, 34, 84, 67, 82],
-                      barPercentage: 0.6,
-                    },
-                  ],
-                }}
-                options={{
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: {
-                      display: false,
-                    },
-                  },
-                  scales: {
-                    x: {
-                      grid: {
-                        display: false,
-                        drawTicks: false,
-                      },
-                      ticks: {
-                        display: false,
-                      },
-                    },
-                    y: {
-                      border: {
-                        display: false,
-                      },
-                      grid: {
-                        display: false,
-                        drawBorder: false,
-                        drawTicks: false,
-                      },
-                      ticks: {
-                        display: false,
-                      },
-                    },
-                  },
-                }}
-              />
-            }
-          />
+        <CCol sm={4}>
+          <OperationRateWidget />
         </CCol>
       </CRow>
-      <CCard className="m-3">
-        <CCardBody>
-          <CRow>
-            <CCol sm={5}>
-              <h4 id="traffic" className="card-title mb-0">
-                Traffic
-              </h4>
-              <div className="small text-medium-emphasis">January - July 2021</div>
-            </CCol>
-            <CCol sm={7} className="d-none d-md-block">
-              <CButton color="primary" className="float-end">
-                <CIcon icon={cilCloudDownload} />
-              </CButton>
-              <CButtonGroup className="float-end me-3">
-                {['Day', 'Month', 'Year'].map((value) => (
-                  <CButton color="outline-secondary" key={value} className="mx-0" active={value === 'Month'}>
-                    {value}
-                  </CButton>
-                ))}
-              </CButtonGroup>
-            </CCol>
-          </CRow>
-          <CChartLine
-            style={{ height: '300px', marginTop: '40px' }}
-            data={{
-              labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-              datasets: [
-                {
-                  label: 'My First dataset',
-                  backgroundColor: hexToRgba(getStyle('--cui-info'), 10),
-                  borderColor: getStyle('--cui-info'),
-                  pointHoverBackgroundColor: getStyle('--cui-info'),
-                  borderWidth: 2,
-                  data: [
-                    random(50, 200),
-                    random(50, 200),
-                    random(50, 200),
-                    random(50, 200),
-                    random(50, 200),
-                    random(50, 200),
-                    random(50, 200),
-                  ],
-                  fill: true,
-                },
-                {
-                  label: 'My Second dataset',
-                  backgroundColor: 'transparent',
-                  borderColor: getStyle('--cui-success'),
-                  pointHoverBackgroundColor: getStyle('--cui-success'),
-                  borderWidth: 2,
-                  data: [
-                    random(50, 200),
-                    random(50, 200),
-                    random(50, 200),
-                    random(50, 200),
-                    random(50, 200),
-                    random(50, 200),
-                    random(50, 200),
-                  ],
-                },
-                {
-                  label: 'My Third dataset',
-                  backgroundColor: 'transparent',
-                  borderColor: getStyle('--cui-danger'),
-                  pointHoverBackgroundColor: getStyle('--cui-danger'),
-                  borderWidth: 1,
-                  borderDash: [8, 5],
-                  data: [65, 65, 65, 65, 65, 65, 65],
-                },
-              ],
-            }}
-            options={{
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  display: false,
-                },
-              },
-              scales: {
-                x: {
-                  grid: {
-                    drawOnChartArea: false,
-                  },
-                },
-                y: {
-                  ticks: {
-                    beginAtZero: true,
-                    maxTicksLimit: 5,
-                    stepSize: Math.ceil(250 / 5),
-                    max: 250,
-                  },
-                },
-              },
-              elements: {
-                line: {
-                  tension: 0.4,
-                },
-                point: {
-                  radius: 0,
-                  hitRadius: 10,
-                  hoverRadius: 4,
-                  hoverBorderWidth: 3,
-                },
-              },
-            }}
+      <CRow className="p-3">
+        <CCol sm={4}>
+          <MonthlyStandardContractCountWidget
+            totalStandardContractDocumentCount={totalStandardContractDocumentCount}
+            // monthlyChartData={}
           />
-        </CCardBody>
-        <CCardFooter>
-          <CRow xs={{ cols: 1 }} md={{ cols: 5 }} className="text-center">
-            {progressExample.map((item, index) => (
-              <CCol className="mb-sm-2 mb-0" key={index}>
-                <div className="text-medium-emphasis">{item.title}</div>
-                <strong>
-                  {item.value} ({item.percent}%)
-                </strong>
-                <CProgress thin className="mt-2" color={`${item.color}-gradient`} value={item.percent} />
-              </CCol>
-            ))}
-          </CRow>
-        </CCardFooter>
-      </CCard>
-      <CCard className="m-3">
-        <CCardHeader>Traffic {' & '} Sales</CCardHeader>
-        <CCardBody>
-          <CRow>
-            <CCol xs={12} md={6} xl={6}>
-              <CRow>
-                <CCol sm={6}>
-                  <div className="border-start border-start-4 border-start-info py-1 px-3 mb-3">
-                    <div className="text-medium-emphasis small">New Clients</div>
-                    <div className="fs-5 fw-semibold">9,123</div>
-                  </div>
-                </CCol>
-                <CCol sm={6}>
-                  <div className="border-start border-start-4 border-start-danger py-1 px-3 mb-3">
-                    <div className="text-medium-emphasis small">Recurring Clients</div>
-                    <div className="fs-5 fw-semibold">22,643</div>
-                  </div>
-                </CCol>
-              </CRow>
-              <hr className="mt-0" />
-              {progressGroupExample1.map((item, index) => (
-                <div className="progress-group mb-4" key={index}>
-                  <div className="progress-group-prepend">
-                    <span className="text-medium-emphasis small">{item.title}</span>
-                  </div>
-                  <div className="progress-group-bars">
-                    <CProgress thin color="info-gradient" value={item.value1} />
-                    <CProgress thin color="danger-gradient" value={item.value2} />
-                  </div>
-                </div>
-              ))}
-            </CCol>
+        </CCol>
+        <CCol sm={4}>
+          <MonthlyDocumentCollectionCountWidget
+            totalDocumentCount={totalDocumentCount}
+            monthlyChartData={accumulatedMonthlyDocumentCollection}
+          />
+        </CCol>
+        <CCol sm={4}>
+          <MonthlyUserAccountCountWidget totalUserCount={totalUserCount} />
+        </CCol>
+      </CRow>
 
-            <CCol xs={12} md={6} xl={6}>
-              <CRow>
-                <CCol sm={6}>
-                  <div className="border-start border-start-4 border-start-warning py-1 px-3 mb-3">
-                    <div className="text-medium-emphasis small">Pageviews</div>
-                    <div className="fs-5 fw-semibold">78,623</div>
-                  </div>
-                </CCol>
-                <CCol sm={6}>
-                  <div className="border-start border-start-4 border-start-success py-1 px-3 mb-3">
-                    <div className="text-medium-emphasis small">Organic</div>
-                    <div className="fs-5 fw-semibold">49,123</div>
-                  </div>
-                </CCol>
-              </CRow>
+      <CRow>
+        <CCol sm={6}>
+          {/* 핫독 랭크 S -----------------------------------------------------*/}
+          <DocumentCollectionTopChatChart chartData={topChatDocuments} />
+          {/* 핫독 랭크 E -----------------------------------------------------*/}
+        </CCol>
+        <CCol sm={6}>
+          <TotalTokenUsageChart monthlyChartData={totalTokenUsages?.monthly} dailyChartData={totalTokenUsages?.daily} />
+        </CCol>
+      </CRow>
 
-              <hr className="mt-0" />
+      <CRow className="mt-2">
+        <CCol sm={6}>
+          <RecentlyAddedDocumentList
+            documentCollectionList={recentlyAddedDocumentCollectionList}
+            standardContractList={recentlyAddedStandardContractList}
+          />
+        </CCol>
 
-              {progressGroupExample2.map((item, index) => (
-                <div className="progress-group mb-4" key={index}>
-                  <div className="progress-group-header">
-                    <CIcon className="me-2" icon={item.icon} size="lg" />
-                    <span>{item.title}</span>
-                    <span className="ms-auto fw-semibold">{item.value}%</span>
-                  </div>
-                  <div className="progress-group-bars">
-                    <CProgress thin color="warning-gradient" value={item.value} />
-                  </div>
-                </div>
-              ))}
+        <CCol sm={6}>
+          <RecentlyLikedChatHistoryList recentlyLikedChatList={recentlyLikedChatList} />
+        </CCol>
+      </CRow>
+      <CRow>
+        <CCol xs={12} md={6} xl={6}>
+          <DailyTokenUsageChart data={totalTokenUsages?.daily} />
+        </CCol>
 
-              <div className="mb-5"></div>
-
-              {progressGroupExample3.map((item, index) => (
-                <div className="progress-group" key={index}>
-                  <div className="progress-group-header">
-                    <CIcon className="me-2" icon={item.icon} size="lg" />
-                    <span>{item.title}</span>
-                    <span className="ms-auto fw-semibold">
-                      {item.value} <span className="text-medium-emphasis small">({item.percent}%)</span>
-                    </span>
-                  </div>
-                  <div className="progress-group-bars">
-                    <CProgress thin color="success-gradient" value={item.percent} />
-                  </div>
-                </div>
-              ))}
-            </CCol>
-          </CRow>
-        </CCardBody>
-      </CCard>
+        <CCol xs={12} md={6} xl={6}>
+          <PopularModelsRatio totalTokenUsages={totalTokenUsages} />
+        </CCol>
+      </CRow>
+      <CRow>
+        <CCol>
+          <TopTokenUserList topTokenUsers={topTokenUsers} />
+        </CCol>
+      </CRow>
     </div>
   );
 };

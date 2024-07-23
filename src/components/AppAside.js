@@ -17,10 +17,11 @@ import {
   CTabPane,
 } from '@coreui/react-pro';
 import { useDispatch, useSelector } from 'react-redux';
+import { set } from 'store';
 
 const AppAside = () => {
   const dispatch = useDispatch();
-  const asideShow = useSelector((state) => state.asideShow);
+  const asideShow = useSelector((state) => state.layout.asideShow);
 
   const [activeKey, setActiveKey] = useState(1);
 
@@ -32,7 +33,7 @@ const AppAside = () => {
       placement="end"
       visible={asideShow}
       onVisibleChange={(visible) => {
-        dispatch({ type: 'set', asideShow: visible });
+        dispatch(set({ asideShow: visible }));
       }}
     >
       <CSidebarHeader className="bg-transparent p-0">
@@ -74,7 +75,7 @@ const AppAside = () => {
             </CNavLink>
           </CNavItem>
           <CNavItem className="ms-auto me-2 d-flex align-items-center">
-            <CCloseButton onClick={() => dispatch({ type: 'set', asideShow: false })} />
+            <CCloseButton onClick={() => dispatch(set({ asideShow: false }))} />
           </CNavItem>
         </CNav>
       </CSidebarHeader>
