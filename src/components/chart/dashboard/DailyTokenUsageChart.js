@@ -16,7 +16,7 @@ export const DailyTokenUsageChart = ({ data = [] }) => {
   const totalOutputTokens = sortedDailyChartData.map((data) => data.metadata.total_output_tokens);
   const inputOfToday = totalInputTokens[totalInputTokens.length - 1];
   const outputOfToday = totalOutputTokens[totalOutputTokens.length - 1];
-  const totalOfToday = inputOfToday + outputOfToday;
+  const totalOfToday = inputOfToday + outputOfToday || -1;
   const renderChart = () => (
     <CChart
       type="bar"
@@ -90,6 +90,11 @@ export const DailyTokenUsageChart = ({ data = [] }) => {
           <CProgressBar color="danger" value={parseInt(((outputOfToday / totalOfToday) * 100).toFixed(0))}>
             {`${((outputOfToday / totalOfToday) * 100).toFixed(1)}%`}
           </CProgressBar>
+          {totalOfToday === -1 && (
+            <CProgressBar color="secondary" value={100}>
+              {'No Data'}
+            </CProgressBar>
+          )}
         </CProgress>
 
         <hr className="mt-3" />

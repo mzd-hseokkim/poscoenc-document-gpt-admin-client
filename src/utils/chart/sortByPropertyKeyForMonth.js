@@ -29,8 +29,6 @@ const sortByPropertyKeyForMonth = (data, prop) => {
  * @description
  * Chart 를 그리기 위해 일 기준으로 정렬하는 함수입니다.
  *
- * @korean-description
- * 이 함수는 연-월-일 속성을 가진 데이터를 정렬하여 Chart를 그립니다.
  */
 const sortByPropertyKeyForDay = (data, prop) => {
   return data.sort((a, b) => {

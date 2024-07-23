@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { CChartLine } from '@coreui/react-chartjs';
 import { CButton, CButtonGroup, CCard, CCardBody, CCardFooter, CCol, CProgress, CRow } from '@coreui/react-pro';
-import { getStyle, hexToRgba } from '@coreui/utils';
+import { getStyle } from '@coreui/utils';
 import { getLastSixMonthsLabel, getUpdatedWeeklyLabel } from 'components/chart/ChartLabel';
 import {
   findPaddedMaxMin,
@@ -44,7 +44,7 @@ export const TotalTokenUsageChart = ({ monthlyChartData = [], dailyChartData = [
     },
   });
 
-  const prepareMonthlyData = () => {
+  const prepareMonthlyData = useCallback(() => {
     const paddedMonthlyChartData = padDataArrayWithZeroForMonth(
       monthlyChartData,
       new Date().getMonth() + 1,
@@ -73,9 +73,9 @@ export const TotalTokenUsageChart = ({ monthlyChartData = [], dailyChartData = [
       accumulatedOutput,
       accumulatedTotal,
     };
-  };
+  }, [monthlyChartData]);
 
-  const prepareDailyData = () => {
+  const prepareDailyData = useCallback(() => {
     const paddedDailyChartData = padDataArrayWithZeroForDay(dailyChartData, 'name', totalTokenUsagePaddingObject);
     const sortedDailyChartData = sortByPropertyKeyForDay(paddedDailyChartData, 'name');
     const { paddedMax, paddedMin } = findPaddedMaxMin(sortedDailyChartData);
@@ -97,7 +97,7 @@ export const TotalTokenUsageChart = ({ monthlyChartData = [], dailyChartData = [
       accumulatedOutput,
       accumulatedTotal,
     };
-  };
+  }, [dailyChartData]);
 
   useEffect(() => {
     const monthlyData = prepareMonthlyData();
@@ -107,8 +107,7 @@ export const TotalTokenUsageChart = ({ monthlyChartData = [], dailyChartData = [
       monthlyData,
       dailyData,
     }));
-    //REMIND 의존성 배열문제 있음. 무한 리렌더리중
-  }, [monthlyChartData, dailyChartData]);
+  }, [prepareDailyData, prepareMonthlyData]);
 
   const updateChartOption = (labelOption) => {
     setChartOptions((prevOptions) => ({
@@ -151,37 +150,37 @@ export const TotalTokenUsageChart = ({ monthlyChartData = [], dailyChartData = [
   const renderChart = () => (
     <CChartLine
       style={{ height: '300px', marginTop: '40px' }}
+      customTooltips={false}
       data={{
         labels: currentData.labels,
         datasets: [
           {
-            label: 'Total',
-            backgroundColor: hexToRgba(getStyle('--cui-success'), 10),
-            borderColor: getStyle('--cui-success'),
-            pointHoverBackgroundColor: getStyle('--cui-success'),
-            borderWidth: 2,
-            data: currentData.totalUsages,
-          },
-          {
             label: 'Input Tokens',
-            backgroundColor: hexToRgba(getStyle('--cui-info'), 10),
+            backgroundColor: getStyle('--cui-info'),
             borderColor: getStyle('--cui-info'),
             pointHoverBackgroundColor: getStyle('--cui-info'),
             borderWidth: 2,
             data: currentData.inputTokens,
-            fill: true,
           },
           {
             label: 'Output Tokens',
-            backgroundColor: 'transparent',
+            backgroundColor: getStyle('--cui-warning'),
             borderColor: getStyle('--cui-warning'),
             pointHoverBackgroundColor: getStyle('--cui-warning'),
             borderWidth: 2,
             data: currentData.outputTokens,
           },
           {
+            label: 'Total',
+            backgroundColor: getStyle('--cui-success'),
+            borderColor: getStyle('--cui-success'),
+            pointHoverBackgroundColor: getStyle('--cui-success'),
+            borderWidth: 2,
+            data: currentData.totalUsages,
+          },
+          {
             label: 'Maximum Token Usage',
-            backgroundColor: 'transparent',
+            backgroundColor: getStyle('--cui-danger'),
             borderColor: getStyle('--cui-danger'),
             pointHoverBackgroundColor: getStyle('--cui-danger'),
             borderWidth: 1,
@@ -199,6 +198,10 @@ export const TotalTokenUsageChart = ({ monthlyChartData = [], dailyChartData = [
         plugins: {
           legend: {
             display: false,
+          },
+          tooltip: {
+            position: 'average',
+            mode: 'index',
           },
         },
         scales: {

@@ -4,26 +4,28 @@ import { CChartLine } from '@coreui/react-chartjs';
 import { CButton, CButtonGroup, CCard, CCardBody, CCardFooter, CCol, CPopover, CRow } from '@coreui/react-pro';
 import { getStyle } from '@coreui/utils';
 import { getLastSixMonthsLabel, getUpdatedWeeklyLabel } from 'components/chart/ChartLabel';
-import { padDataArrayWithZeroForDay } from 'utils/chart/ChartStatisticsProcessor';
+import { padDataArrayWithZeroForDay, padDataArrayWithZeroForMonth } from 'utils/chart/ChartStatisticsProcessor';
 
 const lastSixMonthLabel = getLastSixMonthsLabel();
 const weeklyLabel = getUpdatedWeeklyLabel();
 const hotDocTopFiveColor = ['--cui-primary', '--cui-success', '--cui-info', '--cui-warning', '--cui-danger'];
+const defaultColor = '--cui-secondary';
+
 const topChatDocumentPaddingObject = {
   name: '',
   recordedAt: '',
   value: 0,
   metadata: {},
 };
+
 export const DocumentCollectionTopChatChart = ({ chartData = [] }) => {
   const [hotConChartLabelOption, setHotConChartLabelOption] = useState('days');
-  console.log(chartData);
 
   const allTime = chartData?.allTime || [{ id: 0, name: '-', rank: 0, recordedAt: '-', value: 0 }];
-  const daily = chartData.daily;
-  const monthly = chartData.monthly;
+  const daily = chartData?.daily;
+  const monthly = chartData?.monthly;
 
-  const sortByCollectionIdForDaily = (data = []) => {
+  const sortByCollectionId = (data = []) => {
     const collections = {};
 
     data.forEach((doc) => {
@@ -35,54 +37,67 @@ export const DocumentCollectionTopChatChart = ({ chartData = [] }) => {
     });
     return collections;
   };
-  const sortedDailyData = sortByCollectionIdForDaily(daily);
-  console.log(sortedDailyData);
 
-  //STARTFROM Name 추가해주고, 누적 top chat 순위먼저 매기기
-  const dailyAccumulatedChatCounts = Object.keys(sortedDailyData)
-    .map((docId) => {
-      const docData = sortedDailyData[docId];
-      const accumulation = docData.reduce((acc, data) => {
-        return acc + data.value;
-      }, 0);
+  const sortedDailyData = sortByCollectionId(daily);
+  const sortedMonthlyData = sortByCollectionId(monthly);
+
+  const dailyColorMapping = {};
+  const monthlyColorMapping = {};
+
+  const getDocumentColor = (docIdInt, rank, period) => {
+    let color = hotDocTopFiveColor[rank - 1] || defaultColor;
+    if (period === 'daily') {
+      dailyColorMapping[docIdInt] = color;
+    } else if (period === 'monthly') {
+      monthlyColorMapping[docIdInt] = color;
+    }
+    return color;
+  };
+  const mapToChartData = (targetData, period) => {
+    return Object.keys(targetData).map((docId) => {
+      const docIdInt = parseInt(docId);
+      const docData = targetData[docId];
+      const label = docData[0].metadata.documentCollectionDisplayName;
+      const paddedData =
+        period === 'daily'
+          ? padDataArrayWithZeroForDay(docData, 'name', topChatDocumentPaddingObject)
+          : padDataArrayWithZeroForMonth(docData, new Date().getMonth() + 1, 6, 'name', topChatDocumentPaddingObject);
+      const data = paddedData.map((doc) => doc.value);
+      //REMIND api 수정 후 [0] 로직 수정
+      const docColor = getDocumentColor(docIdInt, docData[0].metadata.rank, period);
+
       return {
-        id: docId,
-        accumulation,
+        label,
+        borderColor: getStyle(docColor),
+        backgroundColor: getStyle(docColor),
+        pointHoverBackgroundColor: getStyle(docColor),
+        borderWidth: 2,
+        data,
       };
-    })
-    .sort((a, b) => {
-      return b.accumulation - a.accumulation;
     });
-  const mapToChartDataForDaily = Object.keys(sortedDailyData).map((docId) => {
-    const docData = sortedDailyData[docId];
-    const label = docData[0].metadata.documentCollectionDisplayName;
-    const paddedData = padDataArrayWithZeroForDay(docData, 'name', topChatDocumentPaddingObject);
-    const data = paddedData.map((doc) => doc.value);
+  };
 
-    return {
-      label,
-      backgroundColor: 'transparent',
-      //REMIND 색상 정하는 로직은 또 따로 생각해야한다. 일단 데이터 매핑먼저 구현 후 고려
-      borderColor: getStyle(hotDocTopFiveColor[docData[0].metadata.rank - 1]),
-      pointHoverBackgroundColor: getStyle(hotDocTopFiveColor[docData[0].metadata.rank - 1]),
-      borderWidth: 2,
-      data,
-      fill: true,
-    };
-  });
+  const formattedDailyChartData = mapToChartData(sortedDailyData, 'daily');
+  const formattedMonthlyChartData = mapToChartData(sortedMonthlyData, 'monthly');
 
   const renderChart = () => (
     <CChartLine
       style={{ height: '300px', marginTop: '40px' }}
       data={{
         labels: hotConChartLabelOption === 'days' ? weeklyLabel : lastSixMonthLabel,
-        datasets: mapToChartDataForDaily,
+        datasets: hotConChartLabelOption === 'days' ? formattedDailyChartData : formattedMonthlyChartData,
       }}
+      customTooltips={false}
       options={{
         maintainAspectRatio: false,
         plugins: {
           legend: {
             display: true,
+            position: 'left',
+          },
+          tooltip: {
+            position: 'average',
+            mode: 'index',
           },
         },
         scales: {
@@ -98,6 +113,7 @@ export const DocumentCollectionTopChatChart = ({ chartData = [] }) => {
               stepSize: Math.ceil(250 / 5),
               max: 250,
             },
+            min: 0,
           },
         },
         elements: {
@@ -155,18 +171,36 @@ export const DocumentCollectionTopChatChart = ({ chartData = [] }) => {
           {/*<small className="text-medium-emphasis d-inline">클릭 시 해당 문서의 상세 정보 창으로 이동합니다.</small>*/}
         </CRow>
         <CRow xs={{ cols: 1 }} md={{ cols: 5 }} className="text-center">
-          {dailyAccumulatedChatCounts.map((doc, index) => (
-            <CCol className="mb-sm-2 mb-0 d-flex flex-column" key={index}>
-              <strong>{index + 1}위</strong>
-              <CButton style={{ backgroundColor: getStyle(hotDocTopFiveColor[index]) }} disabled></CButton>
-              <CPopover content={doc.name} color={hotDocTopFiveColor[index]} placement="bottom" trigger="hover">
-                <div className="text-medium-emphasis mb-3 text-truncate">{doc.name}</div>
-              </CPopover>
-              <div className="mt-auto mb-0">
-                <strong>{doc.accumulation} 개</strong>
-              </div>
-            </CCol>
-          ))}
+          {allTime.map((doc, index) => {
+            const docIdInt = parseInt(doc.id);
+            const colorMapping = hotConChartLabelOption === 'days' ? dailyColorMapping : monthlyColorMapping;
+            const color = colorMapping[docIdInt] || defaultColor;
+
+            return (
+              <CCol className="mb-sm-2 mb-0 d-flex flex-column" key={index}>
+                <strong>{doc.rank}위</strong>
+                <CPopover
+                  content={<strong>{`${doc.name}`}</strong>}
+                  color={hotDocTopFiveColor[index]}
+                  placement="bottom"
+                  trigger="hover"
+                >
+                  <p
+                    className="text-truncate text-white px-2 small"
+                    style={{
+                      backgroundColor: getStyle(color),
+                      borderRadius: '7.5px',
+                    }}
+                  >
+                    {doc.name}
+                  </p>
+                </CPopover>
+                <div className="mt-auto mb-0">
+                  <strong className="text-muted">{doc.value} 개</strong>
+                </div>
+              </CCol>
+            );
+          })}
         </CRow>
       </CCardFooter>
     </CCard>
