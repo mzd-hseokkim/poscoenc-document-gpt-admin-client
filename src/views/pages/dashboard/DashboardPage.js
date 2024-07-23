@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { cilScreenDesktop, cilUser } from '@coreui/icons';
-import CIcon from '@coreui/icons-react';
-import { CCard, CCardBody, CCardHeader, CCol, CProgress, CRow, CSmartTable } from '@coreui/react-pro';
+import { CCol, CRow } from '@coreui/react-pro';
 import { DailyTokenUsageChart } from 'components/chart/dashboard/DailyTokenUsageChart';
 import { DocumentCollectionTopChatChart } from 'components/chart/dashboard/DocumentCollectionTopChatChart';
 import { TotalTokenUsageChart } from 'components/chart/dashboard/TotalTokenUsageChart';
@@ -11,28 +9,15 @@ import { MonthlyPaymentWidget } from 'components/chart/dashboard/widzet/MonthlyP
 import { MonthlyStandardContractCountWidget } from 'components/chart/dashboard/widzet/MonthlyStandardContractCountWidget';
 import { MonthlyUserAccountCountWidget } from 'components/chart/dashboard/widzet/MonthlyUserAccountCountWidget';
 import { OperationRateWidget } from 'components/chart/dashboard/widzet/OperationRateWidget';
+import { PopularModelsRatio } from 'components/dashboard/PopularModelsRatio';
 import { RecentlyAddedDocumentList } from 'components/dashboard/RecentlyAddedDocumentList';
 import { RecentlyLikedChatHistoryList } from 'components/dashboard/RecentlyLikedChatHistoryList';
-import { AIModelIcon } from 'components/icon/AIModelIcon';
+import { TopTokenUserList } from 'components/dashboard/TopTokenUserList';
 import { useToast } from 'context/ToastContext';
 import DashBoardService from 'services/dashboard/DashBoardService';
 import { sortByPropertyKeyForMonth } from 'utils/chart/sortByPropertyKeyForMonth';
-import {
-  formatToIsoEndDate,
-  formatToIsoStartDate,
-  formatToYMD,
-  getCurrentDate,
-  getOneYearAgoDate,
-} from 'utils/common/dateUtils';
+import { formatToIsoEndDate, formatToIsoStartDate, getCurrentDate, getOneYearAgoDate } from 'utils/common/dateUtils';
 
-const initialAIModels = [
-  { name: 'gpt-4o', value: 0, metadata: { rank: 1 } },
-  { name: 'mixtral-8x7b-32768', value: 0, metadata: { rank: 2 } },
-  { name: 'llama3-70b-8192', value: 0, metadata: { rank: 3 } },
-  { name: 'llama3-8b-8192', value: 0, metadata: { rank: 4 } },
-  { name: 'claude-3-opus-20240229', value: 0, metadata: { rank: 5 } },
-  { name: 'claude-3-sonnet-20240229', value: 0, metadata: { rank: 6 } },
-];
 const DashboardPage = () => {
   const { addToast } = useToast();
 
@@ -60,22 +45,6 @@ const DashboardPage = () => {
   //전체 토큰 사용량 추이 ( 지난 7일 사용량, 지난 6개월 사용량, 파일럿 모드 별 사용량, AI모델 별 사용량 )
   const [totalTokenUsages, setTotalTokenUsages] = useState([]);
   const [isTokenUsageStatisticsLoading, setIsTokenUsageStatisticsLoading] = useState(false);
-  // 모든 Pilot 모드의 토큰 사용량 총계
-  const totalTokenUsageCalculatedByPilotMode = totalTokenUsages?.total?.byPilotMode?.reduce(
-    (acc, item) => acc + item.value,
-    0
-  );
-
-  // rank 로 정렬한 AI model의 토큰 사용량 총계
-  const respondAIModelsUsages = initialAIModels
-    .map((model) => {
-      const respondModel = totalTokenUsages?.total?.byModelName.find((rm) => rm.name === model.name);
-      return respondModel ? { ...model, value: respondModel.value, metadata: respondModel.metadata } : model;
-    })
-    .sort((a, b) => a.metadata.rank - b.metadata.rank);
-
-  // 모든 AI Model의 토큰 사용량 총계
-  const totalTokenUsageCalculatedByAIModel = respondAIModelsUsages.reduce((acc, item) => acc + item.value, 0);
 
   const [errorStates, setErrorStates] = useState({
     documentStatistics: false,
@@ -269,146 +238,14 @@ const DashboardPage = () => {
         </CCol>
 
         <CCol xs={12} md={6} xl={6}>
-          <CCard className="m-3">
-            <CCardHeader className="bold">Pop-Model</CCardHeader>
-            <CCardBody>
-              <CRow>
-                <CCol sm={6}>
-                  <div className="border-start border-start-4 border-start-warning py-1 px-3 mb-3">
-                    <div className="text-medium-emphasis small">Popular Pilot Mode</div>
-                    <div className="fs-5 fw-semibold">
-                      {totalTokenUsages?.total?.byPilotMode?.reduce(
-                        (maxItem, currentItem) => (currentItem.value > maxItem.value ? currentItem : maxItem),
-                        totalTokenUsages?.total?.byPilotMode?.[0].name
-                      ) === 'C'
-                        ? 'Co'
-                        : 'Auto'}
-                    </div>
-                  </div>
-                </CCol>
-                <CCol sm={6}>
-                  <div className="border-start border-start-4 border-start-success py-1 px-3 mb-3">
-                    <div className="text-medium-emphasis small">Popular AI Model</div>
-                    <div className="fs-5 fw-semibold">GPT-4 Omni</div>
-                  </div>
-                </CCol>
-              </CRow>
-
-              <hr className="mt-0" />
-
-              {totalTokenUsages?.total?.byPilotMode?.map((item, index) => (
-                <div className="progress-group mb-4" key={index}>
-                  <div className="progress-group-header">
-                    <CIcon className="me-2" icon={item.name === 'C' ? cilUser : cilScreenDesktop} size="lg" />
-                    <span>{item.name === 'C' ? 'Co' : 'Auto'}</span>
-                    <span className="ms-auto fw-semibold">
-                      {((item.value / totalTokenUsageCalculatedByPilotMode) * 100).toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="progress-group-bars">
-                    <CProgress thin color="warning-gradient" value={item.value} />
-                  </div>
-                </div>
-              ))}
-
-              <div className="mb-5"></div>
-
-              {respondAIModelsUsages.map((item, index) => (
-                <div className="progress-group" key={index}>
-                  <div className="progress-group-header">
-                    <AIModelIcon modelName={item.name} />
-                    <span>{item.name}</span>
-                    <span className="ms-auto fw-semibold">
-                      {item.value}
-                      <span className="text-medium-emphasis small">
-                        ({((item.value / totalTokenUsageCalculatedByAIModel) * 100).toFixed(1)}%)
-                      </span>
-                    </span>
-                  </div>
-                  <div className="progress-group-bars">
-                    <CProgress
-                      thin
-                      color="success-gradient"
-                      value={parseInt(((item.value / totalTokenUsageCalculatedByAIModel) * 100).toFixed(1))}
-                    />
-                  </div>
-                </div>
-              ))}
-            </CCardBody>
-          </CCard>
+          <PopularModelsRatio totalTokenUsages={totalTokenUsages} />
         </CCol>
       </CRow>
-      <CCard className="m-3">
-        <CCardHeader className="bold">
-          <h2>✨ Top Token Users 😎</h2>
-        </CCardHeader>
-        <CCardBody>
-          <CSmartTable
-            items={topTokenUsers}
-            columns={[
-              {
-                key: 'name',
-                label: '사용자',
-                _style: { width: '15%' },
-              },
-              {
-                key: 'team',
-                label: '소속',
-                _style: { width: '10%', textAlign: 'center' },
-              },
-              {
-                key: 'tokenUsage',
-                label: '토큰 사용량',
-                _style: { width: '12%', textAlign: 'center' },
-              },
-              {
-                key: 'usedModels',
-                label: 'AI Model',
-                _style: { width: '10%', textAlign: 'center' },
-              },
-              {
-                key: 'registeredAt',
-                label: '가입일',
-                _style: { width: '15%', textAlign: 'center' },
-              },
-            ]}
-            scopedColumns={{
-              name: (item) => (
-                <td>
-                  <div>{item.name}</div>
-                  {/*REMIND new 뱃지 구현 <span>{item.user.new ? 'New' : 'Recurring'}</span>*/}
-                </td>
-              ),
-              team: (item) => <td className="text-center">{item.metadata.team}</td>,
-              tokenUsage: (item) => <td className="text-center">{item.metadata.tokenUsage}</td>,
-              usedModels: (item) => (
-                <td>
-                  <div className="d-flex justify-content-center align-content-center">
-                    {item.metadata.usedModels.map((name, index) => (
-                      <AIModelIcon key={index} modelName={name} />
-                    ))}
-                  </div>
-                </td>
-              ),
-              registeredAt: (item) => (
-                <td>
-                  <div className="text-medium-emphasis text-nowrap text-center">
-                    {formatToYMD(item.metadata.registeredAt)}
-                  </div>
-                </td>
-              ),
-            }}
-            tableProps={{
-              align: 'middle',
-              className: 'mb-0 border',
-              hover: true,
-            }}
-            tableHeadProps={{
-              color: 'secondary',
-            }}
-          />
-        </CCardBody>
-      </CCard>
+      <CRow>
+        <CCol>
+          <TopTokenUserList topTokenUsers={topTokenUsers} />
+        </CCol>
+      </CRow>
     </div>
   );
 };
