@@ -113,18 +113,21 @@ const RoleManagementPage = () => {
                 </CButton>
                 <ExcelDownloadCButton
                   downloadFunction={RoleService.getDownloadRoleList}
-                  searchFormData={roleList.length !== 0}
+                  searchFormData={roleList?.length !== 0}
                 />
               </CCol>
               <CCol className="d-flex justify-content-end">
-                <CFormLabel>총 {roleList.length} 개의 검색 결과</CFormLabel>
+                <CFormLabel>총 {roleList?.length} 개의 검색 결과</CFormLabel>
               </CCol>
             </CRow>
             <CRow className="mb-3">
               {/*REMIND Pagination 적용 필요*/}
               <CSmartTable
                 noItemsLabel={
-                  <CSmartTableNoItemLabel contentLength={roleList.length} isSearchPerformed={isSearchPerformed} />
+                  <CSmartTableNoItemLabel
+                    contentLength={roleList?.length}
+                    isSearchPerformed={isSearchPerformed.current}
+                  />
                 }
                 loading={isLoading}
                 sorterValue={{ column: 'id', state: 'asc' }}

@@ -40,7 +40,7 @@ export const RecentlyLikedChatHistoryList = ({ isLoading, recentlyLikedChatList 
 
   useEffect(() => {
     const initialIndexes = {};
-    recentlyLikedChatList.forEach((_, index) => {
+    recentlyLikedChatList?.forEach((_, index) => {
       initialIndexes[index] = false;
     });
     setHoveredLikedChatIndexes(initialIndexes);

@@ -39,18 +39,18 @@ export const RecentlyAddedDocumentList = ({
 
   const { navigate } = useNavigation();
 
-  const handleOpenNewContractDocumentTable = () => {
-    if (standardContractDocumentTableVisible) {
-      return;
-    }
-    setNewContractDocumentTableVisible(!newContractDocumentTableVisible);
-  };
-
   const handleOpenStandardContractTable = () => {
     if (newContractDocumentTableVisible) {
       return;
     }
     setStandardContractDocumentTableVisible(!standardContractDocumentTableVisible);
+  };
+
+  const handleOpenNewContractDocumentTable = () => {
+    if (standardContractDocumentTableVisible) {
+      return;
+    }
+    setNewContractDocumentTableVisible(!newContractDocumentTableVisible);
   };
 
   return (
@@ -66,11 +66,11 @@ export const RecentlyAddedDocumentList = ({
           }}
         >
           <FormLoadingCover isLoading={isStandardContractLoading} />
-          <CTable align="middle" className="mb-0 border ms-2" hover>
+          <CTable align="middle" className="mb-0 border ms-2" hover style={{ maxWidth: '270px' }}>
             <CTableHead color="light">
               <CTableRow>
                 <CTableHeaderCell
-                  style={{ cursor: newContractDocumentTableVisible ? '' : 'pointer' }}
+                  style={{ cursor: newContractDocumentTableVisible ? '' : 'pointer', whiteSpace: 'nowrap' }}
                   onClick={handleOpenStandardContractTable}
                 >
                   Standard Con
@@ -82,7 +82,7 @@ export const RecentlyAddedDocumentList = ({
 
                 <CTableHeaderCell>
                   <CCollapse visible={standardContractDocumentTableVisible} horizontal>
-                    <div className="d-flex justify-content-center">
+                    <div className="d-flex justify-content-center" style={{ minWidth: '20px' }}>
                       <CPopover
                         placement="top"
                         trigger={['hover', 'focus']}
@@ -94,20 +94,16 @@ export const RecentlyAddedDocumentList = ({
                   </CCollapse>
                 </CTableHeaderCell>
                 <CTableHeaderCell>
-                  <CCollapse visible={standardContractDocumentTableVisible} horizontal>
-                    <p className="collapsable-table-header">CreatedAt</p>
-                  </CCollapse>
+                  <p className="collapsable-table-header">CreatedAt</p>
                 </CTableHeaderCell>
 
-                {standardContractDocumentTableVisible && (
-                  <CTableHeaderCell>
-                    <CCollapse visible={standardContractDocumentTableVisible} horizontal></CCollapse>
-                  </CTableHeaderCell>
-                )}
+                <CTableHeaderCell>
+                  <CCollapse visible={standardContractDocumentTableVisible} horizontal></CCollapse>
+                </CTableHeaderCell>
               </CTableRow>
             </CTableHead>
             <CTableBody>
-              {standardContractList.map((item, index) => (
+              {standardContractList?.map((item, index) => (
                 <CTableRow key={index}>
                   <CTableDataCell>
                     {item.name.length > 12 ? (
@@ -151,23 +147,32 @@ export const RecentlyAddedDocumentList = ({
                     </CCollapse>
                   </CTableDataCell>
                   <CTableDataCell>
-                    <CCollapse visible={standardContractDocumentTableVisible} horizontal>
-                      {/*TODO CreateAt 은 batch 작업의 createdAt 이다. 문서의 createdAt 으로 변경해야함*/}
+                    {/*TODO CreateAt 은 batch 작업의 createdAt 이다. 문서의 createdAt 으로 변경해야함*/}
+                    {isToday(new Date(item.createdAt)) ? (
+                      <CBadge
+                        color="primary"
+                        style={{
+                          position: 'absolute',
+                          top: 12 + 41 * (index + 1),
+                          right: 36,
+                        }}
+                      >
+                        Today
+                      </CBadge>
+                    ) : (
                       <div className="small text-medium-emphasis text-nowrap">{formatToYMD(item.createdAt)}</div>
-                    </CCollapse>
+                    )}
                   </CTableDataCell>
 
-                  {standardContractDocumentTableVisible && (
-                    <CTableDataCell>
-                      <CCollapse visible={standardContractDocumentTableVisible} horizontal>
-                        <CIcon
-                          style={{ cursor: 'pointer' }}
-                          icon={cilExternalLink}
-                          onClick={() => navigate(`/standard-contracts/management?id=${item.id}`)}
-                        />
-                      </CCollapse>
-                    </CTableDataCell>
-                  )}
+                  <CTableDataCell>
+                    <CCollapse visible={standardContractDocumentTableVisible} horizontal>
+                      <CIcon
+                        style={{ cursor: 'pointer' }}
+                        icon={cilExternalLink}
+                        onClick={() => navigate(`/standard-contracts/management?id=${item.id}`)}
+                      />
+                    </CCollapse>
+                  </CTableDataCell>
                 </CTableRow>
               ))}
             </CTableBody>
@@ -182,11 +187,11 @@ export const RecentlyAddedDocumentList = ({
           }}
         >
           <FormLoadingCover isLoading={isDocumentCollectionLoading} />
-          <CTable align="middle" className="mb-0 border me-2" hover responsive={'lg'}>
+          <CTable align="middle" className="mb-0 border me-2" hover responsive={'lg'} style={{ maxWidth: '270px' }}>
             <CTableHead color="light">
               <CTableRow>
                 <CTableHeaderCell
-                  style={{ cursor: standardContractDocumentTableVisible ? '' : 'pointer' }}
+                  style={{ cursor: standardContractDocumentTableVisible ? '' : 'pointer', whiteSpace: 'nowrap' }}
                   onClick={handleOpenNewContractDocumentTable}
                 >
                   Con
@@ -201,22 +206,22 @@ export const RecentlyAddedDocumentList = ({
                   </CCollapse>
                 </CTableHeaderCell>
                 <CTableHeaderCell>
-                  <CCollapse visible={newContractDocumentTableVisible} horizontal>
-                    <p className="collapsable-table-header">CreatedAt</p>
-                  </CCollapse>
+                  {/*<CCollapse visible={newContractDocumentTableVisible} horizontal>*/}
+                  <p className="collapsable-table-header">CreatedAt</p>
+                  {/*</CCollapse>*/}
                 </CTableHeaderCell>
 
-                {newContractDocumentTableVisible && (
-                  <>
-                    <CTableHeaderCell>
-                      <CCollapse visible={newContractDocumentTableVisible} horizontal></CCollapse>
-                    </CTableHeaderCell>
-                  </>
-                )}
+                {/*{newContractDocumentTableVisible && (*/}
+                <>
+                  <CTableHeaderCell>
+                    <CCollapse visible={newContractDocumentTableVisible} horizontal></CCollapse>
+                  </CTableHeaderCell>
+                </>
+                {/*)}*/}
               </CTableRow>
             </CTableHead>
             <CTableBody>
-              {documentCollectionList.map((item, index) => (
+              {documentCollectionList?.map((item, index) => (
                 <CTableRow key={index}>
                   <CTableDataCell>
                     {item.name.length > 12 ? (
@@ -265,24 +270,37 @@ export const RecentlyAddedDocumentList = ({
                     </CCollapse>
                   </CTableDataCell>
                   <CTableDataCell>
-                    <CCollapse visible={newContractDocumentTableVisible} horizontal>
+                    {/*<CCollapse visible={newContractDocumentTableVisible} horizontal>*/}
+                    {isToday(new Date(item.createdAt)) ? (
+                      <CBadge
+                        color="primary"
+                        style={{
+                          position: 'absolute',
+                          top: 12 + 41 * (index + 1),
+                          right: 40,
+                        }}
+                      >
+                        Today
+                      </CBadge>
+                    ) : (
                       <div className="small text-medium-emphasis text-nowrap">{formatToYMD(item.createdAt)}</div>
-                    </CCollapse>
+                    )}
+                    {/*</CCollapse>*/}
                   </CTableDataCell>
-                  {newContractDocumentTableVisible && (
-                    <>
-                      <CTableDataCell>
-                        <CCollapse visible={newContractDocumentTableVisible} horizontal>
-                          <CIcon
-                            style={{ cursor: 'pointer' }}
-                            icon={cilExternalLink}
-                            //REMIND 아래 링크에서 없는 아이디로 요청 할 경우 서버에서 오류발생이라는 에러가 잘못뜨고있다. 찾을수없음으로 변경
-                            onClick={() => navigate(`/document-collections/management?id=${item.id}`)}
-                          />
-                        </CCollapse>
-                      </CTableDataCell>
-                    </>
-                  )}
+                  {/*{newContractDocumentTableVisible && (*/}
+                  <>
+                    <CTableDataCell>
+                      <CCollapse visible={newContractDocumentTableVisible} horizontal>
+                        <CIcon
+                          style={{ cursor: 'pointer' }}
+                          icon={cilExternalLink}
+                          //REMIND 아래 링크에서 없는 아이디로 요청 할 경우 서버에서 오류발생이라는 에러가 잘못뜨고있다. 찾을수없음으로 변경
+                          onClick={() => navigate(`/document-collections/management?id=${item.id}`)}
+                        />
+                      </CCollapse>
+                    </CTableDataCell>
+                  </>
+                  {/*)}*/}
                 </CTableRow>
               ))}
             </CTableBody>
