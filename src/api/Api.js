@@ -52,7 +52,7 @@ export const setupInterceptors = ({ navigate, addToast }) => {
           default:
             break;
         }
-      } else if (error.request) {
+      } else if (error.code === 'ERR_NETWORK') {
         addToast({ message: '서버에서 응답이 없습니다. 잠시 후 다시 시도해 주세요.' }, false);
         return;
       } else {
