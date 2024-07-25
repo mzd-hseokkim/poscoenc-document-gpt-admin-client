@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { CCol, CRow } from '@coreui/react-pro';
 import { DailyTokenUsageChart } from 'components/chart/dashboard/DailyTokenUsageChart';
@@ -43,22 +43,16 @@ const DashboardPage = () => {
   const [totalTokenUsages, setTotalTokenUsages] = useState([]);
   const [isTokenUsageStatisticsLoading, setIsTokenUsageStatisticsLoading] = useState(false);
 
-  const [errorStates, setErrorStates] = useState({
-    documentStatistics: false,
-    periodDocumentStatistics: false,
-    standardContract: false,
-    userStatistics: false,
-    recentlyLikedChat: false,
-    totalTokenUsages: false,
-  });
-
   //REMIND 문서 공유 횟수 추가 고려
-  const fetchData = useCallback(
-    async (request, index) => {
+
+  useEffect(() => {
+    const fetchDashboardData = async (request, index) => {
       request.loadingFlagSetter(true);
       try {
         const response = await request.service();
-        request.onSuccess(response);
+        if (response) {
+          request.onSuccess(response);
+        }
       } catch (error) {
         console.log(error);
         request.setError(true);
@@ -66,11 +60,8 @@ const DashboardPage = () => {
       } finally {
         request.loadingFlagSetter(false);
       }
-    },
-    [addToast]
-  );
+    };
 
-  useEffect(() => {
     const requests = [
       {
         loadingFlagSetter: setIsDocumentStatisticsLoading,
@@ -148,15 +139,13 @@ const DashboardPage = () => {
     ];
 
     requests.forEach((request, index) => {
-      if (!Object.values(errorStates)[index]) {
-        void fetchData(request, index);
-      }
+      void fetchDashboardData(request, index);
     });
-  }, [errorStates, fetchData]);
+  }, []);
 
   return (
     <div className="d-flex flex-column flex-grow-1 overflow-auto" style={{ width: '100%' }}>
-      {/*REMIND Widget 의 그래프 구현 필요*/}
+      {/*REMIND Widget 데이터 api 구현 후 구현 필요*/}
       <CRow className="justify-content-center">
         <CCol sm={4}>
           <MonthlyPaymentWidget />
@@ -199,6 +188,7 @@ const DashboardPage = () => {
 
       <CRow className="mt-2">
         <CCol sm={6}>
+          {/*REMIND createdAt 에 의한 Today 뱃지 리팩토링 필요*/}
           <RecentlyAddedDocumentList
             isStandardContractLoading={isStandardContractLoading}
             isDocumentCollectionLoading={isDocumentStatisticsLoading}
