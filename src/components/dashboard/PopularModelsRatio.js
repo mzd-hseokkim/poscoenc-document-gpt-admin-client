@@ -83,7 +83,7 @@ export const PopularModelsRatio = ({ isLoading, byPilotMode = [], byModelName = 
               <span className="ms-auto fw-semibold">
                 {item.value}
                 <span className="text-medium-emphasis small">
-                  ({((item.value / totalTokenUsageCalculatedByAIModel) * 100).toFixed(1)}%)
+                  ({((item.value / totalTokenUsageCalculatedByAIModel) * 100 || 0).toFixed(1)} %)
                 </span>
               </span>
             </div>

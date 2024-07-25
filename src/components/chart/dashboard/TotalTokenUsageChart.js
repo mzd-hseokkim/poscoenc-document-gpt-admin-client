@@ -108,7 +108,8 @@ export const TotalTokenUsageChart = ({ isLoading, monthlyChartData = [], dailyCh
       monthlyData,
       dailyData,
     }));
-  }, [prepareDailyData, prepareMonthlyData]);
+    //REMIND Depth 문제 발생함.
+  }, []);
 
   const updateChartOption = (labelOption) => {
     setChartOptions((prevOptions) => ({
@@ -279,7 +280,7 @@ export const TotalTokenUsageChart = ({ isLoading, monthlyChartData = [], dailyCh
               <div className="text-medium-emphasis">{item.title}</div>
               <strong>
                 {item.value}
-                <br />({item.percent}%)
+                <br />({item.percent || 0}%)
               </strong>
               <CProgress thin className="mt-2" color={`${item.color}-gradient`} value={item.percent} />
             </CCol>
