@@ -37,12 +37,12 @@ export const ToastProvider = ({ children }) => {
               className="d-flex"
               onClose={() => removeToast(toast.key)}
             >
-              <CToastBody className="text-white">{toast.message + index}</CToastBody>
+              <CToastBody className="text-white">{toast.message}</CToastBody>
               <CToastClose className="me-2 m-auto" white />
             </CToast>
           ))}
         </CToaster>
-        {toasts.length > 0 && (
+        {toasts.length > 1 && (
           <CButton
             style={{
               position: 'fixed',

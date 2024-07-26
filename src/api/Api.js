@@ -54,11 +54,9 @@ export const setupInterceptors = ({ navigate, addToast }) => {
         }
       } else if (error.code === 'ERR_NETWORK') {
         addToast({ message: '서버에서 응답이 없습니다. 잠시 후 다시 시도해 주세요.' }, false);
-        return;
       } else {
         // 요청 설정 중에 오류가 발생한 경우 등
         addToast({ message: '알 수 없는 오류가 발생하였습니다. 잠시 후 다시 시도해 주세요.' });
-        return;
       }
       throw error;
     }
