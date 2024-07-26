@@ -13,7 +13,7 @@ export const MonthlyUserAccountCountWidget = ({ isLoading, totalUserCount }) => 
         color="warning"
         value={
           <>
-            {`${totalUserCount} 명`}
+            {`${totalUserCount || 0} 명`}
             <span className="fs-6 fw-normal">
               (1.9% <CIcon icon={cilArrowTop} />, 월간)
             </span>

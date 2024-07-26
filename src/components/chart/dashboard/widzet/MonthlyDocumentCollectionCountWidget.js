@@ -32,7 +32,7 @@ export const MonthlyDocumentCollectionCountWidget = ({ isLoading, totalDocumentC
       color="primary"
       value={
         <>
-          {`${totalDocumentCount} 개`}
+          {`${totalDocumentCount || 0} 개`}
           <span className="fs-6 fw-normal">
             ({calculateAccumulatedGrowthRate(totalDocumentCount, paddedMonthlyChartData[5])} , 월간)
           </span>

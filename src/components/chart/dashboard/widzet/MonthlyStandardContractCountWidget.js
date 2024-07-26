@@ -5,7 +5,7 @@ import CIcon from '@coreui/icons-react';
 import { CChartLine } from '@coreui/react-chartjs';
 import { CDropdown, CDropdownItem, CDropdownMenu, CDropdownToggle, CWidgetStatsA } from '@coreui/react-pro';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import { findPaddedMaxMin, padDataArrayWithZeroForMonth } from 'utils/chart/ChartStatisticsProcessor';
+import { padDataArrayWithZeroForMonth } from 'utils/chart/ChartStatisticsProcessor';
 
 const zeroObject = {};
 //REMIND  API 미구현
@@ -21,13 +21,13 @@ export const MonthlyStandardContractCountWidget = ({
     'name',
     zeroObject
   ).map((item) => item.value);
-  const { paddedMonthlyMax, paddedDailyMin } = findPaddedMaxMin(paddedMonthlyChartData);
+
   return (
     <CWidgetStatsA
       color="info"
       value={
         <>
-          {`${totalStandardContractDocumentCount} 개`}
+          {`${totalStandardContractDocumentCount || 0} 개`}
           <span className="fs-6 fw-normal">
             (40.9% <CIcon icon={cilArrowBottom} />, 월간)
           </span>
