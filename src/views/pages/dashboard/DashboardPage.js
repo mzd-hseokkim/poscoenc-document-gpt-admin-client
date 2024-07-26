@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { CCol, CRow } from '@coreui/react-pro';
 import { DailyTokenUsageChart } from 'components/chart/dashboard/DailyTokenUsageChart';
@@ -43,6 +43,15 @@ const DashboardPage = () => {
   const [totalTokenUsages, setTotalTokenUsages] = useState([]);
   const [isTokenUsageStatisticsLoading, setIsTokenUsageStatisticsLoading] = useState(false);
 
+  const errorStates = useRef({
+    documentStatistics: false,
+    periodDocumentStatistics: false,
+    standardContract: false,
+    userStatistics: false,
+    recentlyLikedChat: false,
+    totalTokenUsages: false,
+  });
+
   //REMIND 문서 공유 횟수 추가 고려
 
   useEffect(() => {
@@ -54,9 +63,14 @@ const DashboardPage = () => {
           request.onSuccess(response);
         }
       } catch (error) {
-        console.log(error);
+        if (error.isHandled) {
+          return;
+        }
+
+        if (!Object.values(errorStates.current)[index]) {
+          addToast({ message: `Request ${index + 1} failed: ${error.message}` }, false);
+        }
         request.setError(true);
-        addToast({ message: `Request ${index + 1} failed: ${error.message}` }, false);
       } finally {
         request.loadingFlagSetter(false);
       }
@@ -71,20 +85,20 @@ const DashboardPage = () => {
             formatToIsoEndDate(getCurrentDate())
           ),
         onSuccess: (data) => {
-          setTotalDocumentCount(data.totalCount);
-          setRecentlyAddedDocumentCollectionList(data.recentlyAdded);
-          setTopChatDocuments(data.topChats);
+          setTotalDocumentCount(data?.totalCount);
+          setRecentlyAddedDocumentCollectionList(data?.recentlyAdded);
+          setTopChatDocuments(data?.topChats);
         },
-        setError: (hasError) => setErrorStates((prev) => ({ ...prev, documentStatistics: hasError })),
+        setError: (hasError) => (errorStates.current.documentStatistics = hasError),
       },
       {
         loadingFlagSetter: setIsPeriodDocumentStatisticsLoading,
         service: () => DashBoardService.getPeriodDocumentCollectionStatistics(),
         onSuccess: (data) => {
-          const sortedMonthlyData = sortByPropertyKeyForMonth(data.added.monthly, 'name');
+          const sortedMonthlyData = sortByPropertyKeyForMonth(data?.added?.monthly, 'name');
           setAccumulatedMonthlyDocumentCollection(sortedMonthlyData);
         },
-        setError: (hasError) => setErrorStates((prev) => ({ ...prev, periodDocumentStatistics: hasError })),
+        setError: (hasError) => (errorStates.current.periodDocumentStatistics = hasError),
       },
       {
         loadingFlagSetter: setIsStandardContractLoading,
@@ -97,7 +111,7 @@ const DashboardPage = () => {
           setTotalStandardContractDocumentCount(data.totalCount);
           setRecentlyAddedStandardContractList(data.recentlyAdded);
         },
-        setError: (hasError) => setErrorStates((prev) => ({ ...prev, standardContract: hasError })),
+        setError: (hasError) => (errorStates.current.standardContract = hasError),
       },
       {
         loadingFlagSetter: setIsUserStatisticsLoading,
@@ -110,7 +124,7 @@ const DashboardPage = () => {
           setTotalUserCount(data.totalCount);
           setTopTokenUsers(data.topTokenUsage);
         },
-        setError: (hasError) => setErrorStates((prev) => ({ ...prev, userStatistics: hasError })),
+        setError: (hasError) => (errorStates.current.userStatistics = hasError),
       },
       {
         loadingFlagSetter: setIsRecentlyLikedChatLoading,
@@ -122,7 +136,7 @@ const DashboardPage = () => {
         onSuccess: (data) => {
           setRecentlyLikedChatList(data.likedEntry);
         },
-        setError: (hasError) => setErrorStates((prev) => ({ ...prev, recentlyLikedChat: hasError })),
+        setError: (hasError) => (errorStates.current.recentlyLikedChat = hasError),
       },
       {
         loadingFlagSetter: setIsTokenUsageStatisticsLoading,
@@ -134,7 +148,7 @@ const DashboardPage = () => {
         onSuccess: (data) => {
           setTotalTokenUsages(data);
         },
-        setError: (hasError) => setErrorStates((prev) => ({ ...prev, totalTokenUsages: hasError })),
+        setError: (hasError) => (errorStates.current.totalTokenUsages = hasError),
       },
     ];
 
