@@ -8,7 +8,7 @@ const checkServerStatus = () => {
 };
 
 const getDocumentCollectionStatistics = async (startDate, endDate) => {
-  if (!checkServerStatus()) {
+  if (checkServerStatus()) {
     return [];
   }
   const response = await api.get('admin/dashboard-statistics/document-collections', {
@@ -21,7 +21,7 @@ const getDocumentCollectionStatistics = async (startDate, endDate) => {
 };
 
 const getPeriodDocumentCollectionStatistics = async (startDate, endDate) => {
-  if (!checkServerStatus()) {
+  if (checkServerStatus()) {
     return [];
   }
   const response = await api.get('admin/dashboard-statistics/document-collections/periods', {
@@ -33,7 +33,7 @@ const getPeriodDocumentCollectionStatistics = async (startDate, endDate) => {
 };
 
 const getStandardContractDocumentStatistics = async (startDate, endDate) => {
-  if (!checkServerStatus()) {
+  if (checkServerStatus()) {
     return [];
   }
   const response = await api.get('admin/dashboard-statistics/standard-documents', {
@@ -46,7 +46,7 @@ const getStandardContractDocumentStatistics = async (startDate, endDate) => {
 };
 
 const getUserAccountStatistics = async () => {
-  if (!checkServerStatus()) {
+  if (checkServerStatus()) {
     return [];
   }
   const response = await api.get('admin/dashboard-statistics/user-accounts');
@@ -54,7 +54,7 @@ const getUserAccountStatistics = async () => {
 };
 
 const getChatHistoryStatistics = async (startDate, endDate) => {
-  if (!checkServerStatus()) {
+  if (checkServerStatus()) {
     return [];
   }
   const response = await api.get('admin/dashboard-statistics/chats', {
@@ -67,7 +67,7 @@ const getChatHistoryStatistics = async (startDate, endDate) => {
 };
 
 const getTokenUsageStatistics = async (startDate, endDate) => {
-  if (!checkServerStatus()) {
+  if (checkServerStatus()) {
     return [];
   }
   const response = await api.get('admin/dashboard-statistics/token-usages', {

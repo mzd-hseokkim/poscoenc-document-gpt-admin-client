@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import store, { setServerDown } from 'store';
 
 const SERVER_ENDPOINT = process.env.REACT_APP_SERVER_ENDPOINT;
 
@@ -35,7 +36,15 @@ export const setupInterceptors = ({ navigate, addToast }) => {
   });
 
   api.interceptors.response.use(
-    (response) => response,
+    (response) => {
+      const state = store.getState();
+
+      if (state.serverStatus.isServerDown) {
+        store.dispatch(setServerDown(false));
+      }
+
+      return response;
+    },
     (error) => {
       if (error.response) {
         const status = error.response.status;
@@ -53,6 +62,7 @@ export const setupInterceptors = ({ navigate, addToast }) => {
             break;
         }
       } else if (error.code === 'ERR_NETWORK') {
+        store.dispatch(setServerDown(true));
         addToast({ message: '서버에서 응답이 없습니다. 잠시 후 다시 시도해 주세요.' }, false);
       } else {
         // 요청 설정 중에 오류가 발생한 경우 등
