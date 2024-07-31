@@ -108,8 +108,7 @@ export const TotalTokenUsageChart = ({ isLoading, monthlyChartData = [], dailyCh
       monthlyData,
       dailyData,
     }));
-    //REMIND Depth 문제 발생함.
-  }, []);
+  }, [prepareDailyData, prepareMonthlyData]);
 
   const updateChartOption = (labelOption) => {
     setChartOptions((prevOptions) => ({

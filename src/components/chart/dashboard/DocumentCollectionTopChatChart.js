@@ -10,7 +10,8 @@ import { padDataArrayWithZeroForDay, padDataArrayWithZeroForMonth } from 'utils/
 const lastSixMonthLabel = getLastSixMonthsLabel();
 const weeklyLabel = getUpdatedWeeklyLabel();
 const hotDocTopFiveColor = ['--cui-primary', '--cui-success', '--cui-info', '--cui-warning', '--cui-danger'];
-const defaultColor = '--cui-secondary';
+const rgbString = '-rgb';
+const defaultColor = `rgba(${getStyle(`--cui-secondary-rgb`)})`;
 
 const topChatDocumentPaddingObject = {
   name: '',
@@ -20,7 +21,7 @@ const topChatDocumentPaddingObject = {
 };
 
 export const DocumentCollectionTopChatChart = ({ isLoading, chartData = [] }) => {
-  const [hotConChartLabelOption, setHotConChartLabelOption] = useState('days');
+  const [hotConChartLabelOption, setHotConChartLabelOption] = useState('lastDays');
 
   const allTime = chartData?.allTime || [{ id: 0, name: '-', rank: 0, recordedAt: '-', value: 0 }];
   const daily = chartData?.daily;
@@ -45,33 +46,43 @@ export const DocumentCollectionTopChatChart = ({ isLoading, chartData = [] }) =>
   const dailyColorMapping = {};
   const monthlyColorMapping = {};
 
-  const getDocumentColor = (docIdInt, rank, period) => {
+  const getAndSetDocumentColor = (docIdInt, rank, period, opacity) => {
     let color = hotDocTopFiveColor[rank - 1] || defaultColor;
+    const colorWithOpacity = `rgba(${getStyle(color + rgbString)}, ${opacity})`;
+
     if (period === 'daily') {
-      dailyColorMapping[docIdInt] = color;
+      dailyColorMapping[docIdInt] = colorWithOpacity;
     } else if (period === 'monthly') {
-      monthlyColorMapping[docIdInt] = color;
+      monthlyColorMapping[docIdInt] = colorWithOpacity;
     }
-    return color;
+
+    return colorWithOpacity;
   };
   const mapToChartData = (targetData, period) => {
     return Object.keys(targetData).map((docId) => {
       const docIdInt = parseInt(docId);
       const docData = targetData[docId];
+
       const label = docData[0].metadata.documentCollectionDisplayName;
+
+      const sameRankElements = Object.keys(targetData).filter((id) => {
+        return targetData[id][0].metadata.rank === docData[0].metadata.rank;
+      });
+      const currentIndex = sameRankElements.indexOf(docId);
+      const opacity = Math.max(1 - currentIndex * 0.4, 0.2);
+      const docColor = getAndSetDocumentColor(docIdInt, docData[0].metadata.rank, period, opacity);
+
       const paddedData =
         period === 'daily'
           ? padDataArrayWithZeroForDay(docData, 'name', topChatDocumentPaddingObject)
           : padDataArrayWithZeroForMonth(docData, new Date().getMonth() + 1, 6, 'name', topChatDocumentPaddingObject);
       const data = paddedData.map((doc) => doc.value);
-      //REMIND api 수정 후 [0] 로직 수정
-      const docColor = getDocumentColor(docIdInt, docData[0].metadata.rank, period);
 
       return {
         label,
-        borderColor: getStyle(docColor),
-        backgroundColor: getStyle(docColor),
-        pointHoverBackgroundColor: getStyle(docColor),
+        borderColor: docColor,
+        backgroundColor: docColor,
+        pointHoverBackgroundColor: docColor,
         borderWidth: 2,
         data,
       };
@@ -80,13 +91,12 @@ export const DocumentCollectionTopChatChart = ({ isLoading, chartData = [] }) =>
 
   const formattedDailyChartData = mapToChartData(sortedDailyData, 'daily');
   const formattedMonthlyChartData = mapToChartData(sortedMonthlyData, 'monthly');
-
   const renderChart = () => (
     <CChartLine
       style={{ height: '300px', marginTop: '40px' }}
       data={{
-        labels: hotConChartLabelOption === 'days' ? weeklyLabel : lastSixMonthLabel,
-        datasets: hotConChartLabelOption === 'days' ? formattedDailyChartData : formattedMonthlyChartData,
+        labels: hotConChartLabelOption === 'lastDays' ? weeklyLabel : lastSixMonthLabel,
+        datasets: hotConChartLabelOption === 'lastDays' ? formattedDailyChartData : formattedMonthlyChartData,
       }}
       customTooltips={false}
       options={{
@@ -111,8 +121,7 @@ export const DocumentCollectionTopChatChart = ({ isLoading, chartData = [] }) =>
             ticks: {
               beginAtZero: true,
               maxTicksLimit: 5,
-              stepSize: Math.ceil(250 / 5),
-              max: 250,
+              // stepSize: Math.ceil(250 / 5),
             },
             min: 0,
           },
@@ -150,7 +159,7 @@ export const DocumentCollectionTopChatChart = ({ isLoading, chartData = [] }) =>
           </CCol>
           <CCol sm={7} className="d-none d-md-block">
             <CButtonGroup className="float-end me-3">
-              {['days', 'months'].map((value) => (
+              {['lastDays', 'months'].map((value) => (
                 <CButton
                   autoFocus
                   key={value}
@@ -159,7 +168,7 @@ export const DocumentCollectionTopChatChart = ({ isLoading, chartData = [] }) =>
                   active={value === hotConChartLabelOption}
                   onClick={() => setHotConChartLabelOption(value)}
                 >
-                  {value === 'days' ? '지난 7일' : '지난 6개월'}
+                  {value === 'lastDays' ? '지난 7일' : '지난 6개월'}
                 </CButton>
               ))}
             </CButtonGroup>
@@ -175,7 +184,7 @@ export const DocumentCollectionTopChatChart = ({ isLoading, chartData = [] }) =>
         <CRow xs={{ cols: 1 }} md={{ cols: 5 }} className="text-center">
           {allTime.map((doc, index) => {
             const docIdInt = parseInt(doc.id);
-            const colorMapping = hotConChartLabelOption === 'days' ? dailyColorMapping : monthlyColorMapping;
+            const colorMapping = hotConChartLabelOption === 'lastDays' ? dailyColorMapping : monthlyColorMapping;
             const color = colorMapping[docIdInt] || defaultColor;
 
             return (
@@ -190,7 +199,7 @@ export const DocumentCollectionTopChatChart = ({ isLoading, chartData = [] }) =>
                   <p
                     className="text-truncate text-white px-2 small"
                     style={{
-                      backgroundColor: getStyle(color),
+                      backgroundColor: color,
                       borderRadius: '7.5px',
                     }}
                   >

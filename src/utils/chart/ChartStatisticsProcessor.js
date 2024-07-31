@@ -41,7 +41,7 @@ const padDataArrayWithZeroForMonth = (data, currentMonth, totalMonths, aggregati
 const padDataArrayWithZeroForDay = (data, aggregationKeyName, zeroObject) => {
   if (data.length > 7) {
     console.error('The length of data cannot exceed 7.');
-    return null;
+    return [];
   }
 
   // Helper function to get today's date in YYYY-MM-DD format in Korean locale
