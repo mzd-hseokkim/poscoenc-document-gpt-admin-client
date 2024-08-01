@@ -23,18 +23,22 @@ const DashboardPage = () => {
 
   const [totalDocumentCount, setTotalDocumentCount] = useState(0);
   const [recentlyAddedDocumentCollectionList, setRecentlyAddedDocumentCollectionList] = useState([]);
-  const [accumulatedMonthlyDocumentCollection, setAccumulatedMonthlyDocumentCollection] = useState([]);
+  const [monthlyDocumentCollectionGrowth, setMonthlyDocumentCollectionGrowth] = useState([]);
   const [topChatDocuments, setTopChatDocuments] = useState([]);
   const [isDocumentStatisticsLoading, setIsDocumentStatisticsLoading] = useState(false);
-  const [isPeriodDocumentStatisticsLoading, setIsPeriodDocumentStatisticsLoading] = useState(false);
+  const [isMonthlyDocumentCollectionGrowthLoading, setIsMonthlyDocumentCollectionGrowthLoading] = useState(false);
 
   const [totalStandardContractDocumentCount, setTotalStandardContractDocumentCount] = useState(0);
   const [recentlyAddedStandardContractList, setRecentlyAddedStandardContractList] = useState([]);
+  const [monthlyStandardContractGrowth, setMonthlyStandardContractGrowth] = useState([]);
   const [isStandardContractLoading, setIsStandardContractLoading] = useState(false);
+  const [isMonthlyStandardContractGrowthLoading, setIsMonthlyStandardContractGrowthLoading] = useState(false);
 
   const [totalUserCount, setTotalUserCount] = useState(0);
   const [topTokenUsers, setTopTokenUsers] = useState([]);
+  const [monthlyUserAccountGrowth, setMonthlyUserAccountGrowth] = useState([]);
   const [isUserStatisticsLoading, setIsUserStatisticsLoading] = useState(false);
+  const [isMonthlyUserAccountGrowthLoading, setIsMonthlyUserAccountGrowthLoading] = useState(false);
 
   const [recentlyLikedChatList, setRecentlyLikedChatList] = useState([]);
   const [isRecentlyLikedChatLoading, setIsRecentlyLikedChatLoading] = useState(false);
@@ -47,7 +51,9 @@ const DashboardPage = () => {
     documentStatistics: false,
     periodDocumentStatistics: false,
     standardContract: false,
+    periodStandardContract: false,
     userStatistics: false,
+    periodUserStatistics: false,
     recentlyLikedChat: false,
     totalTokenUsages: false,
   });
@@ -86,11 +92,11 @@ const DashboardPage = () => {
         setError: (hasError) => (errorStates.current.documentStatistics = hasError),
       },
       {
-        loadingFlagSetter: setIsPeriodDocumentStatisticsLoading,
+        loadingFlagSetter: setIsMonthlyDocumentCollectionGrowthLoading,
         service: () => DashBoardService.getPeriodDocumentCollectionStatistics(),
         onSuccess: (data) => {
           const sortedMonthlyData = sortByPropertyKeyForMonth(data?.added?.monthly, 'name');
-          setAccumulatedMonthlyDocumentCollection(sortedMonthlyData);
+          setMonthlyDocumentCollectionGrowth(sortedMonthlyData);
         },
         setError: (hasError) => (errorStates.current.periodDocumentStatistics = hasError),
       },
@@ -108,6 +114,15 @@ const DashboardPage = () => {
         setError: (hasError) => (errorStates.current.standardContract = hasError),
       },
       {
+        loadingFlagSetter: setIsMonthlyStandardContractGrowthLoading,
+        service: () => DashBoardService.getPeriodStandardContractDocumentsStatistics(),
+        onSuccess: (data) => {
+          const sortedMonthlyData = sortByPropertyKeyForMonth(data?.added?.monthly, 'name');
+          setMonthlyStandardContractGrowth(sortedMonthlyData);
+        },
+        setError: (hasError) => (errorStates.current.periodStandardContract = hasError),
+      },
+      {
         loadingFlagSetter: setIsUserStatisticsLoading,
         service: () =>
           DashBoardService.getUserAccountStatistics(
@@ -119,6 +134,15 @@ const DashboardPage = () => {
           setTopTokenUsers(data.topTokenUsage);
         },
         setError: (hasError) => (errorStates.current.userStatistics = hasError),
+      },
+      {
+        loadingFlagSetter: setIsMonthlyUserAccountGrowthLoading,
+        service: () => DashBoardService.getPeriodUserAccountStatistics(),
+        onSuccess: (data) => {
+          const sortedMonthlyData = sortByPropertyKeyForMonth(data?.added?.monthly, 'name');
+          setMonthlyUserAccountGrowth(sortedMonthlyData);
+        },
+        setError: (hasError) => (errorStates.current.periodUserStatistics = hasError),
       },
       {
         loadingFlagSetter: setIsRecentlyLikedChatLoading,
@@ -165,19 +189,24 @@ const DashboardPage = () => {
       <CRow className="p-3">
         <CCol sm={4}>
           <MonthlyStandardContractCountWidget
-            isLoading={isStandardContractLoading}
+            isLoading={!(!isStandardContractLoading && !isMonthlyStandardContractGrowthLoading)}
             totalStandardContractDocumentCount={totalStandardContractDocumentCount}
+            monthlyChartData={monthlyStandardContractGrowth}
           />
         </CCol>
         <CCol sm={4}>
           <MonthlyDocumentCollectionCountWidget
-            isLoading={isPeriodDocumentStatisticsLoading}
+            isLoading={!(!isMonthlyDocumentCollectionGrowthLoading && !isMonthlyDocumentCollectionGrowthLoading)}
             totalDocumentCount={totalDocumentCount}
-            monthlyChartData={accumulatedMonthlyDocumentCollection}
+            monthlyChartData={monthlyDocumentCollectionGrowth}
           />
         </CCol>
         <CCol sm={4}>
-          <MonthlyUserAccountCountWidget isLoading={isUserStatisticsLoading} totalUserCount={totalUserCount} />
+          <MonthlyUserAccountCountWidget
+            isLoading={!(!isUserStatisticsLoading && !isMonthlyUserAccountGrowthLoading)}
+            totalUserCount={totalUserCount}
+            monthlyChartData={monthlyUserAccountGrowth}
+          />
         </CCol>
       </CRow>
 

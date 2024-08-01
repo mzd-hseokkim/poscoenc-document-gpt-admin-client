@@ -121,7 +121,7 @@ export const DocumentCollectionTopChatChart = ({ isLoading, chartData = [] }) =>
             ticks: {
               beginAtZero: true,
               maxTicksLimit: 5,
-              // stepSize: Math.ceil(250 / 5),
+              stepSize: Math.ceil(250 / 5),
             },
             min: 0,
           },

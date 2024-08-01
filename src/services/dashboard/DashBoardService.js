@@ -20,7 +20,7 @@ const getDocumentCollectionStatistics = async (startDate, endDate) => {
   return response?.data || [];
 };
 
-const getPeriodDocumentCollectionStatistics = async (startDate, endDate) => {
+const getPeriodDocumentCollectionStatistics = async () => {
   if (checkServerStatus()) {
     return [];
   }
@@ -45,11 +45,38 @@ const getStandardContractDocumentStatistics = async (startDate, endDate) => {
   return response?.data || [];
 };
 
+const getPeriodStandardContractDocumentsStatistics = async () => {
+  if (checkServerStatus()) {
+    return [];
+  }
+  const response = await api.get('admin/dashboard-statistics/standard-documents/periods', {
+    params: {
+      baseDate: getCurrentDate(),
+    },
+  });
+
+  return response?.data || [];
+};
+
 const getUserAccountStatistics = async () => {
   if (checkServerStatus()) {
     return [];
   }
   const response = await api.get('admin/dashboard-statistics/user-accounts');
+  return response?.data || [];
+};
+
+const getPeriodUserAccountStatistics = async () => {
+  if (checkServerStatus()) {
+    return [];
+  }
+
+  const response = await api.get('admin/dashboard-statistics/user-accounts/periods', {
+    params: {
+      baseDate: getCurrentDate(),
+    },
+  });
+
   return response?.data || [];
 };
 
@@ -83,7 +110,9 @@ const DashBoardService = {
   getDocumentCollectionStatistics,
   getPeriodDocumentCollectionStatistics,
   getStandardContractDocumentStatistics,
+  getPeriodStandardContractDocumentsStatistics,
   getUserAccountStatistics,
+  getPeriodUserAccountStatistics,
   getChatHistoryStatistics,
   getTokenUsageStatistics,
 };

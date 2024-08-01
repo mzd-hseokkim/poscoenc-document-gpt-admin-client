@@ -1,13 +1,24 @@
 import React from 'react';
 
-import { cilArrowBottom, cilOptions } from '@coreui/icons';
+import { cilOptions } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import { CChartLine } from '@coreui/react-chartjs';
 import { CDropdown, CDropdownItem, CDropdownMenu, CDropdownToggle, CWidgetStatsA } from '@coreui/react-pro';
+import { getLastSixMonthsLabel } from 'components/chart/ChartLabel';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
-import { padDataArrayWithZeroForMonth } from 'utils/chart/ChartStatisticsProcessor';
+import {
+  calculateAccumulatedGrowthRate,
+  calculateCumulativeData,
+  findPaddedMaxMin,
+  padDataArrayWithZeroForMonth,
+} from 'utils/chart/ChartStatisticsProcessor';
 
-const zeroObject = {};
+const zeroObject = {
+  name: '',
+  value: 0,
+  recordedAt: null,
+  metadata: {},
+};
 //REMIND  API 미구현
 export const MonthlyStandardContractCountWidget = ({
   isLoading,
@@ -21,6 +32,10 @@ export const MonthlyStandardContractCountWidget = ({
     'name',
     zeroObject
   ).map((item) => item.value);
+  console.log(paddedMonthlyChartData);
+  const calculativeChartData = calculateCumulativeData(totalStandardContractDocumentCount, paddedMonthlyChartData);
+  console.log(calculativeChartData, 'scc');
+  const { paddedMax, paddedMin } = findPaddedMaxMin(calculativeChartData);
 
   return (
     <CWidgetStatsA
@@ -29,7 +44,7 @@ export const MonthlyStandardContractCountWidget = ({
         <>
           {`${totalStandardContractDocumentCount || 0} 개`}
           <span className="fs-6 fw-normal">
-            (40.9% <CIcon icon={cilArrowBottom} />, 월간)
+            ({calculateAccumulatedGrowthRate(totalStandardContractDocumentCount, paddedMonthlyChartData[5])} , 월간)
           </span>
         </>
       }
@@ -54,14 +69,14 @@ export const MonthlyStandardContractCountWidget = ({
             className="mt-3 mx-3"
             style={{ height: '70px' }}
             data={{
-              labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+              labels: getLastSixMonthsLabel(),
               datasets: [
                 {
-                  label: 'My First dataset',
+                  label: '월별 표준 문서 누계',
                   backgroundColor: 'transparent',
                   borderColor: 'rgba(255,255,255,.55)',
                   pointBackgroundColor: '#39f',
-                  data: [1, 18, 9, 17, 34, 22, 11],
+                  data: calculativeChartData,
                 },
               ],
             }}
@@ -86,8 +101,8 @@ export const MonthlyStandardContractCountWidget = ({
                   },
                 },
                 y: {
-                  min: -9,
-                  max: 39,
+                  min: paddedMin,
+                  max: paddedMax,
                   display: false,
                   grid: {
                     display: false,

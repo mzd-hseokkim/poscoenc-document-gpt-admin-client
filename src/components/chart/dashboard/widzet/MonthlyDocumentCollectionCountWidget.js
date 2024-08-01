@@ -8,25 +8,24 @@ import { getLastSixMonthsLabel } from 'components/chart/ChartLabel';
 import FormLoadingCover from 'components/cover/FormLoadingCover';
 import {
   calculateAccumulatedGrowthRate,
+  calculateCumulativeData,
   findPaddedMaxMin,
   padDataArrayWithZeroForMonth,
+  widgetGrowthPaddingObject,
 } from 'utils/chart/ChartStatisticsProcessor';
 
-const zeroObject = {
-  name: '',
-  value: 0,
-  recordedAt: null,
-  metadata: {},
-};
 export const MonthlyDocumentCollectionCountWidget = ({ isLoading, totalDocumentCount, monthlyChartData }) => {
   const paddedMonthlyChartData = padDataArrayWithZeroForMonth(
     monthlyChartData,
     new Date().getMonth() + 1,
     6,
     'name',
-    zeroObject
+    widgetGrowthPaddingObject
   ).map((item) => item.value);
-  const { paddedMax, paddedMin } = findPaddedMaxMin(paddedMonthlyChartData);
+
+  const cumulativeChartData = calculateCumulativeData(totalDocumentCount, paddedMonthlyChartData);
+
+  const { paddedMax, paddedMin } = findPaddedMaxMin(cumulativeChartData);
   return (
     <CWidgetStatsA
       color="primary"
@@ -63,11 +62,11 @@ export const MonthlyDocumentCollectionCountWidget = ({ isLoading, totalDocumentC
               labels: getLastSixMonthsLabel(),
               datasets: [
                 {
-                  label: '등록된 계약서',
+                  label: '월별 계약서 누계',
                   backgroundColor: 'transparent',
                   borderColor: 'rgba(255,255,255,.55)',
                   pointBackgroundColor: '#5856d6',
-                  data: paddedMonthlyChartData,
+                  data: cumulativeChartData,
                 },
               ],
             }}

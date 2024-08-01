@@ -86,6 +86,16 @@ const padDataArrayWithZeroForDay = (data, aggregationKeyName, zeroObject) => {
   });
 };
 
+const calculateCumulativeData = (totalCount, monthlyData) => {
+  let cumulativeData = [];
+  let cumulativeCount = totalCount;
+  for (let i = monthlyData.length - 1; i >= 0; i -= 1) {
+    cumulativeCount -= monthlyData[i];
+    cumulativeData[i] = cumulativeCount + monthlyData[i];
+  }
+  return cumulativeData;
+};
+
 const mergeAndSumArrays = (array1, array2) => {
   const resultArray = [];
   for (let i = 0; i < 12; i += 1) {
@@ -95,43 +105,36 @@ const mergeAndSumArrays = (array1, array2) => {
 };
 
 const calculateMonthOnMonthGrowthRateWithArrow = (prevMonthValue, currentMonthValue) => {
-  if (prevMonthValue === 0) {
-    return currentMonthValue ? `${100}% ↑` : '-%';
+  const growthRate = isNaN(((currentMonthValue - prevMonthValue) / prevMonthValue) * 100)
+    ? '-'
+    : (((currentMonthValue - prevMonthValue) / prevMonthValue) * 100).toFixed(1);
+
+  let arrow = '';
+
+  if (growthRate > 0) {
+    arrow = ' ↑';
+  } else if (growthRate < 0) {
+    arrow = ' ↓';
   } else {
-    const growthRate = ((currentMonthValue - prevMonthValue) / prevMonthValue) * 100;
-    const formattedGrowthRate = `${growthRate.toFixed(1)}%`;
-
-    let arrow = '';
-
-    if (growthRate > 0) {
-      arrow = ' ↑';
-    } else if (growthRate < 0) {
-      arrow = ' ↓';
-    } else {
-      arrow = ' -';
-    }
-
-    return formattedGrowthRate + arrow;
+    arrow = ' -';
   }
+
+  return `${growthRate}%${arrow}`;
 };
 
 //REMIND 삭제된 문서의 경우는 어떻게 처리 할지에 대한 결정이 필요
 const calculateAccumulatedGrowthRate = (totalValue, incremental) => {
-  if (incremental === 0) {
-    return incremental ? `${0}% -` : '-%';
-  } else {
-    const growthRate = ((incremental / totalValue) * 100).toFixed(1);
-    let arrow = '';
+  const growthRate = isNaN((incremental / totalValue) * 100) ? '-' : ((incremental / totalValue) * 100).toFixed(1);
+  let arrow = '';
 
-    if (growthRate > 0) {
-      arrow = ' ↑';
-    } else if (growthRate < 0) {
-      arrow = ' ↓';
-    } else {
-      arrow = ' -';
-    }
-    return `${growthRate}%${arrow}`;
+  if (growthRate > 0) {
+    arrow = ' ↑';
+  } else if (growthRate < 0) {
+    arrow = ' ↓';
+  } else {
+    arrow = ' -';
   }
+  return `${growthRate}%${arrow}`;
 };
 
 const findMinMax = (numbers) => {
@@ -163,6 +166,7 @@ const findPaddedMaxMin = (numbers) => {
 export {
   padDataArrayWithZeroForMonth,
   padDataArrayWithZeroForDay,
+  calculateCumulativeData,
   mergeAndSumArrays,
   calculateMonthOnMonthGrowthRateWithArrow,
   findMinMax,
@@ -190,4 +194,11 @@ export const totalTokenUsagePaddingObject = {
     total_input_tokens: 0,
     total_output_tokens: 0,
   },
+};
+
+export const widgetGrowthPaddingObject = {
+  name: '',
+  value: 0,
+  recordedAt: '',
+  metadata: null,
 };
